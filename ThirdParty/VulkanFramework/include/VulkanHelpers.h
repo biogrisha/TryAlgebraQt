@@ -26,3 +26,8 @@ namespace VkHelpers
 	vk::DescriptorType ConvertBufferToDescriptor(VkBufferUsageFlagBits BufferUsage);
 }
 
+namespace NVkHelpers
+{
+	[[nodiscard]] VkShaderModule createShaderModule(const uint32_t* code,uint32_t size, VkDevice device);
+}
+

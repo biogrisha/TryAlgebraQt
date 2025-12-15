@@ -91,4 +91,17 @@ vk::DescriptorType VkHelpers::ConvertBufferToDescriptor(VkBufferUsageFlagBits Bu
 	throw std::runtime_error("Unsupported buffer usage for descriptor type.");
 }
 
-
+VkShaderModule NVkHelpers::createShaderModule(const uint32_t* code, uint32_t size, VkDevice device)
+{
+	VkShaderModuleCreateInfo createInfo;
+	memset(&createInfo, 0, sizeof(createInfo));
+	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.flags = 0;
+	createInfo.codeSize = size;
+	createInfo.pCode = code;
+	VkShaderModule shaderModule;
+	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create shader module!");
+	}
+	return shaderModule;
+}

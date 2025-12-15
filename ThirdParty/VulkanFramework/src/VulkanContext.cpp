@@ -9,10 +9,16 @@ FVulkanContext::~FVulkanContext()
 	Device.clear();
 	PhysicalDevice.release();
 	Instance.release();
+	glfwTerminate();
 }
 
 void FVulkanContext::Init(VkInstance InInstance, VkPhysicalDevice InPhysicalDevice)
 {
+	auto result = glfwInit();
+	if (result != GLFW_TRUE)
+	{
+		throw std::runtime_error("failed to init glfw!");
+	}
 	Instance = vk::raii::Instance(Context, InInstance);
 	PhysicalDevice = vk::raii::PhysicalDevice(Instance, InPhysicalDevice);
 	CreateLogicalDevice();

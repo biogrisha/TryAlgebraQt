@@ -3,20 +3,16 @@
 
 //! [1]
 import QtQuick
-import VulkanUnderQML
+import TryAlgebra
 
 Item {
+    id: root
 
     width: 320
     height: 480
 
-    VulkanSquircle {
-        SequentialAnimation on t {
-            NumberAnimation { to: 1; duration: 2500; easing.type: Easing.InQuad }
-            NumberAnimation { to: 0; duration: 2500; easing.type: Easing.OutQuad }
-            loops: Animation.Infinite
-            running: true
-        }
+    PixelDataRenderer {
+        
     }
 //! [1] //! [2]
     Rectangle {
@@ -36,7 +32,10 @@ Item {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        anchors.margins: 20
+        anchors.topMargin: root.SafeArea.margins.top + 20
+        anchors.leftMargin: root.SafeArea.margins.left + 20
+        anchors.rightMargin: root.SafeArea.margins.right + 20
+        anchors.bottomMargin: root.SafeArea.margins.bottom + 20
     }
 }
 //! [2]
