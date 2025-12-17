@@ -57,11 +57,15 @@ private:
     void prepareShader();
     void init(int framesInFlight);
     void MyInit(int framesInFlight);
+    void createCommandPool();
+    VkCommandBuffer BeginSingleTimeCommands();
+    void EndSingleTimeCommands(VkCommandBuffer CommandBuffer);
     void CreateTextureImage();
     void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
     uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     void CreatePipeline(VkRenderPass rp);
-
+    void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+    void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
     QSize m_viewportSize;
     qreal m_t = 0;
     QQuickWindow* m_window = nullptr;
@@ -84,13 +88,20 @@ private:
     VkPipeline m_pipeline = VK_NULL_HANDLE;
 
     VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
-    VkDescriptorSet m_ubufDescriptor = VK_NULL_HANDLE;
+    VkDescriptorSet m_texDescriptor = VK_NULL_HANDLE;
 
     VkShaderModule ShaderModule = VK_NULL_HANDLE;
 
     VkImage textureImage = VK_NULL_HANDLE;
     VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
+    VkImageView textureImageView = VK_NULL_HANDLE;
+    VkSampler textureSampler = VK_NULL_HANDLE;
     FVertexLayoutPresent VertexLayoutPresent;
+
+    uint32_t graphicsFamily = 0;
+
+    VkCommandPool commandPool;
+    VkQueue graphicsQueue;
 };
 
 PixelDataRenderer::PixelDataRenderer()
@@ -154,6 +165,7 @@ VulkanRendererPrivate::~VulkanRendererPrivate()
     if (!m_devFuncs)
         return;
 
+    m_devFuncs->vkDestroyCommandPool(m_dev, commandPool, nullptr);
     m_devFuncs->vkDestroyPipeline(m_dev, m_pipeline, nullptr);
     m_devFuncs->vkDestroyPipelineLayout(m_dev, m_pipelineLayout, nullptr);
     m_devFuncs->vkDestroyDescriptorSetLayout(m_dev, m_resLayout, nullptr);
@@ -164,6 +176,12 @@ VulkanRendererPrivate::~VulkanRendererPrivate()
 
     m_devFuncs->vkDestroyBuffer(m_dev, m_vbuf, nullptr);
     m_devFuncs->vkFreeMemory(m_dev, m_vbufMem, nullptr);
+
+    m_devFuncs->vkDestroySampler(m_dev, textureSampler, nullptr);
+    m_devFuncs->vkDestroyImageView(m_dev, textureImageView, nullptr);
+
+    m_devFuncs->vkDestroyImage(m_dev, textureImage, nullptr);
+    m_devFuncs->vkFreeMemory(m_dev, textureImageMemory, nullptr);
 
     qDebug("released");
 }
@@ -192,21 +210,16 @@ void VulkanRendererPrivate::frameStart()
     // We are not prepared for anything other than running with the RHI and its Vulkan backend.
     Q_ASSERT(rif->graphicsApi() == QSGRendererInterface::Vulkan);
 
-    /*if (m_vert.isEmpty())
-        prepareShader(VertexStage);
-    if (m_frag.isEmpty())
-        prepareShader(FragmentStage);*/
-
     if (!m_initialized)
         init(m_window->graphicsStateInfo().framesInFlight);
 }
 
 std::vector<FVertex> vertices =
 {
-    {{-1.0f, -1.0f}, {0.0f, 0.0f}},
-    {{1.0f, -1.0f},  {1.0f, 0.0f}},
-    {{1.0f, 1.0f},   {1.0f, 1.0f}},
-    {{-1.0f, 1.0f},  {0.0f, 1.0f}}
+    {{-1, -1,}, {0.0f, 0.0f}},
+    {{1, -1,},  {1.0f, 0.0f}},
+    {{-1, 1,},  {0.0f, 1.0f}},
+    {{1, 1},    {1.0f, 1.0f}}
 };
 
 const int UBUF_SIZE = 4;
@@ -229,6 +242,29 @@ void VulkanRendererPrivate::mainPassRecordingStart()
         rif->getResource(m_window, QSGRendererInterface::CommandListResource));
     Q_ASSERT(cb);
 
+    //Copy buffer into image
+    VkDeviceSize imageSize = 300 * 300 * 4;
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+    std::vector<char> pixels(300 * 300 * 4, 0);
+
+
+    for (int i = 0; i < pixels.size(); i++)
+    {
+        pixels[i] = std::rand() % 255;
+    }
+    void* data;
+    m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
+    memcpy(data, pixels.data(), static_cast<size_t>(imageSize));
+    m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
+    TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(300), static_cast<uint32_t>(300));
+    TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
+    m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
     // Do not assume any state persists on the command buffer. (it may be a
     // brand new one that just started recording)
 
@@ -237,9 +273,9 @@ void VulkanRendererPrivate::mainPassRecordingStart()
     VkDeviceSize vbufOffset = 0;
     m_devFuncs->vkCmdBindVertexBuffers(cb, 0, 1, &m_vbuf, &vbufOffset);
 
-   /* uint32_t dynamicOffset = m_allocPerUbuf * stateInfo.currentFrameSlot;
+    uint32_t Offset = 0;
     m_devFuncs->vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1,
-        &m_ubufDescriptor, 1, &dynamicOffset);*/
+        &m_texDescriptor, 0, &Offset);
 
     VkViewport vp = { 0, 0, float(m_viewportSize.width()), float(m_viewportSize.height()), 0.0f, 1.0f };
     m_devFuncs->vkCmdSetViewport(cb, 0, 1, &vp);
@@ -249,6 +285,76 @@ void VulkanRendererPrivate::mainPassRecordingStart()
     m_devFuncs->vkCmdDraw(cb, 4, 1, 0, 0);
 
     m_window->endExternalCommands();
+}
+
+void VulkanRendererPrivate::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+    auto CommandBuffer = BeginSingleTimeCommands();
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+
+    VkPipelineStageFlags sourceStage;
+    VkPipelineStageFlags destinationStage;
+
+    if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else {
+        throw std::invalid_argument("unsupported layout transition!");
+    }
+
+    m_devFuncs->vkCmdPipelineBarrier(
+        CommandBuffer,
+        sourceStage, destinationStage,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+    );
+    EndSingleTimeCommands(CommandBuffer);
+}
+
+void VulkanRendererPrivate::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+{
+    auto CommandBuffer = BeginSingleTimeCommands();
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+    region.imageOffset = { 0, 0, 0 };
+    region.imageExtent = {
+    width,
+    height,
+    1
+    };
+
+    m_devFuncs->vkCmdCopyBufferToImage(CommandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+    EndSingleTimeCommands(CommandBuffer);
 }
 
 void VulkanRendererPrivate::prepareShader()
@@ -303,48 +409,67 @@ void VulkanRendererPrivate::init(int framesInFlight)
 
     MyInit(framesInFlight);
     CreatePipeline(rp);
+    CreateTextureImage();
 
-    //if (err != VK_SUCCESS)
-    //    qFatal("Failed to create graphics pipeline: %d", err);
+    // Now just need some descriptors.
+    VkDescriptorPoolSize descPoolSizes[] = {
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
+    };
+    VkDescriptorPoolCreateInfo descPoolInfo;
+    memset(&descPoolInfo, 0, sizeof(descPoolInfo));
+    descPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    descPoolInfo.flags = 0; // won't use vkFreeDescriptorSets
+    descPoolInfo.maxSets = 1;
+    descPoolInfo.poolSizeCount = sizeof(descPoolSizes) / sizeof(descPoolSizes[0]);
+    descPoolInfo.pPoolSizes = descPoolSizes;
+    auto err = m_devFuncs->vkCreateDescriptorPool(m_dev, &descPoolInfo, nullptr, &m_descriptorPool);
+    if (err != VK_SUCCESS)
+        qFatal("Failed to create descriptor pool: %d", err);
 
-    //// Now just need some descriptors.
-    //VkDescriptorPoolSize descPoolSizes[] = {
-    //    { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1 }
-    //};
-    //VkDescriptorPoolCreateInfo descPoolInfo;
-    //memset(&descPoolInfo, 0, sizeof(descPoolInfo));
-    //descPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    //descPoolInfo.flags = 0; // won't use vkFreeDescriptorSets
-    //descPoolInfo.maxSets = 1;
-    //descPoolInfo.poolSizeCount = sizeof(descPoolSizes) / sizeof(descPoolSizes[0]);
-    //descPoolInfo.pPoolSizes = descPoolSizes;
-    //err = m_devFuncs->vkCreateDescriptorPool(m_dev, &descPoolInfo, nullptr, &m_descriptorPool);
-    //if (err != VK_SUCCESS)
-    //    qFatal("Failed to create descriptor pool: %d", err);
+    VkDescriptorSetAllocateInfo descAllocInfo;
+    memset(&descAllocInfo, 0, sizeof(descAllocInfo));
+    descAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    descAllocInfo.descriptorPool = m_descriptorPool;
+    descAllocInfo.descriptorSetCount = 1;
+    descAllocInfo.pSetLayouts = &m_resLayout;
+    err = m_devFuncs->vkAllocateDescriptorSets(m_dev, &descAllocInfo, &m_texDescriptor);
+    if (err != VK_SUCCESS)
+        qFatal("Failed to allocate descriptor set");
 
-    //VkDescriptorSetAllocateInfo descAllocInfo;
-    //memset(&descAllocInfo, 0, sizeof(descAllocInfo));
-    //descAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    //descAllocInfo.descriptorPool = m_descriptorPool;
-    //descAllocInfo.descriptorSetCount = 1;
-    //descAllocInfo.pSetLayouts = &m_resLayout;
-    //err = m_devFuncs->vkAllocateDescriptorSets(m_dev, &descAllocInfo, &m_ubufDescriptor);
-    //if (err != VK_SUCCESS)
-    //    qFatal("Failed to allocate descriptor set");
+    VkWriteDescriptorSet writeInfo;
+    memset(&writeInfo, 0, sizeof(writeInfo));
+    writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    writeInfo.dstSet = m_texDescriptor;
+    writeInfo.dstBinding = 0;
+    writeInfo.descriptorCount = 1;
+    writeInfo.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    VkDescriptorImageInfo imageInfo;
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = textureImageView;
+    imageInfo.sampler = textureSampler;
+    writeInfo.pImageInfo = &imageInfo;
+    m_devFuncs->vkUpdateDescriptorSets(m_dev, 1, &writeInfo, 0, nullptr);
 
-    //VkWriteDescriptorSet writeInfo;
-    //memset(&writeInfo, 0, sizeof(writeInfo));
-    //writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    //writeInfo.dstSet = m_ubufDescriptor;
-    //writeInfo.dstBinding = 0;
-    //writeInfo.descriptorCount = 1;
-    //writeInfo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    //VkDescriptorBufferInfo bufInfo;
-    //bufInfo.buffer = m_ubuf;
-    //bufInfo.offset = 0; // dynamic offset is used so this is ignored
-    //bufInfo.range = UBUF_SIZE;
-    //writeInfo.pBufferInfo = &bufInfo;
-    //m_devFuncs->vkUpdateDescriptorSets(m_dev, 1, &writeInfo, 0, nullptr);
+    //Find queue family index
+    uint32_t queueFamilyCount = 0;
+    m_funcs->vkGetPhysicalDeviceQueueFamilyProperties(m_physDev, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    m_funcs->vkGetPhysicalDeviceQueueFamilyProperties(m_physDev, &queueFamilyCount, queueFamilies.data());
+
+    int i = 0;
+    for (const auto& queueFamily : queueFamilies)
+    {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) 
+        {
+            graphicsFamily = i;
+            break;
+        }
+        i++;
+    }
+
+    createCommandPool();
+    m_devFuncs->vkGetDeviceQueue(m_dev, graphicsFamily, 0, &graphicsQueue);
 }
 
 void VulkanRendererPrivate::MyInit(int framesInFlight)
@@ -356,7 +481,7 @@ void VulkanRendererPrivate::MyInit(int framesInFlight)
     VkBufferCreateInfo bufferInfo;
     memset(&bufferInfo, 0, sizeof(bufferInfo));
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = sizeof(vertices);
+    bufferInfo.size = sizeof(FVertex) * vertices.size();
     bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     VkResult err = m_devFuncs->vkCreateBuffer(m_dev, &bufferInfo, nullptr, &m_vbuf);
     if (err != VK_SUCCESS)
@@ -400,6 +525,52 @@ void VulkanRendererPrivate::MyInit(int framesInFlight)
         qFatal("Failed to bind vertex buffer memory: %d", err);
 }
 
+void VulkanRendererPrivate::createCommandPool()
+{
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    poolInfo.queueFamilyIndex = graphicsFamily;
+
+    if (m_devFuncs->vkCreateCommandPool(m_dev, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) 
+    {
+        throw std::runtime_error("failed to create graphics command pool!");
+    }
+}
+
+VkCommandBuffer VulkanRendererPrivate::BeginSingleTimeCommands() {
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    m_devFuncs->vkAllocateCommandBuffers(m_dev, &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    m_devFuncs->vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    return commandBuffer;
+}
+
+void VulkanRendererPrivate::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
+    m_devFuncs->vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    m_devFuncs->vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    m_devFuncs->vkQueueWaitIdle(graphicsQueue);
+
+    m_devFuncs->vkFreeCommandBuffers(m_dev, commandPool, 1, &commandBuffer);
+}
+
 void VulkanRendererPrivate::CreateTextureImage() {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -434,6 +605,45 @@ void VulkanRendererPrivate::CreateTextureImage() {
 
     m_devFuncs->vkBindImageMemory(m_dev, textureImage, textureImageMemory, 0);
 
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = textureImage;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    if (m_devFuncs->vkCreateImageView(m_dev, &viewInfo, nullptr, &textureImageView) != VK_SUCCESS) 
+    {
+        throw std::runtime_error("failed to create texture image view!");
+    }
+
+    VkPhysicalDeviceProperties properties{};
+    m_funcs->vkGetPhysicalDeviceProperties(m_physDev, &properties);
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.anisotropyEnable = VK_TRUE;
+    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+    samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+    if (m_devFuncs->vkCreateSampler(m_dev, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) 
+    {
+        throw std::runtime_error("failed to create texture sampler!");
+    }
 }
 
 void VulkanRendererPrivate::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
@@ -489,9 +699,9 @@ void VulkanRendererPrivate::CreatePipeline(VkRenderPass rp)
     VkDescriptorSetLayoutBinding descLayoutBinding;
     memset(&descLayoutBinding, 0, sizeof(descLayoutBinding));
     descLayoutBinding.binding = 0;
-    descLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    descLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     descLayoutBinding.descriptorCount = 1;
-    descLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    descLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     
     //Descriptor set layout
     VkDescriptorSetLayoutCreateInfo layoutInfo;
@@ -507,8 +717,8 @@ void VulkanRendererPrivate::CreatePipeline(VkRenderPass rp)
     VkPipelineLayoutCreateInfo pipelineLayoutInfo;
     memset(&pipelineLayoutInfo, 0, sizeof(pipelineLayoutInfo));
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 0;
-    pipelineLayoutInfo.pSetLayouts = nullptr;// &m_resLayout;
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &m_resLayout;
     err = m_devFuncs->vkCreatePipelineLayout(m_dev, &pipelineLayoutInfo, nullptr, &m_pipelineLayout);
     if (err != VK_SUCCESS)
         qWarning("Failed to create pipeline layout: %d", err);
