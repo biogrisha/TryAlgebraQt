@@ -37,6 +37,7 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 	{
 		Result = MyRTTI::MakeTypedUnique<FImageBuffer>();
 		Result->SetExtent(Extent);
+		Result->AddUsageFlags(VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 		Result->Init();
 	}
 	{

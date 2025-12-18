@@ -10,6 +10,10 @@
 #include <VertexInputLayout.h>
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
+#include <VulkanContext.h>
+#include <MathDocumentRendering.h>
+#include <VulkanHelpers.h>
+#include <QElapsedTimer>
 
 struct FVertex
 {
@@ -102,6 +106,16 @@ private:
 
     VkCommandPool commandPool;
     VkQueue graphicsQueue;
+
+    struct FContextDestroyer
+    {
+        ~FContextDestroyer()
+        {
+            FVulkanStatic::Context.reset();
+        }
+    } ContextDestroyer;
+
+    FMathDocumentRendering DocumentRendering;
 };
 
 PixelDataRenderer::PixelDataRenderer()
@@ -224,6 +238,10 @@ std::vector<FVertex> vertices =
 
 const int UBUF_SIZE = 4;
 
+std::wstring Chars = L"abasfdadsfcvjhjhvjlhvhgergergergwergwergwrasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfegwerg";
+int Ind = 21;
+int Size = 5;
+
 void VulkanRendererPrivate::mainPassRecordingStart()
 {
     // This example demonstrates the simple case: prepending some commands to
@@ -242,25 +260,46 @@ void VulkanRendererPrivate::mainPassRecordingStart()
         rif->getResource(m_window, QSGRendererInterface::CommandListResource));
     Q_ASSERT(cb);
 
+    //Draw math document
+    std::vector<FGlyphData> Glyphs;
+    for (int i = 0; i < Size; i++)
+    {
+        int OffsetY = 0;
+        for (int j = Ind - 20; j < Ind; j++)
+        {
+
+            FGlyphData g;
+            g.GlyphId.Glyph = Chars[j];
+            g.GlyphId.Height = Size;
+            g.Pos = glm::vec2(i * 30, OffsetY);
+            Glyphs.push_back(g);
+
+            OffsetY += 40;
+        }
+    }
+    Ind = std::min<int>(Chars.size(), Ind + 1);
+    Size = std::min<int>(50, Size + 1);
+    DocumentRendering.SetDocumentContent(Glyphs);
+    auto RenderedDocument = DocumentRendering.Render();
+    auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
+    void* RenderedDocData = RenderedDocBuffer->MapData();
+
     //Copy buffer into image
-    VkDeviceSize imageSize = 300 * 300 * 4;
+    VkDeviceSize imageSize = 1000 * 1000 * 4;
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-    std::vector<char> pixels(300 * 300 * 4, 0);
+    std::vector<char> pixels(1000 * 1000 * 4, 0);
+    memcpy(pixels.data(), RenderedDocData, static_cast<size_t>(imageSize));
 
-
-    for (int i = 0; i < pixels.size(); i++)
-    {
-        pixels[i] = std::rand() % 255;
-    }
     void* data;
     m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
-    memcpy(data, pixels.data(), static_cast<size_t>(imageSize));
+    memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
+    RenderedDocBuffer->UnmapData();
     m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
     TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(300), static_cast<uint32_t>(300));
+    copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(1000), static_cast<uint32_t>(1000));
     TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
@@ -378,7 +417,6 @@ static inline VkDeviceSize aligned(VkDeviceSize v, VkDeviceSize byteAlign)
 
 void VulkanRendererPrivate::init(int framesInFlight)
 {
-
     Q_ASSERT(framesInFlight <= 3);
     m_initialized = true;
 
@@ -470,6 +508,12 @@ void VulkanRendererPrivate::init(int framesInFlight)
 
     createCommandPool();
     m_devFuncs->vkGetDeviceQueue(m_dev, graphicsFamily, 0, &graphicsQueue);
+
+    //Init math renderer
+    FVulkanStatic::Context = std::make_unique<FVulkanContext>();
+    FVulkanStatic::Context->Init(inst->vkInstance(), m_physDev);
+    DocumentRendering.SetDocumentExtent({ 1000 , 1000 });
+    DocumentRendering.Init();
 }
 
 void VulkanRendererPrivate::MyInit(int framesInFlight)
@@ -575,8 +619,8 @@ void VulkanRendererPrivate::CreateTextureImage() {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = static_cast<uint32_t>(300);
-    imageInfo.extent.height = static_cast<uint32_t>(300);
+    imageInfo.extent.width = static_cast<uint32_t>(1000);
+    imageInfo.extent.height = static_cast<uint32_t>(1000);
     imageInfo.extent.depth = 1;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;

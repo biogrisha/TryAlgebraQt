@@ -1,4 +1,7 @@
 #include "Buffer.h"
+#include "Buffer.h"
+#include "Buffer.h"
+#include "Buffer.h"
 #include <VulkanHelpers.h>
 #include <VulkanContext.h>
 #include <boost/signals2.hpp>
@@ -27,6 +30,31 @@ void FBuffer::SetData(uint16_t InSize, const void* Data)
 	}
 }
 
+void FBuffer::Init(uint32_t InSize)
+{
+	VkBufferCreateInfo bufCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+	bufCreateInfo.size = InSize;
+	bufCreateInfo.usage = BufferInfo.Usage;
+	bufCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	VmaAllocationCreateInfo AllocInfo = {};
+	AllocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+	if (BufferInfo.bDeviceLocal)
+	{
+		AllocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	}
+	else
+	{
+		AllocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+	}
+
+	VkBuffer buf;
+	VmaAllocation alloc;
+	auto Res = vmaCreateBuffer(FVulkanStatic::Context->VmaAllocator, &bufCreateInfo, &AllocInfo, &Buffer, &Allocation, nullptr);
+	SizeUpdated();
+
+}
+
 VkBuffer* FBuffer::GetBuffer()
 {
 	return &Buffer;
@@ -45,6 +73,18 @@ const FBufferInfo& FBuffer::GetBufferInfo()
 vk::DescriptorBufferInfo* FBuffer::GetDescriptorBufferInfo()
 {
 	return &DescriptorBufferInfo;
+}
+
+void* FBuffer::MapData()
+{
+	void* mappedData;
+	vmaMapMemory(FVulkanStatic::Context->VmaAllocator, Allocation, &mappedData);
+	return mappedData;
+}
+
+void FBuffer::UnmapData()
+{
+	vmaUnmapMemory(FVulkanStatic::Context->VmaAllocator, Allocation);
 }
 
 void FBuffer::Destroy()

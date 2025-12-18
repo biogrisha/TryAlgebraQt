@@ -24,6 +24,12 @@ namespace VkHelpers
 	void TransitionImageLayout(const vk::raii::Image& image, vk::ImageLayout oldLayout, vk::ImageLayout newLayout);
 
 	vk::DescriptorType ConvertBufferToDescriptor(VkBufferUsageFlagBits BufferUsage);
+
+	std::unique_ptr<FBuffer> ConvertImageToBuffer(FImageBuffer* ImageBuffer);
+
+	void ImageTransition_ShaderReadToTransferSrc(FImageBuffer* Image);
+
+	void ImageTransition_TransferSrcToShaderRead(FImageBuffer* Image);
 }
 
 namespace NVkHelpers

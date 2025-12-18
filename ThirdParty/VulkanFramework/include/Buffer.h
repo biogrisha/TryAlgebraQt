@@ -18,7 +18,7 @@ public:
 	~FBuffer();
 	void SetProperties(const FBufferInfo& InBufferInfo);
 	void SetData(uint16_t InSize, const void* Data);
-
+	void Init(uint32_t InSize);
 	template<typename T>
 	void SetData(const std::vector<T>& Data)
 	{
@@ -36,6 +36,8 @@ public:
 	uint16_t GetSize();
 	const FBufferInfo& GetBufferInfo();
 	vk::DescriptorBufferInfo* GetDescriptorBufferInfo();
+	void* MapData();
+	void UnmapData();
 private:
 	void Destroy();
 	void MapMemoryHostVisible(uint32_t InSize, const void* Data);

@@ -91,6 +91,105 @@ vk::DescriptorType VkHelpers::ConvertBufferToDescriptor(VkBufferUsageFlagBits Bu
 	throw std::runtime_error("Unsupported buffer usage for descriptor type.");
 }
 
+std::unique_ptr<FBuffer> VkHelpers::ConvertImageToBuffer(FImageBuffer* ImageBuffer)
+{
+	std::unique_ptr<FBuffer> Buffer = MyRTTI::MakeTypedUnique<FBuffer>();
+	FBufferInfo BufferInfo;
+	BufferInfo.bDeviceLocal = false;
+	BufferInfo.Usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+	Buffer->SetProperties(BufferInfo);
+	auto ImageExtent = ImageBuffer->GetExtent();
+	Buffer->Init(ImageExtent.height * ImageExtent.width * 4);
+
+	ImageTransition_ShaderReadToTransferSrc(ImageBuffer);
+
+	auto CommandBuffer2 = BeginSingleTimeCommands();
+	vk::BufferImageCopy region{};
+	region.bufferOffset = 0;
+	region.bufferRowLength = 0;
+	region.bufferImageHeight = 0;
+
+	region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+	region.imageSubresource.mipLevel = 0;
+	region.imageSubresource.baseArrayLayer = 0;
+	region.imageSubresource.layerCount = 1;
+
+	region.imageOffset = vk::Offset3D{ 0, 0, 0 };
+	region.imageExtent = vk::Extent3D{ ImageExtent.width, ImageExtent.height, 1 };
+
+	CommandBuffer2.copyImageToBuffer(ImageBuffer->GetImage(), vk::ImageLayout::eTransferSrcOptimal, *Buffer->GetBuffer(), region);
+	
+	EndSingleTimeCommands(CommandBuffer2);
+	ImageTransition_TransferSrcToShaderRead(ImageBuffer);
+	return Buffer;
+}
+
+void VkHelpers::ImageTransition_ShaderReadToTransferSrc(FImageBuffer* Image)
+{
+	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+
+	VkImageMemoryBarrier barrier{};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = Image->GetImage();
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 1;
+
+	// Access masks depend on old usage:
+	barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+	barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+	vkCmdPipelineBarrier(
+		*CommandBuffer,
+		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &barrier
+	);
+	VkHelpers::EndSingleTimeCommands(CommandBuffer);
+}
+
+void VkHelpers::ImageTransition_TransferSrcToShaderRead(FImageBuffer* Image)
+{
+	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+
+	VkImageMemoryBarrier barrier{};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = Image->GetImage();
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 1;
+
+	// Access masks depend on old usage:
+	barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+	vkCmdPipelineBarrier(
+		*CommandBuffer,
+		VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT,
+		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &barrier
+	);
+	VkHelpers::EndSingleTimeCommands(CommandBuffer);
+}
+
 VkShaderModule NVkHelpers::createShaderModule(const uint32_t* code, uint32_t size, VkDevice device)
 {
 	VkShaderModuleCreateInfo createInfo;

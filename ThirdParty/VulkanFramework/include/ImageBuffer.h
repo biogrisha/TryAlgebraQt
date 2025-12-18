@@ -12,6 +12,7 @@ public:
 	~FImageBuffer();
 	void SetExtent(const VkExtent2D& InExtent);
 	void SetFormat(VkFormat InFormat);
+	void AddUsageFlags(VkImageUsageFlags Flags);
 	void Init();
 
 	VkImage GetImage();
@@ -28,4 +29,5 @@ private:
 	VkExtent2D Extent = {0, 0};
 	VkFormat Format = VkFormat::VK_FORMAT_B8G8R8A8_UNORM;
 	vk::DescriptorImageInfo DescriptorImageInfo;
+	VkImageUsageFlags ImageUsageFlags = 0;
 };

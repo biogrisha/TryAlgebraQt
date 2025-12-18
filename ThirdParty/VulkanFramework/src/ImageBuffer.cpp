@@ -1,3 +1,4 @@
+#include "ImageBuffer.h"
 #include <ImageBuffer.h>
 #include <VulkanContext.h>
 #include <VulkanHelpers.h>
@@ -27,6 +28,11 @@ void FImageBuffer::SetFormat(VkFormat InFormat)
 	Format = InFormat;
 }
 
+void FImageBuffer::AddUsageFlags(VkImageUsageFlags Flags)
+{
+	ImageUsageFlags = Flags;
+}
+
 void FImageBuffer::Init()
 {
 	VkImageCreateInfo ImageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
@@ -37,7 +43,7 @@ void FImageBuffer::Init()
 	ImageCreateInfo.arrayLayers = 1;
 	ImageCreateInfo.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
 	ImageCreateInfo.tiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
-	ImageCreateInfo.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT;
+	ImageCreateInfo.usage = VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | ImageUsageFlags;
 	ImageCreateInfo.sharingMode = VkSharingMode::VK_SHARING_MODE_EXCLUSIVE;
 	ImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
