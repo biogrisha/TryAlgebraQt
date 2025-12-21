@@ -4,24 +4,20 @@
 #include <QtQuick/QQuickWindow>
 
 class VulkanRendererPrivate;
-class PixelDataRenderer  : public QQuickItem
+class MathDocumentItem  : public QQuickItem
 {
     Q_OBJECT
-    Q_PROPERTY(qreal t READ t WRITE setT NOTIFY tChanged)
     QML_ELEMENT
 
 public:
-    PixelDataRenderer();
+    MathDocumentItem();
 
-    qreal t() const { return m_t; }
-    void setT(qreal t);
-
-signals:
-    void tChanged();
+public slots:
+    void onUpdateText();
 
 public slots:
     void sync();
-    void cleanup();
+    void onSceneGraphInvalidated();
 
 private slots:
     void handleWindowChanged(QQuickWindow* win);
@@ -29,7 +25,6 @@ private slots:
 private:
     void releaseResources() override;
 
-    qreal m_t = 0;
     VulkanRendererPrivate* m_renderer = nullptr;
 };
 

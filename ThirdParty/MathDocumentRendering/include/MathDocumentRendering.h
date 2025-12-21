@@ -51,6 +51,7 @@ public:
 	FGlyphRenderData LoadGlyph(const FGlyphData& GlyphData);
 	void SetDocumentContent(const std::vector<FGlyphData>& InDocumentContent);
 	FImageBuffer* Render();
+	bool HasContent();
 private:
 	std::vector<FGlyphData> DocumentContent;
 	std::map<FGlyphId, FGlyphData> Atlas;

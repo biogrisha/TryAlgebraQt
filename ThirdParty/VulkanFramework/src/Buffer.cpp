@@ -32,6 +32,7 @@ void FBuffer::SetData(uint16_t InSize, const void* Data)
 
 void FBuffer::Init(uint32_t InSize)
 {
+	Size = InSize;
 	VkBufferCreateInfo bufCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
 	bufCreateInfo.size = InSize;
 	bufCreateInfo.usage = BufferInfo.Usage;
@@ -47,12 +48,8 @@ void FBuffer::Init(uint32_t InSize)
 	{
 		AllocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
 	}
-
-	VkBuffer buf;
-	VmaAllocation alloc;
 	auto Res = vmaCreateBuffer(FVulkanStatic::Context->VmaAllocator, &bufCreateInfo, &AllocInfo, &Buffer, &Allocation, nullptr);
 	SizeUpdated();
-
 }
 
 VkBuffer* FBuffer::GetBuffer()

@@ -12,29 +12,30 @@
 #include <glm/glm.hpp>
 #include <VulkanContext.h>
 #include <MathDocumentRendering.h>
-#include <VulkanHelpers.h>
 #include <QElapsedTimer>
 
-struct FVertex
+//Screen rectangle vertices
+struct Vertex
 {
     glm::vec2 Pos;
     glm::vec2 Uv;
 };
 
-class FVertexLayoutPresent
+//Pipeline vertex layout to draw rectangle with texture
+class VertexLayoutPresent
 {
 public:
     std::vector<VkVertexInputBindingDescription> getBindingDescription()
     {
         return {
-            { 0, sizeof(FVertex), VK_VERTEX_INPUT_RATE_VERTEX }
+            { 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX }
         };
     }
     virtual std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions()
     {
         return {
-            VkVertexInputAttributeDescription(0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(FVertex, Pos)),
-            VkVertexInputAttributeDescription(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(FVertex, Uv)),
+            VkVertexInputAttributeDescription(0, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, Pos)),
+            VkVertexInputAttributeDescription(1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, Uv)),
         };
     }
 };
@@ -44,13 +45,11 @@ class VulkanRendererPrivate : public QObject
     Q_OBJECT
 public:
     ~VulkanRendererPrivate();
-
-    void setT(qreal t) { m_t = t; }
     void setViewportSize(const QSize& size) { m_viewportSize = size; }
     void setWindow(QQuickWindow* window) { m_window = window; }
-
+    void setText();
 public slots:
-    void frameStart();
+    void beforeRendering();
     void mainPassRecordingStart();
 
 private:
@@ -60,7 +59,6 @@ private:
     };
     void prepareShader();
     void init(int framesInFlight);
-    void MyInit(int framesInFlight);
     void createCommandPool();
     VkCommandBuffer BeginSingleTimeCommands();
     void EndSingleTimeCommands(VkCommandBuffer CommandBuffer);
@@ -71,7 +69,6 @@ private:
     void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
     QSize m_viewportSize;
-    qreal m_t = 0;
     QQuickWindow* m_window = nullptr;
 
     QByteArray m_shader;
@@ -94,54 +91,48 @@ private:
     VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
     VkDescriptorSet m_texDescriptor = VK_NULL_HANDLE;
 
-    VkShaderModule ShaderModule = VK_NULL_HANDLE;
+    VkShaderModule m_shaderModule = VK_NULL_HANDLE;
 
-    VkImage textureImage = VK_NULL_HANDLE;
-    VkDeviceMemory textureImageMemory = VK_NULL_HANDLE;
-    VkImageView textureImageView = VK_NULL_HANDLE;
-    VkSampler textureSampler = VK_NULL_HANDLE;
-    FVertexLayoutPresent VertexLayoutPresent;
+    VkImage m_textureImage = VK_NULL_HANDLE;
+    VkDeviceMemory m_textureImageMemory = VK_NULL_HANDLE;
+    VkImageView m_textureImageView = VK_NULL_HANDLE;
+    VkSampler m_textureSampler = VK_NULL_HANDLE;
+    VertexLayoutPresent m_vertexLayoutPresent;
 
-    uint32_t graphicsFamily = 0;
+    uint32_t m_graphicsFamily = 0;
 
-    VkCommandPool commandPool;
-    VkQueue graphicsQueue;
+    VkCommandPool m_commandPool;
+    VkQueue m_graphicsQueue;
 
-    struct FContextDestroyer
+    struct ContextDestroyer
     {
-        ~FContextDestroyer()
+        ~ContextDestroyer()
         {
             FVulkanStatic::Context.reset();
         }
-    } ContextDestroyer;
+    } m_contextDestroyer;
 
-    FMathDocumentRendering DocumentRendering;
+    FMathDocumentRendering m_documentRendering;
 };
 
-PixelDataRenderer::PixelDataRenderer()
+MathDocumentItem::MathDocumentItem()
 {
-    //when new window is assigned as a parent to this QQuickItem
-    connect(this, &QQuickItem::windowChanged, this, &PixelDataRenderer::handleWindowChanged);
+    //construct renderer
+    //bind renderer to window changed signal
+    connect(this, &QQuickItem::windowChanged, this, &MathDocumentItem::handleWindowChanged);
 }
 
-void PixelDataRenderer::setT(qreal t)
+void MathDocumentItem::handleWindowChanged(QQuickWindow* win)
 {
-    if (t == m_t)
-        return;
-    m_t = t;
-    emit tChanged();
-    if (window())
-        window()->update();
-}
-
-void PixelDataRenderer::handleWindowChanged(QQuickWindow* win)
-{
+    //window changed
     if (win) {
-        connect(win, &QQuickWindow::beforeSynchronizing, this, &PixelDataRenderer::sync, Qt::DirectConnection);
-        connect(win, &QQuickWindow::sceneGraphInvalidated, this, &PixelDataRenderer::cleanup, Qt::DirectConnection);
+        //connect renderer to synchronization point
+        connect(win, &QQuickWindow::beforeSynchronizing, this, &MathDocumentItem::sync, Qt::DirectConnection);
+        //connect renderer to scene graph invalidation
+        connect(win, &QQuickWindow::sceneGraphInvalidated, this, &MathDocumentItem::onSceneGraphInvalidated, Qt::DirectConnection);
 
-        // Ensure we start with cleared to black. The squircle's blend mode relies on this.
-        win->setColor(Qt::black);
+        //set clear color
+        win->setColor(Qt::gray);
     }
 }
 
@@ -151,8 +142,10 @@ void PixelDataRenderer::handleWindowChanged(QQuickWindow* win)
 // via scheduleRenderJob(). Note that the VulkanSquircle may be gone by the time
 // the QRunnable is invoked.
 
-void PixelDataRenderer::cleanup()
+void MathDocumentItem::onSceneGraphInvalidated()
 {
+    //scene graph invalidation
+    //clean renderer
     delete m_renderer;
     m_renderer = nullptr;
 }
@@ -166,8 +159,9 @@ private:
     VulkanRendererPrivate* m_renderer;
 };
 
-void PixelDataRenderer::releaseResources()
+void MathDocumentItem::releaseResources()
 {
+    //start releasing resources
     //schedule private renderer deletion to be executed at BeforeSynchronizingStage
     window()->scheduleRenderJob(new CleanupJob(m_renderer), QQuickWindow::BeforeSynchronizingStage);
     m_renderer = nullptr;
@@ -175,11 +169,12 @@ void PixelDataRenderer::releaseResources()
 
 VulkanRendererPrivate::~VulkanRendererPrivate()
 {
+    //renderer destroying
     qDebug("cleanup");
     if (!m_devFuncs)
         return;
 
-    m_devFuncs->vkDestroyCommandPool(m_dev, commandPool, nullptr);
+    m_devFuncs->vkDestroyCommandPool(m_dev, m_commandPool, nullptr);
     m_devFuncs->vkDestroyPipeline(m_dev, m_pipeline, nullptr);
     m_devFuncs->vkDestroyPipelineLayout(m_dev, m_pipelineLayout, nullptr);
     m_devFuncs->vkDestroyDescriptorSetLayout(m_dev, m_resLayout, nullptr);
@@ -191,44 +186,57 @@ VulkanRendererPrivate::~VulkanRendererPrivate()
     m_devFuncs->vkDestroyBuffer(m_dev, m_vbuf, nullptr);
     m_devFuncs->vkFreeMemory(m_dev, m_vbufMem, nullptr);
 
-    m_devFuncs->vkDestroySampler(m_dev, textureSampler, nullptr);
-    m_devFuncs->vkDestroyImageView(m_dev, textureImageView, nullptr);
+    m_devFuncs->vkDestroySampler(m_dev, m_textureSampler, nullptr);
+    m_devFuncs->vkDestroyImageView(m_dev, m_textureImageView, nullptr);
 
-    m_devFuncs->vkDestroyImage(m_dev, textureImage, nullptr);
-    m_devFuncs->vkFreeMemory(m_dev, textureImageMemory, nullptr);
+    m_devFuncs->vkDestroyImage(m_dev, m_textureImage, nullptr);
+    m_devFuncs->vkFreeMemory(m_dev, m_textureImageMemory, nullptr);
 
     qDebug("released");
 }
 
-void PixelDataRenderer::sync()
+void VulkanRendererPrivate::setText()
 {
+    FGlyphData g;
+    g.GlyphId.Glyph = 'A';
+    g.GlyphId.Height = 30;
+    g.Pos = glm::vec2(30, 30);
+    m_documentRendering.SetDocumentContent({ g });
+}
+
+void MathDocumentItem::sync()
+{
+    //gui/renderer syncronization
     if (!m_renderer) {
+        //if called for the first time -> create renderer
         m_renderer = new VulkanRendererPrivate;
-        // Initializing resources is done before starting to record the
-        // renderpass, regardless of wanting an underlay or overlay.
-        connect(window(), &QQuickWindow::beforeRendering, m_renderer, &VulkanRendererPrivate::frameStart, Qt::DirectConnection);
-        // Here we want an underlay and therefore connect to
-        // beforeRenderPassRecording. Changing to afterRenderPassRecording
-        // would render the squircle on top (overlay).
+        //connect renderer initialization on beforeRendering
+        connect(window(), &QQuickWindow::beforeRendering, m_renderer, &VulkanRendererPrivate::beforeRendering, Qt::DirectConnection);
+        //connect vulkan commands to beforeRenderingPassRecording
         connect(window(), &QQuickWindow::beforeRenderPassRecording, m_renderer, &VulkanRendererPrivate::mainPassRecordingStart, Qt::DirectConnection);
     }
+    //set viewport size
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
-    m_renderer->setT(m_t);
     m_renderer->setWindow(window());
 }
 
-void VulkanRendererPrivate::frameStart()
+void VulkanRendererPrivate::beforeRendering()
 {
+    
     QSGRendererInterface* rif = m_window->rendererInterface();
 
     // We are not prepared for anything other than running with the RHI and its Vulkan backend.
     Q_ASSERT(rif->graphicsApi() == QSGRendererInterface::Vulkan);
 
     if (!m_initialized)
+    {
+        //renderer not initialized
+        //initializing renderer
         init(m_window->graphicsStateInfo().framesInFlight);
+    }
 }
 
-std::vector<FVertex> vertices =
+std::vector<Vertex> vertices =
 {
     {{-1, -1,}, {0.0f, 0.0f}},
     {{1, -1,},  {1.0f, 0.0f}},
@@ -236,17 +244,12 @@ std::vector<FVertex> vertices =
     {{1, 1},    {1.0f, 1.0f}}
 };
 
-const int UBUF_SIZE = 4;
-
-std::wstring Chars = L"abasfdadsfcvjhjhvjlhvhgergergergwergwergwrasdfasdfasdfasdfasdfasdfasdfasdfasdfasdfegwerg";
-int Ind = 21;
-int Size = 5;
-
 void VulkanRendererPrivate::mainPassRecordingStart()
 {
-    // This example demonstrates the simple case: prepending some commands to
-    // the scenegraph's main renderpass. It does not create its own passes,
-    // rendertargets, etc. so no synchronization is needed.
+    if (!m_documentRendering.HasContent())
+    {
+        return;
+    }
 
     const QQuickWindow::GraphicsStateInfo& stateInfo(m_window->graphicsStateInfo());
     QSGRendererInterface* rif = m_window->rendererInterface();
@@ -260,27 +263,8 @@ void VulkanRendererPrivate::mainPassRecordingStart()
         rif->getResource(m_window, QSGRendererInterface::CommandListResource));
     Q_ASSERT(cb);
 
-    //Draw math document
-    std::vector<FGlyphData> Glyphs;
-    for (int i = 0; i < Size; i++)
-    {
-        int OffsetY = 0;
-        for (int j = Ind - 20; j < Ind; j++)
-        {
-
-            FGlyphData g;
-            g.GlyphId.Glyph = Chars[j];
-            g.GlyphId.Height = Size;
-            g.Pos = glm::vec2(i * 30, OffsetY);
-            Glyphs.push_back(g);
-
-            OffsetY += 40;
-        }
-    }
-    Ind = std::min<int>(Chars.size(), Ind + 1);
-    Size = std::min<int>(50, Size + 1);
-    DocumentRendering.SetDocumentContent(Glyphs);
-    auto RenderedDocument = DocumentRendering.Render();
+    //render math document
+    auto RenderedDocument = m_documentRendering.Render();
     auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
     void* RenderedDocData = RenderedDocBuffer->MapData();
 
@@ -290,20 +274,18 @@ void VulkanRendererPrivate::mainPassRecordingStart()
     VkDeviceMemory stagingBufferMemory;
     CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-    std::vector<char> pixels(1000 * 1000 * 4, 0);
-    memcpy(pixels.data(), RenderedDocData, static_cast<size_t>(imageSize));
-
     void* data;
     m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
     memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
     RenderedDocBuffer->UnmapData();
     m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
-    TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(1000), static_cast<uint32_t>(1000));
-    TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    copyBufferToImage(stagingBuffer, m_textureImage, static_cast<uint32_t>(1000), static_cast<uint32_t>(1000));
+    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
     m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
+    
     // Do not assume any state persists on the command buffer. (it may be a
     // brand new one that just started recording)
 
@@ -420,9 +402,9 @@ void VulkanRendererPrivate::init(int framesInFlight)
     Q_ASSERT(framesInFlight <= 3);
     m_initialized = true;
 
+    //cache vulkan objects from RI
     QSGRendererInterface* rif = m_window->rendererInterface();
-    QVulkanInstance* inst = reinterpret_cast<QVulkanInstance*>(
-        rif->getResource(m_window, QSGRendererInterface::VulkanInstanceResource));
+    QVulkanInstance* inst = reinterpret_cast<QVulkanInstance*>(rif->getResource(m_window, QSGRendererInterface::VulkanInstanceResource));
     Q_ASSERT(inst && inst->isValid());
 
     m_physDev = *reinterpret_cast<VkPhysicalDevice*>(rif->getResource(m_window, QSGRendererInterface::PhysicalDeviceResource));
@@ -433,9 +415,6 @@ void VulkanRendererPrivate::init(int framesInFlight)
     m_funcs = inst->functions();
     Q_ASSERT(m_devFuncs && m_funcs);
 
-    VkRenderPass rp = *reinterpret_cast<VkRenderPass*>(
-        rif->getResource(m_window, QSGRendererInterface::RenderPassResource));
-    Q_ASSERT(rp);
 
     // For simplicity we just use host visible buffers instead of device local + staging.
 
@@ -445,11 +424,31 @@ void VulkanRendererPrivate::init(int framesInFlight)
     VkPhysicalDeviceMemoryProperties physDevMemProps;
     m_funcs->vkGetPhysicalDeviceMemoryProperties(m_physDev, &physDevMemProps);
 
-    MyInit(framesInFlight);
+    //accessing render pass
+    VkRenderPass rp = *reinterpret_cast<VkRenderPass*>(
+        rif->getResource(m_window, QSGRendererInterface::RenderPassResource));
+    Q_ASSERT(rp);
+
+    //initializing vertex buffer
+    auto AllocationSize = sizeof(Vertex) * vertices.size();
+    CreateBuffer(sizeof(Vertex) * vertices.size(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_vbuf, m_vbufMem);
+    void* P = nullptr;
+    auto Err = m_devFuncs->vkMapMemory(m_dev, m_vbufMem, 0, AllocationSize, 0, &P);
+    if (Err != VK_SUCCESS || !P)
+    {
+        qFatal("Failed to map vertex buffer memory: %d", Err);
+    }
+    memcpy(P, vertices.data(), sizeof(Vertex) * vertices.size());
+    m_devFuncs->vkUnmapMemory(m_dev, m_vbufMem);
+    if (Err != VK_SUCCESS)
+    {
+        qFatal("Failed to bind vertex buffer memory: %d", Err);
+    }
+
     CreatePipeline(rp);
     CreateTextureImage();
 
-    // Now just need some descriptors.
+    //creating descriptor pool
     VkDescriptorPoolSize descPoolSizes[] = {
         { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
     };
@@ -464,6 +463,7 @@ void VulkanRendererPrivate::init(int framesInFlight)
     if (err != VK_SUCCESS)
         qFatal("Failed to create descriptor pool: %d", err);
 
+    //creating descriptor set
     VkDescriptorSetAllocateInfo descAllocInfo;
     memset(&descAllocInfo, 0, sizeof(descAllocInfo));
     descAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -474,6 +474,7 @@ void VulkanRendererPrivate::init(int framesInFlight)
     if (err != VK_SUCCESS)
         qFatal("Failed to allocate descriptor set");
 
+    //binding texture to descriptor set
     VkWriteDescriptorSet writeInfo;
     memset(&writeInfo, 0, sizeof(writeInfo));
     writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -483,12 +484,12 @@ void VulkanRendererPrivate::init(int framesInFlight)
     writeInfo.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     VkDescriptorImageInfo imageInfo;
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = textureImageView;
-    imageInfo.sampler = textureSampler;
+    imageInfo.imageView = m_textureImageView;
+    imageInfo.sampler = m_textureSampler;
     writeInfo.pImageInfo = &imageInfo;
     m_devFuncs->vkUpdateDescriptorSets(m_dev, 1, &writeInfo, 0, nullptr);
 
-    //Find queue family index
+    //Find graphics queue family index
     uint32_t queueFamilyCount = 0;
     m_funcs->vkGetPhysicalDeviceQueueFamilyProperties(m_physDev, &queueFamilyCount, nullptr);
 
@@ -500,73 +501,22 @@ void VulkanRendererPrivate::init(int framesInFlight)
     {
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) 
         {
-            graphicsFamily = i;
+            m_graphicsFamily = i;
             break;
         }
         i++;
     }
 
+    //creating graphics command pool
     createCommandPool();
-    m_devFuncs->vkGetDeviceQueue(m_dev, graphicsFamily, 0, &graphicsQueue);
+    //caching graphics queue
+    m_devFuncs->vkGetDeviceQueue(m_dev, m_graphicsFamily, 0, &m_graphicsQueue);
 
-    //Init math renderer
+    //Initializing math renderer
     FVulkanStatic::Context = std::make_unique<FVulkanContext>();
     FVulkanStatic::Context->Init(inst->vkInstance(), m_physDev);
-    DocumentRendering.SetDocumentExtent({ 1000 , 1000 });
-    DocumentRendering.Init();
-}
-
-void VulkanRendererPrivate::MyInit(int framesInFlight)
-{
-    VkPhysicalDeviceMemoryProperties physDevMemProps;
-    m_funcs->vkGetPhysicalDeviceMemoryProperties(m_physDev, &physDevMemProps);
-
-    //init vertex buffer
-    VkBufferCreateInfo bufferInfo;
-    memset(&bufferInfo, 0, sizeof(bufferInfo));
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = sizeof(FVertex) * vertices.size();
-    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    VkResult err = m_devFuncs->vkCreateBuffer(m_dev, &bufferInfo, nullptr, &m_vbuf);
-    if (err != VK_SUCCESS)
-        qFatal("Failed to create vertex buffer: %d", err);
-
-    VkMemoryRequirements memReq;
-    m_devFuncs->vkGetBufferMemoryRequirements(m_dev, m_vbuf, &memReq);
-    VkMemoryAllocateInfo allocInfo;
-    memset(&allocInfo, 0, sizeof(allocInfo));
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memReq.size;
-
-    uint32_t memTypeIndex = uint32_t(-1);
-    const VkMemoryType* memType = physDevMemProps.memoryTypes;
-    for (uint32_t i = 0; i < physDevMemProps.memoryTypeCount; ++i) {
-        if (memReq.memoryTypeBits & (1 << i)) {
-            if ((memType[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
-                && (memType[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
-            {
-                memTypeIndex = i;
-                break;
-            }
-        }
-    }
-    if (memTypeIndex == uint32_t(-1))
-        qFatal("Failed to find host visible and coherent memory type");
-
-    allocInfo.memoryTypeIndex = memTypeIndex;
-    err = m_devFuncs->vkAllocateMemory(m_dev, &allocInfo, nullptr, &m_vbufMem);
-    if (err != VK_SUCCESS)
-        qFatal("Failed to allocate vertex buffer memory of size %u: %d", uint(allocInfo.allocationSize), err);
-
-    void* p = nullptr;
-    err = m_devFuncs->vkMapMemory(m_dev, m_vbufMem, 0, allocInfo.allocationSize, 0, &p);
-    if (err != VK_SUCCESS || !p)
-        qFatal("Failed to map vertex buffer memory: %d", err);
-    memcpy(p, vertices.data(), sizeof(FVertex) * vertices.size());
-    m_devFuncs->vkUnmapMemory(m_dev, m_vbufMem);
-    err = m_devFuncs->vkBindBufferMemory(m_dev, m_vbuf, m_vbufMem, 0);
-    if (err != VK_SUCCESS)
-        qFatal("Failed to bind vertex buffer memory: %d", err);
+    m_documentRendering.SetDocumentExtent({ 1000 , 1000 });
+    m_documentRendering.Init();
 }
 
 void VulkanRendererPrivate::createCommandPool()
@@ -574,9 +524,9 @@ void VulkanRendererPrivate::createCommandPool()
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    poolInfo.queueFamilyIndex = graphicsFamily;
+    poolInfo.queueFamilyIndex = m_graphicsFamily;
 
-    if (m_devFuncs->vkCreateCommandPool(m_dev, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) 
+    if (m_devFuncs->vkCreateCommandPool(m_dev, &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS) 
     {
         throw std::runtime_error("failed to create graphics command pool!");
     }
@@ -586,7 +536,7 @@ VkCommandBuffer VulkanRendererPrivate::BeginSingleTimeCommands() {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = commandPool;
+    allocInfo.commandPool = m_commandPool;
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
@@ -609,10 +559,10 @@ void VulkanRendererPrivate::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    m_devFuncs->vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    m_devFuncs->vkQueueWaitIdle(graphicsQueue);
+    m_devFuncs->vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    m_devFuncs->vkQueueWaitIdle(m_graphicsQueue);
 
-    m_devFuncs->vkFreeCommandBuffers(m_dev, commandPool, 1, &commandBuffer);
+    m_devFuncs->vkFreeCommandBuffers(m_dev, m_commandPool, 1, &commandBuffer);
 }
 
 void VulkanRendererPrivate::CreateTextureImage() {
@@ -631,28 +581,28 @@ void VulkanRendererPrivate::CreateTextureImage() {
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.flags = 0; // Optional
-    if (m_devFuncs->vkCreateImage(m_dev, &imageInfo, nullptr, &textureImage) != VK_SUCCESS) {
+    if (m_devFuncs->vkCreateImage(m_dev, &imageInfo, nullptr, &m_textureImage) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
     VkMemoryRequirements memRequirements;
-    m_devFuncs->vkGetImageMemoryRequirements(m_dev, textureImage, &memRequirements);
+    m_devFuncs->vkGetImageMemoryRequirements(m_dev, m_textureImage, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-    if (m_devFuncs->vkAllocateMemory(m_dev, &allocInfo, nullptr, &textureImageMemory) != VK_SUCCESS) {
+    if (m_devFuncs->vkAllocateMemory(m_dev, &allocInfo, nullptr, &m_textureImageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate image memory!");
     }
 
-    m_devFuncs->vkBindImageMemory(m_dev, textureImage, textureImageMemory, 0);
+    m_devFuncs->vkBindImageMemory(m_dev, m_textureImage, m_textureImageMemory, 0);
 
 
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    viewInfo.image = textureImage;
+    viewInfo.image = m_textureImage;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
     viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -661,7 +611,7 @@ void VulkanRendererPrivate::CreateTextureImage() {
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (m_devFuncs->vkCreateImageView(m_dev, &viewInfo, nullptr, &textureImageView) != VK_SUCCESS) 
+    if (m_devFuncs->vkCreateImageView(m_dev, &viewInfo, nullptr, &m_textureImageView) != VK_SUCCESS) 
     {
         throw std::runtime_error("failed to create texture image view!");
     }
@@ -684,7 +634,7 @@ void VulkanRendererPrivate::CreateTextureImage() {
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
-    if (m_devFuncs->vkCreateSampler(m_dev, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) 
+    if (m_devFuncs->vkCreateSampler(m_dev, &samplerInfo, nullptr, &m_textureSampler) != VK_SUCCESS) 
     {
         throw std::runtime_error("failed to create texture sampler!");
     }
@@ -731,6 +681,7 @@ uint32_t VulkanRendererPrivate::FindMemoryType(uint32_t typeFilter, VkMemoryProp
 
 void VulkanRendererPrivate::CreatePipeline(VkRenderPass rp)
 {
+    //creating pipeline
     //Pipeline cache info
     VkPipelineCacheCreateInfo pipelineCacheInfo;
     memset(&pipelineCacheInfo, 0, sizeof(pipelineCacheInfo));
@@ -770,24 +721,24 @@ void VulkanRendererPrivate::CreatePipeline(VkRenderPass rp)
 
     prepareShader();
     //create shaders for pipeline
-    ShaderModule = NVkHelpers::createShaderModule(reinterpret_cast<const uint32_t*>(m_shader.constData()), m_shader.size(), m_dev);
+    m_shaderModule = NVkHelpers::createShaderModule(reinterpret_cast<const uint32_t*>(m_shader.constData()), m_shader.size(), m_dev);
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = ShaderModule;
+    vertShaderStageInfo.module = m_shaderModule;
     vertShaderStageInfo.pName = "vertMain";
 
     VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
     fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = ShaderModule;
+    fragShaderStageInfo.module = m_shaderModule;
     fragShaderStageInfo.pName = "fragMain";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
 
-    auto BindingDescriptions = VertexLayoutPresent.getBindingDescription();
-    auto VertexAttributeDescriptions = VertexLayoutPresent.getAttributeDescriptions();
+    auto BindingDescriptions = m_vertexLayoutPresent.getBindingDescription();
+    auto VertexAttributeDescriptions = m_vertexLayoutPresent.getAttributeDescriptions();
     VkPipelineVertexInputStateCreateInfo vertexInputInfo;
     memset(&vertexInputInfo, 0, sizeof(vertexInputInfo));
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -863,8 +814,13 @@ void VulkanRendererPrivate::CreatePipeline(VkRenderPass rp)
     pipelineInfo.renderPass = rp;
 
     err = m_devFuncs->vkCreateGraphicsPipelines(m_dev, m_pipelineCache, 1, &pipelineInfo, nullptr, &m_pipeline);
-    m_devFuncs->vkDestroyShaderModule(m_dev, ShaderModule, nullptr);
+    m_devFuncs->vkDestroyShaderModule(m_dev, m_shaderModule, nullptr);
 }
 
+void MathDocumentItem::onUpdateText()
+{
+    m_renderer->setText();
+    window()->update();
+}
 #include "PixelDataRenderer.moc"
 

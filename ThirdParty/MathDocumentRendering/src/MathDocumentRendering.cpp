@@ -1,4 +1,5 @@
 ﻿#include "MathDocumentRendering.h"
+#include "MathDocumentRendering.h"
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 #include <iostream>
@@ -231,4 +232,9 @@ FImageBuffer* FMathDocumentRendering::Render()
 {
 	AtlasRendering.Render();
 	return TextFromAtlasRendering.Render();
+}
+
+bool FMathDocumentRendering::HasContent()
+{
+	return !DocumentContent.empty();
 }
