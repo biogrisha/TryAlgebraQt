@@ -1,3 +1,2 @@
 T) Add pipeline cache into FPipeline
-T) Remove setT
-T) Replace prepare shader with loading single spir-v file for displaying image
+

@@ -13,6 +13,7 @@ add_subdirectory(ThirdParty/VulkanFramework)
 add_subdirectory(ThirdParty/MyRTTI)
 add_subdirectory(ThirdParty/MathDocumentRendering)
 add_subdirectory(ThirdParty/MathLibrary)
+add_subdirectory(ThirdParty/TryAlgebraCore)
 
 qt_standard_project_setup(REQUIRES 6.5)
 

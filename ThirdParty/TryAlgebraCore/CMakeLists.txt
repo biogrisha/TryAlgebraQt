@@ -1,0 +1,130 @@
+# Create a library target
+add_library(TryAlgebraCore STATIC 
+	include/Modules/ComponentBase.h
+	include/Modules/MainWindowModule.h
+	include/Modules/TypedObject.h
+	include/Modules/ActionHistory/ActionAddMe.h
+	include/Modules/ActionHistory/ActionBase.h
+	include/Modules/ActionHistory/ActionHistoryComponent.h
+	include/Modules/ActionHistory/ActionRemoveMe.h
+	include/Modules/ActionHistory/ActionReplaceMe.h
+	include/Modules/CommonTypes/Color.h
+	include/Modules/CommonTypes/MulticastDelegate.h
+	include/Modules/CommonTypes/Vector2D.h
+	include/Modules/ContextActions/ActionsManager.h
+	include/Modules/ContextActions/BaseMathAction.h
+	include/Modules/ContextActions/Expressions_Ma.h
+	include/Modules/ContextActions/Matrix_Ma.h
+	include/Modules/ContextActions/ShowDebugTree_Ma.h
+	include/Modules/CursorComponent/CursorComponent.h
+	include/Modules/Expressions/CustomTokenization.h
+	include/Modules/Expressions/ExpressionsComponent.h
+	include/Modules/Expressions/ExpressionsModule.h
+	include/Modules/MathDocument/CommandBindings.h
+	include/Modules/MathDocument/MathDocument.h
+	include/Modules/MathElementsV2/BracketsAdjustComponent.h
+	include/Modules/MathElementsV2/CompatibilityData.h
+	include/Modules/MathElementsV2/MathElementPath.h
+	include/Modules/MathElementsV2/MeIndexAdjustComponent.h
+	include/Modules/MathElementsV2/MeStepComponent.h
+	include/Modules/MathElementsV2/Me/MathElementBaseV2.h
+	include/Modules/MathElementsV2/Me/MeBracket.h
+	include/Modules/MathElementsV2/Me/MeCases.h
+	include/Modules/MathElementsV2/Me/MeCharacter.h
+	include/Modules/MathElementsV2/Me/MeComposite.h
+	include/Modules/MathElementsV2/Me/MeContainer.h
+	include/Modules/MathElementsV2/Me/MeCustomToken.h
+	include/Modules/MathElementsV2/Me/MeDocument.h
+	include/Modules/MathElementsV2/Me/MeFraction.h
+	include/Modules/MathElementsV2/Me/MeFromTo.h
+	include/Modules/MathElementsV2/Me/MeFunction.h
+	include/Modules/MathElementsV2/Me/MeHat.h
+	include/Modules/MathElementsV2/Me/MeIndex.h
+	include/Modules/MathElementsV2/Me/MeMatrix.h
+	include/Modules/MathElementsV2/Me/MeNewLine.h
+	include/Modules/MathElementsV2/Me/MeParameter.h
+	include/Modules/MathElementsV2/Me/MeSpecialSymbol.h
+	include/Modules/MathElementsV2/Me/MeTextBlock.h
+	include/Modules/Scripting/DllSimulator.h
+	include/Modules/Scripting/LibraryGenerator.h
+	include/Modules/Search/HighlightSameAsSelected.h
+	include/Modules/Visual/VisualBase.h
+	include/FunctionLibraries/MeDefinition.h
+	include/FunctionLibraries/ScriptingHelpers.h
+	include/FunctionLibraries/CommonHelpers.h
+	include/FunctionLibraries/ExpressionsLibrary.h
+	include/FunctionLibraries/ExpressionsLibraryExtra.h
+	include/FunctionLibraries/FileHelpers.h
+	include/FunctionLibraries/MathElementsHelpers.h
+	include/GlobalVariables.h
+	
+	src/Modules/ComponentBase.cpp
+	src/Modules/MainWindowModule.cpp
+	src/Modules/TypedObject.cpp
+	src/Modules/ActionHistory/ActionAddMe.cpp
+	src/Modules/ActionHistory/ActionBase.cpp
+	src/Modules/ActionHistory/ActionHistoryComponent.cpp
+	src/Modules/ActionHistory/ActionRemoveMe.cpp
+	src/Modules/ActionHistory/ActionReplaceMe.cpp
+	src/Modules/CommonTypes/Color.cpp
+	src/Modules/CommonTypes/MulticastDelegate.cpp
+	src/Modules/CommonTypes/Vector2D.cpp
+	src/Modules/ContextActions/ActionsManager.cpp
+	src/Modules/ContextActions/BaseMathAction.cpp
+	src/Modules/ContextActions/Expressions_Ma.cpp
+	src/Modules/ContextActions/Matrix_Ma.cpp
+	src/Modules/ContextActions/ShowDebugTree_Ma.cpp
+	src/Modules/CursorComponent/CursorComponent.cpp
+	src/Modules/Expressions/CustomTokenization.cpp
+	src/Modules/Expressions/ExpressionsComponent.cpp
+	src/Modules/Expressions/ExpressionsModule.cpp
+	src/Modules/MathDocument/CommandBindings.cpp
+	src/Modules/MathDocument/MathDocument.cpp
+	src/Modules/MathElementsV2/BracketsAdjustComponent.cpp
+	src/Modules/MathElementsV2/CompatibilityData.cpp
+	src/Modules/MathElementsV2/MathElementPath.cpp
+	src/Modules/MathElementsV2/MeIndexAdjustComponent.cpp
+	src/Modules/MathElementsV2/MeStepComponent.cpp
+	src/Modules/MathElementsV2/Me/MathElementBaseV2.cpp
+	src/Modules/MathElementsV2/Me/MeBracket.cpp
+	src/Modules/MathElementsV2/Me/MeCases.cpp
+	src/Modules/MathElementsV2/Me/MeCharacter.cpp
+	src/Modules/MathElementsV2/Me/MeComposite.cpp
+	src/Modules/MathElementsV2/Me/MeContainer.cpp
+	src/Modules/MathElementsV2/Me/MeCustomToken.cpp
+	src/Modules/MathElementsV2/Me/MeDocument.cpp
+	src/Modules/MathElementsV2/Me/MeFraction.cpp
+	src/Modules/MathElementsV2/Me/MeFromTo.cpp
+	src/Modules/MathElementsV2/Me/MeFunction.cpp
+	src/Modules/MathElementsV2/Me/MeHat.cpp
+	src/Modules/MathElementsV2/Me/MeIndex.cpp
+	src/Modules/MathElementsV2/Me/MeMatrix.cpp
+	src/Modules/MathElementsV2/Me/MeNewLine.cpp
+	src/Modules/MathElementsV2/Me/MeParameter.cpp
+	src/Modules/MathElementsV2/Me/MeSpecialSymbol.cpp
+	src/Modules/MathElementsV2/Me/MeTextBlock.cpp
+	src/Modules/Scripting/DllSimulator.cpp
+	src/Modules/Scripting/LibraryGenerator.cpp
+	src/Modules/Search/HighlightSameAsSelected.cpp
+	src/Modules/Visual/VisualBase.cpp
+	src/FunctionLibraries/MeDefinition.cpp
+	src/FunctionLibraries/ScriptingHelpers.cpp
+	src/FunctionLibraries/CommonHelpers.cpp
+	src/FunctionLibraries/ExpressionsLibrary.cpp
+	src/FunctionLibraries/ExpressionsLibraryExtra.cpp
+	src/FunctionLibraries/FileHelpers.cpp
+	src/FunctionLibraries/MathElementsHelpers.cpp
+
+
+)
+
+# Set include directories
+target_include_directories(TryAlgebraCore
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_link_libraries(TryAlgebraCore
+		PUBLIC
+		MyRTTI
+)
