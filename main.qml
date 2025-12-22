@@ -16,7 +16,7 @@ Item {
       focus: true
       Keys.onPressed: (event)=>
       {
-        renderer.onUpdateText();
+        renderer.onUpdateText(event.text);
       }
     }
 

@@ -52,6 +52,7 @@ public:
 	void SetDocumentContent(const std::vector<FGlyphData>& InDocumentContent);
 	FImageBuffer* Render();
 	bool HasContent();
+	int32_t GetGlyphAdvance(const FGlyphId& GlyphId);
 private:
 	std::vector<FGlyphData> DocumentContent;
 	std::map<FGlyphId, FGlyphData> Atlas;

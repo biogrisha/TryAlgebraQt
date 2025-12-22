@@ -13,9 +13,7 @@ public:
     MathDocumentItem();
 
 public slots:
-    void onUpdateText();
-
-public slots:
+    void onUpdateText(const QString& text);
     void sync();
     void onSceneGraphInvalidated();
 
@@ -26,5 +24,7 @@ private:
     void releaseResources() override;
 
     VulkanRendererPrivate* m_renderer = nullptr;
+    QString m_text;
+
 };
 

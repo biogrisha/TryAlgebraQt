@@ -47,7 +47,7 @@ public:
     ~VulkanRendererPrivate();
     void setViewportSize(const QSize& size) { m_viewportSize = size; }
     void setWindow(QQuickWindow* window) { m_window = window; }
-    void setText();
+    void setText(const QString& text);
 public slots:
     void beforeRendering();
     void mainPassRecordingStart();
@@ -195,13 +195,23 @@ VulkanRendererPrivate::~VulkanRendererPrivate()
     qDebug("released");
 }
 
-void VulkanRendererPrivate::setText()
+void VulkanRendererPrivate::setText(const QString& text)
 {
-    FGlyphData g;
-    g.GlyphId.Glyph = 'A';
-    g.GlyphId.Height = 30;
-    g.Pos = glm::vec2(30, 30);
-    m_documentRendering.SetDocumentContent({ g });
+    std::vector<FGlyphData> glyphs;
+    qint32 index = 0;
+    qint32 advance = 0;
+    for (QChar ch : text)
+    {
+        FGlyphData g;
+        g.GlyphId.Glyph = ch.unicode();
+        g.GlyphId.Height = 30;
+        g.Pos = glm::vec2(advance, 30);
+        glyphs.push_back(g);
+        advance += m_documentRendering.GetGlyphAdvance(g.GlyphId);
+        index++;
+    }
+    
+    m_documentRendering.SetDocumentContent({ glyphs });
 }
 
 void MathDocumentItem::sync()
@@ -218,6 +228,9 @@ void MathDocumentItem::sync()
     //set viewport size
     m_renderer->setViewportSize(window()->size() * window()->devicePixelRatio());
     m_renderer->setWindow(window());
+
+    if(!m_text.isEmpty())
+        m_renderer->setText(m_text);
 }
 
 void VulkanRendererPrivate::beforeRendering()
@@ -817,9 +830,9 @@ void VulkanRendererPrivate::CreatePipeline(VkRenderPass rp)
     m_devFuncs->vkDestroyShaderModule(m_dev, m_shaderModule, nullptr);
 }
 
-void MathDocumentItem::onUpdateText()
+void MathDocumentItem::onUpdateText(const QString& text)
 {
-    m_renderer->setText();
+    m_text += text;
     window()->update();
 }
 #include "PixelDataRenderer.moc"

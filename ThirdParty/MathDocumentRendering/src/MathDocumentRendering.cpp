@@ -1,5 +1,6 @@
 ﻿#include "MathDocumentRendering.h"
 #include "MathDocumentRendering.h"
+#include "MathDocumentRendering.h"
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 #include <iostream>
@@ -55,7 +56,7 @@ void FMathDocumentRendering::SetDocumentExtent(const VkExtent2D& InExtent)
 
 FGlyphRenderData FMathDocumentRendering::LoadGlyph(const FGlyphData& GlyphData)
 {
-	//Set font size
+	//Setting font size
 	FGlyphRenderData Result;
 	auto error = FT_Set_Char_Size(
 		face,    /* handle to face object         */
@@ -63,6 +64,7 @@ FGlyphRenderData FMathDocumentRendering::LoadGlyph(const FGlyphData& GlyphData)
 		GlyphData.GlyphId.Height * DocumentScale * 64,   /* char_height in 1/64 of points */
 		dpiX,     /* horizontal device resolution  */
 		dpiY);
+
 	//convert wchar into glyph index
 	FT_ULong charcode = int(GlyphData.GlyphId.Glyph);
 	auto glyph_index = FT_Get_Char_Index(face, charcode);
@@ -123,21 +125,25 @@ FGlyphRenderData FMathDocumentRendering::LoadGlyph(const FGlyphData& GlyphData)
 		// TODO: handle cubic Bézier
 		return 0;
 		};
+
 	funcs.shift = 0;
 	funcs.delta = 0;
 	FT_Outline_Decompose(&face->glyph->outline, &funcs, &data);
-	//Remove last curve 
+
+	//Remove last curve since it is redundant due to how we decompose curves
 	Result.Outline.pop_back();
 
 	//Cache height and width of glyphs
-	Result.HeightInPixels = face->glyph->metrics.height / 64;
+	uint32_t Height = face->bbox.yMax - face->bbox.yMin;
+	Result.HeightInPixels = Height / 64;
 	Result.WidthInPixels = face->glyph->advance.x / 64;
+
 	//Cache a and b of discriminant 
 	for (auto& Curve : Result.Outline)
 	{
 		for (auto& Point : Curve.points)
 		{
-			Point.y = face->glyph->metrics.height - Point.y;
+			Point.y = Height - Point.y + face->bbox.yMin;
 		}
 		std::swap(Curve.points[0], Curve.points[2]);
 		Curve.a = Curve.points[0].y - 2 * Curve.points[1].y + Curve.points[2].y;
@@ -148,6 +154,11 @@ FGlyphRenderData FMathDocumentRendering::LoadGlyph(const FGlyphData& GlyphData)
 
 void FMathDocumentRendering::SetDocumentContent(const std::vector<FGlyphData>& InDocumentContent)
 {
+	if (InDocumentContent.empty())
+	{
+		return;
+	}
+
 	Atlas.clear();
 	DocumentContent = InDocumentContent;
 	//for each glyph on the page
@@ -237,4 +248,26 @@ FImageBuffer* FMathDocumentRendering::Render()
 bool FMathDocumentRendering::HasContent()
 {
 	return !DocumentContent.empty();
+}
+
+int32_t FMathDocumentRendering::GetGlyphAdvance(const FGlyphId& GlyphId)
+{
+	auto error = FT_Set_Char_Size(
+		face,    /* handle to face object         */
+		0,       /* char_width in 1/64 of points  */
+		GlyphId.Height* DocumentScale * 64,   /* char_height in 1/64 of points */
+		dpiX,     /* horizontal device resolution  */
+		dpiY);
+
+	//convert wchar into glyph index
+	FT_ULong charcode = int(GlyphId.Glyph);
+	auto glyph_index = FT_Get_Char_Index(face, charcode);
+
+	//load glyph
+	error = FT_Load_Glyph(
+		face,          /* handle to face object */
+		glyph_index,   /* glyph index           */
+		0);
+
+	return face->glyph->advance.x / 64;
 }

@@ -44,7 +44,7 @@ void FGlyphAtlasRendering::Init(FRendering* InRendering)
 
 void FGlyphAtlasRendering::InitPLine()
 {
-	PLine = Rendering->AddPipeline(P_1, &GlyphAtlasInputLayout, "D:/Projects/VulkanTutorial/Shader/DrawAtlas.spv");
+	PLine = Rendering->AddPipeline(P_1, &GlyphAtlasInputLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/DrawAtlas.spv");
 }
 
 void FGlyphAtlasRendering::SetExtent(const VkExtent2D& InExtent)
