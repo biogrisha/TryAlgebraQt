@@ -21,6 +21,8 @@ qt_add_executable(TryAlgebra
     main.cpp
     PixelDataRenderer.cpp
     PixelDataRenderer.h
+    MathDocument.h
+    MathDocument.cpp
 )
 
 qt_add_qml_module(TryAlgebra

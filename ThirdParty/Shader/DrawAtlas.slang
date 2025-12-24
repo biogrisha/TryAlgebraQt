@@ -105,5 +105,5 @@ float4 fragMain(VSOutput vertIn) : SV_TARGET {
         }
     }
     float color = count;
-    return float4(color, color,float(vertIn.CurvesCount) / 50.f,1);
+    return float4(color, color,color,clamp(color, 0,1));
 }

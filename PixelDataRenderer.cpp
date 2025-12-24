@@ -526,8 +526,11 @@ void VulkanRendererPrivate::init(int framesInFlight)
     m_devFuncs->vkGetDeviceQueue(m_dev, m_graphicsFamily, 0, &m_graphicsQueue);
 
     //Initializing math renderer
-    FVulkanStatic::Context = std::make_unique<FVulkanContext>();
-    FVulkanStatic::Context->Init(inst->vkInstance(), m_physDev);
+    if(!FVulkanStatic::Context.get())
+    {
+        FVulkanStatic::Context = std::make_unique<FVulkanContext>();
+        FVulkanStatic::Context->Init(inst->vkInstance(), m_physDev);
+    }
     m_documentRendering.SetDocumentExtent({ 1000 , 1000 });
     m_documentRendering.Init();
 }
