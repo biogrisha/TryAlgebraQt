@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-    //system("cmd /c \"cd /d D:\\Projects\\TryAlgebraQt\\TryAlgebraQt\\ThirdParty\\Shader && compile.bat\"");
+    system("cmd /c \"cd /d D:\\Projects\\TryAlgebraQt\\TryAlgebraQt\\ThirdParty\\Shader && compile.bat\"");
     QGuiApplication app(argc, argv);
 
     QVulkanInstance inst;

@@ -15,6 +15,7 @@ Item {
         anchors.right: parent.right 
         anchors.bottom: parent.bottom 
         anchors.topMargin: parent.height / 2 
+        anchors.leftMargin: parent.width / 2 
         anchors.top: parent.top
         MathDocument {
             anchors.fill: parent

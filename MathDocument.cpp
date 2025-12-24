@@ -73,6 +73,11 @@ private:
     uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
     void prepareShader();
     void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+    void createCommandPool();
+    VkCommandBuffer BeginSingleTimeCommands();
+    void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+    void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+    void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
     QQuickItem* m_item;
     QQuickWindow* m_window;
@@ -127,6 +132,9 @@ private:
     VertexLayoutPresent m_vertexLayoutPresent;
 
     VkShaderModule m_shaderModule = VK_NULL_HANDLE;
+    uint32_t m_graphicsFamily = 0;
+    VkCommandPool m_commandPool;
+    VkQueue m_graphicsQueue;
 };
 
 MathDocument::MathDocument()
@@ -200,6 +208,7 @@ CustomTextureNodePrivate::CustomTextureNodePrivate(QQuickItem* item)
 
 CustomTextureNodePrivate::~CustomTextureNodePrivate()
 {
+    m_devFuncs->vkDestroyCommandPool(m_dev, m_commandPool, nullptr);
     m_devFuncs->vkDestroyBuffer(m_dev, m_vbuf, nullptr);
     m_devFuncs->vkFreeMemory(m_dev, m_vbufMem, nullptr);
 
@@ -421,6 +430,12 @@ bool CustomTextureNodePrivate::initialize()
     m_documentRendering.SetDocumentExtent({ 1000 , 1000 });
     m_documentRendering.Init();
 
+    FGlyphData glyph;
+    glyph.GlyphId.Glyph = 'A';
+    glyph.GlyphId.Height = 30;
+    glyph.Pos = { 30, 30 };
+    m_documentRendering.SetDocumentContent({ glyph });
+
     m_devFuncs = inst->deviceFunctions(m_dev);
     m_funcs = inst->functions();
     Q_ASSERT(m_devFuncs && m_funcs);
@@ -631,6 +646,30 @@ bool CustomTextureNodePrivate::initialize()
     imageInfo.sampler = m_textureSampler;
     writeInfo.pImageInfo = &imageInfo;
     m_devFuncs->vkUpdateDescriptorSets(m_dev, 1, &writeInfo, 0, nullptr);
+
+    //Find graphics queue family index
+    uint32_t queueFamilyCount = 0;
+    m_funcs->vkGetPhysicalDeviceQueueFamilyProperties(m_physDev, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    m_funcs->vkGetPhysicalDeviceQueueFamilyProperties(m_physDev, &queueFamilyCount, queueFamilies.data());
+
+    int i = 0;
+    for (const auto& queueFamily : queueFamilies)
+    {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
+            m_graphicsFamily = i;
+            break;
+        }
+        i++;
+    }
+
+    //creating graphics command pool
+    createCommandPool();
+    //caching graphics queue
+    m_devFuncs->vkGetDeviceQueue(m_dev, m_graphicsFamily, 0, &m_graphicsQueue);
+
     return true;
 }
 
@@ -674,6 +713,29 @@ void CustomTextureNodePrivate::render()
         return;
 
     VkResult err = VK_SUCCESS;
+
+    //render math document
+    auto RenderedDocument = m_documentRendering.Render();
+    auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
+    void* RenderedDocData = RenderedDocBuffer->MapData();
+
+    //Copy buffer into image
+    VkDeviceSize imageSize = 1000 * 1000 * 4;
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+    void* data;
+    m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
+    memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
+    RenderedDocBuffer->UnmapData();
+    m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
+    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    copyBufferToImage(stagingBuffer, m_textureImage, static_cast<uint32_t>(1000), static_cast<uint32_t>(1000));
+    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
+    m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
 
     uint currentFrameSlot = m_window->graphicsStateInfo().currentFrameSlot;
 
@@ -856,6 +918,122 @@ void CustomTextureNodePrivate::CreateBuffer(VkDeviceSize size, VkBufferUsageFlag
     }
 
     m_devFuncs->vkBindBufferMemory(m_dev, buffer, bufferMemory, 0);
+}
+
+void CustomTextureNodePrivate::createCommandPool()
+{
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    poolInfo.queueFamilyIndex = m_graphicsFamily;
+
+    if (m_devFuncs->vkCreateCommandPool(m_dev, &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create graphics command pool!");
+    }
+}
+
+VkCommandBuffer CustomTextureNodePrivate::BeginSingleTimeCommands() {
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = m_commandPool;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    m_devFuncs->vkAllocateCommandBuffers(m_dev, &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    m_devFuncs->vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    return commandBuffer;
+}
+
+void CustomTextureNodePrivate::EndSingleTimeCommands(VkCommandBuffer commandBuffer) {
+    m_devFuncs->vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    m_devFuncs->vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+    m_devFuncs->vkQueueWaitIdle(m_graphicsQueue);
+
+    m_devFuncs->vkFreeCommandBuffers(m_dev, m_commandPool, 1, &commandBuffer);
+}
+
+void CustomTextureNodePrivate::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+{
+    auto CommandBuffer = BeginSingleTimeCommands();
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = oldLayout;
+    barrier.newLayout = newLayout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+
+    VkPipelineStageFlags sourceStage;
+    VkPipelineStageFlags destinationStage;
+
+    if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else {
+        throw std::invalid_argument("unsupported layout transition!");
+    }
+
+    m_devFuncs->vkCmdPipelineBarrier(
+        CommandBuffer,
+        sourceStage, destinationStage,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+    );
+    EndSingleTimeCommands(CommandBuffer);
+}
+
+void CustomTextureNodePrivate::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+{
+    auto CommandBuffer = BeginSingleTimeCommands();
+    VkBufferImageCopy region{};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = 0;
+    region.imageSubresource.layerCount = 1;
+    region.imageOffset = { 0, 0, 0 };
+    region.imageExtent = {
+    width,
+    height,
+    1
+    };
+
+    m_devFuncs->vkCmdCopyBufferToImage(CommandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+    EndSingleTimeCommands(CommandBuffer);
 }
 
 #include "MathDocument.moc"

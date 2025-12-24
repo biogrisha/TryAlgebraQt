@@ -1,7 +1,4 @@
 #include "Buffer.h"
-#include "Buffer.h"
-#include "Buffer.h"
-#include "Buffer.h"
 #include <VulkanHelpers.h>
 #include <VulkanContext.h>
 #include <boost/signals2.hpp>

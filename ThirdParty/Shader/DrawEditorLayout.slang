@@ -24,6 +24,6 @@ layout (set = 0, binding = 0) uniform Sampler2D texSampler;
 
 [shader("fragment")]
 vec4 fragMain(VSOutput vertIn) : SV_TARGET {
-    //return texture(texSampler, vertIn.fragTexCoord);
-    return vec4(vertIn.fragTexCoord, 1,1);
+    return texture(texSampler, vertIn.fragTexCoord);
+    //return vec4(vertIn.fragTexCoord, 1,1);
 }
