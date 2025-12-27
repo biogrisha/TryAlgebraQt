@@ -93,8 +93,6 @@ private:
 
     bool m_initialized = false;
 
-    float m_t;
-
     VkPhysicalDevice m_physDev = VK_NULL_HANDLE;
     VkDevice m_dev = VK_NULL_HANDLE;
     QVulkanDeviceFunctions* m_devFuncs = nullptr;
@@ -183,18 +181,6 @@ void MathDocument::geometryChange(const QRectF& newGeometry, const QRectF& oldGe
     if (newGeometry.size() != oldGeometry.size())
         update();
 }
-
-void MathDocument::setT(qreal t)
-{
-    if (t == m_t)
-        return;
-
-    m_t = t;
-    emit tChanged();
-
-    update();
-}
-
 CustomTextureNodePrivate::CustomTextureNodePrivate(QQuickItem* item)
     : m_item(item)
 {
@@ -703,8 +689,6 @@ void CustomTextureNodePrivate::sync()
         setTexture(wrapper);
         Q_ASSERT(wrapper->nativeInterface<QNativeInterface::QSGVulkanTexture>()->nativeImage() == m_texture);
     }
-
-    m_t = float(static_cast<MathDocument*>(m_item)->t());
 }
 
 void CustomTextureNodePrivate::render()

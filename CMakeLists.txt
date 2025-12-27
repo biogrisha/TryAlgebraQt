@@ -9,31 +9,32 @@ project(TryAlgebraProj LANGUAGES CXX)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
 find_package(glm REQUIRED)
 
+qt_standard_project_setup(REQUIRES 6.5)
+
 add_subdirectory(ThirdParty/VulkanFramework)
 add_subdirectory(ThirdParty/MyRTTI)
 add_subdirectory(ThirdParty/MathDocumentRendering)
 add_subdirectory(ThirdParty/MathLibrary)
 add_subdirectory(ThirdParty/TryAlgebraCore)
+add_subdirectory(Application)
 
-qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(TryAlgebra
     main.cpp
-    PixelDataRenderer.cpp
-    PixelDataRenderer.h
-    MathDocument.h
-    MathDocument.cpp
 )
 
 qt_add_qml_module(TryAlgebra
     URI TryAlgebra
     QML_FILES
         Main.qml
+    SOURCES 
+        MathDocument.h
+        MathDocument.cpp
     RESOURCES
         ThirdParty/Shader/DrawEditorLayout.spv
-    RESOURCE_PREFIX /tryAlgebra
     NO_RESOURCE_TARGET_PATH
 )
+
 
 target_link_libraries(TryAlgebra PRIVATE
     Qt6::Core
@@ -43,6 +44,7 @@ target_link_libraries(TryAlgebra PRIVATE
     glm::glm
     VulkanFramework
     MathDocumentRendering
+    Applicationplugin
 )
 
 
