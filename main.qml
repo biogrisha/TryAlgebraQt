@@ -59,6 +59,7 @@ ApplicationWindow {
         Loader {
             id: documentLoader
             anchors.fill: parent
+            focus: true
         }
     }
 

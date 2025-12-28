@@ -1,6 +1,6 @@
 #pragma once
-#include "Modules/MainWindowModule.h"
 
 namespace AppGlobal {
-	inline FTAMainModule* mainModule = nullptr;
+	inline class FTAMainModule* mainModule = nullptr;
+	inline class Application* application = nullptr;
 }

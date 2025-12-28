@@ -5,12 +5,7 @@
 #include <Pipeline.h>
 #include <DescriptorManager.h>
 #include <Rendering.h>
-struct FOutlineCurvePoints
-{
-	glm::vec2 points[3];
-	float a = 0;
-	float b = 0;
-};
+#include <FreeTypeWrap.h>
 
 struct FSimpleVertex
 {

@@ -18,6 +18,8 @@
 #include <glm/glm.hpp>
 #include <VulkanContext.h>
 #include <MathDocumentRendering.h>
+#include <Application.h>
+#include <AppGlobal.h>
 
 //Screen rectangle vertices
 struct Vertex
@@ -56,7 +58,7 @@ public:
     QSGTexture* texture() const override;
 
     void sync();
-
+    void moveText(std::vector<FGlyphData>&& text);
 private slots:
     void render();
 
@@ -116,7 +118,7 @@ private:
     {
         ~ContextDestroyer()
         {
-            FVulkanStatic::Context.reset();
+            FVulkanStatic::UnsubscribeFromContext();
         }
     } m_contextDestroyer;
 
@@ -133,11 +135,28 @@ private:
     uint32_t m_graphicsFamily = 0;
     VkCommandPool m_commandPool;
     VkQueue m_graphicsQueue;
+    std::vector<FGlyphData> m_text;
 };
 
 MathDocument::MathDocument()
 {
     setFlag(ItemHasContents, true);
+}
+
+void MathDocument::setText(const QString& text)
+{
+    std::vector<FGlyphData> glyphs;
+    int32_t i = 0;
+    for (auto& ch : text)
+    {
+        auto& g = glyphs.emplace_back();
+        g.GlyphId.Glyph = ch.unicode();
+        g.GlyphId.Height = 20;
+        g.Pos = { i * 30, 30 };
+        i++;
+    }
+    m_node->moveText(std::move(glyphs));
+    update();
 }
 
 void MathDocument::invalidateSceneGraph() // called on the render thread when the scenegraph is invalidated
@@ -152,7 +171,6 @@ void MathDocument::releaseResources() // called on the gui thread if the item is
 
 QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
 {
-
     CustomTextureNodePrivate* n = static_cast<CustomTextureNodePrivate*>(node);
 
     if (!n && (width() <= 0 || height() <= 0))
@@ -407,14 +425,10 @@ bool CustomTextureNodePrivate::initialize()
     Q_ASSERT(m_physDev && m_dev);
 
     //Initializing math renderer
-    if (!FVulkanStatic::Context.get())
-    {
-        FVulkanStatic::Context = std::make_unique<FVulkanContext>();
-        FVulkanStatic::Context->Init(inst->vkInstance(), m_physDev);
-    }
+    FVulkanStatic::SubscribeToContext(inst->vkInstance(), m_physDev);
 
     m_documentRendering.SetDocumentExtent({ 1000 , 1000 });
-    m_documentRendering.Init();
+    m_documentRendering.Init(AppGlobal::application->getFreeTypeWrap());
 
     FGlyphData glyph;
     glyph.GlyphId.Glyph = 'A';
@@ -689,6 +703,17 @@ void CustomTextureNodePrivate::sync()
         setTexture(wrapper);
         Q_ASSERT(wrapper->nativeInterface<QNativeInterface::QSGVulkanTexture>()->nativeImage() == m_texture);
     }
+    if (!m_text.empty())
+    {
+        m_documentRendering.SetDocumentContent(m_text);
+        m_text.clear();
+    }
+}
+
+void CustomTextureNodePrivate::moveText(std::vector<FGlyphData>&& text)
+{
+    m_text = std::move(text);
+    text.clear();
 }
 
 void CustomTextureNodePrivate::render()
@@ -866,7 +891,7 @@ uint32_t CustomTextureNodePrivate::FindMemoryType(uint32_t typeFilter, VkMemoryP
 
 void CustomTextureNodePrivate::prepareShader()
 {
-    QString filename = QLatin1String(":/tryAlgebra/ThirdParty/Shader/DrawEditorLayout.spv");
+    QString filename = QLatin1String(":/qt/qml/com/Application/Shaders/DrawEditorLayout.spv");
 
     QFile f(filename);
     if (!f.open(QIODevice::ReadOnly))

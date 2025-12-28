@@ -1,7 +1,11 @@
 #include "MenuControl.h"
-#include "AppGlobal.h"
 #include "Modules/MathElementsV2/CompatibilityData.h"
 #include "FunctionLibraries/FileHelpers.h"
+#include "MathEditor/CursorComponentGenerator.h"
+#include "MathEditor/MathElementGenerator.h"
+#include "Application.h"
+#include "Modules/MainWindowModule.h"
+#include "AppGlobal.h"
 
 MenuControl::MenuControl(QObject* parent)
 	: QObject(parent)
@@ -10,8 +14,7 @@ MenuControl::MenuControl(QObject* parent)
 
 void MenuControl::openDocument(const QUrl& url)
 {	
-	std::shared_ptr<class FTACompatibilityData> compatibilityData;
 	std::weak_ptr<FTAMathDocumentInfo> docInfo;
-	AppGlobal::mainModule->OpenDocument(url.toLocalFile().toStdWString(), docInfo, compatibilityData);
+	AppGlobal::mainModule->OpenDocument(url.toLocalFile().toStdWString(), docInfo, AppGlobal::application->m_compatibilityData);
 }
 

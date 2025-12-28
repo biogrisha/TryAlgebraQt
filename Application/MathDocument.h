@@ -15,6 +15,7 @@ class MathDocument : public QQuickItem
 
 public:
     MathDocument();
+    void setText(const QString& text);
 protected:
     QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) override;
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;

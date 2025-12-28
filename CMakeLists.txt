@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(TryAlgebraProj LANGUAGES CXX)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
-find_package(glm REQUIRED)
 
 qt_standard_project_setup(REQUIRES 6.5)
 
@@ -27,11 +26,6 @@ qt_add_qml_module(TryAlgebra
     URI TryAlgebra
     QML_FILES
         Main.qml
-    SOURCES 
-        MathDocument.h
-        MathDocument.cpp
-    RESOURCES
-        ThirdParty/Shader/DrawEditorLayout.spv
     NO_RESOURCE_TARGET_PATH
 )
 
@@ -41,9 +35,6 @@ target_link_libraries(TryAlgebra PRIVATE
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
-    glm::glm
-    VulkanFramework
-    MathDocumentRendering
     Applicationplugin
 )
 

@@ -9,16 +9,10 @@ FVulkanContext::~FVulkanContext()
 	Device.clear();
 	PhysicalDevice.release();
 	Instance.release();
-	glfwTerminate();
 }
 
 void FVulkanContext::Init(VkInstance InInstance, VkPhysicalDevice InPhysicalDevice)
 {
-	auto result = glfwInit();
-	if (result != GLFW_TRUE)
-	{
-		throw std::runtime_error("failed to init glfw!");
-	}
 	Instance = vk::raii::Instance(Context, InInstance);
 	PhysicalDevice = vk::raii::PhysicalDevice(Instance, InPhysicalDevice);
 	CreateLogicalDevice();
@@ -96,6 +90,25 @@ void FVulkanContext::CreateCommandPool()
 	poolInfo.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
 	poolInfo.queueFamilyIndex = GraphicsQueueInd;
 	CommandPool = vk::raii::CommandPool(Device, poolInfo);
+}
+
+void FVulkanStatic::SubscribeToContext(VkInstance InInstance, VkPhysicalDevice InPhysicalDevice)
+{
+	if (!Context.get())
+	{
+		Context = std::make_unique<FVulkanContext>();
+		Context->Init(InInstance, InPhysicalDevice);
+		UserCount++;
+	}
+}
+
+void FVulkanStatic::UnsubscribeFromContext()
+{
+	UserCount--;
+	if (UserCount <= 0)
+	{
+		Context.reset();
+	}
 }
 
 

@@ -6,7 +6,6 @@
 #include <vulkan/vk_platform.h>
 
 #define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include "VmaUsage.h"
 #include <algorithm>
 #include <vector>
@@ -49,5 +48,9 @@ public:
 class FVulkanStatic
 {
 public:
+	static void SubscribeToContext(VkInstance InInstance, VkPhysicalDevice InPhysicalDevice);
+	static void UnsubscribeFromContext();
 	static inline std::shared_ptr<FVulkanContext> Context = nullptr;
+private:
+	static inline uint32_t UserCount = 0;
 };
