@@ -1,20 +1,24 @@
 #pragma once
 
 #include <QObject>
-#include "MathDocument.h"
+#include "../MathDocument.h"
+class FTAMathDocumentInfo;
+
 class DocumentControl  : public QObject
 {
 	Q_OBJECT
 	QML_ELEMENT
 public:
 	DocumentControl(QObject *parent);
-	DocumentControl();
+	DocumentControl() = default;
 	~DocumentControl();
+	void setDocInfo(FTAMathDocumentInfo* docInfo);
 
 public slots:
 	void bindMathDocumentItem(MathDocument* mathDocument);
 
 private:
 	MathDocument* m_mathDocument = nullptr;
+	FTAMathDocumentInfo* m_docInfo;
 };
 

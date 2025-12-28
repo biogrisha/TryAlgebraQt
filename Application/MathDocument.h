@@ -27,6 +27,7 @@ private:
     void releaseResources() override;
 
     CustomTextureNodePrivate* m_node = nullptr;
+    QString m_text;
 };
 
 #endif // VULKANTEXTUREIMPORT_H

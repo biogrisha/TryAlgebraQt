@@ -1,4 +1,6 @@
 #include "Application.h"
+#include "Application.h"
+#include "Application.h"
 #include <QQuickWindow>
 #include <QVulkanInstance>
 #include <Modules/MainWindowModule.h>
@@ -37,18 +39,21 @@ Application::Application(QObject *parent)
 
 }
 
-void Application::setMathDocument(QQuickItem* doc)
+DocumentControl* Application::getCurrentDocument()
 {
-	if (auto mathDoc = qobject_cast<MathDocument*>(doc))
-	{
-		mathDoc->setText("hello");
-	}
+	return m_documentControl;
 }
+
 FFreeTypeWrap* Application::getFreeTypeWrap()
 {
 	return m_freeTypeWrap;
 }
-MenuControl* Application::GetMenu()
+void Application::setCurrentDocument(DocumentControl* documentControl)
+{
+	m_documentControl = documentControl;
+}
+
+MenuControl* Application::getMenu()
 {
 	return m_menuControl;
 }

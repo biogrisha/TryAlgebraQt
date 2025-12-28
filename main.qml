@@ -11,7 +11,7 @@ import QtQuick.Dialogs
 ApplicationWindow {
     Component.onCompleted: 
     { 
-        menuControl = UserApplication.GetMenu()
+        menuControl = UserApplication.getMenu()
     }
 
     id: window
@@ -28,7 +28,6 @@ ApplicationWindow {
                 onTriggered: {
                     fileDialog.reason = "openFile"
                     fileDialog.open()
-                    documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
                 }
             }
         }
@@ -42,10 +41,12 @@ ApplicationWindow {
         {
             switch (reason) { 
                 case "openFile":
-                menuControl.openDocument(fileDialog.selectedFile)
-                break 
+                    menuControl.openDocument(fileDialog.selectedFile)
+                    documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
+                    documentLoader.item.setDocumentControl(UserApplication.getCurrentDocument())
+                    break 
                 case "saveFile":
-                console.log("Save file") 
+                    console.log("Save file")
                 break 
             }
         }

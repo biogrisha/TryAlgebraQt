@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include "Controls/MenuControl.h"
+#include "Controls/DocumentControl.h"
 #include "MathDocument.h"
 class FTAMainModule;
 class FFreeTypeWrap;
@@ -15,12 +16,14 @@ class Application  : public QObject
 public:
 	~Application();
 	Application(QObject *parent);
-public slots:
-	MenuControl* GetMenu();
-	void setMathDocument(QQuickItem* doc);
+	void setCurrentDocument(DocumentControl* documentControl);
 	FFreeTypeWrap* getFreeTypeWrap();
+public slots:
+	MenuControl* getMenu();
+	DocumentControl* getCurrentDocument();
 private:
 	MenuControl* m_menuControl = nullptr;
+	DocumentControl* m_documentControl = nullptr;
 	FTAMainModule* m_mainModule = nullptr;
 	FFreeTypeWrap* m_freeTypeWrap = nullptr;
 public:

@@ -126,7 +126,7 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	return Result;
 }
 
-inline int32_t FFreeTypeWrap::GetGlyphAdvance(const FGlyphId& GlyphId)
+int32_t FFreeTypeWrap::GetGlyphAdvance(const FGlyphId& GlyphId)
 {
 	auto error = FT_Set_Char_Size(
 		face,    /* handle to face object         */

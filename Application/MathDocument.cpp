@@ -19,6 +19,7 @@
 #include <VulkanContext.h>
 #include <MathDocumentRendering.h>
 #include <Application.h>
+#include <FreeTypeWrap.h>
 #include <AppGlobal.h>
 
 //Screen rectangle vertices
@@ -145,17 +146,7 @@ MathDocument::MathDocument()
 
 void MathDocument::setText(const QString& text)
 {
-    std::vector<FGlyphData> glyphs;
-    int32_t i = 0;
-    for (auto& ch : text)
-    {
-        auto& g = glyphs.emplace_back();
-        g.GlyphId.Glyph = ch.unicode();
-        g.GlyphId.Height = 20;
-        g.Pos = { i * 30, 30 };
-        i++;
-    }
-    m_node->moveText(std::move(glyphs));
+    m_text = text;
     update();
 }
 
@@ -179,6 +170,23 @@ QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
     if (!n) {
         m_node = new CustomTextureNodePrivate(this);
         n = m_node;
+    }
+    //set text
+    if(!m_text.isEmpty())
+    {
+        auto ftWrap = AppGlobal::application->getFreeTypeWrap();
+        std::vector<FGlyphData> glyphs;
+        int32_t offset = 0;
+        for (auto& ch : m_text)
+        {
+            auto& g = glyphs.emplace_back();
+            g.GlyphId.Glyph = ch.unicode();
+            g.GlyphId.Height = 20;
+            g.Pos = { offset, 30 };
+            offset += ftWrap->GetGlyphAdvance(g.GlyphId);
+        }
+        m_node->moveText(std::move(glyphs));
+        m_text.clear();
     }
 
     m_node->sync();
