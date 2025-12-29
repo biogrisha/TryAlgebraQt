@@ -43,7 +43,7 @@ ApplicationWindow {
                 case "openFile":
                     menuControl.openDocument(fileDialog.selectedFile)
                     documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
-                    //documentLoader.item.setDocumentControl(UserApplication.getCurrentDocument())
+                    documentLoader.item.setDocumentControl(UserApplication.getCurrentDocument())
                     break 
                 case "saveFile":
                     console.log("Save file")

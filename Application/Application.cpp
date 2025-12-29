@@ -8,6 +8,8 @@
 #include "MathEditor/MathElementGenerator.h"
 #include "FreeTypeWrap.h"
 #include "VulkanContext.h"
+#include "Controls/MenuControl.h"
+#include "Controls/DocumentControl.h"
 
 Application::~Application()
 {
@@ -33,19 +35,19 @@ Application::Application(QObject *parent)
 
 }
 
-//DocumentControl* Application::getCurrentDocument()
-//{
-//	return m_documentControl;
-//}
+DocumentControl* Application::getCurrentDocument()
+{
+	return m_documentControl;
+}
 
 FFreeTypeWrap* Application::getFreeTypeWrap()
 {
 	return m_freeTypeWrap;
 }
-//void Application::setCurrentDocument(DocumentControl* documentControl)
-//{
-//	m_documentControl = documentControl;
-//}
+void Application::setCurrentDocument(DocumentControl* documentControl)
+{
+	m_documentControl = documentControl;
+}
 
 MenuControl* Application::getMenu()
 {

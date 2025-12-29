@@ -4,7 +4,7 @@ import com.Application
 Rectangle {
     width: 200
     height: 100
-    //property DocumentControl m_docControl: null
+    property DocumentControl m_docControl: null
     MathDocument {
         id:mathDoc
         anchors.fill: parent
@@ -16,7 +16,7 @@ Rectangle {
 
     function setDocumentControl(docControl) 
     { 
-        //m_docControl = docControl
-        //m_docControl.bindMathDocumentItem(mathDoc)
+        m_docControl = docControl
+        m_docControl.bindMathDocumentItem(mathDoc)
     }
 }

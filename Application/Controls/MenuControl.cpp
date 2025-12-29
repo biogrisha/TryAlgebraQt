@@ -6,6 +6,7 @@
 #include "Application.h"
 #include "Modules/MainWindowModule.h"
 #include "AppGlobal.h"
+#include "DocumentControl.h"
 
 MenuControl::MenuControl(QObject* parent)
 	: QObject(parent)
@@ -20,8 +21,8 @@ void MenuControl::openDocument(const QUrl& url)
 	compatibilityData->MeGenerator = std::make_shared<MathElementGeneratorQt>();
 	AppGlobal::mainModule->OpenDocument(url.toLocalFile().toStdWString(), docInfo, compatibilityData);
 	
-	//auto documentControl = new DocumentControl(AppGlobal::application);
-	//documentControl->setDocInfo(docInfo);
-	//AppGlobal::application->setCurrentDocument(documentControl);
+	auto documentControl = new DocumentControl(AppGlobal::application);
+	documentControl->setDocInfo(docInfo);
+	AppGlobal::application->setCurrentDocument(documentControl);
 }
 

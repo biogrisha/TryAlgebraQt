@@ -13,8 +13,8 @@ void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
 	m_mathDocument->setText("helloworld");
 }
 
-void DocumentControl::setDocInfo(FTAMathDocumentInfo* docInfo)
+void DocumentControl::setDocInfo(const std::weak_ptr<FTAMathDocumentInfo>& docInfo)
 {
-	//m_docInfo = docInfo;
+	m_docInfo = docInfo;
 }
 
