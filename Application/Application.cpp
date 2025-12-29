@@ -1,6 +1,4 @@
 #include "Application.h"
-#include "Application.h"
-#include "Application.h"
 #include <QQuickWindow>
 #include <QVulkanInstance>
 #include <Modules/MainWindowModule.h>
@@ -33,25 +31,21 @@ Application::Application(QObject *parent)
 	qreal logicalDpiY = screen->logicalDotsPerInchY();
 	m_freeTypeWrap->Init(logicalDpiX, logicalDpiY);
 
-	m_compatibilityData = FTACompatibilityData::MakeTypedShared();
-	m_compatibilityData->CursorComponentGenerator = std::make_shared<CursorComponentGeneratorQt>();
-	m_compatibilityData->MeGenerator = std::make_shared<MathElementGeneratorQt>();
-
 }
 
-DocumentControl* Application::getCurrentDocument()
-{
-	return m_documentControl;
-}
+//DocumentControl* Application::getCurrentDocument()
+//{
+//	return m_documentControl;
+//}
 
 FFreeTypeWrap* Application::getFreeTypeWrap()
 {
 	return m_freeTypeWrap;
 }
-void Application::setCurrentDocument(DocumentControl* documentControl)
-{
-	m_documentControl = documentControl;
-}
+//void Application::setCurrentDocument(DocumentControl* documentControl)
+//{
+//	m_documentControl = documentControl;
+//}
 
 MenuControl* Application::getMenu()
 {

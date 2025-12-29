@@ -126,7 +126,7 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	return Result;
 }
 
-int32_t FFreeTypeWrap::GetGlyphAdvance(const FGlyphId& GlyphId)
+glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
 {
 	auto error = FT_Set_Char_Size(
 		face,    /* handle to face object         */
@@ -145,5 +145,10 @@ int32_t FFreeTypeWrap::GetGlyphAdvance(const FGlyphId& GlyphId)
 		glyph_index,   /* glyph index           */
 		0);
 
-	return face->glyph->advance.x / 64;
+	glm::vec2 Result;
+	uint32_t Height = face->bbox.yMax - face->bbox.yMin;
+	Result.y = Height / 64;
+	Result.x = face->glyph->advance.x / 64;
+
+	return Result;
 }

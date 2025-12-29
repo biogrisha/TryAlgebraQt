@@ -1,5 +1,5 @@
 #pragma once
-
+#include "FreeTypeWrap.h"
 #include <QObject>
 #include <QString>
 #include <QUrl>

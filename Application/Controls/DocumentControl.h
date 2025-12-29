@@ -1,5 +1,6 @@
 #pragma once
-
+#include "FreeTypeWrap.h"
+#include "FunctionLibraries/FileHelpers.h"
 #include <QObject>
 #include "../MathDocument.h"
 class FTAMathDocumentInfo;
@@ -19,6 +20,6 @@ public slots:
 
 private:
 	MathDocument* m_mathDocument = nullptr;
-	FTAMathDocumentInfo* m_docInfo;
+	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
 };
 

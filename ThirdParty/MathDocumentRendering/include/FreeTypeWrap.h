@@ -43,13 +43,12 @@ struct FGlyphData
 	FGlyphRenderData* RenderData = nullptr;
 };
 
-
 class FFreeTypeWrap
 {
 public:
 	void Init(float InDpiX, float InDpiY);
 	FGlyphRenderData LoadGlyph(const FGlyphData& GlyphData);
-	int32_t GetGlyphAdvance(const FGlyphId& GlyphId);
+	glm::vec2 GetGlyphSize(const FGlyphId& GlyphId);
 private:
 	FT_Library  library;
 	FT_Face     face;

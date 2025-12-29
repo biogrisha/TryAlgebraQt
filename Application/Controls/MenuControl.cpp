@@ -15,9 +15,13 @@ MenuControl::MenuControl(QObject* parent)
 void MenuControl::openDocument(const QUrl& url)
 {	
 	std::weak_ptr<FTAMathDocumentInfo> docInfo;
-	auto documentControl = new DocumentControl(AppGlobal::application);
-	AppGlobal::mainModule->OpenDocument(url.toLocalFile().toStdWString(), docInfo, AppGlobal::application->m_compatibilityData);
-	documentControl->setDocInfo(docInfo.lock().get());
-	AppGlobal::application->setCurrentDocument(documentControl);
+	auto compatibilityData = FTACompatibilityData::MakeTypedShared();
+	compatibilityData->CursorComponentGenerator = std::make_shared<CursorComponentGeneratorQt>();
+	compatibilityData->MeGenerator = std::make_shared<MathElementGeneratorQt>();
+	AppGlobal::mainModule->OpenDocument(url.toLocalFile().toStdWString(), docInfo, compatibilityData);
+	
+	//auto documentControl = new DocumentControl(AppGlobal::application);
+	//documentControl->setDocInfo(docInfo);
+	//AppGlobal::application->setCurrentDocument(documentControl);
 }
 

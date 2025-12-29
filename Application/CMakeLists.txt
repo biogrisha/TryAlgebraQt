@@ -20,9 +20,16 @@ qt_add_qml_module(Application
         Controls/MenuControl.cpp
         Controls/DocumentControl.h
         Controls/DocumentControl.cpp
+        Controls/ToolbarControl.h
+        Controls/ToolbarControl.cpp
         MathEditor/CursorComponentGenerator.h
         MathEditor/MathElementGenerator.h
         MathEditor/MathElementGenerator.cpp
+        MathEditor/CompatibilityData.h
+        MathEditor/CompatibilityData.cpp
+        MathEditor/Visual/CharVisual.h
+        MathEditor/Visual/CharVisual.cpp
+        
     RESOURCES
         Shaders/DrawEditorLayout.spv
 )
@@ -41,4 +48,5 @@ target_link_libraries(Application
 
 target_include_directories(Application PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/Controls
+    D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/MathDocumentRendering/include
 )

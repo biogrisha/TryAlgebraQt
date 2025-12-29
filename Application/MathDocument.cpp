@@ -183,7 +183,7 @@ QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
             g.GlyphId.Glyph = ch.unicode();
             g.GlyphId.Height = 20;
             g.Pos = { offset, 30 };
-            offset += ftWrap->GetGlyphAdvance(g.GlyphId);
+            offset += ftWrap->GetGlyphSize(g.GlyphId).x;
         }
         m_node->moveText(std::move(glyphs));
         m_text.clear();

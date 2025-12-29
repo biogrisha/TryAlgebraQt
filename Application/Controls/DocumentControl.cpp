@@ -15,6 +15,6 @@ void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
 
 void DocumentControl::setDocInfo(FTAMathDocumentInfo* docInfo)
 {
-	m_docInfo = docInfo;
+	//m_docInfo = docInfo;
 }
 
