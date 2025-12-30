@@ -25,8 +25,6 @@ qt_add_qml_module(Application
         MathEditor/CursorComponentGenerator.h
         MathEditor/MathElementGenerator.h
         MathEditor/MathElementGenerator.cpp
-        MathEditor/CompatibilityData.h
-        MathEditor/CompatibilityData.cpp
         MathEditor/Visual/CharVisual.h
         MathEditor/Visual/CharVisual.cpp
         

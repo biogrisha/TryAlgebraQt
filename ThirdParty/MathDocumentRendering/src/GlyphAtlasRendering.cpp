@@ -31,6 +31,7 @@ void FGlyphAtlasRendering::Init(FRendering* InRendering)
 
 	Atlas = MyRTTI::MakeTypedUnique<FImageBuffer>();
 	Atlas->SetExtent(Extent);
+	Atlas->AddUsageFlags(VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 	Atlas->Init();
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet(

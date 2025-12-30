@@ -85,6 +85,8 @@ private:
     QQuickItem* m_item;
     QQuickWindow* m_window;
     QSize m_size;
+    float m_itemSizeX = 0;
+    float m_itemSizeY = 0;
     qreal m_dpr;
 
     QByteArray m_shader;
@@ -144,9 +146,9 @@ MathDocument::MathDocument()
     setFlag(ItemHasContents, true);
 }
 
-void MathDocument::setText(const QString& text)
+void MathDocument::moveGlyphData(std::vector<FGlyphData>&& glyphs)
 {
-    m_text = text;
+    m_glyphs = std::move(glyphs);
     update();
 }
 
@@ -172,21 +174,10 @@ QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
         n = m_node;
     }
     //set text
-    if(!m_text.isEmpty())
+    if(!m_glyphs.empty())
     {
-        auto ftWrap = AppGlobal::application->getFreeTypeWrap();
-        std::vector<FGlyphData> glyphs;
-        int32_t offset = 0;
-        for (auto& ch : m_text)
-        {
-            auto& g = glyphs.emplace_back();
-            g.GlyphId.Glyph = ch.unicode();
-            g.GlyphId.Height = 20;
-            g.Pos = { offset, 30 };
-            offset += ftWrap->GetGlyphSize(g.GlyphId).x;
-        }
-        m_node->moveText(std::move(glyphs));
-        m_text.clear();
+        m_node->moveText(std::move(m_glyphs));
+        m_glyphs.clear();
     }
 
     m_node->sync();
@@ -435,14 +426,7 @@ bool CustomTextureNodePrivate::initialize()
     //Initializing math renderer
     FVulkanStatic::SubscribeToContext(inst->vkInstance(), m_physDev);
 
-    m_documentRendering.SetDocumentExtent({ 1000 , 1000 });
     m_documentRendering.Init(AppGlobal::application->getFreeTypeWrap());
-
-    FGlyphData glyph;
-    glyph.GlyphId.Glyph = 'A';
-    glyph.GlyphId.Height = 30;
-    glyph.Pos = { 30, 30 };
-    m_documentRendering.SetDocumentContent({ glyph });
 
     m_devFuncs = inst->deviceFunctions(m_dev);
     m_funcs = inst->functions();
@@ -684,8 +668,18 @@ bool CustomTextureNodePrivate::initialize()
 void CustomTextureNodePrivate::sync()
 {
     m_dpr = m_window->effectiveDevicePixelRatio();
-    const QSize newSize = m_window->size() * m_dpr;
+    const QSize newSize = m_item->size().toSize() * m_dpr;
     bool needsNew = false;
+
+    if (newSize != m_size) {
+        needsNew = true;
+        m_size = newSize;
+        auto size = m_item->size().toSize();
+        m_itemSizeY = size.height();
+        m_itemSizeX = size.width();
+
+        m_documentRendering.SetDocumentExtent({ uint32_t(m_itemSizeX), uint32_t(m_itemSizeY) });
+    }
 
     if (!m_initialized) {
         initialize();
@@ -695,10 +689,6 @@ void CustomTextureNodePrivate::sync()
     if (!texture())
         needsNew = true;
 
-    if (newSize != m_size) {
-        needsNew = true;
-        m_size = newSize;
-    }
 
     if (needsNew) {
         delete texture();
@@ -732,27 +722,30 @@ void CustomTextureNodePrivate::render()
     VkResult err = VK_SUCCESS;
 
     //render math document
-    auto RenderedDocument = m_documentRendering.Render();
-    auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
-    void* RenderedDocData = RenderedDocBuffer->MapData();
+    if(m_documentRendering.HasContent())
+    {
+        auto RenderedDocument = m_documentRendering.Render();
+        auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
+        void* RenderedDocData = RenderedDocBuffer->MapData();
 
-    //Copy buffer into image
-    VkDeviceSize imageSize = 1000 * 1000 * 4;
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+        //Copy buffer into image
+        VkDeviceSize imageSize = m_itemSizeX * m_itemSizeY * 4;
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-    void* data;
-    m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
-    memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
-    RenderedDocBuffer->UnmapData();
-    m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
-    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    copyBufferToImage(stagingBuffer, m_textureImage, static_cast<uint32_t>(1000), static_cast<uint32_t>(1000));
-    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        void* data;
+        m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
+        memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
+        RenderedDocBuffer->UnmapData();
+        m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
+        TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        copyBufferToImage(stagingBuffer, m_textureImage, static_cast<uint32_t>(m_itemSizeX), static_cast<uint32_t>(m_itemSizeY));
+        TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-    m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
-    m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
+        m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
+        m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
+    }
 
     uint currentFrameSlot = m_window->graphicsStateInfo().currentFrameSlot;
 
@@ -813,8 +806,8 @@ void CustomTextureNodePrivate::CreateTextureImage() {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.extent.width = static_cast<uint32_t>(1000);
-    imageInfo.extent.height = static_cast<uint32_t>(1000);
+    imageInfo.extent.width = static_cast<uint32_t>(m_itemSizeX);
+    imageInfo.extent.height = static_cast<uint32_t>(m_itemSizeY);
     imageInfo.extent.depth = 1;
     imageInfo.mipLevels = 1;
     imageInfo.arrayLayers = 1;

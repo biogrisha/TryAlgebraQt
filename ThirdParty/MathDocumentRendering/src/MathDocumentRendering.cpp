@@ -117,6 +117,7 @@ FImageBuffer* FMathDocumentRendering::Render()
 {
 	AtlasRendering.Render();
 	return TextFromAtlasRendering.Render();
+	//return AtlasRendering.GetAtlas();
 }
 
 bool FMathDocumentRendering::HasContent()

@@ -2,7 +2,10 @@
 #include "FreeTypeWrap.h"
 #include "FunctionLibraries/FileHelpers.h"
 #include <QObject>
-#include "../MathDocument.h"
+#include <QKeyEvent>
+#include <qqml.h>
+#include <../MathDocument.h>
+
 class FTAMathDocumentInfo;
 
 class DocumentControl  : public QObject
@@ -13,13 +16,13 @@ public:
 	DocumentControl(QObject *parent);
 	DocumentControl() = default;
 	~DocumentControl();
-	void setDocInfo(const std::weak_ptr<FTAMathDocumentInfo>& docInfo);
-
+	void setDocument(const QUrl& filePath);
 public slots:
 	void bindMathDocumentItem(MathDocument* mathDocument);
-
+	void keyInput(int key, const QString& text, int modifiers);
 private:
 	MathDocument* m_mathDocument = nullptr;
 	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
+	std::vector<FGlyphData> m_glyphs;
 };
 

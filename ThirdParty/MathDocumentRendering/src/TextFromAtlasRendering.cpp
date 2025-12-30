@@ -48,7 +48,7 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet({
 				{AtlasBuffer, vk::ShaderStageFlagBits::eFragment},
-				{UniformBuffer.get(), vk::ShaderStageFlagBits::eVertex},
+				{UniformBuffer.get(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment},
 			});
 
 	P_1 = Rendering->GetDescriptorManager().MakePipelineLayout({ S_1 });
@@ -56,7 +56,7 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 
 void FTextFromAtlasRendering::InitPLine()
 {
-	PLine = Rendering->AddPipeline(P_1, &TextFromAtlasLayout, "D:/Projects/VulkanTutorial/Shader/TextFromAtlas.spv");
+	PLine = Rendering->AddPipeline(P_1, &TextFromAtlasLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/TextFromAtlas.spv");
 }
 
 void FTextFromAtlasRendering::SetExtent(const VkExtent2D& InExtent)

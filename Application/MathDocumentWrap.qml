@@ -9,8 +9,8 @@ Rectangle {
         id:mathDoc
         anchors.fill: parent
         focus: true
-        Keys.onPressed: {
-            console.log("Key pressed:")
+        Keys.onPressed: (event) => {
+            m_docControl.keyInput(event.key, event.text, event.modifiers)
         }
     }
 

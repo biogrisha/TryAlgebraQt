@@ -1,5 +1,4 @@
 #include "ImageBuffer.h"
-#include <ImageBuffer.h>
 #include <VulkanContext.h>
 #include <VulkanHelpers.h>
 FImageBuffer::~FImageBuffer()

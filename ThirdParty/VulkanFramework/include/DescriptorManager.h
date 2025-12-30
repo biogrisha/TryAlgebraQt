@@ -9,7 +9,7 @@
 struct FDescriptor
 {
 	vk::DescriptorType DescriptorType;
-	vk::ShaderStageFlagBits ShaderStages;
+	vk::ShaderStageFlags ShaderStages;
 };
 
 struct FDescriptorSetLayout
@@ -41,7 +41,7 @@ public:
 	~FDescriptorManager();
 	void Init();
 	uint16_t MakePipelineLayout(const std::vector<uint16_t>& DescriptorSetIds);
-	uint16_t MakeDescriptorSet(const std::vector<std::pair<FBufferBase*, vk::ShaderStageFlagBits>>& Bindings);
+	uint16_t MakeDescriptorSet(const std::vector<std::pair<FBufferBase*, vk::ShaderStageFlags>>& Bindings);
 	vk::PipelineLayout GetPipelineLayout(uint16_t LayoutId);
 	std::vector<vk::DescriptorSet> GetDescriptorSets(const std::vector<uint16_t>& SetIds);
 private:

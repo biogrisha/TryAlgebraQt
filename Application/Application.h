@@ -3,7 +3,6 @@
 #include <memory>
 #include <QObject>
 #include <QString>
-#include "MathDocument.h"
 
 class FTAMainModule;
 class FFreeTypeWrap;

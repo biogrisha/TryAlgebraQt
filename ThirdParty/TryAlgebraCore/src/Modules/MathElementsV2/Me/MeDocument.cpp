@@ -9,7 +9,7 @@
 
 MathElementV2::FTAMeDocument::FTAMeDocument()
 {
-	RelativeHeight = 50.f;
+	RelativeHeight = 1200.f;
 	VisibleFrom = 0;
 	VisibleTo = 1;
 	LinesCount = 0;

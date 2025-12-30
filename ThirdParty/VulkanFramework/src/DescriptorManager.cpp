@@ -133,7 +133,7 @@ uint16_t FDescriptorManager::MakePipelineLayout(const std::vector<uint16_t>& Des
 	return PipelineLayoutDatas.size() - 1;
 }
 
-uint16_t FDescriptorManager::MakeDescriptorSet(const std::vector<std::pair<FBufferBase*, vk::ShaderStageFlagBits>>& Bindings)
+uint16_t FDescriptorManager::MakeDescriptorSet(const std::vector<std::pair<FBufferBase*, vk::ShaderStageFlags>>& Bindings)
 {
 	FDescriptorSet Set;
 	//converting input pairs into descriptor bindings
