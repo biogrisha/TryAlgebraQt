@@ -14,6 +14,7 @@ public:
 	void SetFormat(VkFormat InFormat);
 	void AddUsageFlags(VkImageUsageFlags Flags);
 	void Init();
+	void UpdateImageFromData(void* InDataPointer);
 
 	VkImage GetImage();
 	vk::ImageView GetImageView();

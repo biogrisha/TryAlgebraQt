@@ -6,6 +6,7 @@
     "stb",
     "tinyobjloader",
     "vulkan",
-    "boost-signals2"
+    "boost-signals2",
+    "nlohmann-json"
   ]
 }

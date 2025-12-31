@@ -28,7 +28,7 @@ void FRendering::RunPipeline(const FRunPipelineInfo& RunPipelineInfo)
 	vk::RenderingAttachmentInfo ResultAttachmentInfo;
 	ResultAttachmentInfo.imageView = RunPipelineInfo.ColorAttachment->GetImageView();
 	ResultAttachmentInfo.imageLayout = vk::ImageLayout::eColorAttachmentOptimal;
-	ResultAttachmentInfo.loadOp = vk::AttachmentLoadOp::eClear;
+	ResultAttachmentInfo.loadOp = RunPipelineInfo.bClearAttachment ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad;
 	ResultAttachmentInfo.storeOp = vk::AttachmentStoreOp::eStore;
 	ResultAttachmentInfo.clearValue = clearColor;
 

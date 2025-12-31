@@ -13,15 +13,22 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 	AtlasRendering.Init(Rendering.get());
 	TextFromAtlasRendering.SetAtlas(AtlasRendering.GetAtlas());
 	TextFromAtlasRendering.Init(Rendering.get());
+	SpriteRendering.SetInput(TextFromAtlasRendering.GetResultImage());
+	SpriteRendering.Init(Rendering.get());
+
 	Rendering->GetDescriptorManager().Init();
+
 	AtlasRendering.InitPLine();
 	TextFromAtlasRendering.InitPLine();
+	SpriteRendering.InitPLine();
+	
 }
 
 void FMathDocumentRendering::SetDocumentExtent(const VkExtent2D& InExtent)
 {
 	AtlasRendering.SetExtent(InExtent);
 	TextFromAtlasRendering.SetExtent(InExtent);
+	SpriteRendering.SetExtent(InExtent);
 	Extent = InExtent;
 }
 
@@ -101,7 +108,7 @@ void FMathDocumentRendering::SetDocumentContent(const std::vector<FGlyphData>& I
 	AtlasRendering.SetOutlineCurves(OutlineData);
 	
 	//Set instance data for text renderer
-	std::vector<FSpriteInstance> TextInstanceData;
+	std::vector<FGlyphSpriteInst> TextInstanceData;
 	for (auto& GlyphData : DocumentContent)
 	{
 		auto& SpriteInstance = TextInstanceData.emplace_back();
@@ -116,8 +123,9 @@ void FMathDocumentRendering::SetDocumentContent(const std::vector<FGlyphData>& I
 FImageBuffer* FMathDocumentRendering::Render()
 {
 	AtlasRendering.Render();
-	return TextFromAtlasRendering.Render();
-	//return AtlasRendering.GetAtlas();
+	TextFromAtlasRendering.Render();
+	SpriteRendering.Render();
+	return SpriteRendering.GetResult();
 }
 
 bool FMathDocumentRendering::HasContent()

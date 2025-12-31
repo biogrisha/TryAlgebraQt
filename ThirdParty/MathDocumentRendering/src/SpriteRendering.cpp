@@ -1,5 +1,5 @@
-#include "TextFromAtlasRendering.h"
-#include <VulkanHelpers.h>
+#include "SpriteRendering.h"
+#include "ImageBuffer.h"
 
 namespace {
 	uint16_t S_1;
@@ -7,7 +7,7 @@ namespace {
 	uint16_t PLine;
 }
 
-void FTextFromAtlasRendering::Init(FRendering* InRendering)
+void FSpriteRendering::Init(FRendering* InRendering)
 {
 	Rendering = InRendering;
 	//Create resources
@@ -25,6 +25,13 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 		Info.bDeviceLocal = true;
 		Info.Usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 		InstanceBuffer->SetProperties(Info);
+		FSpriteInst Inst;
+		Inst.Pos = { 10,10 };
+		Inst.Size = { 100, 200 };
+		Inst.TexPos = { 0,0 };
+		Inst.TexSize = { 78, 64 };
+		InstanceBuffer->SetData(std::vector{ Inst });
+		InstancesCount = 1;
 	}
 	{
 		IndexBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
@@ -35,10 +42,8 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 		IndexBuffer->SetData(RectIndices);
 	}
 	{
-		Result = MyRTTI::MakeTypedUnique<FImageBuffer>();
-		Result->SetExtent(Extent);
-		Result->AddUsageFlags(VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-		Result->Init();
+		Atlas.SetPath("D:/Projects/TryAlgebraQt/TryAlgebraQt/RawAssets/Atlases/MathEditorAtlas.png");
+		Atlas.Init();
 	}
 	{
 		UniformBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
@@ -47,57 +52,46 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 	}
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet({
-				{AtlasBuffer, vk::ShaderStageFlagBits::eFragment},
+				{Atlas.GetImage(), vk::ShaderStageFlagBits::eFragment},
 				{UniformBuffer.get(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment},
-			});
+		});
 
 	P_1 = Rendering->GetDescriptorManager().MakePipelineLayout({ S_1 });
 }
 
-void FTextFromAtlasRendering::InitPLine()
+void FSpriteRendering::InitPLine()
 {
-	PLine = Rendering->AddPipeline(P_1, &TextFromAtlasLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/TextFromAtlas.spv");
+	PLine = Rendering->AddPipeline(P_1, &SpriteLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/DrawSprites.spv");
 }
 
-void FTextFromAtlasRendering::SetExtent(const VkExtent2D& InExtent)
+void FSpriteRendering::SetExtent(const VkExtent2D& InExtent)
 {
-	if (Result)
-	{
-		Result->SetExtent(InExtent);
-		UniformBuffer->SetData(sizeof(InExtent), &InExtent);
-	}
 	Extent = InExtent;
-	
-}
-void FTextFromAtlasRendering::SetAtlas(FImageBuffer* InAtlasBuffer)
-{
-	AtlasBuffer = InAtlasBuffer;
 }
 
-void FTextFromAtlasRendering::SetInstances(const std::vector<FGlyphSpriteInst>& InInstances)
+void FSpriteRendering::SetInput(FImageBuffer* InInputTexture)
 {
-	InstanceBuffer->SetData(InInstances);
-	InstancesCount = InInstances.size();
+	InputTextrure = InInputTexture;
 }
 
-void FTextFromAtlasRendering::Render()
+void FSpriteRendering::Render()
 {
 	FRunPipelineInfo Run;
 
 	Run.PipelineId = PLine;
 	Run.OutputExtent = Extent;
-	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get()};
+	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
 	Run.IndexBuffer = IndexBuffer.get();
 	Run.DescriptorSets = { S_1 };
-	Run.ColorAttachment = Result.get();
+	Run.ColorAttachment = InputTextrure;
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = InstancesCount;
-
+	Run.bClearAttachment = false;
 	Rendering->AddRunPipelineInfo(Run);
 	Rendering->Render();
 }
 
-FImageBuffer* FTextFromAtlasRendering::GetResultImage()
+FImageBuffer* FSpriteRendering::GetResult()
 {
-	return Result.get();
+	return InputTextrure;
 }

@@ -107,6 +107,20 @@ void FImageBuffer::Init()
 	bInitialized = true;
 }
 
+void FImageBuffer::UpdateImageFromData(void* InDataPointer)
+{
+	uint32_t BufferSize = Extent.height * Extent.width * 4;
+	auto StagingBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
+	FBufferInfo Info;
+	Info.bDeviceLocal = false;
+	Info.Usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+	StagingBuffer->SetProperties(Info);
+	StagingBuffer->SetData(BufferSize, InDataPointer);
+	VkHelpers::ImageTransition_UnknownToTransferDst(this);
+	VkHelpers::CopyBufferToImage(StagingBuffer.get(), this);
+	VkHelpers::ImageTransition_TransferDstToShaderRead(this);
+}
+
 void FImageBuffer::DestroyImage()
 {
 	vmaDestroyImage(FVulkanStatic::Context->VmaAllocator, Image, Allocation);

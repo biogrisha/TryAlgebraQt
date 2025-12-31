@@ -8,6 +8,7 @@
 #include <set>
 #include <GlyphAtlasRendering.h>
 #include <TextFromAtlasRendering.h>
+#include <SpriteRendering.h>
 	
 class FMathDocumentRendering
 {
@@ -17,13 +18,14 @@ public:
 	void SetDocumentContent(const std::vector<FGlyphData>& InDocumentContent);
 	FImageBuffer* Render();
 	bool HasContent();
-	int32_t GetGlyphAdvance(const FGlyphId& GlyphId);
 private:
 	std::vector<FGlyphData> DocumentContent;
 	std::map<FGlyphId, FGlyphData> Atlas;
 	std::map<FGlyphId, std::unique_ptr<FGlyphRenderData>> GlyphsRenderData;
 	FGlyphAtlasRendering AtlasRendering;
 	FTextFromAtlasRendering TextFromAtlasRendering;
+	FSpriteRendering SpriteRendering;
+
 	VkExtent2D Extent = { 0, 0 };
 	std::unique_ptr<FRendering> Rendering;
 	FFreeTypeWrap* FreeTypeWrap = nullptr;

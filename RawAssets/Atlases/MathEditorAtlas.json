@@ -1,0 +1,28 @@
+{"frames": [
+
+{
+	"filename": "Smile.png",
+	"frame": {"x":0,"y":0,"w":78,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":78,"h":64},
+	"sourceSize": {"w":78,"h":64}
+},
+{
+	"filename": "TextCaret.png",
+	"frame": {"x":78,"y":0,"w":32,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":64},
+	"sourceSize": {"w":32,"h":64}
+}],
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "MathEditorAtlas.png",
+	"format": "RGBA8888",
+	"size": {"w":110,"h":64},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:1e09b53cb3a9e5ea8340370cf4dac5de:be267862ca704842114e77cc56265841:9c6af9d7a46be47a3494cb1482b31391$"
+}
+}

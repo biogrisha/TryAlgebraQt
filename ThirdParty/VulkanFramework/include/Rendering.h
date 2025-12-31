@@ -13,6 +13,7 @@ struct FRunPipelineInfo
 	FImageBuffer*			ColorAttachment = nullptr;
 	uint16_t				IndicesCount = 0;
 	uint16_t				InstancesCount = 0;
+	bool					bClearAttachment = true;
 };
 
 class FRendering

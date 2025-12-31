@@ -79,6 +79,26 @@ void VkHelpers::TransitionImageLayout(const vk::raii::Image& image, vk::ImageLay
 	EndSingleTimeCommands(commandBuffer);
 }
 
+void VkHelpers::CopyBufferToImage(FBuffer* Buffer, FImageBuffer* ImageBuffer)
+{
+	
+		auto CommandBuffer = BeginSingleTimeCommands();
+		auto ImageExtent = ImageBuffer->GetExtent();
+		vk::BufferImageCopy region;
+		region.bufferImageHeight = 0;
+		region.bufferRowLength = 0;
+		region.bufferOffset = 0;
+		region.imageExtent = vk::Extent3D{ ImageExtent.width, ImageExtent.height, 1 };
+		region.imageOffset = vk::Offset3D{ 0, 0, 0 };
+		region.imageSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+
+		CommandBuffer.copyBufferToImage(*Buffer->GetBuffer(), ImageBuffer->GetImage(), vk::ImageLayout::eTransferDstOptimal, region);
+		EndSingleTimeCommands(CommandBuffer);
+}
+
 vk::DescriptorType VkHelpers::ConvertBufferToDescriptor(VkBufferUsageFlagBits BufferUsage)
 {
 	if (BufferUsage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)
@@ -157,6 +177,38 @@ void VkHelpers::ImageTransition_ShaderReadToTransferSrc(FImageBuffer* Image)
 	VkHelpers::EndSingleTimeCommands(CommandBuffer);
 }
 
+void VkHelpers::ImageTransition_UnknownToTransferDst(FImageBuffer* Image)
+{
+	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+
+	VkImageMemoryBarrier barrier{};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+	barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = Image->GetImage();
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 1;
+	barrier.srcAccessMask = 0;
+	barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+
+	vkCmdPipelineBarrier(
+		*CommandBuffer,
+		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &barrier
+	);
+	VkHelpers::EndSingleTimeCommands(CommandBuffer);
+}
+
 void VkHelpers::ImageTransition_TransferSrcToShaderRead(FImageBuffer* Image)
 {
 	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
@@ -181,6 +233,38 @@ void VkHelpers::ImageTransition_TransferSrcToShaderRead(FImageBuffer* Image)
 	vkCmdPipelineBarrier(
 		*CommandBuffer,
 		VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT,
+		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &barrier
+	);
+	VkHelpers::EndSingleTimeCommands(CommandBuffer);
+}
+
+void VkHelpers::ImageTransition_TransferDstToShaderRead(FImageBuffer* Image)
+{
+	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+
+	VkImageMemoryBarrier barrier{};
+	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+	barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.image = Image->GetImage();
+	barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	barrier.subresourceRange.baseMipLevel = 0;
+	barrier.subresourceRange.levelCount = 1;
+	barrier.subresourceRange.baseArrayLayer = 0;
+	barrier.subresourceRange.layerCount = 1;
+
+	barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+	barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+	vkCmdPipelineBarrier(
+		*CommandBuffer,
+		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 		0,
 		0, nullptr,

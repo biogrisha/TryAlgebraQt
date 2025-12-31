@@ -3,6 +3,8 @@ find_package(glm REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Stb REQUIRED)
 
 # Create a library target
 add_library(VulkanFramework STATIC 
@@ -18,6 +20,7 @@ add_library(VulkanFramework STATIC
 	include/Buffer.h
 	include/ImageBuffer.h
 	include/Rendering.h
+	include/Atlas.h
 	src/DescriptorManager.cpp
 	src/DescriptorSetLayout.cpp
 	src/Pipeline.cpp
@@ -29,12 +32,14 @@ add_library(VulkanFramework STATIC
 	src/Buffer.cpp
 	src/ImageBuffer.cpp
 	src/Rendering.cpp
+	src/Atlas.cpp
 )
 
 # Set include directories
 target_include_directories(VulkanFramework
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
+		${Stb_INCLUDE_DIR}
 )
 
 target_link_libraries(VulkanFramework
@@ -45,4 +50,5 @@ target_link_libraries(VulkanFramework
 		Freetype::Freetype
 		PUBLIC
 		MyRTTI
+		nlohmann_json::nlohmann_json
 )
