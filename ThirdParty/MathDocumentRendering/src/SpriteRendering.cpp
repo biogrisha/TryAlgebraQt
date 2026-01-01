@@ -20,20 +20,6 @@ void FSpriteRendering::Init(FRendering* InRendering)
 		VertexBuffer->SetData(RectVertices);
 	}
 	{
-		InstanceBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
-		FBufferInfo Info;
-		Info.bDeviceLocal = true;
-		Info.Usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		InstanceBuffer->SetProperties(Info);
-		FSpriteInst Inst;
-		Inst.Pos = { 10,10 };
-		Inst.Size = { 100, 200 };
-		Inst.TexPos = { 0,0 };
-		Inst.TexSize = { 78, 64 };
-		InstanceBuffer->SetData(std::vector{ Inst });
-		InstancesCount = 1;
-	}
-	{
 		IndexBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
 		FBufferInfo Info;
 		Info.bDeviceLocal = true;
@@ -42,8 +28,23 @@ void FSpriteRendering::Init(FRendering* InRendering)
 		IndexBuffer->SetData(RectIndices);
 	}
 	{
-		Atlas.SetPath("D:/Projects/TryAlgebraQt/TryAlgebraQt/RawAssets/Atlases/MathEditorAtlas.png");
+		Atlas.SetPath("D:/Projects/TryAlgebraQt/TryAlgebraQt/RawAssets/Atlases/MathEditorAtlas");
 		Atlas.Init();
+	}
+	{
+		InstanceBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
+		FBufferInfo Info;
+		Info.bDeviceLocal = true;
+		Info.Usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		InstanceBuffer->SetProperties(Info);
+		auto SpriteInfo = Atlas.GetInfo("TextCaret.png");
+		FSpriteInst Inst;
+		Inst.Pos = { 10,10 };
+		Inst.Size = { 100, 200 };
+		Inst.TexPos = SpriteInfo.TexPos;
+		Inst.TexSize = SpriteInfo.TexSize;
+		InstanceBuffer->SetData(std::vector{ Inst });
+		InstancesCount = 1;
 	}
 	{
 		UniformBuffer = MyRTTI::MakeTypedUnique<FBuffer>();

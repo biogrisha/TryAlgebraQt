@@ -116,9 +116,11 @@ void FImageBuffer::UpdateImageFromData(void* InDataPointer)
 	Info.Usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	StagingBuffer->SetProperties(Info);
 	StagingBuffer->SetData(BufferSize, InDataPointer);
-	VkHelpers::ImageTransition_UnknownToTransferDst(this);
-	VkHelpers::CopyBufferToImage(StagingBuffer.get(), this);
-	VkHelpers::ImageTransition_TransferDstToShaderRead(this);
+	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+	VkHelpers::ImageTransition_UnknownToTransferDst(this, CommandBuffer);
+	VkHelpers::CopyBufferToImage(StagingBuffer.get(), this, CommandBuffer);
+	VkHelpers::ImageTransition_TransferDstToShaderRead(this, CommandBuffer);
+	VkHelpers::EndSingleTimeCommands(CommandBuffer);
 }
 
 void FImageBuffer::DestroyImage()

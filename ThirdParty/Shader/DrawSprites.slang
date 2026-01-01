@@ -45,5 +45,8 @@ struct VSOutput
 float4 fragMain(VSOutput vertIn) : SV_TARGET {
     
     int2 TexelPos = int2(vertIn.TexCoord * vertIn.TexSize) + vertIn.TexPos;
-    return texelFetch(Atlas, TexelPos);
+    float4 Color = texelFetch(Atlas, TexelPos);
+    if(Color.a < 0.01f)
+        discard;
+    return Color;
 }

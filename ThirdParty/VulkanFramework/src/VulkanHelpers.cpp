@@ -79,10 +79,8 @@ void VkHelpers::TransitionImageLayout(const vk::raii::Image& image, vk::ImageLay
 	EndSingleTimeCommands(commandBuffer);
 }
 
-void VkHelpers::CopyBufferToImage(FBuffer* Buffer, FImageBuffer* ImageBuffer)
+void VkHelpers::CopyBufferToImage(FBuffer* Buffer, FImageBuffer* ImageBuffer, const vk::raii::CommandBuffer& CommandBuffer)
 {
-	
-		auto CommandBuffer = BeginSingleTimeCommands();
 		auto ImageExtent = ImageBuffer->GetExtent();
 		vk::BufferImageCopy region;
 		region.bufferImageHeight = 0;
@@ -94,9 +92,29 @@ void VkHelpers::CopyBufferToImage(FBuffer* Buffer, FImageBuffer* ImageBuffer)
 		region.imageSubresource.mipLevel = 0;
 		region.imageSubresource.baseArrayLayer = 0;
 		region.imageSubresource.layerCount = 1;
-
 		CommandBuffer.copyBufferToImage(*Buffer->GetBuffer(), ImageBuffer->GetImage(), vk::ImageLayout::eTransferDstOptimal, region);
-		EndSingleTimeCommands(CommandBuffer);
+}
+
+void VkHelpers::CopyImageToImage(FImageBuffer* Src, FImageBuffer* Dst, const vk::raii::CommandBuffer& CommandBuffer)
+{
+	ImageTransition_ShaderReadToTransferSrc(Src, CommandBuffer);
+	ImageTransition_UnknownToTransferDst(Dst, CommandBuffer);
+	vk::ImageCopy Copy;
+	Copy.srcOffset = vk::Offset3D{ 0,0,0 };
+	Copy.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+	Copy.srcSubresource.mipLevel = 0;
+	Copy.srcSubresource.baseArrayLayer = 0;
+	Copy.srcSubresource.layerCount = 1;
+	auto Extent = Src->GetExtent();
+	Copy.extent = vk::Extent3D{ Extent.width,Extent.height, 1 };
+	Copy.dstOffset = vk::Offset3D{ 0,0,0 };
+	Copy.dstSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
+	Copy.dstSubresource.mipLevel = 0;
+	Copy.dstSubresource.baseArrayLayer = 0;
+	Copy.dstSubresource.layerCount = 1;
+	CommandBuffer.copyImage(Src->GetImage(), vk::ImageLayout::eTransferSrcOptimal, Dst->GetImage(), vk::ImageLayout::eTransferDstOptimal, Copy);
+	ImageTransition_TransferSrcToShaderRead(Src, CommandBuffer);
+	ImageTransition_TransferDstToShaderRead(Dst, CommandBuffer);
 }
 
 vk::DescriptorType VkHelpers::ConvertBufferToDescriptor(VkBufferUsageFlagBits BufferUsage)
@@ -121,9 +139,8 @@ std::unique_ptr<FBuffer> VkHelpers::ConvertImageToBuffer(FImageBuffer* ImageBuff
 	auto ImageExtent = ImageBuffer->GetExtent();
 	Buffer->Init(ImageExtent.height * ImageExtent.width * 4);
 
-	ImageTransition_ShaderReadToTransferSrc(ImageBuffer);
-
-	auto CommandBuffer2 = BeginSingleTimeCommands();
+	auto CommandBuffer = BeginSingleTimeCommands();
+	ImageTransition_ShaderReadToTransferSrc(ImageBuffer, CommandBuffer);
 	vk::BufferImageCopy region{};
 	region.bufferOffset = 0;
 	region.bufferRowLength = 0;
@@ -137,17 +154,15 @@ std::unique_ptr<FBuffer> VkHelpers::ConvertImageToBuffer(FImageBuffer* ImageBuff
 	region.imageOffset = vk::Offset3D{ 0, 0, 0 };
 	region.imageExtent = vk::Extent3D{ ImageExtent.width, ImageExtent.height, 1 };
 
-	CommandBuffer2.copyImageToBuffer(ImageBuffer->GetImage(), vk::ImageLayout::eTransferSrcOptimal, *Buffer->GetBuffer(), region);
+	CommandBuffer.copyImageToBuffer(ImageBuffer->GetImage(), vk::ImageLayout::eTransferSrcOptimal, *Buffer->GetBuffer(), region);
 	
-	EndSingleTimeCommands(CommandBuffer2);
-	ImageTransition_TransferSrcToShaderRead(ImageBuffer);
+	ImageTransition_TransferSrcToShaderRead(ImageBuffer, CommandBuffer);
+	EndSingleTimeCommands(CommandBuffer);
 	return Buffer;
 }
 
-void VkHelpers::ImageTransition_ShaderReadToTransferSrc(FImageBuffer* Image)
+void VkHelpers::ImageTransition_ShaderReadToTransferSrc(FImageBuffer* Image, const vk::raii::CommandBuffer& CommandBuffer)
 {
-	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
-
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -174,13 +189,10 @@ void VkHelpers::ImageTransition_ShaderReadToTransferSrc(FImageBuffer* Image)
 		0, nullptr,
 		1, &barrier
 	);
-	VkHelpers::EndSingleTimeCommands(CommandBuffer);
 }
 
-void VkHelpers::ImageTransition_UnknownToTransferDst(FImageBuffer* Image)
+void VkHelpers::ImageTransition_UnknownToTransferDst(FImageBuffer* Image, const vk::raii::CommandBuffer& CommandBuffer)
 {
-	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
-
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -206,13 +218,10 @@ void VkHelpers::ImageTransition_UnknownToTransferDst(FImageBuffer* Image)
 		0, nullptr,
 		1, &barrier
 	);
-	VkHelpers::EndSingleTimeCommands(CommandBuffer);
 }
 
-void VkHelpers::ImageTransition_TransferSrcToShaderRead(FImageBuffer* Image)
+void VkHelpers::ImageTransition_TransferSrcToShaderRead(FImageBuffer* Image, const vk::raii::CommandBuffer& CommandBuffer)
 {
-	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
-
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
@@ -239,13 +248,10 @@ void VkHelpers::ImageTransition_TransferSrcToShaderRead(FImageBuffer* Image)
 		0, nullptr,
 		1, &barrier
 	);
-	VkHelpers::EndSingleTimeCommands(CommandBuffer);
 }
 
-void VkHelpers::ImageTransition_TransferDstToShaderRead(FImageBuffer* Image)
+void VkHelpers::ImageTransition_TransferDstToShaderRead(FImageBuffer* Image, const vk::raii::CommandBuffer& CommandBuffer)
 {
-	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
-
 	VkImageMemoryBarrier barrier{};
 	barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 	barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -271,7 +277,6 @@ void VkHelpers::ImageTransition_TransferDstToShaderRead(FImageBuffer* Image)
 		0, nullptr,
 		1, &barrier
 	);
-	VkHelpers::EndSingleTimeCommands(CommandBuffer);
 }
 
 VkShaderModule NVkHelpers::createShaderModule(const uint32_t* code, uint32_t size, VkDevice device)
