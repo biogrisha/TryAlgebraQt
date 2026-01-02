@@ -61,10 +61,25 @@ struct FSpriteInstNamed
 	glm::vec2 Size;
 };
 
-struct FSpriteInst
+struct FSpriteInstByName
 {
 	glm::ivec2 Pos;
 	glm::ivec2 Size;
-	glm::ivec2 TexPos;
-	glm::ivec2 TexSize;
+	std::string SpriteName;
+	float Alpha = 0;
+};
+
+struct FSpriteInst
+{
+	glm::ivec2	Pos;
+	glm::ivec2	Size;
+	glm::ivec2	TexPos;
+	glm::ivec2	TexSize;
+	float		Alpha = 0;
+};
+
+struct FCaretData
+{
+	glm::vec2 Pos;
+	glm::vec2 Size;
 };

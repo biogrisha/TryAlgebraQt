@@ -9,6 +9,7 @@ layout (location = 2) in VSInstanceData {
 	int2 Size;
 	int2 TexPos;
     int2 TexSize; 
+    float Alpha;
 } Inst; 
 
 layout (set = 0, binding = 0) uniform Sampler2D Atlas;
@@ -30,6 +31,7 @@ VSOutput vertMain() {
     Output.TexCoord = Vert.TexCoord;
     Output.TexPos = Inst.TexPos;
     Output.TexSize = Inst.TexSize;
+    Output.Alpha = Inst.Alpha;
     return Output;
 }
 
@@ -39,6 +41,7 @@ struct VSOutput
     float2 TexCoord;
     int2 TexPos;
     int2 TexSize; 
+    float Alpha;
 };
 
 [shader("fragment")]
@@ -48,5 +51,5 @@ float4 fragMain(VSOutput vertIn) : SV_TARGET {
     float4 Color = texelFetch(Atlas, TexelPos);
     if(Color.a < 0.01f)
         discard;
-    return Color;
+    return float4(Color.rgb, vertIn.Alpha);
 }

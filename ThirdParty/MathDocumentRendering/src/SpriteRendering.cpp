@@ -1,6 +1,6 @@
 #include "SpriteRendering.h"
 #include "ImageBuffer.h"
-
+#include "VulkanHelpers.h"
 namespace {
 	uint16_t S_1;
 	uint16_t P_1;
@@ -37,19 +37,17 @@ void FSpriteRendering::Init(FRendering* InRendering)
 		Info.bDeviceLocal = true;
 		Info.Usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
 		InstanceBuffer->SetProperties(Info);
-		auto SpriteInfo = Atlas.GetInfo("TextCaret.png");
-		FSpriteInst Inst;
-		Inst.Pos = { 10,10 };
-		Inst.Size = { 100, 200 };
-		Inst.TexPos = SpriteInfo.TexPos;
-		Inst.TexSize = SpriteInfo.TexSize;
-		InstanceBuffer->SetData(std::vector{ Inst });
-		InstancesCount = 1;
 	}
 	{
 		UniformBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
 		UniformBuffer->SetProperties({ VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT , false });
 		UniformBuffer->SetData(sizeof(Extent), &Extent);
+	}
+	{
+		Output = MyRTTI::MakeTypedUnique<FImageBuffer>();
+		Output->SetExtent(Extent);
+		Output->AddUsageFlags(VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+		Output->Init();
 	}
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet({
@@ -70,21 +68,23 @@ void FSpriteRendering::SetExtent(const VkExtent2D& InExtent)
 	Extent = InExtent;
 }
 
-void FSpriteRendering::SetInput(FImageBuffer* InInputTexture)
+void FSpriteRendering::SetInput(FImageBuffer* InInput)
 {
-	InputTextrure = InInputTexture;
+	Input = InInput;
 }
 
 void FSpriteRendering::Render()
 {
+	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+	VkHelpers::CopyImageToImage(Input, Output.get(), CommandBuffer);
+	VkHelpers::EndSingleTimeCommands(CommandBuffer);
 	FRunPipelineInfo Run;
-
 	Run.PipelineId = PLine;
 	Run.OutputExtent = Extent;
 	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
 	Run.IndexBuffer = IndexBuffer.get();
 	Run.DescriptorSets = { S_1 };
-	Run.ColorAttachment = InputTextrure;
+	Run.ColorAttachment = Output.get();
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = InstancesCount;
 	Run.bClearAttachment = false;
@@ -92,7 +92,24 @@ void FSpriteRendering::Render()
 	Rendering->Render();
 }
 
+void FSpriteRendering::SetInstances(const std::vector<FSpriteInstByName>& Sprites)
+{
+	std::vector<FSpriteInst> Instances;
+	for (auto& Sprite : Sprites)
+	{
+		auto SpriteInfo = Atlas.GetInfo(Sprite.SpriteName);
+		auto& Inst = Instances.emplace_back();
+		Inst.Pos = Sprite.Pos;
+		Inst.Size = Sprite.Size;
+		Inst.TexPos = SpriteInfo.TexPos;
+		Inst.TexSize = SpriteInfo.TexSize;
+		Inst.Alpha = Sprite.Alpha;
+	}
+	InstanceBuffer->SetData(Instances);
+	InstancesCount = Sprites.size();
+}
+
 FImageBuffer* FSpriteRendering::GetResult()
 {
-	return InputTextrure;
+	return Output.get();
 }

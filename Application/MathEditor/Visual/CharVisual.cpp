@@ -19,4 +19,5 @@ void CharVisual::Show()
 	auto Pos = MeChar->GetAbsolutePosition();
 	Glyph.Pos = { Pos.x, Pos.y };
 	GlyphsPtr->push_back(Glyph);
+	FTAVisual::Show();
 }

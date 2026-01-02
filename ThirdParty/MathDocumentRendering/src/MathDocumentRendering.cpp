@@ -118,12 +118,27 @@ void FMathDocumentRendering::SetDocumentContent(const std::vector<FGlyphData>& I
 	}
 	TextFromAtlasRendering.SetInstances(TextInstanceData);
 
+	bUpdatedText = true;
+}
+
+void FMathDocumentRendering::UpdateCaret(const FCaretData& CaretData)
+{
+	FSpriteInstByName Caret;
+	Caret.Alpha = 1;
+	Caret.Pos = CaretData.Pos;
+	Caret.Size = CaretData.Size;
+	Caret.SpriteName = "TextCaret.png";
+	SpriteRendering.SetInstances({ Caret });
 }
 
 FImageBuffer* FMathDocumentRendering::Render()
 {
-	AtlasRendering.Render();
-	TextFromAtlasRendering.Render();
+	if(bUpdatedText)
+	{
+		AtlasRendering.Render();
+		TextFromAtlasRendering.Render();
+		bUpdatedText = false;
+	}
 	SpriteRendering.Render();
 	return SpriteRendering.GetResult();
 }

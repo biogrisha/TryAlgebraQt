@@ -16,6 +16,7 @@ public:
 	void Init(FFreeTypeWrap* InFreeTypeWrap);
 	void SetDocumentExtent(const VkExtent2D& InExtent);
 	void SetDocumentContent(const std::vector<FGlyphData>& InDocumentContent);
+	void UpdateCaret(const FCaretData& caretData);
 	FImageBuffer* Render();
 	bool HasContent();
 private:
@@ -29,4 +30,6 @@ private:
 	VkExtent2D Extent = { 0, 0 };
 	std::unique_ptr<FRendering> Rendering;
 	FFreeTypeWrap* FreeTypeWrap = nullptr;
+
+	bool bUpdatedText = false;
 };

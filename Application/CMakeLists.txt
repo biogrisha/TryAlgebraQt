@@ -23,10 +23,13 @@ qt_add_qml_module(Application
         Controls/ToolbarControl.h
         Controls/ToolbarControl.cpp
         MathEditor/CursorComponentGenerator.h
+        MathEditor/CursorComponentGenerator.cpp
         MathEditor/MathElementGenerator.h
         MathEditor/MathElementGenerator.cpp
         MathEditor/Visual/CharVisual.h
         MathEditor/Visual/CharVisual.cpp
+        MathEditor/Visual/CaretVisual.h
+        MathEditor/Visual/CaretVisual.cpp
         
     RESOURCES
         Shaders/DrawEditorLayout.spv

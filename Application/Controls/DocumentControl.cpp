@@ -18,15 +18,16 @@ DocumentControl::~DocumentControl()
 void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
 {
 	m_mathDocument = mathDocument;
-	m_mathDocument->moveGlyphData(std::move(m_glyphs));
-	m_glyphs.clear();
+	QObject::connect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady, Qt::ConnectionType::DirectConnection);
 }
 
 void DocumentControl::setDocument(const QUrl& filePath)
 {
 	std::weak_ptr<FTAMathDocumentInfo> docInfo;
 	auto compatibilityData = FTACompatibilityData::MakeTypedShared();
-	compatibilityData->CursorComponentGenerator = std::make_shared<CursorComponentGeneratorQt>();
+	auto cursorGen = std::make_shared<CursorComponentGeneratorQt>();
+	cursorGen->m_caretDataPtr = &m_caretData;
+	compatibilityData->CursorComponentGenerator = cursorGen;
 	auto meGen = std::make_shared<MathElementGeneratorQt>();
 	meGen->m_glyphsPtr = &m_glyphs;
 	compatibilityData->MeGenerator = meGen;
@@ -37,8 +38,43 @@ void DocumentControl::setDocument(const QUrl& filePath)
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 {	
 	auto doc = m_docInfo.lock()->MathDocument;
-	doc->AddMathElements(text.toStdWString());
-	doc->Draw();
+	if(!text.isEmpty())
+	{
+		doc->AddMathElements(text.toStdWString());
+		doc->Draw();
+		m_mathDocument->moveGlyphData(std::move(m_glyphs));
+		m_mathDocument->updateCaret(m_caretData);
+	}
+	else 
+	{
+		switch (key) { 
+		case Qt::Key_Left:
+			doc->StepX(-1);
+			break;
+		case Qt::Key_Right: 
+			doc->StepX(1);
+			break;
+		case Qt::Key_Up: 
+			doc->StepY(1);
+			break; 
+		case Qt::Key_Down:
+			doc->StepY(-1);
+			break;
+		default: 
+			qDebug() << "Other key:" << key << "text:" << text; 
+			break;
+		}
+		m_mathDocument->updateCaret(m_caretData);
+	}
+
+	m_mathDocument->update();
+}
+
+void DocumentControl::mathDocumentReady()
+{
+	QObject::disconnect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady);
 	m_mathDocument->moveGlyphData(std::move(m_glyphs));
+	m_mathDocument->updateCaret(m_caretData);
+	m_glyphs.clear();
 }
 

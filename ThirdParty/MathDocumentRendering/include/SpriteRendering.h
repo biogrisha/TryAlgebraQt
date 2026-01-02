@@ -22,6 +22,7 @@ class FSpriteLayout : public FVertexInputLayout {
 			vk::VertexInputAttributeDescription(3, 1, vk::Format::eR32G32Sint, offsetof(FSpriteInst, Size)),
 			vk::VertexInputAttributeDescription(4, 1, vk::Format::eR32G32Sint, offsetof(FSpriteInst, TexPos)),
 			vk::VertexInputAttributeDescription(5, 1, vk::Format::eR32G32Sint, offsetof(FSpriteInst, TexSize)),
+			vk::VertexInputAttributeDescription(6, 1, vk::Format::eR32Sfloat, offsetof(FSpriteInst, Alpha)),
 		};
 	}
 };
@@ -32,8 +33,9 @@ public:
 	void Init(FRendering* InRendering);
 	void InitPLine();
 	void SetExtent(const VkExtent2D& InExtent);
-	void SetInput(FImageBuffer* InInputTexture);
+	void SetInput(FImageBuffer* InInput);
 	void Render();
+	void SetInstances(const std::vector<FSpriteInstByName>& Sprites);
 	FImageBuffer* GetResult();
 
 	std::unique_ptr<FBuffer> VertexBuffer;
@@ -42,7 +44,7 @@ public:
 	std::unique_ptr<FBuffer> UniformBuffer;
 	std::unique_ptr<FImageBuffer> Output;
 	FAtlas Atlas;
-	FImageBuffer* InputTextrure;
+	FImageBuffer* Input;
 	FSpriteLayout SpriteLayout;
 	uint16_t InstancesCount = 0;
 

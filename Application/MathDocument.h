@@ -16,18 +16,19 @@ class MathDocument : public QQuickItem
 public:
     MathDocument();
     void moveGlyphData(std::vector<FGlyphData>&& glyphs);
+    void updateCaret(const FCaretData& caretData);
 protected:
     QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) override;
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
 
 private slots:
     void invalidateSceneGraph();
-
+signals:
+    void onNodeCreated();
 private:
     void releaseResources() override;
 
     CustomTextureNodePrivate* m_node = nullptr;
-    std::vector<FGlyphData> m_glyphs;
 };
 
 #endif // VULKANTEXTUREIMPORT_H

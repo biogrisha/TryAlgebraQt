@@ -14,8 +14,6 @@
 
 #include <VulkanHelpers.h>
 #include <VertexInputLayout.h>
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-#include <glm/glm.hpp>
 #include <VulkanContext.h>
 #include <MathDocumentRendering.h>
 #include <Application.h>
@@ -60,6 +58,7 @@ public:
 
     void sync();
     void moveText(std::vector<FGlyphData>&& text);
+    void updateCaret(const FCaretData& caretData);
 private slots:
     void render();
 
@@ -138,7 +137,10 @@ private:
     uint32_t m_graphicsFamily = 0;
     VkCommandPool m_commandPool;
     VkQueue m_graphicsQueue;
+
     std::vector<FGlyphData> m_text;
+    FCaretData m_caretData;
+    bool m_updatedCarret = false;
 };
 
 MathDocument::MathDocument()
@@ -148,8 +150,12 @@ MathDocument::MathDocument()
 
 void MathDocument::moveGlyphData(std::vector<FGlyphData>&& glyphs)
 {
-    m_glyphs = std::move(glyphs);
-    update();
+    m_node->moveText(std::move(glyphs));
+}
+
+void MathDocument::updateCaret(const FCaretData& caretData)
+{
+    m_node->updateCaret(caretData);
 }
 
 void MathDocument::invalidateSceneGraph() // called on the render thread when the scenegraph is invalidated
@@ -172,14 +178,8 @@ QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
     if (!n) {
         m_node = new CustomTextureNodePrivate(this);
         n = m_node;
+        emit onNodeCreated();
     }
-    //set text
-    if(!m_glyphs.empty())
-    {
-        m_node->moveText(std::move(m_glyphs));
-        m_glyphs.clear();
-    }
-
     m_node->sync();
 
     n->setTextureCoordinatesTransform(QSGSimpleTextureNode::NoTransform);
@@ -706,12 +706,22 @@ void CustomTextureNodePrivate::sync()
         m_documentRendering.SetDocumentContent(m_text);
         m_text.clear();
     }
+    if (m_updatedCarret)
+    {
+        m_documentRendering.UpdateCaret(m_caretData);
+    }
 }
 
 void CustomTextureNodePrivate::moveText(std::vector<FGlyphData>&& text)
 {
     m_text = std::move(text);
-    text.clear();
+}
+
+void CustomTextureNodePrivate::updateCaret(const FCaretData& caretData)
+{
+    m_updatedCarret = true;
+    m_caretData = caretData;
+    
 }
 
 void CustomTextureNodePrivate::render()
