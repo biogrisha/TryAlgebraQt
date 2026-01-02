@@ -139,8 +139,9 @@ private:
     VkQueue m_graphicsQueue;
 
     std::vector<FGlyphData> m_text;
+    bool m_updatedText = false;
     FCaretData m_caretData;
-    bool m_updatedCarret = false;
+    bool m_updatedCaret = false;
 };
 
 MathDocument::MathDocument()
@@ -701,25 +702,27 @@ void CustomTextureNodePrivate::sync()
         setTexture(wrapper);
         Q_ASSERT(wrapper->nativeInterface<QNativeInterface::QSGVulkanTexture>()->nativeImage() == m_texture);
     }
-    if (!m_text.empty())
+    if (m_updatedText)
     {
         m_documentRendering.SetDocumentContent(m_text);
-        m_text.clear();
     }
-    if (m_updatedCarret)
+    if (m_updatedCaret)
     {
         m_documentRendering.UpdateCaret(m_caretData);
     }
+    m_updatedText = false;
+    m_updatedCaret = false;
 }
 
 void CustomTextureNodePrivate::moveText(std::vector<FGlyphData>&& text)
 {
     m_text = std::move(text);
+    m_updatedText = true;
 }
 
 void CustomTextureNodePrivate::updateCaret(const FCaretData& caretData)
 {
-    m_updatedCarret = true;
+    m_updatedCaret = true;
     m_caretData = caretData;
     
 }
@@ -732,30 +735,28 @@ void CustomTextureNodePrivate::render()
     VkResult err = VK_SUCCESS;
 
     //render math document
-    if(m_documentRendering.HasContent())
-    {
-        auto RenderedDocument = m_documentRendering.Render();
-        auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
-        void* RenderedDocData = RenderedDocBuffer->MapData();
+    auto RenderedDocument = m_documentRendering.Render();
+    auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
+    void* RenderedDocData = RenderedDocBuffer->MapData();
 
-        //Copy buffer into image
-        VkDeviceSize imageSize = m_itemSizeX * m_itemSizeY * 4;
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    //Copy buffer into image
+    VkDeviceSize imageSize = m_itemSizeX * m_itemSizeY * 4;
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-        void* data;
-        m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
-        memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
-        RenderedDocBuffer->UnmapData();
-        m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
-        TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-        copyBufferToImage(stagingBuffer, m_textureImage, static_cast<uint32_t>(m_itemSizeX), static_cast<uint32_t>(m_itemSizeY));
-        TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    void* data;
+    m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
+    memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
+    RenderedDocBuffer->UnmapData();
+    m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
+    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    copyBufferToImage(stagingBuffer, m_textureImage, static_cast<uint32_t>(m_itemSizeX), static_cast<uint32_t>(m_itemSizeY));
+    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-        m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
-        m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
-    }
+    m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
+    m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
+    
 
     uint currentFrameSlot = m_window->graphicsStateInfo().currentFrameSlot;
 

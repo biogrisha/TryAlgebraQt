@@ -27,6 +27,8 @@ namespace VkHelpers
 
 	void CopyImageToImage(FImageBuffer* Src, FImageBuffer* Dst, const vk::raii::CommandBuffer& CommandBuffer);
 
+	void ClearImage(FImageBuffer* Image, const vk::raii::CommandBuffer& CommandBuffer);
+
 	vk::DescriptorType ConvertBufferToDescriptor(VkBufferUsageFlagBits BufferUsage);
 
 	std::unique_ptr<FBuffer> ConvertImageToBuffer(FImageBuffer* ImageBuffer);

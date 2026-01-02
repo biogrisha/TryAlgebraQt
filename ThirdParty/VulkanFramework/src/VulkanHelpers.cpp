@@ -117,6 +117,21 @@ void VkHelpers::CopyImageToImage(FImageBuffer* Src, FImageBuffer* Dst, const vk:
 	ImageTransition_TransferDstToShaderRead(Dst, CommandBuffer);
 }
 
+void VkHelpers::ClearImage(FImageBuffer* Image, const vk::raii::CommandBuffer& CommandBuffer)
+{
+	ImageTransition_UnknownToTransferDst(Image, CommandBuffer);
+	vk::ClearColorValue Color;
+	Color.setFloat32({ 0,0,0,0 });
+	vk::ImageSubresourceRange Range;
+	Range.aspectMask = vk::ImageAspectFlagBits::eColor;
+	Range.baseMipLevel = 0;
+	Range.levelCount = 1;
+	Range.baseArrayLayer = 0;
+	Range.layerCount = 1;
+	CommandBuffer.clearColorImage(Image->GetImage(), vk::ImageLayout::eTransferDstOptimal, Color, Range);
+	ImageTransition_TransferDstToShaderRead(Image, CommandBuffer);
+}
+
 vk::DescriptorType VkHelpers::ConvertBufferToDescriptor(VkBufferUsageFlagBits BufferUsage)
 {
 	if (BufferUsage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT)

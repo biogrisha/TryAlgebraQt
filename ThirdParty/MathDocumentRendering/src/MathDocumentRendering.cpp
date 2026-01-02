@@ -5,6 +5,7 @@
 #include <VulkanContext.h>
 #include <chrono>
 #include <algorithm>
+#include "VulkanHelpers.h"
 void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 {
 	FreeTypeWrap = InFreeTypeWrap;
@@ -35,13 +36,14 @@ void FMathDocumentRendering::SetDocumentExtent(const VkExtent2D& InExtent)
 
 void FMathDocumentRendering::SetDocumentContent(const std::vector<FGlyphData>& InDocumentContent)
 {
+	bUpdatedText = true;
+	Atlas.clear();
+	DocumentContent = InDocumentContent;
 	if (InDocumentContent.empty())
 	{
 		return;
 	}
 
-	Atlas.clear();
-	DocumentContent = InDocumentContent;
 	//for each glyph on the page
 	for (auto& GlyphData : DocumentContent)
 	{
@@ -117,8 +119,6 @@ void FMathDocumentRendering::SetDocumentContent(const std::vector<FGlyphData>& I
 		SpriteInstance.TextureOffset = GlyphData.RenderData->TextureOffset;
 	}
 	TextFromAtlasRendering.SetInstances(TextInstanceData);
-
-	bUpdatedText = true;
 }
 
 void FMathDocumentRendering::UpdateCaret(const FCaretData& CaretData)
@@ -135,8 +135,17 @@ FImageBuffer* FMathDocumentRendering::Render()
 {
 	if(bUpdatedText)
 	{
-		AtlasRendering.Render();
-		TextFromAtlasRendering.Render();
+		if(HasContent())
+		{
+			AtlasRendering.Render();
+			TextFromAtlasRendering.Render();
+		}
+		else
+		{
+			auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+			VkHelpers::ClearImage(TextFromAtlasRendering.GetResultImage(), CommandBuffer);
+			VkHelpers::EndSingleTimeCommands(CommandBuffer);
+		}
 		bUpdatedText = false;
 	}
 	SpriteRendering.Render();

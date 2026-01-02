@@ -38,7 +38,7 @@ void DocumentControl::setDocument(const QUrl& filePath)
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 {	
 	auto doc = m_docInfo.lock()->MathDocument;
-	if(!text.isEmpty())
+	if(!text.isEmpty() && text != "\b")
 	{
 		doc->AddMathElements(text.toStdWString());
 		doc->Draw();
@@ -59,6 +59,11 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 			break; 
 		case Qt::Key_Down:
 			doc->StepY(-1);
+			break;
+		case Qt::Key_Backspace:
+			doc->DeleteBackward();
+			doc->Draw();
+			m_mathDocument->moveGlyphData(std::move(m_glyphs));
 			break;
 		default: 
 			qDebug() << "Other key:" << key << "text:" << text; 
