@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include <qqml.h>
 #include <../MathDocument.h>
+#include <QElapsedTimer>
 
 class FTAMathDocumentInfo;
 
@@ -28,5 +29,6 @@ private:
 	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
 	std::vector<FGlyphData> m_glyphs;
 	FCaretData m_caretData;
+	QElapsedTimer timer;
 };
 

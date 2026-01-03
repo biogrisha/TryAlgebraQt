@@ -60,10 +60,7 @@ void FTAMeHelpers::CalculateSize(const MathElementV2::FMathElements& MathElement
 {
 	for (auto& Element : MathElements)
 	{
-		if (auto Comp = Element->Cast<MathElementV2::FTAMeComposite>())
-		{
-			Comp->CalculateSize();
-		}
+		Element->CalculateSize(1);
 	}
 }
 

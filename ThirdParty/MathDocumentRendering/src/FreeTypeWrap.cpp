@@ -108,16 +108,18 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	Result.Outline.pop_back();
 
 	//Cache height and width of glyphs
-	uint32_t Height = face->bbox.yMax - face->bbox.yMin;
-	Result.HeightInPixels = Height / 64;
-	Result.WidthInPixels = face->glyph->advance.x / 64;
+	FT_Pos bbox_units = face->bbox.yMax - face->bbox.yMin;
+	int bbox_pixels = (bbox_units * face->size->metrics.y_scale) >> 16;
+	Result.HeightInPixels = bbox_pixels / 64;
+	Result.WidthInPixels = face->glyph->metrics.horiAdvance / 64;
 
+	int32_t BboxMin = (face->bbox.yMin * face->size->metrics.y_scale) >> 16;
 	//Cache a and b of discriminant 
 	for (auto& Curve : Result.Outline)
 	{
 		for (auto& Point : Curve.points)
 		{
-			Point.y = Height - Point.y + face->bbox.yMin;
+			Point.y = bbox_pixels - Point.y + BboxMin;
 		}
 		std::swap(Curve.points[0], Curve.points[2]);
 		Curve.a = Curve.points[0].y - 2 * Curve.points[1].y + Curve.points[2].y;
@@ -146,9 +148,10 @@ glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
 		0);
 
 	glm::vec2 Result;
-	uint32_t Height = face->bbox.yMax - face->bbox.yMin;
-	Result.y = Height / 64;
-	Result.x = face->glyph->advance.x / 64;
+	FT_Pos bbox_units = face->bbox.yMax - face->bbox.yMin;
+	int bbox_pixels = (bbox_units * face->size->metrics.y_scale) >> 16;
+	Result.y = bbox_pixels / 64;
+	Result.x = face->glyph->metrics.horiAdvance / 64;
 
 	return Result;
 }

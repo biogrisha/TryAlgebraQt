@@ -30,6 +30,8 @@ qt_add_qml_module(Application
         MathEditor/Visual/CharVisual.cpp
         MathEditor/Visual/CaretVisual.h
         MathEditor/Visual/CaretVisual.cpp
+        MathEditor/Visual/FromToVisual.h
+        MathEditor/Visual/FromToVisual.cpp
         
     RESOURCES
         Shaders/DrawEditorLayout.spv

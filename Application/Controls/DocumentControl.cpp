@@ -30,6 +30,7 @@ void DocumentControl::setDocument(const QUrl& filePath)
 	compatibilityData->CursorComponentGenerator = cursorGen;
 	auto meGen = std::make_shared<MathElementGeneratorQt>();
 	meGen->m_glyphsPtr = &m_glyphs;
+	meGen->initMeGenerators();
 	compatibilityData->MeGenerator = meGen;
 	AppGlobal::mainModule->OpenDocument(filePath.toLocalFile().toStdWString(), docInfo, compatibilityData);
 	m_docInfo = docInfo;
@@ -55,10 +56,10 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 			doc->StepX(1);
 			break;
 		case Qt::Key_Up: 
-			doc->StepY(1);
+			doc->StepY(-1);
 			break; 
 		case Qt::Key_Down:
-			doc->StepY(-1);
+			doc->StepY(1);
 			break;
 		case Qt::Key_Backspace:
 			doc->DeleteBackward();
@@ -78,6 +79,7 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 void DocumentControl::mathDocumentReady()
 {
 	QObject::disconnect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady);
+	m_docInfo.lock()->MathDocument->Draw();
 	m_mathDocument->moveGlyphData(std::move(m_glyphs));
 	m_mathDocument->updateCaret(m_caretData);
 	m_glyphs.clear();

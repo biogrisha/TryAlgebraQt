@@ -2,7 +2,7 @@
 
 
 #include "Modules/MathElementsV2/Me/MeFromTo.h"
-
+#include "Modules/Visual/VisualBase.h"
 #include "FunctionLibraries/MeDefinition.h"
 #include "FunctionLibraries/MathElementsHelpers.h"
 
@@ -11,6 +11,7 @@ MathElementV2::FTAMeFromTo::FTAMeFromTo(const std::wstring& InSymbol)
 {
 	Symbol = InSymbol;
 	SetDefaultSize({1.f, 1.5f});
+	AccumulatedScalingFactor = 0.7f;
 }
 
 const std::wstring& MathElementV2::FTAMeFromTo::GetSymbol() const
@@ -26,6 +27,11 @@ const TACommonTypes::FTAVector2d& MathElementV2::FTAMeFromTo::GetSymbolPosition(
 std::wstring MathElementV2::FTAMeFromTo::GetName()
 {
 	return FTAMeDefinition::FromToName;
+}
+
+int32_t MathElementV2::FTAMeFromTo::GetFontSize()
+{
+	return FontSize;
 }
 
 float MathElementV2::FTAMeFromTo::GetScalingFactor(int ChildIndex)
@@ -44,6 +50,16 @@ float MathElementV2::FTAMeFromTo::GetHorizontalAlignmentOffset() const
 	return GetAbsoluteSize().y / 2.f;
 }
 
+void MathElementV2::FTAMeFromTo::CalculateSize(float InAccumulatedScalingFactor)
+{
+	if(!bScaleFactorApplied)
+	{
+		FontSize *= InAccumulatedScalingFactor;
+		SymbolSize = Visual->GetVisualSize();
+	}
+	FTAMeComposite::CalculateSize(InAccumulatedScalingFactor);
+}
+
 void MathElementV2::FTAMeFromTo::ArrangeChildren()
 {
 	if (Children.size() < 2)
@@ -52,7 +68,7 @@ void MathElementV2::FTAMeFromTo::ArrangeChildren()
 	}
 	//Align children horizontally and gt their Center X
 	float Center = FTAMeHelpers::AlignHorizontally(Children);
-	float HalfDefaultWidth = DefaultSize.x / 2.f;
+	float HalfDefaultWidth = SymbolSize.x / 2.f;
 	if (Center < HalfDefaultWidth)
 	{
 		//If Symbol Is wider than children, move them to the right so that Symbol could fit
@@ -63,7 +79,7 @@ void MathElementV2::FTAMeFromTo::ArrangeChildren()
 	Pos1.y = 0;
 	Children[0]->SetLocalPosition(Pos1);
 	auto Pos2 = Children[1]->GetLocalPosition();
-	Pos2.y = Children[0]->GetAbsoluteSize().y + DefaultSize.y;
+	Pos2.y = Children[0]->GetAbsoluteSize().y + SymbolSize.y;
 	Children[1]->SetLocalPosition(Pos2);
 	
 	SymbolPosition = {Center - HalfDefaultWidth, Children[0]->GetAbsoluteSize().y};

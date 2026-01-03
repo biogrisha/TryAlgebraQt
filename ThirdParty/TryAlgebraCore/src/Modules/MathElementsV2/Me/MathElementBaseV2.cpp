@@ -86,3 +86,7 @@ void MathElementV2::FTAMathElementBase::CalculateAbsolutePosition()
 	
 }
 
+void MathElementV2::FTAMathElementBase::CalculateSize(float AccumulatedScalingFactor)
+{
+}
+

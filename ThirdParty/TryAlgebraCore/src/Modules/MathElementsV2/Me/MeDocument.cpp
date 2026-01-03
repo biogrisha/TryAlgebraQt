@@ -6,6 +6,7 @@
 #include "FunctionLibraries/MathElementsHelpers.h"
 #include "Modules/MathElementsV2/Me/MeContainer.h"
 #include "Modules/MathElementsV2/Me/MeNewLine.h"
+#include <algorithm>
 
 MathElementV2::FTAMeDocument::FTAMeDocument()
 {
@@ -15,9 +16,9 @@ MathElementV2::FTAMeDocument::FTAMeDocument()
 	LinesCount = 0;
 	SetDefaultSize({1,1});
 	//Init first line
-	auto FirstLine = FTAMeNewLine::MakeTypedShared();
-	FirstLine->SetParent(this);
-	Children.push_back(FirstLine);
+	//auto FirstLine = FTAMeNewLine::MakeTypedShared();
+	//FirstLine->SetParent(this);
+	//Children.push_back(FirstLine);
 }
 
 float MathElementV2::FTAMeDocument::GetScalingFactor(int ChildIndex)
@@ -92,79 +93,25 @@ void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const 
 	{
 		return;
 	}
-	//Set as owner
-	SetDocumentToChildren(GeneratedMathElements);
-	//Calculate default sizes
-	FTAMeHelpers::CalculateInitialScaling(GeneratedMathElements);
-	FTAMeHelpers::CalculateSize(GeneratedMathElements);
-	FTAMeHelpers::SetDepth(GeneratedMathElements, Path.TreePath.size());
 
 	TTypedWeak<FTAMeComposite> ParentElement = FTAMeHelpers::GetParentElement(this, Path);
-	if (ParentElement.Get() != this)
+	//set this as a parent
+	for (auto& Me : GeneratedMathElements)
 	{
-		//If insert in some child elements
-		ParentElement->AddChildren(Path, GeneratedMathElements);
-		OnMeAdded.Invoke(Path, GeneratedMathElements);
-		return;
+		//Set parent
+		Me->SetParent(ParentElement.Get());
 	}
-	//if insert in MeDocument
-	//Update lines count
-	UpdateLinesCount(FTAMeHelpers::GetLinesCount(GeneratedMathElements));
-	//Scale with respect to doc size
-	//and set this as a parent
-	SetParentAndScale(Path, GeneratedMathElements);
-
-	//Cache elements that can be affected by insertion
-	std::vector<TTypedWeak<FTAMathElementBase>> VisibleElementsToRedraw;
-	//If Path outside visible region
-	bool bAboveVisibleArea = (std::max)(0, Path.TreePath.back() - 1) < VisibleFrom;
-	bool bOutsideVisibleArea = Path.TreePath.back() > VisibleTo || bAboveVisibleArea;
-	//If Path points at last visible elements and first inserted element is NewLine
-	bool bAffectVisibleRegion = !((Path.TreePath.back() == VisibleTo && GeneratedMathElements[0]->IsOfType(FTAMeNewLine::StaticType()))
-		|| bOutsideVisibleArea);
 	
-	int AffectedLineStart = Path.TreePath.back();
-	if (bAffectVisibleRegion)
+	ParentElement->AddChildren(Path, GeneratedMathElements);
+	if(ParentElement.Get() != this)
 	{
-		//If affects visible elements
-		//Mark elements that they potentially can be hidden
-		FTAMeHelpers::FindLineStart(this, Path.TreePath.back(), AffectedLineStart);
-		VisibleElementsToRedraw = FTAMeHelpers::GetMeRange(Children, AffectedLineStart, VisibleTo);
-		FTAMeHelpers::SetShouldHide(VisibleElementsToRedraw);
+		Children[Path.TreePath[0]]->CalculateSize(1);
 	}
-	//Insert math elements
-	Children.insert(Children.begin() + Path.TreePath.back(), GeneratedMathElements.begin(), GeneratedMathElements.end());
-	int ArrangedFrom = AffectedLineStart;
-	int ArrangedTo = Path.TreePath.back() + GeneratedMathElements.size();
-
-	//Arrange math elements and find last visible index
-	FTAMeHelpers::CalculateMeCountInLines(this, ArrangedFrom, ArrangedTo);
-	PreAligned.Invoke(Children, ArrangedFrom, ArrangedTo);
-	FTAMeHelpers::ArrangeElementsInLines(this, ArrangedFrom, ArrangedTo);
-	if (!bOutsideVisibleArea)
+	else
 	{
-		//If elements are inside visible area
-		if (ArrangedFrom == VisibleFrom)
-		{
-			//If this is first line in visible area-> we don't want to take line above into account
-			FTAMeHelpers::ArrangeLines(this, 0, ArrangedFrom, ArrangedTo);
-		}
-		else
-		{
-			FTAMeHelpers::ArrangeLines(this, ArrangedFrom, ArrangedTo);
-		}
-
-		VisibleTo = ArrangedTo;
-		FTAMeHelpers::ShowElements(Children, ArrangedFrom, ArrangedTo);
-		FTAMeHelpers::HideIfShould(VisibleElementsToRedraw);
+		FTAMeHelpers::CalculateSize(GeneratedMathElements);
 	}
-	else if (bAboveVisibleArea)
-	{
-		//If elements were inserted above -> offset visible indices
-		VisibleTo += GeneratedMathElements.size();
-		VisibleFrom += GeneratedMathElements.size();
-	}	
-	OnMeAdded.Invoke(Path, GeneratedMathElements);
+	ArrangeVisibleElements();
 }
 
 void MathElementV2::FTAMeDocument::RemoveMathElements(FTAMePath Path, int Count)
@@ -327,5 +274,50 @@ void MathElementV2::FTAMeDocument::SetDocumentToChildren(const FMathElements& Ma
 			}
 			SetDocumentToChildren(Comp->GetChildren());
 		}
+	}
+}
+
+void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
+{
+	float MaxHorizontalAlignment = FLT_MIN;
+	float YOffset = 0;
+	float XOffset = 0;
+	int LineStart = VisibleFrom;
+	for (int i = VisibleFrom; i < Children.size(); i++)
+	{
+		TACommonTypes::FTAVector2d NewPos;
+		auto HorAlign = Children[i]->GetHorizontalAlignmentOffset();
+		//find max hor alignment
+		MaxHorizontalAlignment = std::max(MaxHorizontalAlignment, HorAlign);
+		//move element up by hor alignment
+		NewPos.y = -HorAlign;
+		NewPos.x = XOffset;
+		Children[i]->SetLocalPosition(NewPos);
+		//Advance X
+		XOffset += Children[i]->GetAbsoluteSize().x;
+		auto NewLine = Children[i]->Cast<MathElementV2::FTAMeNewLine>();
+		if (NewLine || i + 1 == Children.size())
+		{
+			//if new line
+			//lower all elements in line by max hor alignment
+			float MaxYOffset = FLT_MIN;
+			for (int j = LineStart; j <= i; j++)
+			{
+				auto LocalPos = Children[j]->GetLocalPosition();
+				LocalPos.y += MaxHorizontalAlignment + YOffset;
+				MaxYOffset = std::max(MaxYOffset, LocalPos.y + Children[j]->GetAbsoluteSize().y);
+				Children[j]->SetLocalPosition(LocalPos);
+			}
+			LineStart = i + 1;
+			MaxHorizontalAlignment = FLT_MIN;
+			XOffset = 0;
+			YOffset = MaxYOffset;
+			VisibleTo = LineStart;
+			if (YOffset >= RelativeHeight)
+			{
+				break;
+			}
+		}
+
 	}
 }

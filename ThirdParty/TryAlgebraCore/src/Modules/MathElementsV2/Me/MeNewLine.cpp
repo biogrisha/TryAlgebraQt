@@ -13,3 +13,8 @@ void MathElementV2::FTAMeNewLine::SetMinY(float Val)
 {
 	MinY = Val;
 }
+
+void MathElementV2::FTAMeNewLine::CalculateSize(float AccumulatedScalingFactor)
+{
+	AbsoluteSize = DefaultSize;
+}

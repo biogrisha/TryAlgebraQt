@@ -55,6 +55,12 @@ namespace MathElementV2
 		bool bSelected = false;
 		bool bHighlight = false;
 		bool bSelectionMatchHighlight = false;
+
+		//new logic
+	public:
+		virtual void CalculateSize(float AccumulatedScalingFactor);
+	protected:
+		bool bScaleFactorApplied = false;
 	};
 
 	using FMathElements = std::vector<std::shared_ptr<FTAMathElementBase>>;

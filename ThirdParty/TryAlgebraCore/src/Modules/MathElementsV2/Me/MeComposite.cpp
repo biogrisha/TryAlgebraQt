@@ -65,12 +65,8 @@ void MathElementV2::FTAMeComposite::ChildrenChanged(const FTAMePath& RequestPath
 
 void MathElementV2::FTAMeComposite::AddChildren(const FTAMePath& RequestPath, const FMathElements& MathElements)
 {
-	//Scale children
-	//We assume that children were just created using parser, and they have default sizes
-	SetParentAndScale(RequestPath,MathElements);
 	//insert children in last index in path
 	Children.insert(Children.begin() + RequestPath.TreePath.back(), MathElements.begin(), MathElements.end());
-	ChildrenChanged(RequestPath, true);
 }
 
 void MathElementV2::FTAMeComposite::Destroy()
@@ -142,13 +138,21 @@ float MathElementV2::FTAMeComposite::GetReferenceScaler() const
 
 void MathElementV2::FTAMeComposite::CalculateCompSize()
 {
-	AbsoluteSize = DefaultSize;
+	if (bAdjustChildrenSize)
+	{
+		//Adjust children size
+		AdjustChildrenSize();
+	}
+	//Arrange children
+	ArrangeChildren();
+	//Offset children with respect to padding
+	FTAMeHelpers::OffsetMathElements(Children, GetPadding() * AccumulatedScalingFactor);
 	for (auto& Child : Children)
 	{
 		auto ExtremePoint = Child->LocalPosition + Child->AbsoluteSize;
 		AbsoluteSize = TACommonTypes::Max(AbsoluteSize, ExtremePoint);
 	}
-	AbsoluteSize += GetPadding();
+	AbsoluteSize += GetPadding() * AccumulatedScalingFactor;
 }
 
 void MathElementV2::FTAMeComposite::SetParentAndScale(const FTAMePath& RequestPath, const FMathElements& MathElements)
@@ -166,12 +170,26 @@ void MathElementV2::FTAMeComposite::SetParentAndScale(const FTAMePath& RequestPa
 
 TACommonTypes::FTAVector2d MathElementV2::FTAMeComposite::GetPadding() const
 {
-	return Padding * GetReferenceScaler();
+	return Padding;
 }
 
 void MathElementV2::FTAMeComposite::SetAdjustChildrenSize(bool bVal)
 {
 	bAdjustChildrenSize = bVal;
+}
+
+void MathElementV2::FTAMeComposite::CalculateSize(float InAccumulatedScalingFactor)
+{
+	if(!bScaleFactorApplied)
+	{
+		AccumulatedScalingFactor *= InAccumulatedScalingFactor;
+		bScaleFactorApplied = true;
+	}
+	for (auto Me : Children)
+	{
+		Me->CalculateSize(AccumulatedScalingFactor);
+	}
+	CalculateCompSize();
 }
 
 

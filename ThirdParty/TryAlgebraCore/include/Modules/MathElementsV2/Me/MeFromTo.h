@@ -15,11 +15,17 @@ namespace MathElementV2
 		virtual float GetScalingFactor(int ChildIndex) override;
 		virtual std::wstring GetParseInfo() override;
 		virtual float GetHorizontalAlignmentOffset() const override;
+		virtual void CalculateSize(float AccumulatedScalingFactor) override;
 	public:
 		const std::wstring& GetSymbol() const;
 		const TACommonTypes::FTAVector2d& GetSymbolPosition() const;
 		static std::wstring GetName();
+		int32_t GetFontSize();
+
+	private:
 		std::wstring Symbol;
 		TACommonTypes::FTAVector2d SymbolPosition;
+		TACommonTypes::FTAVector2d SymbolSize;
+		int32_t FontSize = 25;
 	};
 }

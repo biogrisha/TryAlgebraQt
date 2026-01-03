@@ -21,5 +21,11 @@ namespace MathElementV2
 	protected:
 		wchar_t Char;
 		TACommonTypes::FTAColor Color;
+
+		//new logic
+		uint32_t FontSize = 15;
+	public:
+		virtual void CalculateSize(float AccumulatedScalingFactor) override;
+		uint32_t GetFontSize();
 	};
 }

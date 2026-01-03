@@ -20,5 +20,8 @@ namespace MathElementV2
 		int ElementsCount = 0;
 	public:
 		static std::wstring GetName() { return L"lb"; }
+
+		//new logic
+	virtual void CalculateSize(float AccumulatedScalingFactor) override;
 	};
 }

@@ -14,10 +14,6 @@ MathElementV2::FTAMeContainer::FTAMeContainer()
 
 void MathElementV2::FTAMeContainer::ArrangeChildren()
 {
-	if (OwnerDocument.IsValid())
-	{
-		OwnerDocument->PreAligned.Invoke(Children, 0, Children.size());
-	}
 	float MinY = 0;
 	float Offset = 0;
 	FTAMeHelpers::AlignElementsVertically(Children,MinY,Offset);

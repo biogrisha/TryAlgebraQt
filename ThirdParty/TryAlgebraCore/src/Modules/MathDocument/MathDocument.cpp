@@ -46,7 +46,7 @@ void FTAMathDocument::Draw()
 void FTAMathDocument::SetMeData(const std::wstring& MathData)
 {
 	FTAMePath Path;
-	Path.TreePath.push_back(1);
+	Path.TreePath.push_back(0);
 	MeDocument->AddMathElements(Path, MathData);
 }
 

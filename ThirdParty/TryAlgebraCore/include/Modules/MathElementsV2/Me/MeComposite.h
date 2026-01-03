@@ -39,5 +39,12 @@ namespace MathElementV2
 		TACommonTypes::FTAVector2d Padding;
 	private:
 		bool bAdjustChildrenSize;
+
+		//new logic
+	public:
+		virtual void CalculateSize(float AccumulatedScalingFactor) override;
+	protected:
+		//this.AccumulatedScalingFactor = parent.AccumulatedScalingFactor * this.AccumulatedScalingFactor
+		float AccumulatedScalingFactor = 1;
 	};
 }
