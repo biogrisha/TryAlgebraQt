@@ -62,7 +62,7 @@ struct FTAMeHelpers
 	static int FindClosestIndex(const MathElementV2::FMathElements& MathElements, const TACommonTypes::FTAVector2d& Position);
 	static int FindClosestIndex(const MathElementV2::FMathElements& MathElements, const TACommonTypes::FTAVector2d& Position, int From, int To);
 	static int GetLastSameParentInd(const FTAMePath& InPath1, const FTAMePath& InPath2, FTAMePath& SmallerPath, FTAMePath& LargerPath);
-	static int FindElementByX(const MathElementV2::FMathElements& MathElements, int From, int To, float InX);
+	static int FindElementByX(const MathElementV2::FMathElements& MathElements, int From, float InX);
 
 	static void FindMe(const std::vector<TTypedWeak<MathElementV2::FTAMathElementBase>>& Template, const MathElementV2::FMathElements& MathElements, int From, int To,std::vector<MathElementV2::FMathElements>& Result);
 	static bool CompareMe(const std::vector<TTypedWeak<MathElementV2::FTAMathElementBase>>& Template, const MathElementV2::FMathElements& MathElements, int From);
@@ -103,6 +103,11 @@ struct FTAMeHelpers
 	static MathElementV2::FTAMeNewLine* FindLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart);
 	static MathElementV2::FTAMeNewLine* FindPrevLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart);
 	static MathElementV2::FTAMeNewLine* FindNextLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart);
+	//If found new line returns index after it(since you insert elements after new line)
+	//otherwise returns 0
+	static int FindPrevLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From);
+	//If found line, returns index after it, otherwise Children.size()
+	static int FindNextLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From);
 	static void IterateOverLines(MathElementV2::FTAMeDocument* InDocument, int From, int To, const std::function<void(const MathElementV2::FMathElements&, int /*From*/,int /*To*/)>& Callable);
 	//------------Selection----------------
 	

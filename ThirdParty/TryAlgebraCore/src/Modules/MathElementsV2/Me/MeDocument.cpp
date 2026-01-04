@@ -105,79 +105,26 @@ void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const 
 	ParentElement->AddChildren(Path, GeneratedMathElements);
 	if(ParentElement.Get() != this)
 	{
-		Children[Path.TreePath[0]]->CalculateSize(1);
+		Children[Path.TreePath[0]]->CalculateSize(Children[Path.TreePath[0]]->GetParent()->GetAccumulatedScalingFactor());
 	}
 	else
 	{
 		FTAMeHelpers::CalculateSize(GeneratedMathElements);
 	}
 	ArrangeVisibleElements();
+	OnMeAdded.Invoke(Path, GeneratedMathElements);
 }
 
 void MathElementV2::FTAMeDocument::RemoveMathElements(FTAMePath Path, int Count)
 {
 	TTypedWeak<FTAMeComposite> ParentElement = FTAMeHelpers::GetParentElement(this, Path);
+
+	auto CachedMe = ParentElement->RemoveChildren(Path, Count);
 	if (ParentElement.Get() != this)
 	{
-		//If remove in some child elements
-		auto CachedMe = ParentElement->RemoveChildren(Path, Count);
-		if (!CachedMe.empty())
-		{
-			OnMeRemoved.Invoke(Path, CachedMe, Count);
-		}
-		return;
+		Children[Path.TreePath[0]]->CalculateSize(Children[Path.TreePath[0]]->GetParent()->GetAccumulatedScalingFactor());
 	}
-	//if remove from MeDocument
-	if (Path.TreePath.back() + Count > Children.size())
-	{
-		//If attempted to delete elements outside array
-		return;
-	}
-	//Determine from which index visible Me will be affected
-	//If Start below visible region or above visible region
-	bool bAboveVisibleArea = Path.TreePath.back() + Count <= VisibleFrom;
-	bool bAffectVisibleRegion = !(Path.TreePath.back() >= VisibleTo || bAboveVisibleArea);
-	
-	//Find line start before removing Me
-	int From = Path.TreePath.back();
-	FTAMeHelpers::FindLineStart(this, From, From);
-	int To = From;
-	//Update MeNewLine count
-	UpdateLinesCount(-FTAMeHelpers::GetLinesCount(Children, Path.TreePath.back(), Path.TreePath.back() + Count));
-	//Remove Me
-	auto CachedMe = RemoveChildren(Path, Count);
-	//Arrange math elements in lines
-	FTAMeHelpers::CalculateMeCountInLines(this, From, To);
-	PreAligned.Invoke(Children, From, To);
-	FTAMeHelpers::ArrangeElementsInLines(this, From, To);
-	
-	if (bAffectVisibleRegion)
-	{
-		//If elements are inside visible area
-		if (VisibleFrom > From)
-		{
-			//If removing above visible area, adjust VisibleFrom
-			VisibleFrom = From;
-		}
-		if (From == VisibleFrom)
-		{
-			//If this is first line in visible area-> we don't want to take line above into account
-			FTAMeHelpers::ArrangeLines(this, 0, From, To);
-		}
-		else
-		{
-			FTAMeHelpers::ArrangeLines(this, From, To);
-		}
-		VisibleTo = To;
-		FTAMeHelpers::ShowElements(Children, From, To);
-		
-	}
-	else if (bAboveVisibleArea)
-	{
-		//If elements were deleted above -> offset visible indices
-		VisibleTo -= Count;
-		VisibleFrom -= Count;
-	}
+	ArrangeVisibleElements();
 	OnMeRemoved.Invoke(Path, CachedMe, Count);
 }
 
@@ -280,6 +227,11 @@ void MathElementV2::FTAMeDocument::SetDocumentToChildren(const FMathElements& Ma
 void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 {
 
+	if (Children.empty())
+	{
+		VisibleFrom = 0;
+		VisibleTo = 0;
+	}
 	float MaxHorizontalAlignment = FLT_MIN;
 	float YOffset = 0;
 	float XOffset = 0;

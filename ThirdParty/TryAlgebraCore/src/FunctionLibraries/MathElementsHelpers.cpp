@@ -1,7 +1,7 @@
 ﻿#include "FunctionLibraries/MathElementsHelpers.h"
 
 #include <cassert>
-
+#include <algorithm>
 #include "FunctionLibraries/CommonHelpers.h"
 #include "FunctionLibraries/MeDefinition.h"
 #include "Modules/MathElementsV2/MeStepComponent.h"
@@ -273,6 +273,48 @@ MathElementV2::FTAMeNewLine* FTAMeHelpers::FindPrevLineStart(MathElementV2::FTAM
 	}
 	//If non zero index return previous line
 	return FindLineStart(InDocument, OutLineStartTemp - 1, OutLineStart);
+}
+
+int FTAMeHelpers::FindPrevLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From)
+{
+	if (InDocument->Children.empty())
+	{
+		return 0;
+	}
+
+	From = std::min(int(InDocument->Children.size() - 1), From);
+	bool bSkipFirstLine = false;
+	for (int i = From; i >= 0; i--)
+	{
+		if (InDocument->Children[i]->IsOfType(MathElementV2::FTAMeNewLine::StaticType()))
+		{
+			if (bSkipFirstLine)
+			{
+				return i + 1;
+			}
+			else
+			{
+				bSkipFirstLine = true;
+			}
+		}
+	}
+	return 0;
+}
+
+int FTAMeHelpers::FindNextLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From)
+{
+	if (InDocument->Children.empty())
+	{
+		return 0;
+	}
+	for (int i = From; i < InDocument->Children.size(); i++)
+	{
+		if (InDocument->Children[i]->IsOfType(MathElementV2::FTAMeNewLine::StaticType()))
+		{
+			return i + 1;
+		}
+	}
+	return InDocument->Children.size();
 }
 
 MathElementV2::FTAMeNewLine* FTAMeHelpers::FindNextLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart)
@@ -987,16 +1029,20 @@ int FTAMeHelpers::GetLastSameParentInd(const FTAMePath& InPath1, const FTAMePath
 	return i;
 }
 
-int FTAMeHelpers::FindElementByX(const MathElementV2::FMathElements& MathElements, int From, int To, float InX)
+int FTAMeHelpers::FindElementByX(const MathElementV2::FMathElements& MathElements, int From, float InX)
 {
-	for (int i = From; i < To; i++)
+	for (int i = From; i < MathElements.size(); i++)
 	{
+		if (MathElements[i]->IsOfType(MathElementV2::FTAMeNewLine::StaticType()))
+		{
+			return i;
+		}
 		if (MathElements[i]->LocalPosition.x <= InX && MathElements[i]->LocalPosition.x + MathElements[i]->AbsoluteSize.x >= InX)
 		{
 			return i;
 		}
 	}
-	return To;
+	return MathElements.size();
 }
 
 void FTAMeHelpers::FindMe(const std::vector<TTypedWeak<MathElementV2::FTAMathElementBase>>& Template, const MathElementV2::FMathElements& MathElements, int From, int To, std::vector<MathElementV2::FMathElements>& Result)
@@ -1090,45 +1136,26 @@ void FTAMeHelpers::MakeYStep(MathElementV2::FTAMeDocument* InDocument, FTAMePath
 	//If Document
 	//Try step Up or Down
 	//Cache X pos before cursor
-	float RightOffset = 0.2f;
+	float RightOffset = 5.f;
 	float XPos = RightOffset;
 	if (CommonHelpers::IsValidId(InDocument->Children, InPath.TreePath.back() - 1))
 	{
-		auto& MeBeforeCursor = InDocument->Children[InPath.TreePath.back() - 1];
+		//has element before caret
+		auto& MeBeforeCaret = InDocument->Children[InPath.TreePath.back() - 1];
 		//XPos = Element's right side + little offset
-		XPos = MeBeforeCursor->LocalPosition.x + MeBeforeCursor->AbsoluteSize.x + RightOffset;
+		XPos = MeBeforeCaret->LocalPosition.x + MeBeforeCaret->AbsoluteSize.x + RightOffset;
 	}
 	if (Count < 0)
 	{
 		//If step Up
-		int LineStartIndex = 0;
-		MathElementV2::FTAMeNewLine* LineStart = FindPrevLineStart(InDocument, InPath.TreePath.back() - 1, LineStartIndex);
-		if (!LineStart)
-		{
-			return;
-		}
-		InPath.TreePath.back() = FindElementByX(InDocument->Children, LineStartIndex, LineStartIndex + LineStart->ElementsCount, XPos);
+		int LineStart = FindPrevLineStartInd(InDocument, InPath.TreePath.back() - 1);
+		InPath.TreePath.back() = FindElementByX(InDocument->Children, LineStart, XPos);
 	}
 	else
 	{
 		//If step Down
-		if (CommonHelpers::IsValidId(InDocument->Children, InPath.TreePath.back()))
-		{
-			int LineStartIndex = 0;
-			//Check if Cursor points at new line
-			MathElementV2::FTAMeNewLine* LineStart = InDocument->Children[InPath.TreePath.back()]->Cast<MathElementV2::FTAMeNewLine>();
-			LineStartIndex = InPath.TreePath.back();
-			if (!LineStart)
-			{
-				//If not, find next line
-				LineStart = FindNextLineStart(InDocument, InPath.TreePath.back(), LineStartIndex);
-				if (!LineStart)
-				{
-					return;
-				}
-			}
-			InPath.TreePath.back() = FindElementByX(InDocument->Children, LineStartIndex, LineStartIndex + LineStart->ElementsCount, XPos);
-		}
+		int LineStart = FindNextLineStartInd(InDocument, InPath.TreePath.back());
+		InPath.TreePath.back() = FindElementByX(InDocument->Children, LineStart, XPos);
 	}
 }
 

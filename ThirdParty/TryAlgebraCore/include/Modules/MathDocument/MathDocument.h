@@ -18,6 +18,7 @@ public:
 	void Setup(const std::shared_ptr<class FTACompatibilityData>& InCompatibilityData);
 	void ClearDrawing();
 	void Draw();
+	void UpdateCaret();
 	void SetMeData(const std::wstring& MathData);
 	std::wstring GetMeData() const;
 	TTypedWeak<MathElementV2::FTAMeDocument> GetMeDocument() const;

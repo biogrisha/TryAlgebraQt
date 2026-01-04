@@ -51,15 +51,19 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 		switch (key) { 
 		case Qt::Key_Left:
 			doc->StepX(-1);
+			doc->UpdateCaret();
 			break;
 		case Qt::Key_Right: 
 			doc->StepX(1);
+			doc->UpdateCaret();
 			break;
 		case Qt::Key_Up: 
 			doc->StepY(-1);
+			doc->UpdateCaret();
 			break; 
 		case Qt::Key_Down:
 			doc->StepY(1);
+			doc->UpdateCaret();
 			break;
 		case Qt::Key_Backspace:
 			doc->DeleteBackward();

@@ -75,7 +75,6 @@ void FTACursorComponent::StepX(int Count)
 	auto PathTemp = CurrentPath;
 	FTAMeHelpers::MakeXStep(Document.Get(), PathTemp, Count);
 	SetCurrentPath(PathTemp);
-	Redraw();
 }
 
 void FTACursorComponent::StepY(int Count)
@@ -83,7 +82,6 @@ void FTACursorComponent::StepY(int Count)
 	auto PathTemp = CurrentPath;
 	FTAMeHelpers::MakeYStep(Document.Get(), PathTemp, Count);
 	SetCurrentPath(PathTemp);
-	Redraw();
 }
 
 void FTACursorComponent::UpdateSelecting(const TACommonTypes::FTAVector2d& InPosition)
@@ -189,7 +187,6 @@ void FTACursorComponent::OnMeAdded(const FTAMePath& Path, const MathElementV2::F
 	FTAMePath NewCurrentPath = Path;
 	NewCurrentPath.TreePath.back() += MathElements.size();
 	SetCurrentPath(NewCurrentPath);
-	Redraw();
 }
 
 void FTACursorComponent::OnScrolled(float)

@@ -43,6 +43,11 @@ void FTAMathDocument::Draw()
 	CursorComponent->Show();
 }
 
+void FTAMathDocument::UpdateCaret()
+{
+	CursorComponent->Show();
+}
+
 void FTAMathDocument::SetMeData(const std::wstring& MathData)
 {
 	FTAMePath Path;
@@ -169,7 +174,7 @@ void FTAMathDocument::DeleteBackward()
 	int Count = CursorComponent->GetSelectedElements().size();
 	if (Count == 0)
 	{
-		if (CurrentPath.TreePath.size() == 1 && CurrentPath.TreePath.back() == 1)
+		if (CurrentPath.TreePath.size() == 1 && CurrentPath.TreePath.back() == 0)
 		{
 			return;
 		}
