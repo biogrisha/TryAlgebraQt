@@ -10,6 +10,6 @@ CaretVisual::CaretVisual(FTACursorComponent* cursorComp, FCaretData* caretDataPt
 void CaretVisual::Show()
 {
 	auto params = m_cursorComp->GetParameters();
-	m_caretDataPtr->Pos = glm::vec2{ params.Position.x, params.Position.y - 42/2 };
-	m_caretDataPtr->Size = glm::vec2{ 5, params.Height * 42 };
+	m_caretDataPtr->Pos = glm::vec2{ params.Position.x - 2, params.Position.y };
+	m_caretDataPtr->Size = glm::vec2{ 5, params.Height };
 }

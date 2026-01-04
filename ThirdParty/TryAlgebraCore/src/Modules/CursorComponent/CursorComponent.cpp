@@ -6,6 +6,7 @@
 #include "FunctionLibraries/MathElementsHelpers.h"
 #include "Modules/MathElementsV2/Me/MeContainer.h"
 #include "Modules/MathElementsV2/Me/MeDocument.h"
+#include "Modules/MathElementsV2/Me/MeNewLine.h"
 #include "Modules/Visual/VisualBase.h"
 
 FTACursorComponent::FTACursorComponent()
@@ -36,37 +37,30 @@ FTACursorParameters FTACursorComponent::GetParameters()
 	TTypedWeak<MathElementV2::FTAMeComposite> ParentElement = FTAMeHelpers::GetParentElement(Document.Get(), CurrentPath);
 	MathElementV2::FMathElements Children = ParentElement->GetChildren();
 	//Find cursor height
-	CursorParameters.Height = ParentElement->GetScalingFactor(0);
-	if (CurrentPath.TreePath.back() == 0)
+	CursorParameters.Height = ParentElement->GetAccumulatedScalingFactor() * 30;
+	
+	auto LeafPath = CurrentPath.TreePath.back();
+	if (LeafPath == 0)
 	{
-		//if cursor at start
-		if (Children.empty())
+		if(Children.empty() || Children[0]->IsOfType(MathElementV2::FTAMeNewLine::StaticType()))
 		{
-			//Set cursor at parents local zero
 			CursorParameters.Position = ParentElement->GetAbsolutePosition();
-			if (ParentElement->IsOfType(MathElementV2::FTAMeContainer::StaticType()))
-			{
-				//if parent is container and no children->set cursor at center
-				CursorParameters.Position.x += ParentElement->GetAbsoluteSize().x / 2.f;
-			}
 		}
 		else
 		{
-			//If there are children at 0 index -> use its position and alignment
-			CursorParameters.Position = Children[0]->GetAbsolutePosition() + TACommonTypes::FTAVector2d(0, Children[0]->GetHorizontalAlignmentOffset());
-			CursorParameters.Position.y -= CursorParameters.Height / 2.f;
+			auto ChildPos = Children[0]->GetAbsolutePosition();
+			auto HorizontalAlign = Children[0]->GetHorizontalAlignmentOffset();
+			CursorParameters.Position.x = ChildPos.x;
+			CursorParameters.Position.y = ChildPos.y + HorizontalAlign - CursorParameters.Height / 2.f;
 		}
 	}
 	else
 	{
-		//If the cursor is after some element
-		//Find this element
-		auto Me = Children[CurrentPath.TreePath.back() - 1];
-		//Set the position according to the alignment
-		auto ChildPos = Me->GetAbsolutePosition() + TACommonTypes::FTAVector2d(0, Me->GetHorizontalAlignmentOffset());
-		ChildPos.y -= CursorParameters.Height / 2.f;
-		ChildPos.x += Children[CurrentPath.TreePath.back() - 1]->GetAbsoluteSize().x;
-		CursorParameters.Position = ChildPos;
+		auto ChildPos = Children[LeafPath - 1]->GetAbsolutePosition();
+		auto ChildSize = Children[LeafPath - 1]->GetAbsoluteSize();
+		auto HorizontalAlign = Children[LeafPath - 1]->GetHorizontalAlignmentOffset();
+		CursorParameters.Position.x = ChildPos.x + ChildSize.x;
+		CursorParameters.Position.y = ChildPos.y + HorizontalAlign - CursorParameters.Height/2.f;
 	}
 	return CursorParameters;
 }
@@ -80,7 +74,7 @@ void FTACursorComponent::StepX(int Count)
 {
 	auto PathTemp = CurrentPath;
 	FTAMeHelpers::MakeXStep(Document.Get(), PathTemp, Count);
-	SetCurrentPath(ClampPath(PathTemp));
+	SetCurrentPath(PathTemp);
 	Redraw();
 }
 
@@ -88,7 +82,7 @@ void FTACursorComponent::StepY(int Count)
 {
 	auto PathTemp = CurrentPath;
 	FTAMeHelpers::MakeYStep(Document.Get(), PathTemp, Count);
-	SetCurrentPath(ClampPath(PathTemp));
+	SetCurrentPath(PathTemp);
 	Redraw();
 }
 
@@ -98,11 +92,10 @@ void FTACursorComponent::UpdateSelecting(const TACommonTypes::FTAVector2d& InPos
 	{
 		bStartedSelection = true;
 		FTAMeHelpers::GetIndexAtPosition(Document.Get(),InPosition,SelectionStart);
-		ClampPath(SelectionStart);
 	}
 	FTAMePath SelectionEndTemp;
 	FTAMeHelpers::GetIndexAtPosition(Document.Get(),InPosition,SelectionEndTemp);
-	Select(SelectionStart, ClampPath(SelectionEndTemp));
+	Select(SelectionStart,SelectionEndTemp);
 }
 
 void FTACursorComponent::StartManualSelection()
@@ -229,12 +222,13 @@ void FTACursorComponent::OnComponentAdded()
 
 bool FTACursorComponent::CursorInVisibleArea() const
 {
-	int IndexAdjusted = (std::max)(0,CurrentPath.TreePath[0]-1);
+	/*int IndexAdjusted = (std::max)(0,CurrentPath.TreePath[0]-1);
 	if (IndexAdjusted < Document->GetVisibleTo() && IndexAdjusted >= Document->GetVisibleFrom())
 	{
 		return true;
 	}
-	return false;
+	return false;*/
+	return true;
 }
 
 void FTACursorComponent::Redraw()
@@ -277,10 +271,4 @@ void FTACursorComponent::HighlightParent()
 			FTAMeHelpers::RedrawIfVisible({CurrentParent});
 		}
 	}
-}
-
-FTAMePath& FTACursorComponent::ClampPath(FTAMePath& Path) const
-{
-	Path.TreePath[0] = (std::max)(1,Path.TreePath[0]);
-	return Path;
 }

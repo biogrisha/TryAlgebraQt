@@ -192,4 +192,9 @@ void MathElementV2::FTAMeComposite::CalculateSize(float InAccumulatedScalingFact
 	CalculateCompSize();
 }
 
+float MathElementV2::FTAMeComposite::GetAccumulatedScalingFactor()
+{
+	return AccumulatedScalingFactor;
+}
+
 

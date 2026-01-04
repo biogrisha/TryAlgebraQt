@@ -279,12 +279,37 @@ void MathElementV2::FTAMeDocument::SetDocumentToChildren(const FMathElements& Ma
 
 void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 {
+
 	float MaxHorizontalAlignment = FLT_MIN;
 	float YOffset = 0;
 	float XOffset = 0;
 	int LineStart = VisibleFrom;
 	for (int i = VisibleFrom; i < Children.size(); i++)
 	{
+		auto NewLine = Children[i]->Cast<MathElementV2::FTAMeNewLine>();
+		if (NewLine)
+		{
+			//if new line
+			//lower all elements in line by max hor alignment and YOffset
+			float MaxYOffset = NewLine->GetAbsoluteSize().y;
+			for (int j = LineStart; j < i; j++)
+			{
+				auto LocalPos = Children[j]->GetLocalPosition();
+				LocalPos.y += MaxHorizontalAlignment + YOffset;
+				MaxYOffset = std::max(MaxYOffset, LocalPos.y + Children[j]->GetAbsoluteSize().y);
+				Children[j]->SetLocalPosition(LocalPos);
+			}
+			LineStart = i;
+			MaxHorizontalAlignment = FLT_MIN;
+			XOffset = 0;
+			YOffset = MaxYOffset;
+			VisibleTo = LineStart;
+			if (YOffset >= RelativeHeight)
+			{
+				return;
+			}
+		}
+
 		TACommonTypes::FTAVector2d NewPos;
 		auto HorAlign = Children[i]->GetHorizontalAlignmentOffset();
 		//find max hor alignment
@@ -295,29 +320,16 @@ void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 		Children[i]->SetLocalPosition(NewPos);
 		//Advance X
 		XOffset += Children[i]->GetAbsoluteSize().x;
-		auto NewLine = Children[i]->Cast<MathElementV2::FTAMeNewLine>();
-		if (NewLine || i + 1 == Children.size())
+
+		if (i + 1 == Children.size())
 		{
-			//if new line
-			//lower all elements in line by max hor alignment
-			float MaxYOffset = FLT_MIN;
+			VisibleTo = Children.size();
 			for (int j = LineStart; j <= i; j++)
 			{
 				auto LocalPos = Children[j]->GetLocalPosition();
 				LocalPos.y += MaxHorizontalAlignment + YOffset;
-				MaxYOffset = std::max(MaxYOffset, LocalPos.y + Children[j]->GetAbsoluteSize().y);
 				Children[j]->SetLocalPosition(LocalPos);
 			}
-			LineStart = i + 1;
-			MaxHorizontalAlignment = FLT_MIN;
-			XOffset = 0;
-			YOffset = MaxYOffset;
-			VisibleTo = LineStart;
-			if (YOffset >= RelativeHeight)
-			{
-				break;
-			}
 		}
-
 	}
 }

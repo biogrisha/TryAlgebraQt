@@ -56,8 +56,6 @@ protected:
 	void Redraw();
 	void HighlightSelected(bool bVal);
 	void HighlightParent();
-	//Clamp first element in path to be >= 1
-	FTAMePath& ClampPath(FTAMePath& Path) const;
 public:
 	FTAMulticastDelegate<FTACursorComponent*> OnSelectionUpdated;
 protected:

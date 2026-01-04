@@ -43,6 +43,7 @@ namespace MathElementV2
 		//new logic
 	public:
 		virtual void CalculateSize(float AccumulatedScalingFactor) override;
+		float GetAccumulatedScalingFactor();
 	protected:
 		//this.AccumulatedScalingFactor = parent.AccumulatedScalingFactor * this.AccumulatedScalingFactor
 		float AccumulatedScalingFactor = 1;
