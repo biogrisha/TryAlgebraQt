@@ -1185,7 +1185,7 @@ const std::vector<std::pair<std::wstring, std::wstring>>& FTAMeHelpers::GetMathE
 		{L"Product", Sp + MathElementV2::FTAMeFromTo::GetName() + Sp + FTAMeDefinition::ProductInfo + Sp + GenContainers(2)},
 		{L"Union over", Sp + MathElementV2::FTAMeFromTo::GetName() + Sp + FTAMeDefinition::UnionOverInfo + Sp + GenContainers(2)},
 
-		{L"Doublescript", Sp + MathElementV2::FTAMeIndex::GetName() + Sp + FTAMeDefinition::DoublescriptInfo + Sp + GenContainers(2)},
+		/*{L"Doublescript", Sp + MathElementV2::FTAMeIndex::GetName() + Sp + FTAMeDefinition::DoublescriptInfo + Sp + GenContainers(2)},
 		{L"Subscript", Sp + MathElementV2::FTAMeIndex::GetName() + Sp + FTAMeDefinition::SubscriptInfo + Sp + GenContainers(1)},
 		{L"Superscript", Sp + MathElementV2::FTAMeIndex::GetName() + Sp + FTAMeDefinition::SuperscriptInfo + Sp + GenContainers(1)},
 
@@ -1215,7 +1215,7 @@ const std::vector<std::pair<std::wstring, std::wstring>>& FTAMeHelpers::GetMathE
 
 		{L"Non commute", Sp + MathElementV2::FTAMeCustomToken::GetName() + Sp + FTAMeDefinition::NonCommuteInfo + Sp + GenContainers(1)},
 		{L"Token Word", Sp + MathElementV2::FTAMeCustomToken::GetName() + Sp + FTAMeDefinition::TokenWord + Sp + GenContainers(1)},
-		{L"Token Expression", Sp + MathElementV2::FTAMeCustomToken::GetName() + Sp + FTAMeDefinition::TokenExpression + Sp + GenContainers(1)},
+		{L"Token Expression", Sp + MathElementV2::FTAMeCustomToken::GetName() + Sp + FTAMeDefinition::TokenExpression + Sp + GenContainers(1)},*/
 
 		{L"Alpha", L"α"}, {L"CAlpha", L"Α"},
 		{L"Beta", L"β"}, {L"CBeta", L"Β"},

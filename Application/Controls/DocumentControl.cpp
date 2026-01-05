@@ -7,6 +7,7 @@
 #include "Modules/MathDocument/MathDocument.h"
 #include <QUrl>
 #include "AppGlobal.h"
+#include "FunctionLibraries/MathElementsHelpers.h"
 
 DocumentControl::DocumentControl(QObject *parent)
 	: QObject(parent)
@@ -87,5 +88,20 @@ void DocumentControl::mathDocumentReady()
 	m_mathDocument->moveGlyphData(std::move(m_glyphs));
 	m_mathDocument->updateCaret(m_caretData);
 	m_glyphs.clear();
+}
+
+MathElementInfoModel* DocumentControl::getMeInfoModel()
+{
+	if (m_meInfoModel)
+	{
+		return m_meInfoModel;
+	}
+	m_meInfoModel = new MathElementInfoModel(this);
+	auto& meList = FTAMeHelpers::GetMathElementsList();
+	for (auto& me : meList)
+	{
+		m_meInfoModel->addMathElementInfo(MathElementInfo(QString::fromStdWString(me.first), ""));
+	}
+	return m_meInfoModel;
 }
 

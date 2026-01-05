@@ -6,6 +6,7 @@
 #include <qqml.h>
 #include <../MathDocument.h>
 #include <QElapsedTimer>
+#include "../Models/MathElementInfoModel.h"
 
 class FTAMathDocumentInfo;
 
@@ -23,12 +24,15 @@ public slots:
 	void bindMathDocumentItem(MathDocument* mathDocument);
 	void keyInput(int key, const QString& text, int modifiers);
 	void mathDocumentReady();
-
+	MathElementInfoModel* getMeInfoModel();
 private:
 	MathDocument* m_mathDocument = nullptr;
 	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
 	std::vector<FGlyphData> m_glyphs;
 	FCaretData m_caretData;
-	QElapsedTimer timer;
+	MathElementInfoModel* m_meInfoModel = nullptr;
+
+
+	QElapsedTimer m_timer;
 };
 

@@ -9,14 +9,29 @@ void FFreeTypeWrap::Init(float InDpiX, float InDpiY)
 	DpiY = InDpiY;
 
 	//Init freetype library
-	if (FT_Init_FreeType(&library)) {
+	if (FT_Init_FreeType(&Library)) {
 		throw std::runtime_error("Could not init FreeType Library");
 	}
 	//Load font
-	auto error = FT_New_Face(library,
-		"C:/Windows/Fonts/Arial.ttf",
+	auto error = FT_New_Face(Library,
+		"C:/Windows/Fonts/cambriai.ttf",
 		0,
-		&face);
+		&Face);
+
+	if (error == FT_Err_Unknown_File_Format)
+	{
+		throw std::runtime_error("FT_Err_Unknown_File_Format");
+	}
+	else if (error)
+	{
+		throw std::runtime_error("FontError");
+	}
+
+	//Load fallback font
+	error = FT_New_Face(Library,
+		"C:/Windows/Fonts/cambria.ttc",
+		0,
+		&FaceFallback);
 
 	if (error == FT_Err_Unknown_File_Format)
 	{
@@ -30,22 +45,29 @@ void FFreeTypeWrap::Init(float InDpiX, float InDpiY)
 
 FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 {
+	//convert wchar into glyph index
+	FT_ULong charcode = int(GlyphData.GlyphId.Glyph);
+	auto glyph_index = FT_Get_Char_Index(Face, charcode);
+
+	auto UsedFace = Face;
+	if (glyph_index == 0)
+	{
+		glyph_index = FT_Get_Char_Index(FaceFallback, charcode);
+		UsedFace = FaceFallback;
+	}
 	//Setting font size
 	FGlyphRenderData Result;
 	auto error = FT_Set_Char_Size(
-		face,    /* handle to face object         */
+		UsedFace,    /* handle to face object         */
 		0,       /* char_width in 1/64 of points  */
 		GlyphData.GlyphId.Height * 64,   /* char_height in 1/64 of points */
 		DpiX,     /* horizontal device resolution  */
 		DpiY);
 
-	//convert wchar into glyph index
-	FT_ULong charcode = int(GlyphData.GlyphId.Glyph);
-	auto glyph_index = FT_Get_Char_Index(face, charcode);
 
 	//load glyph
 	error = FT_Load_Glyph(
-		face,          /* handle to face object */
+		UsedFace,          /* handle to face object */
 		glyph_index,   /* glyph index           */
 		0);
 
@@ -102,18 +124,18 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 
 	funcs.shift = 0;
 	funcs.delta = 0;
-	FT_Outline_Decompose(&face->glyph->outline, &funcs, &data);
+	FT_Outline_Decompose(&UsedFace->glyph->outline, &funcs, &data);
 
 	//Remove last curve since it is redundant due to how we decompose curves
 	Result.Outline.pop_back();
 
 	//Cache height and width of glyphs
-	FT_Pos bbox_units = face->bbox.yMax - face->bbox.yMin;
-	int bbox_pixels = (bbox_units * face->size->metrics.y_scale) >> 16;
+	FT_Pos bbox_units = UsedFace->bbox.yMax - UsedFace->bbox.yMin;
+	int bbox_pixels = (bbox_units * UsedFace->size->metrics.y_scale) >> 16;
 	Result.HeightInPixels = bbox_pixels / 64;
-	Result.WidthInPixels = face->glyph->metrics.horiAdvance / 64;
+	Result.WidthInPixels = UsedFace->glyph->metrics.horiAdvance / 64;
 
-	int32_t BboxMin = (face->bbox.yMin * face->size->metrics.y_scale) >> 16;
+	int32_t BboxMin = (UsedFace->bbox.yMin * UsedFace->size->metrics.y_scale) >> 16;
 	//Cache a and b of discriminant 
 	for (auto& Curve : Result.Outline)
 	{
@@ -130,28 +152,36 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 
 glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
 {
+	//convert wchar into glyph index
+	FT_ULong charcode = int(GlyphId.Glyph);
+	auto glyph_index = FT_Get_Char_Index(Face, charcode);
+
+	auto UsedFace = Face;
+	if (glyph_index == 0)
+	{
+		glyph_index = FT_Get_Char_Index(FaceFallback, charcode);
+		UsedFace = FaceFallback;
+	}
+
 	auto error = FT_Set_Char_Size(
-		face,    /* handle to face object         */
+		UsedFace,    /* handle to face object         */
 		0,       /* char_width in 1/64 of points  */
 		GlyphId.Height * 64,   /* char_height in 1/64 of points */
 		DpiX,     /* horizontal device resolution  */
 		DpiY);
 
-	//convert wchar into glyph index
-	FT_ULong charcode = int(GlyphId.Glyph);
-	auto glyph_index = FT_Get_Char_Index(face, charcode);
 
 	//load glyph
 	error = FT_Load_Glyph(
-		face,          /* handle to face object */
+		UsedFace,          /* handle to face object */
 		glyph_index,   /* glyph index           */
 		0);
 
 	glm::vec2 Result;
-	FT_Pos bbox_units = face->bbox.yMax - face->bbox.yMin;
-	int bbox_pixels = (bbox_units * face->size->metrics.y_scale) >> 16;
+	FT_Pos bbox_units = UsedFace->bbox.yMax - UsedFace->bbox.yMin;
+	int bbox_pixels = (bbox_units * UsedFace->size->metrics.y_scale) >> 16;
 	Result.y = bbox_pixels / 64;
-	Result.x = face->glyph->metrics.horiAdvance / 64;
+	Result.x = UsedFace->glyph->metrics.horiAdvance / 64;
 
 	return Result;
 }
