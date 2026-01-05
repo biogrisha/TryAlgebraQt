@@ -13,9 +13,6 @@ DocumentControl::DocumentControl(QObject *parent)
 	: QObject(parent)
 {}
 
-DocumentControl::~DocumentControl()
-{}
-
 void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
 {
 	m_mathDocument = mathDocument;
@@ -103,5 +100,20 @@ MathElementInfoModel* DocumentControl::getMeInfoModel()
 		m_meInfoModel->addMathElementInfo(MathElementInfo(QString::fromStdWString(me.first), ""));
 	}
 	return m_meInfoModel;
+}
+
+void DocumentControl::addMeByName(const QString& meName)
+{
+	auto& meList = FTAMeHelpers::GetMathElementsList();
+	auto foundMe = meList.find(meName.toStdWString());
+	if (foundMe != meList.end())
+	{
+		auto doc = m_docInfo.lock()->MathDocument;
+		doc->AddMathElements(foundMe->second);
+		doc->Draw();
+		m_mathDocument->moveGlyphData(std::move(m_glyphs));
+		m_mathDocument->updateCaret(m_caretData);
+		m_mathDocument->update();
+	}
 }
 

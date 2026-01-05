@@ -183,6 +183,7 @@ void MathElementV2::FTAMeComposite::CalculateSize(float InAccumulatedScalingFact
 	if(!bScaleFactorApplied)
 	{
 		AccumulatedScalingFactor *= InAccumulatedScalingFactor;
+		AbsoluteSize *= InAccumulatedScalingFactor;
 		bScaleFactorApplied = true;
 	}
 	for (auto Me : Children)

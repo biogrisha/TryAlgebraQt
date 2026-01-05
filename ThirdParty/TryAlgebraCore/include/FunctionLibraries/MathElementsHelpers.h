@@ -88,7 +88,7 @@ struct FTAMeHelpers
 	static void ParseToString(const MathElementV2::FMathElements& MathElements, std::wstring& OutStr);
 	static std::wstring GenContainers(int Count);
 	//Key - Name, Val - MeData
-	static const std::vector<std::pair<std::wstring, std::wstring>>& GetMathElementsList();
+	static const std::map<std::wstring, std::wstring>& GetMathElementsList();
 	
 	//--------------Misc---------------------
 	

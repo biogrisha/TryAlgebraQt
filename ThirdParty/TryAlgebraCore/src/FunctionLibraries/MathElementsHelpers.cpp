@@ -1169,12 +1169,12 @@ int FTAMeHelpers::DefaultStep(int Count, int Index, int ElementsCount)
 	return NewIndex;
 }
 
-const std::vector<std::pair<std::wstring, std::wstring>>& FTAMeHelpers::GetMathElementsList()
+const std::map<std::wstring, std::wstring>& FTAMeHelpers::GetMathElementsList()
 {
 	std::wstring Sp = L"\\";
 	std::wstring Op = Sp + L"{";
 	std::wstring Cl = Sp + L"}";
-	static std::vector<std::pair<std::wstring, std::wstring>> List =
+	static std::map<std::wstring, std::wstring> List =
 	{
 		{L"Integral", Sp + MathElementV2::FTAMeFromTo::GetName() + Sp + FTAMeDefinition::IntegralInfo + Sp + GenContainers(2)},
 		{L"Double Integral", Sp + MathElementV2::FTAMeFromTo::GetName() + Sp + FTAMeDefinition::DoubleIntegralInfo + Sp + GenContainers(2)},

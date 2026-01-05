@@ -9,7 +9,7 @@ class FFreeTypeWrap
 public:
 	void Init(float InDpiX, float InDpiY);
 	FGlyphRenderData LoadGlyph(const FGlyphData& GlyphData);
-	glm::vec2 GetGlyphSize(const FGlyphId& GlyphId);
+	glm::vec2 GetGlyphSize(const FGlyphId& GlyphId, bool bCompact = false);
 private:
 	FT_Library  Library;
 	FT_Face     Face;

@@ -56,6 +56,7 @@ void MathElementV2::FTAMeFromTo::CalculateSize(float InAccumulatedScalingFactor)
 	{
 		FontSize *= InAccumulatedScalingFactor;
 		SymbolSize = Visual->GetVisualSize();
+		AbsoluteSize = SymbolSize;
 	}
 	FTAMeComposite::CalculateSize(InAccumulatedScalingFactor);
 }

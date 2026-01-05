@@ -17,7 +17,6 @@ class DocumentControl  : public QObject
 public:
 	DocumentControl(QObject *parent);
 	DocumentControl() = default;
-	~DocumentControl();
 	void setDocument(const QUrl& filePath);
 
 public slots:
@@ -25,6 +24,7 @@ public slots:
 	void keyInput(int key, const QString& text, int modifiers);
 	void mathDocumentReady();
 	MathElementInfoModel* getMeInfoModel();
+	void addMeByName(const QString& meName);
 private:
 	MathDocument* m_mathDocument = nullptr;
 	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;

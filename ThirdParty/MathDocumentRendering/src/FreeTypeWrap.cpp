@@ -58,7 +58,7 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	//Setting font size
 	FGlyphRenderData Result;
 	auto error = FT_Set_Char_Size(
-		UsedFace,    /* handle to face object         */
+		UsedFace,    /* handle to face object */
 		0,       /* char_width in 1/64 of points  */
 		GlyphData.GlyphId.Height * 64,   /* char_height in 1/64 of points */
 		DpiX,     /* horizontal device resolution  */
@@ -130,27 +130,28 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	Result.Outline.pop_back();
 
 	//Cache height and width of glyphs
-	FT_Pos bbox_units = UsedFace->bbox.yMax - UsedFace->bbox.yMin;
-	int bbox_pixels = (bbox_units * UsedFace->size->metrics.y_scale) >> 16;
-	Result.HeightInPixels = bbox_pixels / 64;
 	Result.WidthInPixels = UsedFace->glyph->metrics.horiAdvance / 64;
-
-	int32_t BboxMin = (UsedFace->bbox.yMin * UsedFace->size->metrics.y_scale) >> 16;
+	FT_BBox CBox;
+	FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
+	int Height = (CBox.yMax - CBox.yMin);
+	Result.HeightInPixels = (std::max(CBox.yMax, CBox.yMin) / 64) * 2;
 	//Cache a and b of discriminant 
 	for (auto& Curve : Result.Outline)
 	{
 		for (auto& Point : Curve.points)
 		{
-			Point.y = bbox_pixels - Point.y + BboxMin;
+			Point.y = Height - Point.y + CBox.yMin;
 		}
 		std::swap(Curve.points[0], Curve.points[2]);
 		Curve.a = Curve.points[0].y - 2 * Curve.points[1].y + Curve.points[2].y;
 		Curve.b = Curve.points[0].y - Curve.points[1].y;
 	}
+
+
 	return Result;
 }
 
-glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
+glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId, bool bCompact)
 {
 	//convert wchar into glyph index
 	FT_ULong charcode = int(GlyphId.Glyph);
@@ -178,10 +179,18 @@ glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
 		0);
 
 	glm::vec2 Result;
-	FT_Pos bbox_units = UsedFace->bbox.yMax - UsedFace->bbox.yMin;
-	int bbox_pixels = (bbox_units * UsedFace->size->metrics.y_scale) >> 16;
-	Result.y = bbox_pixels / 64;
+
 	Result.x = UsedFace->glyph->metrics.horiAdvance / 64;
+	FT_BBox CBox;
+	FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
+	if (bCompact)
+	{
+		Result.y = (CBox.yMax - CBox.yMin) / 64;
+	} 
+	else
+	{
+		Result.y = (std::max(CBox.yMax, CBox.yMin) / 64) * 2;
+	}
 
 	return Result;
 }

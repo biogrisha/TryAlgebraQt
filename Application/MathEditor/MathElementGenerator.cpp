@@ -40,8 +40,6 @@ MathElementV2::FMathElementPtr MathElementGeneratorQt::CreateCharacter(wchar_t C
 
 	auto MeChar = MathElementV2::FTAMeCharacter::MakeTypedShared(Char);
 	MeChar->SetVisual(std::make_shared<CharVisual>(MeChar.get(), m_glyphsPtr));
-	auto size = ft->GetGlyphSize({ .Glyph = Char, .Height = 20 });
-	MeChar->SetDefaultSize({ size.x,size.y });
 	return MeChar;
 }
 

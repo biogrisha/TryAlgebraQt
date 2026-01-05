@@ -12,7 +12,7 @@ MathElementV2::FTAMeDocument::FTAMeDocument()
 {
 	RelativeHeight = 1200.f;
 	VisibleFrom = 0;
-	VisibleTo = 1;
+	VisibleTo = 0;
 	LinesCount = 0;
 	SetDefaultSize({1,1});
 	//Init first line

@@ -25,7 +25,7 @@ TACommonTypes::FTAVector2d FromToVisual::GetVisualSize()
 	FGlyphId Glyph;
 	Glyph.Glyph = m_me->GetSymbol().back();
 	Glyph.Height = m_me->GetFontSize();
-	auto Size = ft->GetGlyphSize(Glyph);
+	auto Size = ft->GetGlyphSize(Glyph, true);
 	return { Size.x, Size.y };
 }
 
