@@ -56,9 +56,15 @@ void MathElementV2::FTAMeFromTo::CalculateSize(float InAccumulatedScalingFactor)
 	{
 		FontSize *= InAccumulatedScalingFactor;
 		SymbolSize = Visual->GetVisualSize();
-		AbsoluteSize = SymbolSize;
+		DefaultSize = SymbolSize;
+		AccumulatedScalingFactor *= InAccumulatedScalingFactor;
+		bScaleFactorApplied = true;
 	}
-	FTAMeComposite::CalculateSize(InAccumulatedScalingFactor);
+	for (auto Me : Children)
+	{
+		Me->CalculateSize(AccumulatedScalingFactor);
+	}
+	CalculateCompSize();
 }
 
 void MathElementV2::FTAMeFromTo::ArrangeChildren()

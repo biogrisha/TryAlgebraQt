@@ -131,16 +131,26 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 
 	//Cache height and width of glyphs
 	Result.WidthInPixels = UsedFace->glyph->metrics.horiAdvance / 64;
-	FT_BBox CBox;
-	FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
-	int Height = (CBox.yMax - CBox.yMin);
-	Result.HeightInPixels = (std::max(CBox.yMax, CBox.yMin) / 64) * 2;
+	float VerticalOffset = 0;
+	if (GlyphData.GlyphId.bCompact)
+	{
+		FT_BBox CBox;
+		FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
+		Result.HeightInPixels = (CBox.yMax - CBox.yMin) / 64;
+		VerticalOffset = CBox.yMax;
+	}
+	else
+	{
+		Result.HeightInPixels = GetHeightFromFontSize(GlyphData.GlyphId.Height);
+		VerticalOffset = Result.HeightInPixels * 64 * 0.7;
+
+	}
 	//Cache a and b of discriminant 
 	for (auto& Curve : Result.Outline)
 	{
 		for (auto& Point : Curve.points)
 		{
-			Point.y = Height - Point.y + CBox.yMin;
+			Point.y = - Point.y + VerticalOffset;
 		}
 		std::swap(Curve.points[0], Curve.points[2]);
 		Curve.a = Curve.points[0].y - 2 * Curve.points[1].y + Curve.points[2].y;
@@ -151,7 +161,7 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	return Result;
 }
 
-glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId, bool bCompact)
+glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
 {
 	//convert wchar into glyph index
 	FT_ULong charcode = int(GlyphId.Glyph);
@@ -181,16 +191,21 @@ glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId, bool bCompact)
 	glm::vec2 Result;
 
 	Result.x = UsedFace->glyph->metrics.horiAdvance / 64;
-	FT_BBox CBox;
-	FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
-	if (bCompact)
+	if (GlyphId.bCompact)
 	{
+		FT_BBox CBox;
+		FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
 		Result.y = (CBox.yMax - CBox.yMin) / 64;
 	} 
 	else
 	{
-		Result.y = (std::max(CBox.yMax, CBox.yMin) / 64) * 2;
+		Result.y = GetHeightFromFontSize(GlyphId.Height);
 	}
 
 	return Result;
+}
+
+uint32_t FFreeTypeWrap::GetHeightFromFontSize(float Points)
+{
+	return static_cast<int>(Points * (DpiY / 72.0f)) * 1.5;
 }

@@ -88,7 +88,6 @@ std::wstring MathElementV2::FTAMeComposite::RemoveChildren(const FTAMePath& Requ
 		Children[i]->Destroy();
 	}
 	Children.erase(Children.begin() + From, Children.begin() + To);
-	ChildrenChanged(RequestPath, true);
 	return CachedMe;
 }
 
@@ -147,6 +146,7 @@ void MathElementV2::FTAMeComposite::CalculateCompSize()
 	ArrangeChildren();
 	//Offset children with respect to padding
 	FTAMeHelpers::OffsetMathElements(Children, GetPadding() * AccumulatedScalingFactor);
+	AbsoluteSize = DefaultSize;
 	for (auto& Child : Children)
 	{
 		auto ExtremePoint = Child->LocalPosition + Child->AbsoluteSize;
@@ -183,7 +183,7 @@ void MathElementV2::FTAMeComposite::CalculateSize(float InAccumulatedScalingFact
 	if(!bScaleFactorApplied)
 	{
 		AccumulatedScalingFactor *= InAccumulatedScalingFactor;
-		AbsoluteSize *= InAccumulatedScalingFactor;
+		DefaultSize *= InAccumulatedScalingFactor;
 		bScaleFactorApplied = true;
 	}
 	for (auto Me : Children)

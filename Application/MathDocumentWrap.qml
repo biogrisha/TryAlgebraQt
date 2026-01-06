@@ -5,7 +5,6 @@ import com.Application
 Rectangle {
     width: 200
     height: 100
-	focus: true
     property DocumentControl m_docControl: null
 
     function setDocumentControl(docControl) 
@@ -18,6 +17,7 @@ Rectangle {
 
 
 	ListView {
+		focus: false
 		id: mathElementsList
 		width: 150 
 		anchors.top: parent.top 
@@ -36,7 +36,11 @@ Rectangle {
 				border.width: 1
 				radius: 1
 			}
-			onClicked: m_docControl.addMeByName(button.meName)
+			onClicked:
+			{
+				m_docControl.addMeByName(button.meName)
+				mathDoc.focus = true
+			}
 		}
 	}
 
@@ -51,6 +55,7 @@ Rectangle {
 		Keys.onPressed: (event) => {
 			m_docControl.keyInput(event.key, event.text, event.modifiers)
 		}
+		MouseArea { anchors.fill: parent; onClicked: { mathDoc.focus = true } }
 	}
         
 

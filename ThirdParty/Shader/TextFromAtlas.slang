@@ -45,7 +45,6 @@ float4 fragMain(VSOutput vertIn) : SV_TARGET {
     int2 TexelCoord = 
         int2(int(gl_FragCoord.x + vertIn.TextureOffset.x),int(gl_FragCoord.y + vertIn.TextureOffset.y))
         - vertIn.PixelPos;
-    //return float4(gl_FragCoord.xy /800,1,1);
     float4 Col = texelFetch(texSampler,  TexelCoord);
     if(Col.a < 0.01)
         discard;

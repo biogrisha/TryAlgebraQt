@@ -72,19 +72,6 @@ void MathElementV2::FTAMeDocument::ChildrenChanged(const FTAMePath& RequestPath,
 	}
 }
 
-std::wstring MathElementV2::FTAMeDocument::RemoveChildren(const FTAMePath& RequestPath, int Num)
-{
-	int From = RequestPath.TreePath.back();
-	int To = From + Num;
-	std::wstring CachedMe = FTAMeHelpers::ParseToString(Children, From, To);
-	for (int i = From; i < To; i++)
-	{
-		Children[i]->Destroy();
-	}
-	Children.erase(Children.begin() + From, Children.begin() + To);
-	return CachedMe;
-}
-
 void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const std::wstring& InMathElements)
 {
 	//Generate math elements from string

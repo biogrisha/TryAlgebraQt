@@ -23,6 +23,7 @@ struct FGlyphId
 {
 	wchar_t Glyph{};
 	uint16_t Height = 10;
+	bool bCompact = false;
 
 	bool operator < (const FGlyphId& Other) const
 	{

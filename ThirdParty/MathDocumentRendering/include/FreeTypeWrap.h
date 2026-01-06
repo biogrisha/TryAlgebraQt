@@ -9,8 +9,9 @@ class FFreeTypeWrap
 public:
 	void Init(float InDpiX, float InDpiY);
 	FGlyphRenderData LoadGlyph(const FGlyphData& GlyphData);
-	glm::vec2 GetGlyphSize(const FGlyphId& GlyphId, bool bCompact = false);
+	glm::vec2 GetGlyphSize(const FGlyphId& GlyphId);
 private:
+	uint32_t GetHeightFromFontSize(float Points);
 	FT_Library  Library;
 	FT_Face     Face;
 	FT_Face     FaceFallback;

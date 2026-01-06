@@ -15,6 +15,7 @@ void FromToVisual::Show()
 	FGlyphData g;
 	g.GlyphId.Glyph = m_me->GetSymbol().back();
 	g.GlyphId.Height = m_me->GetFontSize();
+	g.GlyphId.bCompact = true;
 	g.Pos = { pos.x, pos.y };
 	m_glyphsPtr->push_back(g);
 }
@@ -25,7 +26,8 @@ TACommonTypes::FTAVector2d FromToVisual::GetVisualSize()
 	FGlyphId Glyph;
 	Glyph.Glyph = m_me->GetSymbol().back();
 	Glyph.Height = m_me->GetFontSize();
-	auto Size = ft->GetGlyphSize(Glyph, true);
+	Glyph.bCompact = true;
+	auto Size = ft->GetGlyphSize(Glyph);
 	return { Size.x, Size.y };
 }
 
