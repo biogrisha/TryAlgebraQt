@@ -11,18 +11,64 @@ Rectangle {
         { 
             m_docControl = docControl
             m_docControl.bindMathDocumentItem(mathDoc)
-            mathElementsList.model = m_docControl.getMeInfoModel();
+            filteredMeList.model = m_docControl.getMeInfoModel();
         }
 
 
+
+	Flickable {
+		id: flick
+
+		width: 150; height: 30;
+		contentWidth: meSearchBar.contentWidth
+		contentHeight: meSearchBar.contentHeight
+
+		function ensureVisible(r)
+		{
+			if (contentX >= r.x)
+				contentX = r.x;
+			else if (contentX+width <= r.x+r.width)
+				contentX = r.x+r.width-width;
+			if (contentY >= r.y)
+				contentY = r.y;
+			else if (contentY+height <= r.y+r.height)
+				contentY = r.y+r.height-height;
+		}
+
+		TextEdit {
+			id: meSearchBar
+			width: flick.width
+			focus: true
+			wrapMode: TextEdit.Wrap
+			text: "int"
+			onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
+			onTextChanged:
+			{
+				filteredMeList.invalidate()
+			}
+		}
+	}
+
+	SortFilterProxyModel {
+		id: filteredMeList
+		filters: [
+			FunctionFilter {
+				component RoleData: QtObject { property string meName }
+				function filter(data: RoleData) : bool {
+					return data.meName.toLowerCase().includes(meSearchBar.text.toLowerCase())
+				}
+			}
+		]
+	}
 
 	ListView {
 		focus: false
 		id: mathElementsList
 		width: 150 
-		anchors.top: parent.top 
+		anchors.top: flick.bottom 
 		anchors.bottom: parent.bottom
-
+		anchors.left: parent.left
+		model: filteredMeList
 		delegate:  Button {
 			id:button
 			required property string meName
