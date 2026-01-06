@@ -11,15 +11,22 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 	FreeTypeWrap = InFreeTypeWrap;
 	Rendering = std::make_unique<FRendering>();
 
+
 	AtlasRendering.Init(Rendering.get());
+
+	RectRendering.Init(Rendering.get());
+
 	TextFromAtlasRendering.SetAtlas(AtlasRendering.GetAtlas());
+	TextFromAtlasRendering.SetOutputImage(RectRendering.GetResult());
 	TextFromAtlasRendering.Init(Rendering.get());
+
 	SpriteRendering.SetInput(TextFromAtlasRendering.GetResultImage());
 	SpriteRendering.Init(Rendering.get());
 
 	Rendering->GetDescriptorManager().Init();
 
 	AtlasRendering.InitPLine();
+	RectRendering.InitPLine();
 	TextFromAtlasRendering.InitPLine();
 	SpriteRendering.InitPLine();
 	
@@ -27,6 +34,7 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 
 void FMathDocumentRendering::SetDocumentExtent(const VkExtent2D& InExtent)
 {
+	RectRendering.SetExtent(InExtent);
 	AtlasRendering.SetExtent(InExtent);
 	TextFromAtlasRendering.SetExtent(InExtent);
 	SpriteRendering.SetExtent(InExtent);
@@ -137,8 +145,9 @@ FImageBuffer* FMathDocumentRendering::Render()
 	{
 		if(HasContent())
 		{
+			RectRendering.Render();
 			AtlasRendering.Render();
-			TextFromAtlasRendering.Render();
+			TextFromAtlasRendering.Render(!RectRendering.HasInstances());
 		}
 		else
 		{

@@ -35,13 +35,14 @@ public:
 	void SetAtlas(FImageBuffer* InAtlasBuffer);
 	void SetInstances(const std::vector<FGlyphSpriteInst>& InInstances);
 	FImageBuffer* GetResultImage();
-	void Render();
+	void SetOutputImage(FImageBuffer* Image);
+	void Render(bool bClearAttachment);
 
 	std::unique_ptr<FBuffer> VertexBuffer;
 	std::unique_ptr<FBuffer> InstanceBuffer;
 	std::unique_ptr<FBuffer> IndexBuffer;
 	std::unique_ptr<FBuffer> UniformBuffer;
-	std::unique_ptr<FImageBuffer> Result;
+	FImageBuffer* Result;
 	FGlyphSpriteLayout TextFromAtlasLayout;
 	FImageBuffer* AtlasBuffer = nullptr;
 	uint16_t InstancesCount = 0;

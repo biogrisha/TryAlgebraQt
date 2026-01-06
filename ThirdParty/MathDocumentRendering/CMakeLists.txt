@@ -12,11 +12,14 @@ add_library(MathDocumentRendering STATIC
 	include/FreeTypeWrap.h
 	include/MathDocumentRenderingStructs.h
 	include/SpriteRendering.h
+	include/RectanglesRendering.h
 	src/MathDocumentRendering.cpp
 	src/GlyphAtlasRendering.cpp
 	src/TextFromAtlasRendering.cpp
 	src/FreeTypeWrap.cpp
 	src/SpriteRendering.cpp
+	src/RectanglesRendering.cpp
+
 )
 
 # Set include directories

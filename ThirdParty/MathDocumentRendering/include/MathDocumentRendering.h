@@ -9,6 +9,7 @@
 #include <GlyphAtlasRendering.h>
 #include <TextFromAtlasRendering.h>
 #include <SpriteRendering.h>
+#include "RectanglesRendering.h"
 	
 class FMathDocumentRendering
 {
@@ -23,6 +24,7 @@ private:
 	std::vector<FGlyphData> DocumentContent;
 	std::map<FGlyphId, FGlyphData> Atlas;
 	std::map<FGlyphId, std::unique_ptr<FGlyphRenderData>> GlyphsRenderData;
+	FRectRendering RectRendering;
 	FGlyphAtlasRendering AtlasRendering;
 	FTextFromAtlasRendering TextFromAtlasRendering;
 	FSpriteRendering SpriteRendering;

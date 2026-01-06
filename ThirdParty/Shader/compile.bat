@@ -3,3 +3,4 @@ D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawEditorLayout.slang -target s
 D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawAtlas.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawAtlas.spv
 D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe TextFromAtlas.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o TextFromAtlas.spv
 D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawSprites.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawSprites.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawRectangles.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawRectangles.spv

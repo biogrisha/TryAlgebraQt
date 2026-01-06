@@ -48,6 +48,11 @@ struct FVertTex
 	glm::vec2 TexCoord;
 };
 
+struct FVert
+{
+	glm::vec2 Pos;
+};
+
 struct FGlyphSpriteInst
 {
 	glm::vec2 Pos;
@@ -83,4 +88,11 @@ struct FCaretData
 {
 	glm::vec2 Pos;
 	glm::vec2 Size;
+};
+
+struct FRectInst
+{
+	glm::ivec2 Pos;
+	glm::ivec2 Size;
+	glm::vec4 Color;
 };

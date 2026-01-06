@@ -1,5 +1,6 @@
-#include "TextFromAtlasRendering.h"
-#include <VulkanHelpers.h>
+#include "RectanglesRendering.h"
+#include "ImageBuffer.h"
+#include "VulkanHelpers.h"
 
 namespace {
 	uint16_t S_1;
@@ -7,7 +8,7 @@ namespace {
 	uint16_t PLine;
 }
 
-void FTextFromAtlasRendering::Init(FRendering* InRendering)
+void FRectRendering::Init(FRendering* InRendering)
 {
 	Rendering = InRendering;
 	//Create resources
@@ -20,13 +21,6 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 		VertexBuffer->SetData(RectVertices);
 	}
 	{
-		InstanceBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
-		FBufferInfo Info;
-		Info.bDeviceLocal = true;
-		Info.Usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		InstanceBuffer->SetProperties(Info);
-	}
-	{
 		IndexBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
 		FBufferInfo Info;
 		Info.bDeviceLocal = true;
@@ -35,66 +29,82 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 		IndexBuffer->SetData(RectIndices);
 	}
 	{
+		InstanceBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
+		FBufferInfo Info;
+		Info.bDeviceLocal = true;
+		Info.Usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+		InstanceBuffer->SetProperties(Info);
+	}
+	{
 		UniformBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
 		UniformBuffer->SetProperties({ VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT , false });
 		UniformBuffer->SetData(sizeof(Extent), &Extent);
 	}
+	{
+		Output = MyRTTI::MakeTypedUnique<FImageBuffer>();
+		Output->SetExtent(Extent);
+		Output->AddUsageFlags(VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+		Output->Init();
+	}
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet({
-				{AtlasBuffer, vk::ShaderStageFlagBits::eFragment},
 				{UniformBuffer.get(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment},
-			});
+		});
 
 	P_1 = Rendering->GetDescriptorManager().MakePipelineLayout({ S_1 });
 }
 
-void FTextFromAtlasRendering::InitPLine()
+void FRectRendering::InitPLine()
 {
-	PLine = Rendering->AddPipeline(P_1, &TextFromAtlasLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/TextFromAtlas.spv");
+	PLine = Rendering->AddPipeline(P_1, &RectLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/DrawRectangles.spv");
 }
 
-void FTextFromAtlasRendering::SetExtent(const VkExtent2D& InExtent)
+void FRectRendering::SetExtent(const VkExtent2D& InExtent)
 {
-	if (UniformBuffer)
+	if (Output)
 	{
+		Output->SetExtent(InExtent);
 		UniformBuffer->SetData(sizeof(InExtent), &InExtent);
 	}
 	Extent = InExtent;
 }
-void FTextFromAtlasRendering::SetAtlas(FImageBuffer* InAtlasBuffer)
-{
-	AtlasBuffer = InAtlasBuffer;
-}
 
-void FTextFromAtlasRendering::SetInstances(const std::vector<FGlyphSpriteInst>& InInstances)
+void FRectRendering::Render()
 {
-	InstanceBuffer->SetData(InInstances);
-	InstancesCount = InInstances.size();
-}
-
-void FTextFromAtlasRendering::Render(bool bClearAttachment)
-{
+	if (InstancesCount == 0)
+	{
+		return;
+	}
 	FRunPipelineInfo Run;
-
 	Run.PipelineId = PLine;
 	Run.OutputExtent = Extent;
-	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get()};
+	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
 	Run.IndexBuffer = IndexBuffer.get();
 	Run.DescriptorSets = { S_1 };
-	Run.ColorAttachment = Result;
+	Run.ColorAttachment = Output.get();
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = InstancesCount;
-	Run.bClearAttachment = bClearAttachment;
 	Rendering->AddRunPipelineInfo(Run);
 	Rendering->Render();
 }
 
-FImageBuffer* FTextFromAtlasRendering::GetResultImage()
+void FRectRendering::SetInstances(const std::vector<FRectInst>& Rects)
 {
-	return Result;
+	InstancesCount = Rects.size();
+	if (Rects.empty())
+	{
+		return;
+	}
+	InstanceBuffer->SetData(Rects);
 }
 
-void FTextFromAtlasRendering::SetOutputImage(FImageBuffer* Image)
+FImageBuffer* FRectRendering::GetResult()
 {
-	Result = Image;
+	return Output.get();
 }
+
+bool FRectRendering::HasInstances()
+{
+	return InstancesCount > 0;
+}
+

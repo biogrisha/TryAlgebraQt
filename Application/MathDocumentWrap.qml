@@ -40,7 +40,6 @@ Rectangle {
 			width: flick.width
 			focus: true
 			wrapMode: TextEdit.Wrap
-			text: "int"
 			onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
 			onTextChanged:
 			{
@@ -55,6 +54,10 @@ Rectangle {
 			FunctionFilter {
 				component RoleData: QtObject { property string meName }
 				function filter(data: RoleData) : bool {
+					if(meSearchBar.text === "")
+					{
+						return true
+					}
 					return data.meName.toLowerCase().includes(meSearchBar.text.toLowerCase())
 				}
 			}
@@ -65,10 +68,11 @@ Rectangle {
 		focus: false
 		id: mathElementsList
 		width: 150 
+		height: 300
 		anchors.top: flick.bottom 
-		anchors.bottom: parent.bottom
 		anchors.left: parent.left
 		model: filteredMeList
+		clip: true
 		delegate:  Button {
 			id:button
 			required property string meName

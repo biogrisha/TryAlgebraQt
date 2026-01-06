@@ -66,6 +66,10 @@ void FSpriteRendering::InitPLine()
 void FSpriteRendering::SetExtent(const VkExtent2D& InExtent)
 {
 	Extent = InExtent;
+	if (UniformBuffer)
+	{
+		UniformBuffer->SetData(sizeof(Extent), &Extent);
+	}
 }
 
 void FSpriteRendering::SetInput(FImageBuffer* InInput)
