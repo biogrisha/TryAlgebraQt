@@ -3,21 +3,31 @@
 #include "Application.h"
 #include "AppGlobal.h"
 
-FromToVisual::FromToVisual(MathElementV2::FTAMeFromTo* me, std::vector<FGlyphData>* glyphsPtr)
+FromToVisual::FromToVisual(MathElementV2::FTAMeFromTo* me, FMathDocumentState* meDocState)
 {
-	m_glyphsPtr = glyphsPtr;
 	m_me = me;
+	m_meDocState = meDocState;
 }
 
 void FromToVisual::Show()
 {
-	auto pos = m_me->GetAbsolutePosition() + m_me->GetSymbolPosition();
-	FGlyphData g;
-	g.GlyphId.Glyph = m_me->GetSymbol().back();
-	g.GlyphId.Height = m_me->GetFontSize();
-	g.GlyphId.bCompact = true;
-	g.Pos = { pos.x, pos.y };
-	m_glyphsPtr->push_back(g);
+	if (m_meDocState->IsTextUpdated())
+	{
+		auto symbPos = m_me->GetAbsolutePosition() + m_me->GetSymbolPosition();
+		FGlyphData g;
+		g.GlyphId.Glyph = m_me->GetSymbol().back();
+		g.GlyphId.Height = m_me->GetFontSize();
+		g.GlyphId.bCompact = true;
+		g.Pos = { symbPos.x, symbPos.y };
+		m_meDocState->AddGlyph(g);
+	}
+	if (m_meDocState->IsRectsUpdated())
+	{
+		auto pos = m_me->GetAbsolutePosition();
+		auto size = m_me->GetAbsoluteSize();
+		m_meDocState->AddRect(FRectInst({ pos.x, pos.y }, { size.x, size.y }, { 0,0,0.8,1 }));
+	}
+	FTAVisual::Show();
 }
 
 TACommonTypes::FTAVector2d FromToVisual::GetVisualSize()

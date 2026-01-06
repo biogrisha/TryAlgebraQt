@@ -3,38 +3,42 @@
 #include "Application.h"
 #include "AppGlobal.h"
 
-CharVisual::CharVisual(MathElementV2::FTAMeCharacter* InMeChar, std::vector<FGlyphData>* InGlyphsPtr)
+CharVisual::CharVisual(MathElementV2::FTAMeCharacter* InMeChar, FMathDocumentState* meDocState)
 {
-	MeChar = InMeChar;
-	GlyphsPtr = InGlyphsPtr;
+	m_me = InMeChar;
+	m_meDocState = meDocState;
 }
 
 void CharVisual::Show()
 {
-	auto Char = MeChar->GetChar();
-	if (Char == L' ')
+	auto ch = m_me->GetChar();
+	auto pos = m_me->GetAbsolutePosition();
+	auto size = m_me->GetAbsoluteSize();
+	if (m_meDocState->IsTextUpdated() && ch != L' ')
 	{
-		return;
+		FGlyphData glyph;
+		glyph.GlyphId.Glyph = ch;
+		glyph.GlyphId.Height = m_me->GetFontSize();
+		glyph.Pos = { pos.x, pos.y };
+		m_meDocState->AddGlyph(glyph);
 	}
-	FGlyphData Glyph;
-	Glyph.GlyphId.Glyph = Char;
-	Glyph.GlyphId.Height = MeChar->GetFontSize();
-	auto Pos = MeChar->GetAbsolutePosition();
-	Glyph.Pos = { Pos.x, Pos.y };
-	GlyphsPtr->push_back(Glyph);
+	if (m_meDocState->IsRectsUpdated())
+	{
+		m_meDocState->AddRect(FRectInst({ pos.x, pos.y }, { size.x, size.y }, { 0,0,0.8,1 }));
+	}
 	FTAVisual::Show();
 }
 
 TACommonTypes::FTAVector2d CharVisual::GetVisualSize()
 {
 	auto ft = AppGlobal::application->getFreeTypeWrap();
-	FGlyphId Glyph;
-	Glyph.Glyph = MeChar->GetChar();
-	if (Glyph.Glyph == L' ')
+	FGlyphId glyph;
+	glyph.Glyph = m_me->GetChar();
+	if (glyph.Glyph == L' ')
 	{
-		Glyph.Glyph = L'M';
+		glyph.Glyph = L'M';
 	}
-	Glyph.Height = MeChar->GetFontSize();
-	auto Size = ft->GetGlyphSize(Glyph);
-	return { Size.x, Size.y };
+	glyph.Height = m_me->GetFontSize();
+	auto size = ft->GetGlyphSize(glyph);
+	return { size.x, size.y };
 }

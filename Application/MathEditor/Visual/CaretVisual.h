@@ -1,15 +1,15 @@
 #pragma once
 #include "Modules/Visual/VisualBase.h"
-#include "MathDocumentRenderingStructs.h"
+#include "MathDocumentState.h"
 
 class FTACursorComponent;
 
 class CaretVisual : public FTAVisual
 {
 public:
-	CaretVisual(FTACursorComponent* cursorComp, FCaretData* caretDataPtr);
+	CaretVisual(FTACursorComponent* cursorComp, FMathDocumentState* meDocState);
 	virtual void Show() override;
 private:
 	FTACursorComponent* m_cursorComp = nullptr;
-	FCaretData* m_caretDataPtr = nullptr;
+	FMathDocumentState* m_meDocState = nullptr;
 };

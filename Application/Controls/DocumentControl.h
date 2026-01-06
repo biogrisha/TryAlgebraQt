@@ -7,7 +7,7 @@
 #include <../MathDocument.h>
 #include <QElapsedTimer>
 #include "../Models/MathElementInfoModel.h"
-
+#include "MathDocumentState.h"
 class FTAMathDocumentInfo;
 
 class DocumentControl  : public QObject
@@ -28,10 +28,8 @@ public slots:
 private:
 	MathDocument* m_mathDocument = nullptr;
 	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
-	std::vector<FGlyphData> m_glyphs;
-	FCaretData m_caretData;
 	MathElementInfoModel* m_meInfoModel = nullptr;
-
+	FMathDocumentState m_meDocState;
 
 	QElapsedTimer m_timer;
 };

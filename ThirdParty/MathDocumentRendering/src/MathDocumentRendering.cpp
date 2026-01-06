@@ -42,9 +42,8 @@ void FMathDocumentRendering::SetDocumentExtent(const VkExtent2D& InExtent)
 }
 
 
-void FMathDocumentRendering::SetDocumentContent(const std::vector<FGlyphData>& InDocumentContent)
+void FMathDocumentRendering::UpdateText(const std::vector<FGlyphData>& InDocumentContent)
 {
-	bUpdatedText = true;
 	Atlas.clear();
 	DocumentContent = InDocumentContent;
 	if (InDocumentContent.empty())
@@ -129,6 +128,10 @@ void FMathDocumentRendering::SetDocumentContent(const std::vector<FGlyphData>& I
 	TextFromAtlasRendering.SetInstances(TextInstanceData);
 }
 
+void FMathDocumentRendering::UpdateRects(const std::vector<FRectInst>& InRects)
+{
+	RectRendering.SetInstances(InRects);
+}
 void FMathDocumentRendering::UpdateCaret(const FCaretData& CaretData)
 {
 	FSpriteInstByName Caret;
@@ -139,23 +142,46 @@ void FMathDocumentRendering::UpdateCaret(const FCaretData& CaretData)
 	SpriteRendering.SetInstances({ Caret });
 }
 
+void FMathDocumentRendering::UpdateState(const FMathDocumentState& NewState)
+{
+	State.CopyChanged(NewState);
+}
+
 FImageBuffer* FMathDocumentRendering::Render()
 {
-	if(bUpdatedText)
+	if (State.IsRectsUpdated())
 	{
-		if(HasContent())
+		UpdateRects(State.GetRects());
+	}
+	if(State.IsTextUpdated())
+	{
+		UpdateText(State.GetText());
+	}
+	if (!HasContent())
+	{
+		auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+		VkHelpers::ClearImage(TextFromAtlasRendering.GetResultImage(), CommandBuffer);
+		VkHelpers::EndSingleTimeCommands(CommandBuffer);
+	}
+	else if (State.IsRectsUpdated())
+	{
+		RectRendering.Render();
+		if(State.IsTextUpdated())
 		{
-			RectRendering.Render();
 			AtlasRendering.Render();
-			TextFromAtlasRendering.Render(!RectRendering.HasInstances());
 		}
-		else
-		{
-			auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
-			VkHelpers::ClearImage(TextFromAtlasRendering.GetResultImage(), CommandBuffer);
-			VkHelpers::EndSingleTimeCommands(CommandBuffer);
-		}
-		bUpdatedText = false;
+		TextFromAtlasRendering.Render(!RectRendering.HasInstances());
+	}
+	else if (State.IsTextUpdated())
+	{
+		RectRendering.Render();
+		AtlasRendering.Render();
+		TextFromAtlasRendering.Render(!RectRendering.HasInstances());
+	}
+	
+	if (State.IsCaretUpdated())
+	{
+		UpdateCaret(State.GetCaretData());
 	}
 	SpriteRendering.Render();
 	return SpriteRendering.GetResult();

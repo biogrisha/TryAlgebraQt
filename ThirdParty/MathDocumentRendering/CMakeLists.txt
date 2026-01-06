@@ -13,12 +13,14 @@ add_library(MathDocumentRendering STATIC
 	include/MathDocumentRenderingStructs.h
 	include/SpriteRendering.h
 	include/RectanglesRendering.h
+	include/MathDocumentState.h
 	src/MathDocumentRendering.cpp
 	src/GlyphAtlasRendering.cpp
 	src/TextFromAtlasRendering.cpp
 	src/FreeTypeWrap.cpp
 	src/SpriteRendering.cpp
 	src/RectanglesRendering.cpp
+	src/MathDocumentState.cpp
 
 )
 

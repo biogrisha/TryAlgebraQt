@@ -39,7 +39,7 @@ MathElementV2::FMathElementPtr MathElementGeneratorQt::CreateCharacter(wchar_t C
 	}
 
 	auto MeChar = MathElementV2::FTAMeCharacter::MakeTypedShared(Char);
-	MeChar->SetVisual(std::make_shared<CharVisual>(MeChar.get(), m_glyphsPtr));
+	MeChar->SetVisual(std::make_shared<CharVisual>(MeChar.get(), m_meDocState));
 	return MeChar;
 }
 
@@ -60,7 +60,7 @@ void MathElementGeneratorQt::initMeGenerators()
 		FuncCreateMe FuncCreateMe = [this](const std::wstring& Info)->MathElementV2::FMathElementPtr
 			{
 				auto FromTo = MathElementV2::FTAMeFromTo::MakeTypedShared(Info);
-				auto CharVisual = std::make_shared<FromToVisual>(FromTo.get(), m_glyphsPtr);
+				auto CharVisual = std::make_shared<FromToVisual>(FromTo.get(), m_meDocState);
 				FromTo->SetVisual(CharVisual);
 				return FromTo;
 			};

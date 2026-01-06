@@ -2,5 +2,7 @@ T) Add pipeline cache into FPipeline
 T)	replace Extent2D with Extent3D in imageBuffer
 T) Try to use same command buffer when possible
 
-create tree->calculate elements 
-default size
+rects upd && text same->render rects->render only text
+rects upd && text updated->render rects->render atlas->render text
+rects same && text updated -> render rects -> render atlas -> render text
+rects same && text same -> update caret

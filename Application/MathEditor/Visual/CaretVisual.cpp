@@ -1,15 +1,17 @@
 #include "CaretVisual.h"
 #include "Modules/CursorComponent/CursorComponent.h"
 
-CaretVisual::CaretVisual(FTACursorComponent* cursorComp, FCaretData* caretDataPtr)
+CaretVisual::CaretVisual(FTACursorComponent* cursorComp, FMathDocumentState* meDocState)
 {
 	m_cursorComp = cursorComp;
-	m_caretDataPtr = caretDataPtr;
+	m_meDocState = meDocState;
 }
 
 void CaretVisual::Show()
 {
 	auto params = m_cursorComp->GetParameters();
-	m_caretDataPtr->Pos = glm::vec2{ params.Position.x - 2, params.Position.y };
-	m_caretDataPtr->Size = glm::vec2{ 5, params.Height };
+	FCaretData caretData;
+	caretData.Pos = glm::vec2{ params.Position.x - 2, params.Position.y };
+	caretData.Size = glm::vec2{ 5, params.Height };
+	m_meDocState->SetCaret(caretData);
 }

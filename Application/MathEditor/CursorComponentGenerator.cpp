@@ -3,6 +3,6 @@
 std::shared_ptr<FTACursorComponent> CursorComponentGeneratorQt::Create()
 {
 	auto cursorComponent = FTACursorComponent::MakeTypedShared();
-	cursorComponent->SetVisual(std::make_shared<CaretVisual>(cursorComponent.get(), m_caretDataPtr));
+	cursorComponent->SetVisual(std::make_shared<CaretVisual>(cursorComponent.get(), m_meDocState));
 	return cursorComponent;
 }

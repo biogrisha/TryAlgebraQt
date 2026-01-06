@@ -57,8 +57,7 @@ public:
     QSGTexture* texture() const override;
 
     void sync();
-    void moveText(std::vector<FGlyphData>&& text);
-    void updateCaret(const FCaretData& caretData);
+    void setMeDocState(FMathDocumentState* meDocState);
 private slots:
     void render();
 
@@ -137,11 +136,7 @@ private:
     uint32_t m_graphicsFamily = 0;
     VkCommandPool m_commandPool;
     VkQueue m_graphicsQueue;
-
-    std::vector<FGlyphData> m_text;
-    bool m_updatedText = false;
-    FCaretData m_caretData;
-    bool m_updatedCaret = false;
+    FMathDocumentState* m_meDocState = nullptr;
 };
 
 MathDocument::MathDocument()
@@ -149,14 +144,9 @@ MathDocument::MathDocument()
     setFlag(ItemHasContents, true);
 }
 
-void MathDocument::moveGlyphData(std::vector<FGlyphData>&& glyphs)
+void MathDocument::setMeDocState(FMathDocumentState* meDocState)
 {
-    m_node->moveText(std::move(glyphs));
-}
-
-void MathDocument::updateCaret(const FCaretData& caretData)
-{
-    m_node->updateCaret(caretData);
+    m_node->setMeDocState(meDocState);
 }
 
 void MathDocument::invalidateSceneGraph() // called on the render thread when the scenegraph is invalidated
@@ -702,29 +692,13 @@ void CustomTextureNodePrivate::sync()
         setTexture(wrapper);
         Q_ASSERT(wrapper->nativeInterface<QNativeInterface::QSGVulkanTexture>()->nativeImage() == m_texture);
     }
-    if (m_updatedText)
-    {
-        m_documentRendering.SetDocumentContent(m_text);
-    }
-    if (m_updatedCaret)
-    {
-        m_documentRendering.UpdateCaret(m_caretData);
-    }
-    m_updatedText = false;
-    m_updatedCaret = false;
+    m_documentRendering.UpdateState(*m_meDocState);
+    m_meDocState->Update();
 }
 
-void CustomTextureNodePrivate::moveText(std::vector<FGlyphData>&& text)
+void CustomTextureNodePrivate::setMeDocState(FMathDocumentState* meDocState)
 {
-    m_text = std::move(text);
-    m_updatedText = true;
-}
-
-void CustomTextureNodePrivate::updateCaret(const FCaretData& caretData)
-{
-    m_updatedCaret = true;
-    m_caretData = caretData;
-    
+    m_meDocState = meDocState;
 }
 
 void CustomTextureNodePrivate::render()

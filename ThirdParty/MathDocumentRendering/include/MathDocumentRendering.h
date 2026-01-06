@@ -10,14 +10,17 @@
 #include <TextFromAtlasRendering.h>
 #include <SpriteRendering.h>
 #include "RectanglesRendering.h"
+#include "MathDocumentState.h"
 	
 class FMathDocumentRendering
 {
 public:
 	void Init(FFreeTypeWrap* InFreeTypeWrap);
 	void SetDocumentExtent(const VkExtent2D& InExtent);
-	void SetDocumentContent(const std::vector<FGlyphData>& InDocumentContent);
+	void UpdateText(const std::vector<FGlyphData>& InDocumentContent);
+	void UpdateRects(const std::vector<FRectInst>& InRects);
 	void UpdateCaret(const FCaretData& caretData);
+	void UpdateState(const FMathDocumentState& NewState);
 	FImageBuffer* Render();
 	bool HasContent();
 private:
@@ -33,5 +36,5 @@ private:
 	std::unique_ptr<FRendering> Rendering;
 	FFreeTypeWrap* FreeTypeWrap = nullptr;
 
-	bool bUpdatedText = false;
+	FMathDocumentState State;
 };

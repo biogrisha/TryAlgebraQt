@@ -3,7 +3,7 @@
 
 #ifndef VULKANTEXTUREIMPORT_H
 #define VULKANTEXTUREIMPORT_H
-#include "MathDocumentRenderingStructs.h"
+#include "MathDocumentState.h"
 #include <QtQuick/QQuickItem>
 
 class CustomTextureNodePrivate;
@@ -15,8 +15,7 @@ class MathDocument : public QQuickItem
 
 public:
     MathDocument();
-    void moveGlyphData(std::vector<FGlyphData>&& glyphs);
-    void updateCaret(const FCaretData& caretData);
+    void setMeDocState(FMathDocumentState* meDocState);
 protected:
     QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) override;
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
@@ -27,7 +26,6 @@ signals:
     void onNodeCreated();
 private:
     void releaseResources() override;
-
     CustomTextureNodePrivate* m_node = nullptr;
 };
 
