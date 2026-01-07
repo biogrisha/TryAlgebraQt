@@ -9,8 +9,6 @@
         "CMAKE_BUILD_TYPE": "Debug"
       },
       "environment": {
-        "VCPKG_ROOT": "D:/Projects/ThirdParty/VCPackage/vcpkg",
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "QML_DEBUG_ARGS": "-qmljsdebugger=file:{3fc0409e-32d0-4376-a3fa-1a41c0c50033},block"
       }
     },
@@ -20,10 +18,6 @@
       "binaryDir": "${sourceDir}/out/build/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
-      },
-      "environment": {
-        "VCPKG_ROOT": "D:/Projects/ThirdParty/VCPackage/vcpkg",
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       }
     },
     {
