@@ -23,9 +23,12 @@ void FromToVisual::Show()
 	}
 	if (m_meDocState->IsRectsUpdated())
 	{
-		auto pos = m_me->GetAbsolutePosition();
-		auto size = m_me->GetAbsoluteSize();
-		m_meDocState->AddRect(FRectInst({ pos.x, pos.y }, { size.x, size.y }, { 0,0,0.8,1 }));
+		if(m_me->bSelected)
+		{
+			auto pos = m_me->GetAbsolutePosition();
+			auto size = m_me->GetAbsoluteSize();
+			m_meDocState->AddRect(FRectInst({ pos.x, pos.y }, { size.x, size.y }, { 0,0,0.8,1 }));
+		}
 	}
 	FTAVisual::Show();
 }

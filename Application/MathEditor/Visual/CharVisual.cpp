@@ -24,7 +24,10 @@ void CharVisual::Show()
 	}
 	if (m_meDocState->IsRectsUpdated())
 	{
-		m_meDocState->AddRect(FRectInst({ pos.x, pos.y }, { size.x, size.y }, { 0,0,0.8,1 }));
+		if(m_me->bSelected)
+		{
+			m_meDocState->AddRect(FRectInst({ pos.x, pos.y }, { size.x, size.y }, { 0,0,0.8,1 }));
+		}
 	}
 	FTAVisual::Show();
 }

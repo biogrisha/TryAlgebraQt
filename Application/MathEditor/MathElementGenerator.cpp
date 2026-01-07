@@ -33,7 +33,7 @@ MathElementV2::FMathElementPtr MathElementGeneratorQt::CreateCharacter(wchar_t C
 	if (Char == L' ')
 	{
 		auto MeChar = MathElementV2::FTAMeCharacter::MakeTypedShared(Char);
-		MeChar->SetVisual(std::make_shared<CharVisual>(MeChar.get(), nullptr));
+		MeChar->SetVisual(std::make_shared<CharVisual>(MeChar.get(), m_meDocState));
 		MeChar->SetDefaultSize({ 20,0 });
 		return MeChar;
 	}

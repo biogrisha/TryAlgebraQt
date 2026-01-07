@@ -24,6 +24,8 @@ qt_add_qml_module(Application
         Controls/ToolbarControl.cpp
         Models/MathElementInfoModel.h
         Models/MathElementInfoModel.cpp
+        Models/DocumentTabModel.h
+        Models/DocumentTabModel.cpp
         MathEditor/CursorComponentGenerator.h
         MathEditor/CursorComponentGenerator.cpp
         MathEditor/MathElementGenerator.h

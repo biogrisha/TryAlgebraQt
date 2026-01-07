@@ -40,7 +40,6 @@ void FTAMathDocument::ClearDrawing()
 void FTAMathDocument::Draw()
 {
 	FTAMeHelpers::ShowElements(MeDocument->GetChildren(), MeDocument->GetVisibleFrom(), MeDocument->GetVisibleTo());
-	CursorComponent->Show();
 }
 
 void FTAMathDocument::UpdateCaret()
@@ -146,6 +145,11 @@ void FTAMathDocument::StopSelecting()
 void FTAMathDocument::DeleteForward()
 {
 	FTAMePath CurrentPath = CursorComponent->GetNormalizedPath();
+	if (CurrentPath.TreePath.size() == 1 && CurrentPath.TreePath.back() == MeDocument->GetChildren().size())
+	{
+		//if cursor at the end and nothing is selected
+		return;
+	}
 	int Count = (std::max)((int)CursorComponent->GetSelectedElements().size(),1);
 	if (CurrentPath.TreePath.size() == 1)
 	{

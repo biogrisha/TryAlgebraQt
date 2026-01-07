@@ -1185,10 +1185,10 @@ const std::map<std::wstring, std::wstring>& FTAMeHelpers::GetMathElementsList()
 		{L"Product", Sp + MathElementV2::FTAMeFromTo::GetName() + Sp + FTAMeDefinition::ProductInfo + Sp + GenContainers(2)},
 		{L"Union over", Sp + MathElementV2::FTAMeFromTo::GetName() + Sp + FTAMeDefinition::UnionOverInfo + Sp + GenContainers(2)},
 
-		/*{L"Doublescript", Sp + MathElementV2::FTAMeIndex::GetName() + Sp + FTAMeDefinition::DoublescriptInfo + Sp + GenContainers(2)},
+		{L"Doublescript", Sp + MathElementV2::FTAMeIndex::GetName() + Sp + FTAMeDefinition::DoublescriptInfo + Sp + GenContainers(2)},
 		{L"Subscript", Sp + MathElementV2::FTAMeIndex::GetName() + Sp + FTAMeDefinition::SubscriptInfo + Sp + GenContainers(1)},
 		{L"Superscript", Sp + MathElementV2::FTAMeIndex::GetName() + Sp + FTAMeDefinition::SuperscriptInfo + Sp + GenContainers(1)},
-
+		/*
 		{L"Mat3x3", Sp + MathElementV2::FTAMeMatrix::GetName() + Sp + FTAMeDefinition::GetMatInfo(3, 3) + Sp + GenContainers(9)},
 		{L"Vec 3", Sp + MathElementV2::FTAMeMatrix::GetName() + Sp + FTAMeDefinition::GetMatInfo(3, 1) + Sp + GenContainers(3)},
 

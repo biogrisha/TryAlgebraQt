@@ -26,6 +26,7 @@ public slots:
 	MathElementInfoModel* getMeInfoModel();
 	void addMeByName(const QString& meName);
 private:
+	void UpdateElements(bool bRect, bool bText, bool bCaret);
 	MathDocument* m_mathDocument = nullptr;
 	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
 	MathElementInfoModel* m_meInfoModel = nullptr;

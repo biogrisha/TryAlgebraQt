@@ -37,50 +37,64 @@ void DocumentControl::setDocument(const QUrl& filePath)
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 {	
 	auto doc = m_docInfo.lock()->MathDocument;
-	if(!text.isEmpty() && text != "\b")
-	{
-		doc->AddMathElements(text.toStdWString());
-		m_meDocState.Clear(false, true);
-		doc->Draw();
-	}
-	else 
-	{
-		switch (key) { 
-		case Qt::Key_Left:
-			doc->StepX(-1);
-			doc->UpdateCaret();
-			break;
-		case Qt::Key_Right: 
-			doc->StepX(1);
-			doc->UpdateCaret();
-			break;
-		case Qt::Key_Up: 
-			doc->StepY(-1);
-			doc->UpdateCaret();
-			break; 
-		case Qt::Key_Down:
-			doc->StepY(1);
-			doc->UpdateCaret();
-			break;
-		case Qt::Key_Backspace:
-			doc->DeleteBackward();
-			doc->Draw();
-			break;
-		default: 
-			qDebug() << "Other key:" << key << "text:" << text; 
+	bool bShift = modifiers == Qt::Modifier::SHIFT;
+	bool bCtrl = modifiers == Qt::Modifier::CTRL;
+	switch (key) {
+	case Qt::Key_Left:
+		doc->StepX(-1, bShift);
+		UpdateElements(true, false, true);
+		break;
+	case Qt::Key_Right:
+		doc->StepX(1, bShift);
+		UpdateElements(true, false, true);
+		break;
+	case Qt::Key_Up:
+		doc->StepY(-1, bShift);
+		UpdateElements(true, false, true);
+		break;
+	case Qt::Key_Down:
+		doc->StepY(1, bShift);
+		UpdateElements(true, false, true);
+		break;
+	case Qt::Key_Backspace:
+		doc->DeleteBackward();
+		UpdateElements(true, true, true);
+		break;
+	case Qt::Key_Delete:
+		doc->DeleteForward();
+		UpdateElements(true, true, true);
+		break;
+	case Qt::Key_Z:
+		if (bCtrl)
+		{
+			doc->Undo();
+			UpdateElements(true, true, true);
 			break;
 		}
+		[[fallthrough]];
+	case Qt::Key_Y:
+		if (bCtrl)
+		{
+			doc->Redo();
+			UpdateElements(true, true, true);
+			break;
+		}
+		[[fallthrough]];
+	default:
+		if (!text.isEmpty() && text != "\b")
+		{
+			doc->AddMathElements(text.toStdWString());
+			UpdateElements(true, true, true);
+		}
+		break;
 	}
-
-	m_mathDocument->update();
 }
 
 void DocumentControl::mathDocumentReady()
 {
 	m_mathDocument->setMeDocState(&m_meDocState);
 	QObject::disconnect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady);
-	m_meDocState.Clear(true, false);
-	m_docInfo.lock()->MathDocument->Draw();
+	UpdateElements(true, true, true);
 }
 
 MathElementInfoModel* DocumentControl::getMeInfoModel()
@@ -106,9 +120,23 @@ void DocumentControl::addMeByName(const QString& meName)
 	{
 		auto doc = m_docInfo.lock()->MathDocument;
 		doc->AddMathElements(foundMe->second);
-		doc->Draw();
-		m_mathDocument->update();
+		UpdateElements(true, true, true);
 	}
+}
+
+void DocumentControl::UpdateElements(bool bRect, bool bText, bool bCaret)
+{
+	m_meDocState.Clear(bText, bRect);
+	auto doc = m_docInfo.lock()->MathDocument;
+	if (bRect || bText)
+	{
+		doc->Draw();
+	}
+	if(bCaret)
+	{
+		doc->UpdateCaret();
+	}
+	m_mathDocument->update();
 }
 
 

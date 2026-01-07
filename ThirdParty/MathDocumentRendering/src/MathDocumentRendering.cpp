@@ -6,6 +6,7 @@
 #include <chrono>
 #include <algorithm>
 #include "VulkanHelpers.h"
+
 void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 {
 	FreeTypeWrap = InFreeTypeWrap;
