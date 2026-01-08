@@ -22,6 +22,8 @@ qt_add_qml_module(Application
         Controls/DocumentControl.cpp
         Controls/ToolbarControl.h
         Controls/ToolbarControl.cpp
+        Controls/TabsControl.h
+        Controls/TabsControl.cpp
         Models/MathElementInfoModel.h
         Models/MathElementInfoModel.cpp
         Models/DocumentTabModel.h
@@ -49,11 +51,12 @@ target_link_libraries(Application
     Qt6::Quick
     glm::glm
     VulkanFramework
+    PUBLIC
     MathDocumentRendering
     TryAlgebraCore
 )
 
 target_include_directories(Application PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/Controls
-    D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/MathDocumentRendering/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Models
 )

@@ -11,11 +11,8 @@ class FTAMainModule
 public:
 	FTAMainModule();
 	bool NewDocument(EDocumentType Type, const std::wstring& DocumentPath, std::weak_ptr<FTAMathDocumentInfo>& OutDocInfo,const std::shared_ptr<class FTACompatibilityData>& CompatibilityData);
-	void SaveSelectDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo);
-	void SelectDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo);
 	std::vector<std::weak_ptr<FTAMathDocumentInfo>> GetAllDocuments() const;
 	void CloseDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo);
-	void SaveCurrentDocument() const;
 	void SaveDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo) const;
 	bool OpenDocument(const std::wstring& DocumentPath, std::weak_ptr<FTAMathDocumentInfo>& OutDocInfo, const std::shared_ptr<class FTACompatibilityData>& CompatibilityData);
 	bool OpenOrCreateDocument(std::weak_ptr<FTAMathDocumentInfo>& OutDocInfo, const std::shared_ptr<class FTACompatibilityData>& CompatibilityData, const std::wstring& RelDocumentPath);
@@ -34,6 +31,6 @@ private:
 	std::shared_ptr<class FTACommandBindings> CommandBindings;
 	std::shared_ptr<class FTACustomTokenization> CustomTokenization;
 public:
-	FTAMulticastDelegate<> OnDocumentsClosed;
-	FTAMulticastDelegate<const std::weak_ptr<FTAMathDocumentInfo>&> OnDocumentSelected;
+	FTAMulticastDelegate<const std::weak_ptr<FTAMathDocumentInfo>&> OnDocumentsClosed;
+	FTAMulticastDelegate<const std::weak_ptr<FTAMathDocumentInfo>&> OnDocumentAdded;
 };

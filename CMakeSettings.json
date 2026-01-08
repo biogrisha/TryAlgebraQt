@@ -7,9 +7,9 @@
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=D:/Projects/ThirdParty/VCPackage/vcpkg/scripts/buildsystems/vcpkg.cmake",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": ""
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "D:/Projects/ThirdParty/VCPackage/vcpkg/scripts/buildsystems/vcpkg.cmake"
     }
   ]
 }

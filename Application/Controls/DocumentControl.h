@@ -1,13 +1,14 @@
 #pragma once
-#include "FreeTypeWrap.h"
-#include "FunctionLibraries/FileHelpers.h"
+#include <qqml.h>
 #include <QObject>
 #include <QKeyEvent>
-#include <qqml.h>
-#include <../MathDocument.h>
 #include <QElapsedTimer>
-#include "../Models/MathElementInfoModel.h"
 #include "MathDocumentState.h"
+#include "FreeTypeWrap.h"
+#include "FunctionLibraries/FileHelpers.h"
+#include "../MathDocument.h"
+#include "../Models/MathElementInfoModel.h"
+
 class FTAMathDocumentInfo;
 
 class DocumentControl  : public QObject

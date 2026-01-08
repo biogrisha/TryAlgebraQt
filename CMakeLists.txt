@@ -35,7 +35,9 @@ target_link_libraries(TryAlgebra PRIVATE
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
+    PUBLIC
     Applicationplugin
+    Application
 )
 
 

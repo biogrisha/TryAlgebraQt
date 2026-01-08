@@ -1,7 +1,6 @@
 #include "Application.h"
 #include <QQuickWindow>
 #include <QVulkanInstance>
-#include <Modules/MainWindowModule.h>
 #include "AppGlobal.h"
 #include "Modules/MathElementsV2/CompatibilityData.h"
 #include "MathEditor/CursorComponentGenerator.h"
@@ -15,23 +14,19 @@ Application::~Application()
 {
 	AppGlobal::mainModule = nullptr;
 	AppGlobal::application = nullptr;
-	delete m_mainModule;
-	delete m_freeTypeWrap;
 }
 
 Application::Application(QObject *parent)
 	: QObject(parent)
 {
 	AppGlobal::application = this;
-	m_mainModule = new FTAMainModule;
-	AppGlobal::mainModule = m_mainModule;
+	AppGlobal::mainModule = &m_mainModule;
 	m_menuControl = new MenuControl(this);
-	m_freeTypeWrap = new FFreeTypeWrap();
 
 	QScreen* screen = QGuiApplication::primaryScreen(); 
 	qreal logicalDpiX = screen->logicalDotsPerInchX(); 
 	qreal logicalDpiY = screen->logicalDotsPerInchY();
-	m_freeTypeWrap->Init(logicalDpiX, logicalDpiY);
+	m_freeTypeWrap.Init(logicalDpiX, logicalDpiY);
 
 }
 
@@ -42,7 +37,7 @@ DocumentControl* Application::getCurrentDocument()
 
 FFreeTypeWrap* Application::getFreeTypeWrap()
 {
-	return m_freeTypeWrap;
+	return &m_freeTypeWrap;
 }
 void Application::setCurrentDocument(DocumentControl* documentControl)
 {

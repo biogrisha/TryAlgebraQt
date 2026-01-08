@@ -75,39 +75,8 @@ bool FTAMainModule::NewDocument(EDocumentType Type, const std::wstring& Document
 			OutDocInfo = Documents.back();
 		}
 	}
+	OnDocumentAdded.Invoke(OutDocInfo);
 	return true;
-}
-
-void FTAMainModule::SaveSelectDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo)
-{
-	if (!CurrentDocument.expired())
-	{
-		//Save Current doc
-		SaveCurrentDocument();
-	}
-	SelectDocument(DocInfo);
-}
-
-void FTAMainModule::SelectDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo)
-{
-	if (DocInfo.lock() == CurrentDocument.lock())
-	{
-		return;
-	}
-	if (!DocInfo.expired())
-	{
-		if (!CurrentDocument.expired())
-		{
-			//If there was document-> clear its visuals
-			CurrentDocument.lock()->MathDocument->ClearDrawing();
-		}
-		//Set new current doc
-		CurrentDocument = DocInfo;
-		//Signal "New doc Selected"
-		OnDocumentSelected.Invoke(DocInfo);
-		//Redraw it
-		CurrentDocument.lock()->MathDocument->Draw();
-	}
 }
 
 std::vector<std::weak_ptr<FTAMathDocumentInfo>> FTAMainModule::GetAllDocuments() const
@@ -129,29 +98,9 @@ void FTAMainModule::CloseDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocI
 	{
 		return;
 	}
-	if (DocInfo.lock() == CurrentDocument.lock())
-	{
-		//if closing current doc-> save
-		SaveCurrentDocument();
-	}
 	//Remove from documents
+	OnDocumentsClosed.Invoke(DocInfo);
 	CommonHelpers::RemoveSwap(Documents, Index);
-	if (CurrentDocument.expired())
-	{
-		//if this was current doc
-		//Clamp this index from above
-		Index = (std::min)(Index, static_cast<int>(Documents.size() - 1));
-		if (Index >= 0)
-		{
-			//If index still valid -> select document under new index
-			SelectDocument(Documents[Index]);
-		}
-		else
-		{
-			//If all documents were closed-> signal
-			OnDocumentsClosed.Invoke();
-		}
-	}
 }
 
 void FTAMainModule::SaveDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo) const
@@ -195,6 +144,7 @@ bool FTAMainModule::OpenDocument(const std::wstring& DocumentPath, std::weak_ptr
 				Documents.push_back(std::make_shared<FTAMathDocumentInfo>(MathDocumentInfo));
 				OutDocInfo = Documents.back();
 				SetupMathDocument(OutDocInfo.lock().get());
+				OnDocumentAdded.Invoke(OutDocInfo);
 				return true;
 			}
 		}
@@ -207,6 +157,7 @@ bool FTAMainModule::OpenDocument(const std::wstring& DocumentPath, std::weak_ptr
 				//If succeeded to create document, add to documents array and return this doc
 				Documents.push_back(std::make_shared<FTAMathDocumentInfo>(MathDocumentInfo));
 				OutDocInfo = Documents.back();
+				OnDocumentAdded.Invoke(OutDocInfo);
 				return true;
 			}
 		}
@@ -219,7 +170,7 @@ bool FTAMainModule::OpenDocument(const std::wstring& DocumentPath, std::weak_ptr
 
 void FTAMainModule::Compile()
 {
-	SaveCurrentDocument();
+	//TODO: need to save modified files
 	CommandBindings->UpdateBindings();
 	CustomTokenization->UpdateRewritingRules();
 	std::wstring FailedPath;
@@ -241,11 +192,6 @@ bool FTAMainModule::OpenOrCreateDocument(std::weak_ptr<FTAMathDocumentInfo>& Out
 std::weak_ptr<class FTAActionsManager> FTAMainModule::GetActionsManager()
 {
 	return ActionsManager;
-}
-
-void FTAMainModule::SaveCurrentDocument() const
-{
-	SaveDocument(CurrentDocument);
 }
 
 std::weak_ptr<class FTACommandBindings> FTAMainModule::GetCommandBindings()

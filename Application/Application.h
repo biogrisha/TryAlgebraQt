@@ -1,13 +1,14 @@
 #pragma once
 
-#include <memory>
 #include <QObject>
 #include <QString>
+#include "Modules/MainWindowModule.h"
+#include "FreeTypeWrap.h"
 
-class FTAMainModule;
-class FFreeTypeWrap;
 class MenuControl;
 class DocumentControl;
+class TabsControl;
+class FFreeTypeWrap;
 
 class Application  : public QObject
 {
@@ -24,6 +25,8 @@ public slots:
 private:
 	MenuControl* m_menuControl = nullptr;
 	DocumentControl* m_documentControl = nullptr;
-	FTAMainModule* m_mainModule = nullptr;
-	FFreeTypeWrap* m_freeTypeWrap = nullptr;
+	TabsControl* m_tabsControl = nullptr;
+
+	FTAMainModule m_mainModule;
+	FFreeTypeWrap m_freeTypeWrap;
 };
