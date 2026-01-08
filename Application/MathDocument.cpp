@@ -149,6 +149,11 @@ void MathDocument::setMeDocState(FMathDocumentState* meDocState)
     m_node->setMeDocState(meDocState);
 }
 
+bool MathDocument::isNodeCreated()
+{
+    return m_node != nullptr;
+}
+
 void MathDocument::invalidateSceneGraph() // called on the render thread when the scenegraph is invalidated
 {
     m_node = nullptr;

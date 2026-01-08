@@ -1,13 +1,19 @@
 #include "DocumentTabModel.h"
 
-DocumentTabInfo::DocumentTabInfo(const QString& inFileName)
+DocumentTabInfo::DocumentTabInfo(const QString& inFileName, const QString& inFilePath)
 {
 	m_fileName = inFileName;
+	m_filePath = inFilePath;
 }
 
 QString DocumentTabInfo::fileName() const
 {
 	return m_fileName;
+}
+
+QString DocumentTabInfo::filePath() const
+{
+	return m_filePath;
 }
 
 DocumentTabInfoModel::DocumentTabInfoModel(QObject* parent)
@@ -29,6 +35,9 @@ QVariant DocumentTabInfoModel::data(const QModelIndex& index, int role) const
 	const DocumentTabInfo& docInfo = m_documents[index.row()];
 	if (role == DocumentTabInfoRoles::FileName)
 		return docInfo.fileName();
+	if (role == DocumentTabInfoRoles::FilePath)
+		return docInfo.filePath();
+	
 	return QVariant();
 }
 
@@ -66,5 +75,6 @@ QHash<int, QByteArray> DocumentTabInfoModel::roleNames() const
 {
 	QHash<int, QByteArray> roles;
 	roles[DocumentTabInfoRoles::FileName] = "fileName";
+	roles[DocumentTabInfoRoles::FilePath] = "filePath";
 	return roles;
 }

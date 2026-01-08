@@ -16,6 +16,11 @@ DocumentControl::DocumentControl(QObject *parent)
 void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
 {
 	m_mathDocument = mathDocument;
+	if (m_mathDocument->isNodeCreated())
+	{
+		mathDocumentReady();
+		return;
+	}
 	QObject::connect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady, Qt::ConnectionType::DirectConnection);
 }
 
@@ -32,6 +37,11 @@ void DocumentControl::setDocument(const QUrl& filePath)
 	compatibilityData->MeGenerator = meGen;
 	AppGlobal::mainModule->OpenDocument(filePath.toLocalFile().toStdWString(), docInfo, compatibilityData);
 	m_docInfo = docInfo;
+}
+
+void DocumentControl::setDocument(const std::weak_ptr<FTAMathDocumentInfo>& docInfo)
+{
+	//Document control must live as long as document in memory
 }
 
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)

@@ -5,10 +5,12 @@
 class DocumentTabInfo
 {
 public:
-    DocumentTabInfo(const QString& inFileName);
+    DocumentTabInfo(const QString& inFileName, const QString& inFilePath);
     QString fileName() const;
+    QString filePath() const;
 private:
     QString m_fileName;
+    QString m_filePath;
 };
 
 class DocumentTabInfoModel : public QAbstractListModel
@@ -17,6 +19,7 @@ class DocumentTabInfoModel : public QAbstractListModel
 public:
     enum DocumentTabInfoRoles {
         FileName = Qt::UserRole + 1,
+        FilePath
     };
 
     DocumentTabInfoModel(QObject* parent = nullptr);

@@ -10,13 +10,24 @@
 class TabsControl : public QObject
 {
 	Q_OBJECT
+	QML_ELEMENT
 public:
+	Q_PROPERTY(qint32 currentTabId READ currentTabId WRITE setCurrentTabId NOTIFY currentTabIdChanged)
+	TabsControl() = default;
 	TabsControl(QObject* parent);
 public slots:
-	void selectTab(const QString& fileName);
-	void closeTab(const QString& fileName);
+	void selectTab(qint32 id);
+	void closeTab(qint32 id);
+	DocumentTabInfoModel* getTabsModel();
+
+	//currentTabId
+	qint32 currentTabId();
+	void setCurrentTabId(qint32 id);
+signals:
+	void currentTabIdChanged(qint32 id);
 private:
 	void onDocumentAdded(const std::weak_ptr<FTAMathDocumentInfo>& docInfo);
 	FTAMulticastDelegate<const std::weak_ptr<FTAMathDocumentInfo>&>::HndlPtr m_onAddedHndl;
 	DocumentTabInfoModel* m_tabInfoModel = nullptr;
+	qint32 m_currentTabId = 0;
 };

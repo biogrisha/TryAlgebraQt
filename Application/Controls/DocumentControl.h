@@ -19,6 +19,7 @@ public:
 	DocumentControl(QObject *parent);
 	DocumentControl() = default;
 	void setDocument(const QUrl& filePath);
+	void setDocument(const std::weak_ptr<FTAMathDocumentInfo>& docInfo);
 
 public slots:
 	void bindMathDocumentItem(MathDocument* mathDocument);

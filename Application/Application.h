@@ -20,6 +20,7 @@ public:
 	void setCurrentDocument(DocumentControl* documentControl);
 	FFreeTypeWrap* getFreeTypeWrap();
 public slots:
+	TabsControl* getTabs();
 	MenuControl* getMenu();
 	DocumentControl* getCurrentDocument();
 private:

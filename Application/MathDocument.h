@@ -16,6 +16,7 @@ class MathDocument : public QQuickItem
 public:
     MathDocument();
     void setMeDocState(FMathDocumentState* meDocState);
+    bool isNodeCreated();
 protected:
     QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) override;
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
