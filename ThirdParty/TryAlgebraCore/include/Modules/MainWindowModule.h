@@ -12,7 +12,7 @@ public:
 	FTAMainModule();
 	bool NewDocument(EDocumentType Type, const std::wstring& DocumentPath, std::weak_ptr<FTAMathDocumentInfo>& OutDocInfo,const std::shared_ptr<class FTACompatibilityData>& CompatibilityData);
 	const std::vector<std::shared_ptr<FTAMathDocumentInfo>>& GetAllDocuments() const;
-	void CloseDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo);
+	void CloseDocument(int Ind);
 	void SaveDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo) const;
 	bool OpenDocument(const std::wstring& DocumentPath, const std::shared_ptr<class FTACompatibilityData>& CompatibilityData);
 	bool OpenOrCreateDocument(std::weak_ptr<FTAMathDocumentInfo>& OutDocInfo, const std::shared_ptr<class FTACompatibilityData>& CompatibilityData, const std::wstring& RelDocumentPath);

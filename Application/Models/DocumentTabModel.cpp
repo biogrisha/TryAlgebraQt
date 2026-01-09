@@ -71,6 +71,13 @@ void DocumentTabInfoModel::removeDocumentTabInfo(const QString& fileName)
 	endRemoveRows();
 }
 
+void DocumentTabInfoModel::removeDocumentTabInfo(qint32 ind)
+{
+	beginRemoveRows(QModelIndex(), ind, ind);
+	m_documents.removeAt(ind);
+	endRemoveRows();
+}
+
 QHash<int, QByteArray> DocumentTabInfoModel::roleNames() const
 {
 	QHash<int, QByteArray> roles;

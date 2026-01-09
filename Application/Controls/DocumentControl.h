@@ -28,6 +28,7 @@ public slots:
 	void onCurrentDocumentChanged(qint32 ind);
 private:
 	void UpdateElements(bool bRect, bool bText, bool bCaret);
+	void ClearDocument();
 	MathDocument* m_mathDocument = nullptr;
 	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
 	MathElementInfoModel* m_meInfoModel = nullptr;

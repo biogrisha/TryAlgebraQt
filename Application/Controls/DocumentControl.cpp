@@ -30,6 +30,10 @@ void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
 
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 {	
+	if (m_docInfo.expired())
+	{
+		return;
+	}
 	auto doc = m_docInfo.lock()->MathDocument;
 	bool bShift = modifiers == Qt::Modifier::SHIFT;
 	bool bCtrl = modifiers == Qt::Modifier::CTRL;
@@ -109,6 +113,10 @@ MathElementInfoModel* DocumentControl::getMeInfoModel()
 
 void DocumentControl::addMeByName(const QString& meName)
 {
+	if (m_docInfo.expired())
+	{
+		return;
+	}
 	auto& meList = FTAMeHelpers::GetMathElementsList();
 	auto foundMe = meList.find(meName.toStdWString());
 	if (foundMe != meList.end())
@@ -121,6 +129,12 @@ void DocumentControl::addMeByName(const QString& meName)
 
 void DocumentControl::onCurrentDocumentChanged(qint32 ind)
 {
+	if (ind == -1)
+	{
+		ClearDocument();
+		m_docInfo.reset();
+		return;
+	}
 	m_docInfo = AppGlobal::mainModule->GetAllDocuments()[ind];
 	if (isMathDocumentReady)
 	{
@@ -140,6 +154,13 @@ void DocumentControl::UpdateElements(bool bRect, bool bText, bool bCaret)
 	{
 		doc->UpdateCaret();
 	}
+	m_mathDocument->update();
+}
+
+void DocumentControl::ClearDocument()
+{
+	m_meDocState.Clear(true, true);
+	m_meDocState.SetCaret({ {-100, -100}, {1,1} });
 	m_mathDocument->update();
 }
 

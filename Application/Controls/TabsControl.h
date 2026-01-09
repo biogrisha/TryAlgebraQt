@@ -25,6 +25,7 @@ public slots:
 
 	void onCurrentDocumentChanged(qint32 ind);
 	void onDocumentOpened(qint32 ind);
+	void onDocumentClosed(qint32 ind);
 signals:
 	void currentTabIdChanged(qint32 id);
 private:

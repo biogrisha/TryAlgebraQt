@@ -78,17 +78,9 @@ const std::vector<std::shared_ptr<FTAMathDocumentInfo>>& FTAMainModule::GetAllDo
 	return Documents;
 }
 
-void FTAMainModule::CloseDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo)
+void FTAMainModule::CloseDocument(int Ind)
 {
-	//Close logic
-	//Find Doc index
-	int Index = CommonHelpers::Find(Documents, DocInfo.lock());
-	if (Index == CommonHelpers::InvalidIndex)
-	{
-		return;
-	}
-	//Remove from documents
-	CommonHelpers::RemoveSwap(Documents, Index);
+	Documents.erase(Documents.begin() + Ind);
 }
 
 void FTAMainModule::SaveDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo) const

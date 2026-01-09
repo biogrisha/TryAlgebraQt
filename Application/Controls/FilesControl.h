@@ -11,6 +11,7 @@ public:
 	void openDocument(const QUrl& url);
 	void setMeDocStatePtr(FMathDocumentState* meDocState);
 	void selectDocument(qint32 ind);
+	void closeDocument(qint32 ind);
 signals:
 	void onDocumentOpened(qint32 currentDocInd);
 	void onDocumentClosed(qint32 currentDocInd);

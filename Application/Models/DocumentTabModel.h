@@ -31,6 +31,8 @@ public:
     void addDocumentTabInfo(const DocumentTabInfo& Info);
 
     void removeDocumentTabInfo(const QString& fileName);
+
+    void removeDocumentTabInfo(qint32 ind);
 protected:
     QHash<int, QByteArray> roleNames() const;
 private:
