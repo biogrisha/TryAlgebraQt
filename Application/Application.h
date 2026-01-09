@@ -8,6 +8,7 @@
 class MenuControl;
 class DocumentControl;
 class TabsControl;
+class FilesControl;
 class FFreeTypeWrap;
 
 class Application  : public QObject
@@ -17,16 +18,17 @@ class Application  : public QObject
 public:
 	~Application();
 	Application(QObject *parent);
-	void setCurrentDocument(DocumentControl* documentControl);
 	FFreeTypeWrap* getFreeTypeWrap();
+	FilesControl* getFilesControl();
 public slots:
 	TabsControl* getTabs();
 	MenuControl* getMenu();
-	DocumentControl* getCurrentDocument();
+	DocumentControl* getDocumentControl();
 private:
 	MenuControl* m_menuControl = nullptr;
 	DocumentControl* m_documentControl = nullptr;
 	TabsControl* m_tabsControl = nullptr;
+	FilesControl* m_filesControl = nullptr;
 
 	FTAMainModule m_mainModule;
 	FFreeTypeWrap m_freeTypeWrap;

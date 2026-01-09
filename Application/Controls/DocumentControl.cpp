@@ -1,47 +1,31 @@
 #include "DocumentControl.h"
+#include <QUrl>
+
+#include "FilesControl.h"
+#include "Application.h"
+#include "AppGlobal.h"
+
 #include "MathEditor/CursorComponentGenerator.h"
 #include "MathEditor/MathElementGenerator.h"
+
 #include "Modules/MathElementsV2/CompatibilityData.h"
 #include "Modules/MainWindowModule.h"
-#include "FunctionLibraries/FileHelpers.h"
 #include "Modules/MathDocument/MathDocument.h"
-#include <QUrl>
-#include "AppGlobal.h"
+#include "FunctionLibraries/FileHelpers.h"
 #include "FunctionLibraries/MathElementsHelpers.h"
 
 DocumentControl::DocumentControl(QObject *parent)
 	: QObject(parent)
-{}
+{
+	auto filesControl = AppGlobal::application->getFilesControl();
+	filesControl->setMeDocStatePtr(&m_meDocState);
+	QObject::connect(filesControl, &FilesControl::onCurrentDocumentChanged, this, &DocumentControl::onCurrentDocumentChanged, Qt::DirectConnection);
+}
 
 void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
 {
 	m_mathDocument = mathDocument;
-	if (m_mathDocument->isNodeCreated())
-	{
-		mathDocumentReady();
-		return;
-	}
 	QObject::connect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady, Qt::ConnectionType::DirectConnection);
-}
-
-void DocumentControl::setDocument(const QUrl& filePath)
-{
-	std::weak_ptr<FTAMathDocumentInfo> docInfo;
-	auto compatibilityData = FTACompatibilityData::MakeTypedShared();
-	auto cursorGen = std::make_shared<CursorComponentGeneratorQt>();
-	cursorGen->m_meDocState = &m_meDocState;
-	compatibilityData->CursorComponentGenerator = cursorGen;
-	auto meGen = std::make_shared<MathElementGeneratorQt>();
-	meGen->m_meDocState = &m_meDocState;
-	meGen->initMeGenerators();
-	compatibilityData->MeGenerator = meGen;
-	AppGlobal::mainModule->OpenDocument(filePath.toLocalFile().toStdWString(), docInfo, compatibilityData);
-	m_docInfo = docInfo;
-}
-
-void DocumentControl::setDocument(const std::weak_ptr<FTAMathDocumentInfo>& docInfo)
-{
-	//Document control must live as long as document in memory
 }
 
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)
@@ -105,6 +89,7 @@ void DocumentControl::mathDocumentReady()
 	m_mathDocument->setMeDocState(&m_meDocState);
 	QObject::disconnect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady);
 	UpdateElements(true, true, true);
+	isMathDocumentReady = true;
 }
 
 MathElementInfoModel* DocumentControl::getMeInfoModel()
@@ -130,6 +115,15 @@ void DocumentControl::addMeByName(const QString& meName)
 	{
 		auto doc = m_docInfo.lock()->MathDocument;
 		doc->AddMathElements(foundMe->second);
+		UpdateElements(true, true, true);
+	}
+}
+
+void DocumentControl::onCurrentDocumentChanged(qint32 ind)
+{
+	m_docInfo = AppGlobal::mainModule->GetAllDocuments()[ind];
+	if (isMathDocumentReady)
+	{
 		UpdateElements(true, true, true);
 	}
 }

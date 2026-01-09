@@ -20,9 +20,11 @@ public slots:
 	void closeTab(qint32 id);
 	DocumentTabInfoModel* getTabsModel();
 
-	//currentTabId
 	qint32 currentTabId();
 	void setCurrentTabId(qint32 id);
+
+	void onCurrentDocumentChanged(qint32 ind);
+	void onDocumentOpened(qint32 ind);
 signals:
 	void currentTabIdChanged(qint32 id);
 private:

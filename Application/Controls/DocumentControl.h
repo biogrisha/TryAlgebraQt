@@ -18,8 +18,6 @@ class DocumentControl  : public QObject
 public:
 	DocumentControl(QObject *parent);
 	DocumentControl() = default;
-	void setDocument(const QUrl& filePath);
-	void setDocument(const std::weak_ptr<FTAMathDocumentInfo>& docInfo);
 
 public slots:
 	void bindMathDocumentItem(MathDocument* mathDocument);
@@ -27,13 +25,14 @@ public slots:
 	void mathDocumentReady();
 	MathElementInfoModel* getMeInfoModel();
 	void addMeByName(const QString& meName);
+	void onCurrentDocumentChanged(qint32 ind);
 private:
 	void UpdateElements(bool bRect, bool bText, bool bCaret);
 	MathDocument* m_mathDocument = nullptr;
 	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
 	MathElementInfoModel* m_meInfoModel = nullptr;
 	FMathDocumentState m_meDocState;
-
+	bool isMathDocumentReady = false;
 	QElapsedTimer m_timer;
 };
 

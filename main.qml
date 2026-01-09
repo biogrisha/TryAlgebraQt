@@ -14,6 +14,7 @@ ApplicationWindow {
         menuControl = UserApplication.getMenu()
         tabsControl = UserApplication.getTabs()
         tabsList.model = tabsControl.getTabsModel()
+        documentLoader.source = ""
     }
 
     id: window
@@ -45,8 +46,11 @@ ApplicationWindow {
             switch (reason) { 
                 case "openFile":
                     menuControl.openDocument(fileDialog.selectedFile)
-                    documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
-                    documentLoader.item.setDocumentControl(UserApplication.getCurrentDocument())
+                    if(!documentLoader.source.href)
+                    {
+                        documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
+                        documentLoader.item.setDocumentControl(UserApplication.getDocumentControl())
+                    }
                     break 
                 case "saveFile":
                     console.log("Save file")

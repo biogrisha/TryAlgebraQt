@@ -24,6 +24,8 @@ qt_add_qml_module(Application
         Controls/ToolbarControl.cpp
         Controls/TabsControl.h
         Controls/TabsControl.cpp
+        Controls/FilesControl.h
+        Controls/FilesControl.cpp
         Models/MathElementInfoModel.h
         Models/MathElementInfoModel.cpp
         Models/DocumentTabModel.h

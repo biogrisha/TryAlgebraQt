@@ -12,8 +12,8 @@
 
 void FTAMathDocument::Setup(const std::shared_ptr<class FTACompatibilityData>& InCompatibilityData)
 {
-	CompatibilityData = InCompatibilityData;
 	MeDocument = MathElementV2::FTAMeDocument::MakeTypedShared();
+	CompatibilityData = InCompatibilityData;
 	MeDocument->SetMeGenerator(InCompatibilityData->MeGenerator);
 	//Add cursor comp
 	auto CursorCompPtr = InCompatibilityData->CursorComponentGenerator->Create();

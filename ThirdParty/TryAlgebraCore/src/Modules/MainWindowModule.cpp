@@ -39,11 +39,6 @@ FTAMainModule::FTAMainModule()
 
 bool FTAMainModule::NewDocument(EDocumentType Type, const std::wstring& DocumentPath, std::weak_ptr<FTAMathDocumentInfo>& OutDocInfo,const std::shared_ptr<FTACompatibilityData>& CompatibilityData)
 {
-	if (FindDocumentInfo(DocumentPath))
-	{
-		//If document already in memory -> return
-		return false;
-	}
 	if (Type == EDocumentType::Document)
 	{
 		//If document
@@ -75,18 +70,12 @@ bool FTAMainModule::NewDocument(EDocumentType Type, const std::wstring& Document
 			OutDocInfo = Documents.back();
 		}
 	}
-	OnDocumentAdded.Invoke(OutDocInfo);
 	return true;
 }
 
-std::vector<std::weak_ptr<FTAMathDocumentInfo>> FTAMainModule::GetAllDocuments() const
+const std::vector<std::shared_ptr<FTAMathDocumentInfo>>& FTAMainModule::GetAllDocuments() const
 {
-	std::vector<std::weak_ptr<FTAMathDocumentInfo>> Result;
-	for (auto& DocInfo : Documents)
-	{
-		Result.push_back(DocInfo);
-	}
-	return Result;
+	return Documents;
 }
 
 void FTAMainModule::CloseDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocInfo)
@@ -99,7 +88,6 @@ void FTAMainModule::CloseDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocI
 		return;
 	}
 	//Remove from documents
-	OnDocumentsClosed.Invoke(DocInfo);
 	CommonHelpers::RemoveSwap(Documents, Index);
 }
 
@@ -118,14 +106,8 @@ void FTAMainModule::SaveDocument(const std::weak_ptr<FTAMathDocumentInfo>& DocIn
 	}
 }
 
-bool FTAMainModule::OpenDocument(const std::wstring& DocumentPath, std::weak_ptr<FTAMathDocumentInfo>& OutDocInfo, const std::shared_ptr<class FTACompatibilityData>& CompatibilityData)
+bool FTAMainModule::OpenDocument(const std::wstring& DocumentPath, const std::shared_ptr<class FTACompatibilityData>& CompatibilityData)
 {
-	if (auto Doc = FindDocumentInfo(DocumentPath))
-	{
-		//If document already in memory -> return it
-		OutDocInfo = *Doc;
-		return true;
-	}
 	fs::path Path = {DocumentPath};
 	if (!fs::exists(Path))
 	{
@@ -142,12 +124,12 @@ bool FTAMainModule::OpenDocument(const std::wstring& DocumentPath, std::weak_ptr
 			{
 				//If succeeded to create document, add to documents array and return this doc
 				Documents.push_back(std::make_shared<FTAMathDocumentInfo>(MathDocumentInfo));
-				OutDocInfo = Documents.back();
-				SetupMathDocument(OutDocInfo.lock().get());
-				OnDocumentAdded.Invoke(OutDocInfo);
+				auto DocInfo = Documents.back();
+				SetupMathDocument(DocInfo.get());
 				return true;
 			}
 		}
+		break;
 	case EDocumentType::Expressions:
 		{
 			//If document or expressions
@@ -156,11 +138,10 @@ bool FTAMainModule::OpenDocument(const std::wstring& DocumentPath, std::weak_ptr
 			{
 				//If succeeded to create document, add to documents array and return this doc
 				Documents.push_back(std::make_shared<FTAMathDocumentInfo>(MathDocumentInfo));
-				OutDocInfo = Documents.back();
-				OnDocumentAdded.Invoke(OutDocInfo);
 				return true;
 			}
 		}
+		break;
 	default: ;
 	}
 	
@@ -184,7 +165,7 @@ bool FTAMainModule::OpenOrCreateDocument(std::weak_ptr<FTAMathDocumentInfo>& Out
 	fs::path Path = {BindingsPath};
 	if (fs::exists(Path))
 	{
-		return OpenDocument(BindingsPath, OutDocInfo, CompatibilityData);
+		//return OpenDocument(BindingsPath, OutDocInfo, CompatibilityData);
 	}
 	return NewDocument(EDocumentType::Document, BindingsPath, OutDocInfo, CompatibilityData);
 }
@@ -221,10 +202,15 @@ void FTAMainModule::LoadLocalExpressions()
 	}
 }
 
-std::shared_ptr<FTAMathDocumentInfo>* FTAMainModule::FindDocumentInfo(const std::wstring& DocumentPath)
+int FTAMainModule::FindDocumentInd(const std::wstring& DocumentPath)
 {
-	return CommonHelpers::FindByPredicate(Documents, [&DocumentPath](const std::shared_ptr<FTAMathDocumentInfo>& Element)
+
+	for (int i = 0; i < Documents.size(); i++)
 	{
-		return Element->FilePath == DocumentPath;
-	});
+		if (Documents[i]->FilePath == DocumentPath)
+		{
+			return i;
+		}
+	}
+	return -1;
 }

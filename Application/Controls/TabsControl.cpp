@@ -1,13 +1,17 @@
 #include "TabsControl.h"
 #include <QDebug>
 #include "Modules/MainWindowModule.h"
+#include "FilesControl.h"
+#include "Application.h"
 #include "AppGlobal.h"
 
 TabsControl::TabsControl(QObject* parent)
 	:QObject(parent)
 {
-	m_onAddedHndl = AppGlobal::mainModule->OnDocumentAdded.AddFunc(this, &TabsControl::onDocumentAdded);
 	m_tabInfoModel = new DocumentTabInfoModel(this);
+	auto filesControl = AppGlobal::application->getFilesControl();
+	QObject::connect(filesControl, &FilesControl::onDocumentOpened, this, &TabsControl::onDocumentOpened);
+	QObject::connect(filesControl, &FilesControl::onCurrentDocumentChanged, this, &TabsControl::onCurrentDocumentChanged);
 }
 
 void TabsControl::selectTab(qint32 id)
@@ -16,9 +20,7 @@ void TabsControl::selectTab(qint32 id)
 	{
 		return;
 	}
-	setCurrentTabId(id);
-	auto docs = AppGlobal::mainModule->GetAllDocuments();
-
+	AppGlobal::application->getFilesControl()->selectDocument(id);
 }
 
 void TabsControl::closeTab(qint32 id)
@@ -45,10 +47,14 @@ void TabsControl::setCurrentTabId(qint32 id)
 	emit currentTabIdChanged(id);
 }
 
-void TabsControl::onDocumentAdded(const std::weak_ptr<FTAMathDocumentInfo>& docInfo)
+void TabsControl::onCurrentDocumentChanged(qint32 ind)
 {
-	auto docInfoPtr = docInfo.lock();
-	m_tabInfoModel->addDocumentTabInfo(DocumentTabInfo(QString::fromStdWString(docInfoPtr->FileName), QString::fromStdWString(docInfoPtr->FilePath)));
-	setCurrentTabId(m_tabInfoModel->rowCount() - 1);
+	setCurrentTabId(ind);
+}
+
+void TabsControl::onDocumentOpened(qint32 ind)
+{
+	auto& docInfo = AppGlobal::mainModule->GetAllDocuments()[ind];
+	m_tabInfoModel->addDocumentTabInfo(DocumentTabInfo(QString::fromStdWString(docInfo->FileName), QString::fromStdWString(docInfo->FilePath)));
 }
 

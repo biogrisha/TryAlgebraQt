@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Application.h"
 #include <QQuickWindow>
 #include <QVulkanInstance>
 #include "AppGlobal.h"
@@ -10,6 +11,7 @@
 #include "Controls/MenuControl.h"
 #include "Controls/DocumentControl.h"
 #include "Controls/TabsControl.h"
+#include "Controls/FilesControl.h"
 
 Application::~Application()
 {
@@ -22,8 +24,10 @@ Application::Application(QObject *parent)
 {
 	AppGlobal::application = this;
 	AppGlobal::mainModule = &m_mainModule;
+	m_filesControl = new FilesControl(this);
 	m_menuControl = new MenuControl(this);
 	m_tabsControl = new TabsControl(this);
+	m_documentControl = new DocumentControl(this);
 
 	QScreen* screen = QGuiApplication::primaryScreen(); 
 	qreal logicalDpiX = screen->logicalDotsPerInchX(); 
@@ -31,7 +35,7 @@ Application::Application(QObject *parent)
 	m_freeTypeWrap.Init(logicalDpiX, logicalDpiY);
 }
 
-DocumentControl* Application::getCurrentDocument()
+DocumentControl* Application::getDocumentControl()
 {
 	return m_documentControl;
 }
@@ -40,13 +44,10 @@ FFreeTypeWrap* Application::getFreeTypeWrap()
 {
 	return &m_freeTypeWrap;
 }
-void Application::setCurrentDocument(DocumentControl* documentControl)
+
+FilesControl* Application::getFilesControl()
 {
-	if(m_documentControl)
-	{
-		m_documentControl->deleteLater();
-	}
-	m_documentControl = documentControl;
+	return m_filesControl;
 }
 
 TabsControl* Application::getTabs()

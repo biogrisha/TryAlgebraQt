@@ -6,3 +6,33 @@ rects upd && text same->render rects->render only text
 rects upd && text updated->render rects->render atlas->render text
 rects same && text updated -> render rects -> render atlas -> render text
 rects same && text same -> update caret
+
+docC
+menuC
+tabsC
+docI
+
+menuC->open doc
+- docC->create comp data->create doc->set doc
+- tabsC->add tab->update curr ind
+
+menuC->open existing doc
+- docC->set doc
+- tabsC->update curr ind
+
+tabsC->select doc
+- docC->set doc
+- tabsC->update curr ind
+
+display:
+state: image
+actions: set state.
+actions events: set state or none
+
+application:
+state: files array
+actions: add file, close file
+state events: file added, file removed
+actions events: 
+
+

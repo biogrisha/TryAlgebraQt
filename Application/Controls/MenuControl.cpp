@@ -1,7 +1,7 @@
 #include "MenuControl.h"
 #include "Application.h"
 #include "AppGlobal.h"
-#include "DocumentControl.h"
+#include "FilesControl.h"
 
 MenuControl::MenuControl(QObject* parent)
 	: QObject(parent)
@@ -10,8 +10,7 @@ MenuControl::MenuControl(QObject* parent)
 
 void MenuControl::openDocument(const QUrl& url)
 {	
-	auto documentControl = new DocumentControl(AppGlobal::application);
-	documentControl->setDocument(url);
-	AppGlobal::application->setCurrentDocument(documentControl);
+	auto filesControl = AppGlobal::application->getFilesControl();
+	filesControl->openDocument(url);
 }
 
