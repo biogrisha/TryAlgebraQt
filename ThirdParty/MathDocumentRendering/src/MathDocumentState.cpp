@@ -33,6 +33,11 @@ void FMathDocumentState::Clear(bool bText, bool bRects)
 	}
 }
 
+void FMathDocumentState::Invalidate()
+{
+	bTextUpdated = bRectsUpdated = bCaretUpdated = true;
+}
+
 void FMathDocumentState::AddGlyph(const FGlyphData& Glyph)
 {
 	bTextUpdated = true;

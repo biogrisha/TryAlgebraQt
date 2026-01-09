@@ -6,6 +6,7 @@ class FMathDocumentState
 public:
 	void CopyChanged(const FMathDocumentState& From);
 	void Clear(bool bText, bool bRects);
+	void Invalidate();
 	void AddGlyph(const FGlyphData& Glyph);
 	void SetCaret(const FCaretData& InCaretData);
 	void AddRect(const FRectInst& Rect);

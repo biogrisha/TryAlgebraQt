@@ -339,6 +339,24 @@ bool CustomTextureNodePrivate::buildTexture(const QSize& size)
         qWarning("Failed to create framebuffer: %d", err);
         return false;
     }
+
+    auto commandBuffer = BeginSingleTimeCommands();
+    VkImageMemoryBarrier imageTransitionBarrier = {};
+    imageTransitionBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    imageTransitionBarrier.srcAccessMask = VK_ACCESS_NONE;
+    imageTransitionBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    imageTransitionBarrier.oldLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
+    imageTransitionBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageTransitionBarrier.image = m_texture;
+    imageTransitionBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageTransitionBarrier.subresourceRange.levelCount = imageTransitionBarrier.subresourceRange.layerCount = 1;
+
+    m_devFuncs->vkCmdPipelineBarrier(commandBuffer,
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        0, 0, nullptr, 0, nullptr,
+        1, &imageTransitionBarrier);
+    EndSingleTimeCommands(commandBuffer);
     return true;
 }
 
@@ -664,17 +682,19 @@ bool CustomTextureNodePrivate::initialize()
 void CustomTextureNodePrivate::sync()
 {
     m_dpr = m_window->effectiveDevicePixelRatio();
-    const QSize newSize = m_item->size().toSize() * m_dpr;
+    QSize newSize = m_item->size().toSize() * m_dpr;
+    newSize = QSize(qMax(newSize.width(), 1), qMax(newSize.height(), 1));
     bool needsNew = false;
 
     if (newSize != m_size) {
         needsNew = true;
         m_size = newSize;
         auto size = m_item->size().toSize();
-        m_itemSizeY = size.height();
-        m_itemSizeX = size.width();
+        m_itemSizeY = m_size.height();
+        m_itemSizeX = m_size.width();
 
         m_documentRendering.SetDocumentExtent({ uint32_t(m_itemSizeX), uint32_t(m_itemSizeY) });
+        m_meDocState->Invalidate();
     }
 
     if (!m_initialized) {
@@ -729,67 +749,12 @@ void CustomTextureNodePrivate::render()
     memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
     RenderedDocBuffer->UnmapData();
     m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
-    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    copyBufferToImage(stagingBuffer, m_textureImage, static_cast<uint32_t>(m_itemSizeX), static_cast<uint32_t>(m_itemSizeY));
-    TransitionImageLayout(m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+    copyBufferToImage(stagingBuffer, m_texture, static_cast<uint32_t>(m_itemSizeX), static_cast<uint32_t>(m_itemSizeY));
+    TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
     m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
-    
-
-    uint currentFrameSlot = m_window->graphicsStateInfo().currentFrameSlot;
-
-    VkClearValue clearColor = { { {0, 0, 0, 1} } };
-
-    VkRenderPassBeginInfo rpBeginInfo = {};
-    rpBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    rpBeginInfo.renderPass = m_renderPass;
-    rpBeginInfo.framebuffer = m_textureFramebuffer;
-    rpBeginInfo.renderArea.extent.width = m_size.width();
-    rpBeginInfo.renderArea.extent.height = m_size.height();
-    rpBeginInfo.clearValueCount = 1;
-    rpBeginInfo.pClearValues = &clearColor;
-
-    QSGRendererInterface* rif = m_window->rendererInterface();
-    VkCommandBuffer cmdBuf = *reinterpret_cast<VkCommandBuffer*>(
-        rif->getResource(m_window, QSGRendererInterface::CommandListResource));
-
-    m_devFuncs->vkCmdBeginRenderPass(cmdBuf, &rpBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-    m_devFuncs->vkCmdBindPipeline(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
-
-    VkDeviceSize vbufOffset = 0;
-    m_devFuncs->vkCmdBindVertexBuffers(cmdBuf, 0, 1, &m_vbuf, &vbufOffset);
-
-    m_devFuncs->vkCmdBindDescriptorSets(cmdBuf, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1,
-        &m_texDescriptor, 0, nullptr);
-
-    VkViewport vp = { 0, 0, float(m_size.width()), float(m_size.height()), 0.0f, 1.0f };
-    m_devFuncs->vkCmdSetViewport(cmdBuf, 0, 1, &vp);
-    VkRect2D scissor = { { 0, 0 }, { uint32_t(m_size.width()), uint32_t(m_size.height()) } };
-    m_devFuncs->vkCmdSetScissor(cmdBuf, 0, 1, &scissor);
-
-    m_devFuncs->vkCmdDraw(cmdBuf, 4, 1, 0, 0);
-    m_devFuncs->vkCmdEndRenderPass(cmdBuf);
-
-    // Memory barrier before the texture can be used as a source.
-    // Since we are not using a sub-pass, we have to do this explicitly.
-
-    VkImageMemoryBarrier imageTransitionBarrier = {};
-    imageTransitionBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    imageTransitionBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    imageTransitionBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    imageTransitionBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    imageTransitionBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageTransitionBarrier.image = m_texture;
-    imageTransitionBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageTransitionBarrier.subresourceRange.levelCount = imageTransitionBarrier.subresourceRange.layerCount = 1;
-
-    m_devFuncs->vkCmdPipelineBarrier(cmdBuf,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        0, 0, nullptr, 0, nullptr,
-        1, &imageTransitionBarrier);
 }
 
 void CustomTextureNodePrivate::CreateTextureImage() {

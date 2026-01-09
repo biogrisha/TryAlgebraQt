@@ -69,6 +69,7 @@ void FSpriteRendering::SetExtent(const VkExtent2D& InExtent)
 	if (UniformBuffer)
 	{
 		UniformBuffer->SetData(sizeof(Extent), &Extent);
+		Output->SetExtent(InExtent);
 	}
 }
 
