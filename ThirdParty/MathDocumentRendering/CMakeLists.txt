@@ -14,6 +14,7 @@ add_library(MathDocumentRendering STATIC
 	include/SpriteRendering.h
 	include/RectanglesRendering.h
 	include/MathDocumentState.h
+	include/FileSystemUtilities.h
 	src/MathDocumentRendering.cpp
 	src/GlyphAtlasRendering.cpp
 	src/TextFromAtlasRendering.cpp
@@ -41,3 +42,7 @@ target_link_libraries(MathDocumentRendering
 		VulkanFramework
 		MathLibrary
 )
+set(ASSETS_LOCAL_PATH "MdRenderingAssets")
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/include/pathsConfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/pathsConfig.h )
+include(GNUInstallDirs)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${ASSETS_LOCAL_PATH} DESTINATION ${CMAKE_INSTALL_BINDIR} )

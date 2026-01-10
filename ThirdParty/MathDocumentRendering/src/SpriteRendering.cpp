@@ -1,6 +1,7 @@
 #include "SpriteRendering.h"
 #include "ImageBuffer.h"
 #include "VulkanHelpers.h"
+#include "FileSystemUtilities.h"
 namespace {
 	uint16_t S_1;
 	uint16_t P_1;
@@ -28,6 +29,7 @@ void FSpriteRendering::Init(FRendering* InRendering)
 		IndexBuffer->SetData(RectIndices);
 	}
 	{
+		auto path = FSUtils::getAssetsPath();
 		Atlas.SetPath("D:/Projects/TryAlgebraQt/TryAlgebraQt/RawAssets/Atlases/MathEditorAtlas");
 		Atlas.Init();
 	}

@@ -40,9 +40,6 @@ qt_add_qml_module(Application
         MathEditor/Visual/CaretVisual.cpp
         MathEditor/Visual/FromToVisual.h
         MathEditor/Visual/FromToVisual.cpp
-        
-    RESOURCES
-        Shaders/DrawEditorLayout.spv
 )
 
 target_link_libraries(Application

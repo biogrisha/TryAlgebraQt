@@ -4,6 +4,7 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
 project(TryAlgebraProj LANGUAGES CXX)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
@@ -26,9 +27,11 @@ qt_add_qml_module(TryAlgebra
     URI TryAlgebra
     QML_FILES
         Main.qml
-    NO_RESOURCE_TARGET_PATH
 )
 
+set_target_properties(TryAlgebra PROPERTIES
+    WIN32_EXECUTABLE TRUE
+)
 
 target_link_libraries(TryAlgebra PRIVATE
     Qt6::Core
@@ -40,5 +43,9 @@ target_link_libraries(TryAlgebra PRIVATE
     Application
 )
 
-
-
+include(GNUInstallDirs)
+install(TARGETS TryAlgebra
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

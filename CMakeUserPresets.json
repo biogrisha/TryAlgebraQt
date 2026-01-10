@@ -5,6 +5,7 @@
       "name": "Qt-Debug",
       "inherits": "Qt-Default",
       "binaryDir": "${sourceDir}/out/build/debug",
+      "installDir": "${sourceDir}/out/install/debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       },
@@ -16,6 +17,7 @@
       "name": "Qt-Release",
       "inherits": "Qt-Default",
       "binaryDir": "${sourceDir}/out/build/release",
+      "installDir": "${sourceDir}/out/install/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
