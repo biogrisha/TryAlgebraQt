@@ -19,18 +19,16 @@ int main(int argc, char* argv[])
     if (!ok) {
         return 1;
     }
-
-    if (!inst.layers().contains("VK_LAYER_KHRONOS_validation")) {
-        return 1;
-    }
+    qDebug() << "vulkan created";
 
     // This example needs Vulkan. It will not run otherwise.
     QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
 
     QQmlApplicationEngine engine;
+    qDebug() << "engine created";
     Application* userApplication = new Application(&app);
     qmlRegisterSingletonInstance("com.Application", 1, 0, "UserApplication", userApplication);
-
+    qDebug() << "registred app successfully";
     QObject::connect(
         &engine,
         &QQmlApplicationEngine::objectCreationFailed,
@@ -44,6 +42,7 @@ int main(int argc, char* argv[])
     engine.loadFromModule("TryAlgebra", "Main");
     if (auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().first()))
     {
+        qDebug() << "loaded main successfully";
         window->setVulkanInstance(&inst);
     }
     return app.exec();

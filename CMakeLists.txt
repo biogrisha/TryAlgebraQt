@@ -30,7 +30,7 @@ qt_add_qml_module(TryAlgebra
 )
 
 set_target_properties(TryAlgebra PROPERTIES
-    WIN32_EXECUTABLE TRUE
+    WIN32_EXECUTABLE FALSE
 )
 
 target_link_libraries(TryAlgebra PRIVATE
