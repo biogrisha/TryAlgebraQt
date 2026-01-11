@@ -5,6 +5,7 @@
 #include <QVulkanInstance>
 #include <Application/Application.h>
 #include <QDebug>
+
 int main(int argc, char* argv[])
 {
     //system("cmd /c \"cd /d D:\\Projects\\TryAlgebraQt\\TryAlgebraQt\\ThirdParty\\Shader && compile.bat\"");
@@ -39,6 +40,7 @@ int main(int argc, char* argv[])
             QCoreApplication::exit(-1); 
         },
         Qt::QueuedConnection);
+
     engine.loadFromModule("TryAlgebra", "Main");
     if (auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().first()))
     {

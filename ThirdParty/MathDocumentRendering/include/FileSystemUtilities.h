@@ -1,8 +1,8 @@
 #pragma once
-#include "pathsConfig.h"
 #include <windows.h>
 #include <string>
 #include <filesystem>
+#include "pathsConfig.h"
 
 namespace FSUtils
 {
@@ -22,7 +22,12 @@ namespace FSUtils
 
     inline std::string getAssetsPath()
     {
-
-        return getExecutableDir();
+        std::string Result;
+#ifdef INSTALL_BUILD
+        Result = getExecutableDir();
+#else
+        Result = getSourceDir();
+#endif
+        return Result + "/" + ASSETS_LOCAL_PATH;
     }
 }

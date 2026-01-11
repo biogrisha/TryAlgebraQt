@@ -1,14 +1,15 @@
 #include "MathElementGenerator.h"
-#include "Modules/Visual/VisualBase.h"
-#include "Application.h"
-#include "FreeTypeWrap.h"
-#include "AppGlobal.h"
-#include "Modules/MathElementsV2/Me/MeCharacter.h"
-#include "Modules/MathElementsV2/Me/MeNewLine.h"
-#include "Modules/MathElementsV2/Me/MeContainer.h"
-#include "Modules/MathElementsV2/Me/MeFromTo.h"
-#include "Visual/CharVisual.h"
-#include "Visual/FromToVisual.h"
+#include <FreeTypeWrap.h>
+#include <Modules/Visual/VisualBase.h>
+#include <Modules/MathElementsV2/Me/MeCharacter.h>
+#include <Modules/MathElementsV2/Me/MeNewLine.h>
+#include <Modules/MathElementsV2/Me/MeContainer.h>
+#include <Modules/MathElementsV2/Me/MeFromTo.h>
+
+#include <Application.h>
+#include <AppGlobal.h>
+#include <MathEditor/Visual/CharVisual.h>
+#include <MathEditor/Visual/FromToVisual.h>
 
 MathElementV2::FMathElementPtr MathElementGeneratorQt::CreateMathElement(const std::wstring& Name, const std::wstring& Info)
 {
@@ -45,6 +46,7 @@ MathElementV2::FMathElementPtr MathElementGeneratorQt::CreateCharacter(wchar_t C
 
 void MathElementGeneratorQt::initMeGenerators()
 {
+	//Container
 	{
 		FuncCreateMe FuncCreateMe = [this](const std::wstring& Info)->MathElementV2::FMathElementPtr
 			{

@@ -1,6 +1,7 @@
 #include "RectanglesRendering.h"
 #include "ImageBuffer.h"
 #include "VulkanHelpers.h"
+#include "FileSystemUtilities.h"
 
 namespace {
 	uint16_t S_1;
@@ -56,7 +57,8 @@ void FRectRendering::Init(FRendering* InRendering)
 
 void FRectRendering::InitPLine()
 {
-	PLine = Rendering->AddPipeline(P_1, &RectLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/DrawRectangles.spv");
+	auto AssetsPath = FSUtils::getAssetsPath();
+	PLine = Rendering->AddPipeline(P_1, &RectLayout, AssetsPath + "/Shader/DrawRectangles.spv");
 }
 
 void FRectRendering::SetExtent(const VkExtent2D& InExtent)

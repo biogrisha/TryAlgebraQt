@@ -1,8 +1,5 @@
-// Copyright (C) 2019 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+#pragma once
 
-#ifndef VULKANTEXTUREIMPORT_H
-#define VULKANTEXTUREIMPORT_H
 #include "MathDocumentState.h"
 #include <QtQuick/QQuickItem>
 
@@ -15,8 +12,13 @@ class MathDocument : public QQuickItem
 
 public:
     MathDocument();
+    
+    //Set new state to update rendering
     void setMeDocState(FMathDocumentState* meDocState);
+
+    //Is underlying node created
     bool isNodeCreated();
+
 protected:
     QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) override;
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
@@ -30,4 +32,3 @@ private:
     CustomTextureNodePrivate* m_node = nullptr;
 };
 
-#endif // VULKANTEXTUREIMPORT_H

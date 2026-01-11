@@ -5,7 +5,7 @@
 #include <Pipeline.h>
 #include <DescriptorManager.h>
 #include <Rendering.h>
-#include <FreeTypeWrap.h>
+#include "FreeTypeWrap.h"
 
 struct FSimpleVertex
 {

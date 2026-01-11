@@ -1,6 +1,6 @@
 #include "TextFromAtlasRendering.h"
 #include <VulkanHelpers.h>
-
+#include "FileSystemUtilities.h"
 namespace {
 	uint16_t S_1;
 	uint16_t P_1;
@@ -50,7 +50,8 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 
 void FTextFromAtlasRendering::InitPLine()
 {
-	PLine = Rendering->AddPipeline(P_1, &TextFromAtlasLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/TextFromAtlas.spv");
+	auto AssetsPath = FSUtils::getAssetsPath();
+	PLine = Rendering->AddPipeline(P_1, &TextFromAtlasLayout, AssetsPath + "/Shader/TextFromAtlas.spv");
 }
 
 void FTextFromAtlasRendering::SetExtent(const VkExtent2D& InExtent)

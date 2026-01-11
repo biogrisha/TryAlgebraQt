@@ -1,9 +1,9 @@
 #pragma once
 #include <functional>
 #include <map>
-#include "MathDocumentState.h"
-#include "Modules/MathElementsV2/CompatibilityData.h"
-#include "Modules/MathElementsV2/Me/MathElementBaseV2.h"
+#include <MathDocumentState.h>
+#include <Modules/MathElementsV2/CompatibilityData.h>
+#include <Modules/MathElementsV2/Me/MathElementBaseV2.h>
 
 class MathElementGeneratorQt : public FTAMathElementGenerator
 {

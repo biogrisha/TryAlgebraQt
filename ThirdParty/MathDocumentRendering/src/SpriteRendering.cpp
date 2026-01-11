@@ -29,8 +29,8 @@ void FSpriteRendering::Init(FRendering* InRendering)
 		IndexBuffer->SetData(RectIndices);
 	}
 	{
-		auto path = FSUtils::getAssetsPath();
-		Atlas.SetPath("D:/Projects/TryAlgebraQt/TryAlgebraQt/RawAssets/Atlases/MathEditorAtlas");
+		auto AssetsPath = FSUtils::getAssetsPath();
+		Atlas.SetPath(AssetsPath + "/Atlases/MathEditorAtlas");
 		Atlas.Init();
 	}
 	{
@@ -62,7 +62,8 @@ void FSpriteRendering::Init(FRendering* InRendering)
 
 void FSpriteRendering::InitPLine()
 {
-	PLine = Rendering->AddPipeline(P_1, &SpriteLayout, "D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/Shader/DrawSprites.spv");
+	auto AssetsPath = FSUtils::getAssetsPath();
+	PLine = Rendering->AddPipeline(P_1, &SpriteLayout, AssetsPath + "/Shader/DrawSprites.spv");
 }
 
 void FSpriteRendering::SetExtent(const VkExtent2D& InExtent)

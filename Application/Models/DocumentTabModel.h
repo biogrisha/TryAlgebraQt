@@ -13,6 +13,9 @@ private:
     QString m_filePath;
 };
 
+/*
+* Model used to display documents as tabs
+*/
 class DocumentTabInfoModel : public QAbstractListModel
 {
     Q_OBJECT

@@ -1,5 +1,5 @@
 #include "CursorComponentGenerator.h"
-#include "Visual/CaretVisual.h"
+#include <MathEditor/Visual/CaretVisual.h>
 std::shared_ptr<FTACursorComponent> CursorComponentGeneratorQt::Create()
 {
 	auto cursorComponent = FTACursorComponent::MakeTypedShared();

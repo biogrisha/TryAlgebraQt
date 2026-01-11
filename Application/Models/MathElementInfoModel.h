@@ -14,6 +14,9 @@ private:
 	QString m_meSign;
 };
 
+/*
+* Model used to display math elements in math elents palette
+*/
 class MathElementInfoModel : public QAbstractListModel
 {
     Q_OBJECT

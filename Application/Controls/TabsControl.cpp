@@ -1,9 +1,10 @@
 #include "TabsControl.h"
 #include <QDebug>
-#include "Modules/MainWindowModule.h"
-#include "FilesControl.h"
-#include "Application.h"
-#include "AppGlobal.h"
+#include <Modules/MainWindowModule.h>
+#include <Application.h>
+#include <AppGlobal.h>
+#include <Controls/FilesControl.h>
+
 
 TabsControl::TabsControl(QObject* parent)
 	:QObject(parent)

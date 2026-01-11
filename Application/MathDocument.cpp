@@ -1,7 +1,7 @@
 // Copyright (C) 2019 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-#include "MathDocument.h"
+#include <MathDocument.h>
 
 #include <QtGui/QScreen>
 #include <QtQuick/QQuickWindow>
@@ -16,8 +16,9 @@
 #include <VertexInputLayout.h>
 #include <VulkanContext.h>
 #include <MathDocumentRendering.h>
-#include <Application.h>
 #include <FreeTypeWrap.h>
+
+#include <Application.h>
 #include <AppGlobal.h>
 
 class CustomTextureNodePrivate : public QSGTextureProvider, public QSGSimpleTextureNode
@@ -30,29 +31,50 @@ public:
 
     QSGTexture* texture() const override;
 
+    //Synchronization during paint node
     void sync();
+
+    //Cache doc state ptr in node
     void setMeDocState(FMathDocumentState* meDocState);
 private slots:
+    //Rendering logic
     void render();
 
 private:
+    //Creates a texture used by scene graph
     bool buildTexture(const QSize& size);
+
+    //Releases texture resources
     void freeTexture();
+
+    //Renderer initialization logic
     bool initialize();
+
+    //Finds memory type suitable for the buffer
     uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+    //Creates VkBuffer and binds memory
     void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+    
+    //Creates command pool on graphics queue
     void createCommandPool();
+
+    //Creates command buffer for single time command
     VkCommandBuffer BeginSingleTimeCommands();
+
+    //Executes command buffer on graphics queue
     void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+    //Transits image layout
     void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+    
+    //Copying VkBuffer into VkImage
     void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
-    QQuickItem* m_item;
-    QQuickWindow* m_window;
-    QSize m_size;
-    float m_itemSizeX = 0;
-    float m_itemSizeY = 0;
-    qreal m_dpr;
+    QQuickItem* m_item = nullptr;
+    QQuickWindow* m_window = nullptr;
+    QSize m_size = { 0,0 };
+    qreal m_dpr = 0;
 
     VkImage m_texture = VK_NULL_HANDLE;
     VkDeviceMemory m_textureMemory = VK_NULL_HANDLE;
@@ -64,6 +86,7 @@ private:
     QVulkanDeviceFunctions* m_devFuncs = nullptr;
     QVulkanFunctions* m_funcs = nullptr;
 
+    //Request to destroy vulkan context if Item destroyed
     struct ContextDestroyer
     {
         ~ContextDestroyer()
@@ -75,8 +98,8 @@ private:
 
     FMathDocumentRendering m_documentRendering;
     uint32_t m_graphicsFamily = 0;
-    VkCommandPool m_commandPool;
-    VkQueue m_graphicsQueue;
+    VkCommandPool m_commandPool = nullptr;
+    VkQueue m_graphicsQueue = nullptr;
     FMathDocumentState* m_meDocState = nullptr;
 };
 
@@ -160,6 +183,7 @@ QSGTexture* CustomTextureNodePrivate::texture() const
 
 bool CustomTextureNodePrivate::buildTexture(const QSize& size)
 {
+    //creating output texture
     VkImageCreateInfo imageInfo;
     memset(&imageInfo, 0, sizeof(imageInfo));
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -186,6 +210,7 @@ bool CustomTextureNodePrivate::buildTexture(const QSize& size)
 
     m_texture = image;
 
+    //creating texture memory
     VkMemoryRequirements memReq;
     m_devFuncs->vkGetImageMemoryRequirements(m_dev, image, &memReq);
 
@@ -211,12 +236,14 @@ bool CustomTextureNodePrivate::buildTexture(const QSize& size)
         return false;
     }
 
+    //bind memory to texture
     err = m_devFuncs->vkBindImageMemory(m_dev, image, m_textureMemory, 0);
     if (err != VK_SUCCESS) {
         qWarning("Failed to bind linear image memory: %d", err);
         return false;
     }
 
+    //transiting layout from VK_IMAGE_LAYOUT_PREINITIALIZED to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     auto commandBuffer = BeginSingleTimeCommands();
     VkImageMemoryBarrier imageTransitionBarrier = {};
     imageTransitionBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -245,11 +272,6 @@ void CustomTextureNodePrivate::freeTexture()
         m_devFuncs->vkDestroyImage(m_dev, m_texture, nullptr);
         m_texture = VK_NULL_HANDLE;
     }
-}
-
-static inline VkDeviceSize aligned(VkDeviceSize v, VkDeviceSize byteAlign)
-{
-    return (v + byteAlign - 1) & ~(byteAlign - 1);
 }
 
 bool CustomTextureNodePrivate::initialize()
@@ -308,13 +330,10 @@ void CustomTextureNodePrivate::sync()
     bool needsNew = false;
 
     if (newSize != m_size) {
+        //if window resized - update size
         needsNew = true;
         m_size = newSize;
-        auto size = m_item->size().toSize();
-        m_itemSizeY = m_size.height();
-        m_itemSizeX = m_size.width();
-
-        m_documentRendering.SetDocumentExtent({ uint32_t(m_itemSizeX), uint32_t(m_itemSizeY) });
+        m_documentRendering.SetDocumentExtent({ uint32_t(m_size.width()), uint32_t(m_size.height()) });
         m_meDocState->Invalidate();
     }
 
@@ -338,6 +357,7 @@ void CustomTextureNodePrivate::sync()
         setTexture(wrapper);
         Q_ASSERT(wrapper->nativeInterface<QNativeInterface::QSGVulkanTexture>()->nativeImage() == m_texture);
     }
+    //update math renderer state
     m_documentRendering.UpdateState(*m_meDocState);
     m_meDocState->Update();
 }
@@ -360,20 +380,24 @@ void CustomTextureNodePrivate::render()
     void* RenderedDocData = RenderedDocBuffer->MapData();
 
     //Copy buffer into image
-    VkDeviceSize imageSize = m_itemSizeX * m_itemSizeY * 4;
+    VkDeviceSize imageSize = m_size.width() * m_size.height() * 4;
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
+    
+    //move result into staging buffer
     void* data;
     m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
     memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
     RenderedDocBuffer->UnmapData();
     m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
+
+    //copy buffer into node texture
     TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    copyBufferToImage(stagingBuffer, m_texture, static_cast<uint32_t>(m_itemSizeX), static_cast<uint32_t>(m_itemSizeY));
+    copyBufferToImage(stagingBuffer, m_texture, static_cast<uint32_t>(m_size.width()), static_cast<uint32_t>(m_size.height()));
     TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
+    //destroy staging buffer
     m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
     m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
 }

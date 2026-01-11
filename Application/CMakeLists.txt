@@ -20,8 +20,6 @@ qt_add_qml_module(Application
         Controls/MenuControl.cpp
         Controls/DocumentControl.h
         Controls/DocumentControl.cpp
-        Controls/ToolbarControl.h
-        Controls/ToolbarControl.cpp
         Controls/TabsControl.h
         Controls/TabsControl.cpp
         Controls/FilesControl.h
@@ -55,7 +53,8 @@ target_link_libraries(Application
     TryAlgebraCore
 )
 
-target_include_directories(Application PRIVATE 
+target_include_directories(Application BEFORE PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Controls
     ${CMAKE_CURRENT_SOURCE_DIR}/Models
 )

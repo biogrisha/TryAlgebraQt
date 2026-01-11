@@ -1,8 +1,11 @@
 #pragma once
-#include "MathDocumentState.h"
-#include "Modules/Visual/VisualBase.h"
-#include "Modules/MathElementsV2/Me/MeFromTo.h"
+#include <MathDocumentState.h>
+#include <Modules/Visual/VisualBase.h>
+#include <Modules/MathElementsV2/Me/MeFromTo.h>
 
+/*
+* Collects vilual data from MeFromTo
+*/
 class FromToVisual : public FTAVisual
 {
 public:

@@ -1,10 +1,11 @@
+
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2)
 
-# Create a library target
+
 add_library(MathDocumentRendering STATIC 
 	include/MathDocumentRendering.h
 	include/GlyphAtlasRendering.h
@@ -25,7 +26,11 @@ add_library(MathDocumentRendering STATIC
 
 )
 
-# Set include directories
+if(INSTALL_BUILD)
+	target_compile_definitions(MathDocumentRendering PRIVATE INSTALL_BUILD)
+endif()
+
+
 target_include_directories(MathDocumentRendering
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include

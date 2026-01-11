@@ -1,7 +1,7 @@
 #include "FromToVisual.h"
-#include "FreeTypeWrap.h"
-#include "Application.h"
-#include "AppGlobal.h"
+#include <FreeTypeWrap.h>
+#include <Application.h>
+#include <AppGlobal.h>
 
 FromToVisual::FromToVisual(MathElementV2::FTAMeFromTo* me, FMathDocumentState* meDocState)
 {
@@ -13,6 +13,7 @@ void FromToVisual::Show()
 {
 	if (m_meDocState->IsTextUpdated())
 	{
+		//Add symbol parameters to glyphs render data
 		auto symbPos = m_me->GetAbsolutePosition() + m_me->GetSymbolPosition();
 		FGlyphData g;
 		g.GlyphId.Glyph = m_me->GetSymbol().back();
@@ -25,6 +26,7 @@ void FromToVisual::Show()
 	{
 		if(m_me->bSelected)
 		{
+			//if me is selected -> add rectangle for the highlighting
 			auto pos = m_me->GetAbsolutePosition();
 			auto size = m_me->GetAbsoluteSize();
 			m_meDocState->AddRect(FRectInst({ pos.x, pos.y }, { size.x, size.y }, { 0,0,0.8,1 }));
@@ -35,12 +37,13 @@ void FromToVisual::Show()
 
 TACommonTypes::FTAVector2d FromToVisual::GetVisualSize()
 {
+	//Calculates Symbol size in pixels for the given font size from the outlines bounding box
 	auto ft = AppGlobal::application->getFreeTypeWrap();
-	FGlyphId Glyph;
-	Glyph.Glyph = m_me->GetSymbol().back();
-	Glyph.Height = m_me->GetFontSize();
-	Glyph.bCompact = true;
-	auto Size = ft->GetGlyphSize(Glyph);
-	return { Size.x, Size.y };
+	FGlyphId g;
+	g.Glyph = m_me->GetSymbol().back();
+	g.Height = m_me->GetFontSize();
+	g.bCompact = true;
+	auto size = ft->GetGlyphSize(g);
+	return { size.x, size.y };
 }
 
