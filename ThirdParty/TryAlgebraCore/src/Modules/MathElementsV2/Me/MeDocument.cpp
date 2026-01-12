@@ -2,12 +2,11 @@
 
 
 #include "Modules/MathElementsV2/Me/MeDocument.h"
+#include <algorithm>
 
 #include "FunctionLibraries/MathElementsHelpers.h"
 #include "Modules/MathElementsV2/Me/MeContainer.h"
 #include "Modules/MathElementsV2/Me/MeNewLine.h"
-#include <algorithm>
-
 MathElementV2::FTAMeDocument::FTAMeDocument()
 {
 	RelativeHeight = 1200.f;
@@ -76,6 +75,7 @@ void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const 
 {
 	//Generate math elements from string
 	FMathElements GeneratedMathElements = FTAMeHelpers::ParseFromString(InMathElements, Generator.lock().get());
+
 	if (GeneratedMathElements.empty())
 	{
 		return;
@@ -90,6 +90,7 @@ void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const 
 	}
 	
 	ParentElement->AddChildren(Path, GeneratedMathElements);
+
 	if(ParentElement.Get() != this)
 	{
 		Children[Path.TreePath[0]]->CalculateSize(Children[Path.TreePath[0]]->GetParent()->GetAccumulatedScalingFactor());

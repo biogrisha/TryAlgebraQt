@@ -6,7 +6,7 @@
 
 struct FOutlineCurvePoints
 {
-	glm::vec2 points[3];
+	glm::vec2 points[3] = {glm::vec2(),glm::vec2(),glm::vec2()};
 	float a = 0;
 	float b = 0;
 };
@@ -16,7 +16,7 @@ struct FGlyphRenderData
 	std::vector<FOutlineCurvePoints> Outline;
 	uint32_t HeightInPixels = 0;
 	uint32_t WidthInPixels = 0;
-	glm::vec2 TextureOffset;
+	glm::vec2 TextureOffset = glm::vec2{ 0,0 };
 };
 
 struct FGlyphId

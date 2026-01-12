@@ -7,7 +7,7 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "D:/Projects/ThirdParty/VCPackage/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_PREFIX_PATH": "$env{QTDIR}",
-        "INSTALL_BUILD": "ON"
+        "INSTALL_BUILD": "OFF"
 
       },
         "vendor": {

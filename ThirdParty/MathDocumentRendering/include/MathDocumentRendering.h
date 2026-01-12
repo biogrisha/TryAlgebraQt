@@ -26,7 +26,6 @@ public:
 private:
 	std::vector<FGlyphData> DocumentContent;
 	std::map<FGlyphId, FGlyphData> Atlas;
-	std::map<FGlyphId, std::unique_ptr<FGlyphRenderData>> GlyphsRenderData;
 	FRectRendering RectRendering;
 	FGlyphAtlasRendering AtlasRendering;
 	FTextFromAtlasRendering TextFromAtlasRendering;

@@ -54,24 +54,8 @@ void FMathDocumentRendering::UpdateText(const std::vector<FGlyphData>& InDocumen
 
 	//for each glyph on the page
 	for (auto& GlyphData : DocumentContent)
-	{
-		//find render data in cache
-		auto It = GlyphsRenderData.find(GlyphData.GlyphId);
-		if (It != GlyphsRenderData.end())
-		{
-			//If found -> cache it for glyph
-			GlyphData.RenderData = It->second.get();
-		}
-		else
-		{
-			//if no render data -> make new
-			std::unique_ptr<FGlyphRenderData> RenderData = std::make_unique<FGlyphRenderData>();
-			GlyphData.RenderData = RenderData.get();
-			//Load render data
-			*RenderData = FreeTypeWrap->LoadGlyph(GlyphData);
-			//Add to render data cache
-			GlyphsRenderData.emplace(GlyphData.GlyphId, std::move(RenderData));
-		}
+	{		
+		GlyphData.RenderData = FreeTypeWrap->GetGlyphRenderData(GlyphData.GlyphId);
 		//Add unique glyph/size into atlas
 		Atlas.emplace(GlyphData.GlyphId, GlyphData);
 	}

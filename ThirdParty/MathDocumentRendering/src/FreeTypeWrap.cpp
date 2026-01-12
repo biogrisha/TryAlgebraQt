@@ -1,4 +1,5 @@
 ﻿#include "FreeTypeWrap.h"
+#include "FreeTypeWrap.h"
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
@@ -43,10 +44,10 @@ void FFreeTypeWrap::Init(float InDpiX, float InDpiY)
 	}
 }
 
-FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
+FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphId& GlyphId)
 {
 	//convert wchar into glyph index
-	FT_ULong charcode = int(GlyphData.GlyphId.Glyph);
+	FT_ULong charcode = int(GlyphId.Glyph);
 	auto glyph_index = FT_Get_Char_Index(Face, charcode);
 
 	auto UsedFace = Face;
@@ -60,7 +61,7 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	auto error = FT_Set_Char_Size(
 		UsedFace,    /* handle to face object */
 		0,       /* char_width in 1/64 of points  */
-		GlyphData.GlyphId.Height * 64,   /* char_height in 1/64 of points */
+		GlyphId.Height * 64,   /* char_height in 1/64 of points */
 		DpiX,     /* horizontal device resolution  */
 		DpiY);
 
@@ -132,7 +133,7 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	//Cache height and width of glyphs
 	Result.WidthInPixels = UsedFace->glyph->metrics.horiAdvance / 64;
 	float VerticalOffset = 0;
-	if (GlyphData.GlyphId.bCompact)
+	if (GlyphId.bCompact)
 	{
 		FT_BBox CBox;
 		FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
@@ -141,7 +142,7 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	}
 	else
 	{
-		Result.HeightInPixels = GetHeightFromFontSize(GlyphData.GlyphId.Height);
+		Result.HeightInPixels = GetHeightFromFontSize(GlyphId.Height);
 		VerticalOffset = Result.HeightInPixels * 64 * 0.7;
 
 	}
@@ -161,48 +162,27 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphData& GlyphData)
 	return Result;
 }
 
+FGlyphRenderData* FFreeTypeWrap::GetGlyphRenderData(const FGlyphId& GlyphId)
+{
+	//find render data in cache
+	auto It = GlyphsRenderData.find(GlyphId);
+	if (It != GlyphsRenderData.end())
+	{
+		return It->second.get();
+	}
+	//if no render data -> make new
+	std::unique_ptr<FGlyphRenderData> RenderData = std::make_unique<FGlyphRenderData>();
+	//Load render data
+	*RenderData = LoadGlyph(GlyphId);
+	//Add to render data cache
+	auto RenderDataEmplaced = GlyphsRenderData.emplace(GlyphId, std::move(RenderData));
+	return RenderDataEmplaced.first->second.get();
+}
+
 glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
 {
-	//convert wchar into glyph index
-	FT_ULong charcode = int(GlyphId.Glyph);
-	auto glyph_index = FT_Get_Char_Index(Face, charcode);
-
-	auto UsedFace = Face;
-	if (glyph_index == 0)
-	{
-		glyph_index = FT_Get_Char_Index(FaceFallback, charcode);
-		UsedFace = FaceFallback;
-	}
-
-	auto error = FT_Set_Char_Size(
-		UsedFace,    /* handle to face object         */
-		0,       /* char_width in 1/64 of points  */
-		GlyphId.Height * 64,   /* char_height in 1/64 of points */
-		DpiX,     /* horizontal device resolution  */
-		DpiY);
-
-
-	//load glyph
-	error = FT_Load_Glyph(
-		UsedFace,          /* handle to face object */
-		glyph_index,   /* glyph index           */
-		0);
-
-	glm::vec2 Result;
-
-	Result.x = UsedFace->glyph->metrics.horiAdvance / 64;
-	if (GlyphId.bCompact)
-	{
-		FT_BBox CBox;
-		FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
-		Result.y = (CBox.yMax - CBox.yMin) / 64;
-	} 
-	else
-	{
-		Result.y = GetHeightFromFontSize(GlyphId.Height);
-	}
-
-	return Result;
+	auto RenderData = GetGlyphRenderData(GlyphId);
+	return { RenderData->WidthInPixels, RenderData->HeightInPixels };
 }
 
 uint32_t FFreeTypeWrap::GetHeightFromFontSize(float Points)
