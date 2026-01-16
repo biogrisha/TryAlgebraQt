@@ -26,7 +26,7 @@ qt_add_executable(TryAlgebra
 qt_add_qml_module(TryAlgebra
     URI TryAlgebra
     QML_FILES
-        Main.qml
+        main.qml
 )
 
 set_target_properties(TryAlgebra PROPERTIES

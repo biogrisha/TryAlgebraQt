@@ -24,26 +24,13 @@ int main(int argc, char* argv[])
     // This example needs Vulkan. It will not run otherwise.
     QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
 
-    QQmlApplicationEngine engine;
-    qDebug() << "engine created";
     Application* userApplication = new Application(&app);
     qmlRegisterSingletonInstance("com.Application", 1, 0, "UserApplication", userApplication);
     qDebug() << "registred app successfully";
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreationFailed,
-        &app,
-        []() {
-            qDebug() << "failed to load";
-            QCoreApplication::exit(-1); 
-        },
-        Qt::QueuedConnection);
-
-    engine.loadFromModule("TryAlgebra", "Main");
-    if (auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().first()))
-    {
-        qDebug() << "loaded main successfully";
-        window->setVulkanInstance(&inst);
-    }
+    QQuickView view;
+    view.setResizeMode(QQuickView::SizeRootObjectToView);
+    view.setSource(QUrl("qrc:/qt/qml/TryAlgebra/main.qml"));
+    view.setVulkanInstance(&inst);
+    view.showMaximized();
     return app.exec();
 }

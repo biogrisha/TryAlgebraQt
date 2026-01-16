@@ -8,8 +8,8 @@ import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Dialogs
 
-ApplicationWindow {
-    Component.onCompleted: 
+Item {
+	Component.onCompleted: 
     { 
         menuControl = UserApplication.getMenu()
         tabsControl = UserApplication.getTabs()
@@ -19,12 +19,11 @@ ApplicationWindow {
 
     id: window
     visible: true
-    visibility: "Maximized"
-    width: 640
-    height: 480
     property MenuControl menuControl: null
     property TabsControl tabsControl: null
-    menuBar: MenuBar {
+
+    MenuBar {
+        id:menuBar
         Menu {
             title: qsTr("File")
             Action {
@@ -62,7 +61,7 @@ ApplicationWindow {
     Rectangle {
         id: tabsArea
         width: 150 
-		anchors.top: parent.top 
+		anchors.top: menuBar.bottom 
         anchors.bottom: parent.bottom
 		anchors.left: parent.left
         color: "#a3a3a3"
@@ -102,10 +101,8 @@ ApplicationWindow {
 	    }
     }
 
-
-
     Rectangle {
-        anchors.top: parent.top
+        anchors.top: menuBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: tabsArea.right
         anchors.right: parent.right
@@ -117,5 +114,4 @@ ApplicationWindow {
             focus: true
         }
     }
-
 }
