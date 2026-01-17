@@ -212,9 +212,9 @@ void FTACursorComponent::OnComponentAdded()
 {
 	Document = Host->Cast<MathElementV2::FTAMeDocument>()->GetSelfWeak();
 	OnMeAddedHandle = Document->OnMeAdded.AddFunc(this, &FTACursorComponent::OnMeAdded);
-	OnScrolledHandle = Document->OnScrolled.AddFunc(this, &FTACursorComponent::OnScrolled);
+	//OnScrolledHandle = Document->OnScrolled.AddFunc(this, &FTACursorComponent::OnScrolled);
 	OnMeRemovedHandle = Document->OnMeRemoved.AddFunc(this, &FTACursorComponent::OnMeRemoved);
-	OnRelativeHeightUpdatedHandle = Document->OnRelativeHeightUpdated.AddFunc(this, &FTACursorComponent::OnRelativeHeightUpdated);
+	//OnRelativeHeightUpdatedHandle = Document->OnRelativeHeightUpdated.AddFunc(this, &FTACursorComponent::OnRelativeHeightUpdated);
 }
 
 bool FTACursorComponent::CursorInVisibleArea() const

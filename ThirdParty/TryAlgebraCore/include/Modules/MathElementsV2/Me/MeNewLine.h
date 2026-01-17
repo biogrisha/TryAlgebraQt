@@ -12,11 +12,9 @@ namespace MathElementV2
 	protected:
 		FTAMeNewLine();
 	public:
-		void SetMinY(float Val);
 		int GetElementsCount() const { return ElementsCount; }
 	private:
-		float Height = 1;
-		float MinY = 0;
+		//Number of elements in line, excluding NewLine
 		int ElementsCount = 0;
 	public:
 		static std::wstring GetName() { return L"lb"; }

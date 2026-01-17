@@ -28,41 +28,6 @@ void MathElementV2::FTAMeComposite::ScaleRecursive(float Height)
 	}
 }
 
-void MathElementV2::FTAMeComposite::ChildrenChanged(const FTAMePath& RequestPath,bool bSizeChanged)
-{
-	if (bAdjustChildrenSize)
-	{
-		auto SizeTemp = AbsoluteSize;
-		//Recalculate size, since all containers were adjusted
-		CalculateSize();
-		if (Parent.Get())
-		{
-			//If size changed -> signal to parent
-			FTAMePath PathTemp = RequestPath;
-			PathTemp.TreePath.pop_back();
-			Parent->ChildrenChanged(PathTemp,SizeTemp != AbsoluteSize);
-		}
-	}
-	else
-	{
-		//Arrange children
-		ArrangeChildren();
-		//Offset children with respect to padding
-		FTAMeHelpers::OffsetMathElements(Children, GetPadding());
-		//Cache size
-		auto SizeTemp = AbsoluteSize;
-		//Calculate the size so that the element covers all its child elements
-		CalculateCompSize();
-		if (Parent.Get())
-		{
-			//If size changed -> signal to parent
-			FTAMePath PathTemp = RequestPath;
-			PathTemp.TreePath.pop_back();
-			Parent->ChildrenChanged(PathTemp,SizeTemp != AbsoluteSize);
-		}
-	}
-}
-
 void MathElementV2::FTAMeComposite::AddChildren(const FTAMePath& RequestPath, const FMathElements& MathElements)
 {
 	//insert children in last index in path

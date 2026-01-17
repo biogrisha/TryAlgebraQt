@@ -172,43 +172,6 @@ void FTAMeHelpers::SetDepth(const MathElementV2::FMathElements& MathElements, in
 	}
 }
 
-void FTAMeHelpers::ArrangeLines(MathElementV2::FTAMeDocument* InDocument, int From, int& OutTo)
-{
-	float MinY = 0;
-	int PrevLineStart = 0;
-	if (MathElementV2::FTAMeNewLine* PrevLine = FindPrevLineStart(InDocument, From, PrevLineStart))
-	{
-		//If there is line above
-		//MinY is its bottom
-		MinY = PrevLine->MinY + PrevLine->Height;
-	}
-	ArrangeLines(InDocument, MinY, From, OutTo);
-}
-
-void FTAMeHelpers::ArrangeLines(MathElementV2::FTAMeDocument* InDocument, float MinY, int From, int& OutTo)
-{
-	for (int i = From; i < InDocument->Children.size();)
-	{
-		if (MinY >= InDocument->Height)
-		{
-			//If Line height is below screen
-			OutTo = i;
-			return;
-		}
-		//Get line
-		MathElementV2::FTAMeNewLine* Line = FindLineStart(InDocument, i, i);
-		//How much we need to lift it or lower
-		float HeightDiff = MinY - Line->MinY;
-		//Move line correspondingly
-		MoveMathElementsInY(InDocument->Children, i, i + Line->ElementsCount, HeightDiff);
-		Line->MinY = MinY;
-		//Set next line MinY
-		MinY = Line->MinY + Line->Height;
-		i = i + Line->ElementsCount;
-	}
-	OutTo = InDocument->Children.size();
-}
-
 void FTAMeHelpers::MoveMathElementsInY(const MathElementV2::FMathElements& MathElements, int From, int To, float Offset)
 {
 	for (int i = From; i < To; i++)
@@ -225,54 +188,16 @@ void FTAMeHelpers::MoveMathElementsInX(const MathElementV2::FMathElements& MathE
 	}
 }
 
-void FTAMeHelpers::ArrangeElementsInLines(MathElementV2::FTAMeDocument* InDocument, int& From, int& To)
+MathElementV2::FTAMeNewLine* FTAMeHelpers::FindLineStart(MathElementV2::FTAMeDocument* InDocument, int From)
 {
-	for (int i = From; i < To;)
-	{
-		MathElementV2::FTAMeNewLine* CurrentLine = FindLineStart(InDocument, i, i);
-
-		CurrentLine->Height = AlignElementsVertically(InDocument->Children, i, i + CurrentLine->ElementsCount, CurrentLine->MinY);
-		ArrangeInLine(InDocument->Children, i, i + CurrentLine->ElementsCount);
-		i += CurrentLine->ElementsCount;
-	}
-}
-
-MathElementV2::FTAMeNewLine* FTAMeHelpers::FindLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart)
-{
-	if (From < 0)
-	{
-		OutLineStart = -1;
-		return nullptr;
-	}
-	From = (std::min)(From, static_cast<int>(InDocument->Children.size() - 1));
 	for (int i = From; i >= 0; i--)
 	{
 		if (auto NewLine = InDocument->Children[i]->Cast<MathElementV2::FTAMeNewLine>())
 		{
-			OutLineStart = i;
 			return NewLine;
 		}
 	}
-	//We assume that 0-th element is always line start
 	return nullptr;
-}
-
-MathElementV2::FTAMeNewLine* FTAMeHelpers::FindPrevLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart)
-{
-	if (InDocument->Children.empty())
-	{
-		OutLineStart = -1;
-		return nullptr;
-	}
-	//Find current line start
-	int OutLineStartTemp = 0;
-	MathElementV2::FTAMeNewLine* LineStart = FindLineStart(InDocument, From, OutLineStartTemp);
-	if (OutLineStartTemp == 0)
-	{
-		return nullptr;
-	}
-	//If non zero index return previous line
-	return FindLineStart(InDocument, OutLineStartTemp - 1, OutLineStart);
 }
 
 int FTAMeHelpers::FindPrevLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From)
@@ -317,70 +242,68 @@ int FTAMeHelpers::FindNextLineStartInd(MathElementV2::FTAMeDocument* InDocument,
 	return InDocument->Children.size();
 }
 
-MathElementV2::FTAMeNewLine* FTAMeHelpers::FindNextLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart)
+int FTAMeHelpers::FindLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From)
 {
-	if (!CommonHelpers::IsValidId(InDocument->Children, From))
+	for (int i = From; i >= 0; i--)
 	{
-		return nullptr;
-	}
-	if (auto NewLine = InDocument->Children[From]->Cast<MathElementV2::FTAMeNewLine>())
-	{
-		//If From points at new line
-		OutLineStart = From + NewLine->ElementsCount;
-		if (!CommonHelpers::IsValidId(InDocument->Children, OutLineStart))
+		if (InDocument->Children[i]->IsOfType(MathElementV2::FTAMeNewLine::StaticType()))
 		{
-			return nullptr;
-		}
-		return InDocument->Children[OutLineStart]->Cast<MathElementV2::FTAMeNewLine>();
-	}
-	for (int i = From; i < InDocument->Children.size(); i++)
-	{
-		if (auto NewLine = InDocument->Children[i]->Cast<MathElementV2::FTAMeNewLine>())
-		{
-			OutLineStart = i;
-			return NewLine;
+			return i;
 		}
 	}
-	OutLineStart = InDocument->Children.size();
-	return nullptr;
+	return -1;
 }
 
 void FTAMeHelpers::IterateOverLines(MathElementV2::FTAMeDocument* InDocument, int From, int To, const std::function<void(const MathElementV2::FMathElements&, int, int)>& Callable)
 {
 	for (int i = From; i < To;)
 	{
-		auto NewLine = FindLineStart(InDocument, i, i);
+		auto NewLine = FindLineStart(InDocument, i);
 		Callable(InDocument->Children, i, i + NewLine->ElementsCount);
 		i += NewLine->ElementsCount;
 	}
 }
 
-void FTAMeHelpers::CalculateMeCountInLines(MathElementV2::FTAMeDocument* InDocument, int& From, int& To)
+void FTAMeHelpers::CalculateMeCountInLines(MathElementV2::FTAMeDocument* InDocument, int From, int To)
 {
 	//Cache first line
-	MathElementV2::FTAMeNewLine* CurrentLine = FindLineStart(InDocument, From, From);
-	int CurrentLineCount = 0;
-	//Iterate from 
-	for (int i = From; i < InDocument->Children.size(); i++)
+	int CurrentLineInd = FindLineStartInd(InDocument, From);
+	int MeCount = 0;
+	for (int i = CurrentLineInd + 1; i < InDocument->Children.size(); i++)
 	{
-		if (auto NewLine = InDocument->Children[i]->Cast<MathElementV2::FTAMeNewLine>(); NewLine && NewLine != CurrentLine)
+		if (InDocument->Children[i]->IsOfType(MathElementV2::FTAMeNewLine::StaticType()))
 		{
-			//If new line
-			//Set count and cache new line
-			CurrentLine->ElementsCount = CurrentLineCount;
-			CurrentLineCount = 0;
-			CurrentLine = NewLine;
+			SetMeCountInLine(InDocument, CurrentLineInd, MeCount);
+			MeCount = 0;
+			CurrentLineInd = i;
 			if (i >= To)
 			{
-				//If the new line comes after the last element
-				To = i;
 				return;
 			}
+			continue;
 		}
-		CurrentLineCount++;
+		MeCount++;
 	}
-	CurrentLine->ElementsCount = CurrentLineCount;
-	To = InDocument->Children.size();
+	SetMeCountInLine(InDocument, CurrentLineInd, MeCount);
+}
+
+int FTAMeHelpers::GetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InLineInd)
+{
+	if (InLineInd != -1)
+	{
+		return InDocument->Children[InLineInd]->Cast<MathElementV2::FTAMeNewLine>()->ElementsCount;
+	}
+	return InDocument->FirstLineMeCount;
+}
+
+void FTAMeHelpers::SetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InLineInd, int InMeCount)
+{
+	if (InLineInd != -1)
+	{
+		InDocument->Children[InLineInd]->Cast<MathElementV2::FTAMeNewLine>()->ElementsCount = InMeCount;
+		return;
+	}
+	InDocument->FirstLineMeCount = InMeCount;
 }
 
 void FTAMeHelpers::AlignContentInContainersVertically(const MathElementV2::FMathElements& MathElements, int From, int To)
@@ -769,51 +692,6 @@ void FTAMeHelpers::ParseToString(const MathElementV2::FMathElements& MathElement
 			OutStr += L"\\}";
 		}
 	}
-}
-
-int FTAMeHelpers::ScrollY(MathElementV2::FTAMeDocument* InDocument, int Count)
-{
-	int AbsCount = (std::abs)(Count);
-	int LineStart = InDocument->VisibleFrom;
-	if (Count < 0)
-	{
-		//if scroll up
-		for (int i = 0; i < AbsCount; i++)
-		{
-			FindPrevLineStart(InDocument, LineStart, LineStart);
-			if (LineStart == -1)
-			{
-				LineStart = 0;
-				break;
-			}
-		}
-	}
-	else
-	{
-		//If scroll down
-		for (int i = 0; i < AbsCount; i++)
-		{
-			//Find line start
-			if (MathElementV2::FTAMeNewLine* NewLine = FindLineStart(InDocument, LineStart, LineStart))
-			{
-				//Cache line start
-				int LineStartTemp = LineStart;
-				LineStartTemp += NewLine->ElementsCount;
-				assert(LineStartTemp <= InDocument->Children.size()); //Something wrong with NewLine->ElementsCount
-				if (LineStartTemp == InDocument->Children.size())
-				{
-					//If this is last line
-					return LineStart;
-				}
-				LineStart = LineStartTemp;
-			}
-			else
-			{
-				return InDocument->VisibleFrom;
-			}
-		}
-	}
-	return LineStart;
 }
 
 void FTAMeHelpers::GetIndexAtPosition(MathElementV2::FTAMeDocument* InDocument, const TACommonTypes::FTAVector2d& Position, FTAMePath& Path)

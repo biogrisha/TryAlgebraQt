@@ -7,6 +7,7 @@
 #include <MathDocumentState.h>
 #include <FreeTypeWrap.h>
 #include <FunctionLibraries/FileHelpers.h>
+#include <Modules/CommonTypes/MulticastDelegate.h>
 
 #include <MathDocument.h>
 #include <Models/MathElementInfoModel.h>
@@ -20,9 +21,16 @@ class DocumentControl  : public QObject
 {
 	Q_OBJECT
 	QML_ELEMENT
+	Q_PROPERTY(float scrollHandleSize READ scrollHandleSize WRITE setScrollHandleSize NOTIFY scrollHandleSizeChanged)
 public:
 	DocumentControl(QObject *parent);
 	DocumentControl() = default;
+
+	float scrollHandleSize();
+	void setScrollHandleSize(float newSize);
+
+signals:
+	void scrollHandleSizeChanged(float newSize);
 
 public slots:
 
@@ -47,6 +55,8 @@ public slots:
 
 	//Handles item size update
 	void onResized(const QSize& newSize);
+	
+	float getScrollHandleSize();
 
 private:
 	//Updates the rendering data of the selected elements
@@ -55,6 +65,7 @@ private:
 	//Forces rendering to clear items texture
 	void clearDocument();
 
+	void onLinesCountUpdated(int linesCount, int linesOnPage);
 	//Math document used to render content
 	MathDocument* m_mathDocument = nullptr;
 	//Selected document info
@@ -64,6 +75,10 @@ private:
 	//Render state of math document
 	FMathDocumentState m_meDocState;
 	//Indicates that MathDocument Item is ready to render
-	bool isMathDocumentReady = false;
+	bool m_isMathDocumentReady = false;
+
+	float m_scrollHandleSize = 0.5;
+
+	FTAMulticastDelegate<int, int>::HndlPtr m_onLinesCountUpdated;
 };
 

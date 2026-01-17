@@ -12,7 +12,6 @@ namespace MathElementV2
 		FTAMeFraction();
 		virtual void ArrangeChildren() override;
 		virtual void AdjustChildrenSize() override;
-		virtual void ChildrenChanged(const FTAMePath& RequestPath, bool bSizeChanged) override;
 		virtual float GetHorizontalAlignmentOffset() const override;
 	public:
 		virtual std::wstring GetParseInfo() override;

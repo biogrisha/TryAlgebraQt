@@ -17,7 +17,6 @@ namespace MathElementV2
 		virtual void ArrangeChildren();
 		virtual void ScaleRecursive(float Height) override;
 	public:
-		virtual void ChildrenChanged(const FTAMePath& RequestPath, bool bSizeChanged);
 		//What default size each child will have after being added
 		virtual float GetScalingFactor(int ChildIndex) { return GetReferenceScaler(); };
 	protected:

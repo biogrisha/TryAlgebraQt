@@ -42,14 +42,12 @@ struct FTAMeHelpers
 	static void ArrangeInLine(const MathElementV2::FMathElements& MathElements, int From, int To);
 	//Aligns MEs  centers at the same x value. Returns this x value 
 	static float AlignHorizontally(const MathElementV2::FMathElements& MathElements);
-	static void ArrangeLines(MathElementV2::FTAMeDocument* InDocument, int From, int& OutTo);
-	static void ArrangeLines(MathElementV2::FTAMeDocument* InDocument,float MinY, int From, int& OutTo);
 	static void MoveMathElementsInY(const MathElementV2::FMathElements& MathElements, int From, int To, float Offset);
 	static void MoveMathElementsInX(const MathElementV2::FMathElements& MathElements, float Offset);
 	static void OffsetMathElements(const MathElementV2::FMathElements& MathElements, const TACommonTypes::FTAVector2d& Offset);
-	static void ArrangeElementsInLines(MathElementV2::FTAMeDocument* InDocument, int& From, int& To);
-	static void CalculateMeCountInLines(MathElementV2::FTAMeDocument* InDocument, int& From, int& To);
-
+	//If InLineInd = -1, returns elements count from MeDocument, otherwise returns me count from NewLine
+	static int GetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InLineInd);
+	static void SetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InLineInd, int InMeCount);
 	//Assuming that containers are aligned vertically
 	//This function will align their children elements
 	static void AlignContentInContainersVertically(const MathElementV2::FMathElements& MathElements, int From, int To);
@@ -97,12 +95,15 @@ struct FTAMeHelpers
 	static float ClosestDistSq(const MathElementV2::FMathElementPtr& Me, const TACommonTypes::FTAVector2d& Position);
 	//--------------Lines---------------------
 	
+	static void CalculateMeCountInLines(MathElementV2::FTAMeDocument* InDocument, int From, int To);
+
 	static int GetLinesCount(const MathElementV2::FMathElements& AddedMe);
 	static int GetLinesCount(const MathElementV2::FMathElements& MathElements, int From, int To);
-	//Use this function to get line start, even if From == 0
-	static MathElementV2::FTAMeNewLine* FindLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart);
-	static MathElementV2::FTAMeNewLine* FindPrevLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart);
-	static MathElementV2::FTAMeNewLine* FindNextLineStart(MathElementV2::FTAMeDocument* InDocument, int From, int& OutLineStart);
+	
+	//Returns new line or nullptr first encountered while moving backward from "From"
+	static MathElementV2::FTAMeNewLine* FindLineStart(MathElementV2::FTAMeDocument* InDocument, int From);
+	
+	static int FindLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From);
 	//If found new line returns index after it(since you insert elements after new line)
 	//otherwise returns 0
 	static int FindPrevLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From);
@@ -117,7 +118,6 @@ struct FTAMeHelpers
 	
 	//----------Me navigation------------
 	
-	static int ScrollY(MathElementV2::FTAMeDocument* InDocument, int Count);
 	static void MakeXStep(MathElementV2::FTAMeDocument* InDocument,FTAMePath& InPath, int Count);
 	static void MakeYStep(MathElementV2::FTAMeDocument* InDocument,FTAMePath& InPath, int Count);
 	static int DefaultStep(int Count, int Index, int ElementsCount);

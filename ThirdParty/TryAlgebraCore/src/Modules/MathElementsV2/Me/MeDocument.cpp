@@ -13,58 +13,15 @@ MathElementV2::FTAMeDocument::FTAMeDocument()
 	VisibleFrom = 0;
 	VisibleTo = 0;
 	LinesCount = 0;
+	FirstLineMeCount = 0;
+	CurrentLine = 0;
+	LinesOnPage = 20;
 	SetDefaultSize({1,1});
 }
 
 float MathElementV2::FTAMeDocument::GetScalingFactor(int ChildIndex)
 {
 	return 1;
-}
-
-void MathElementV2::FTAMeDocument::ChildrenChanged(const FTAMePath& RequestPath, bool bSizeChanged)
-{
-	bool bOutsideVisibleArea = RequestPath.TreePath.back() > VisibleTo || (std::max)(0, RequestPath.TreePath.back() - 1) < VisibleFrom;
-	if (!bSizeChanged && !bOutsideVisibleArea)
-	{
-		//If the size hasn't changed, simply redraw the modified element.
-		FTAMeHelpers::ShowElements(Children, RequestPath.TreePath.back(), RequestPath.TreePath.back() + 1);
-		return;
-	}
-	//If size changed
-	std::vector<TTypedWeak<FTAMathElementBase>> VisibleElementsToRedraw;
-	//Find line start/end
-	int AffectedLineStart;
-	FTAMeNewLine* MeNewLine = FTAMeHelpers::FindLineStart(this, RequestPath.TreePath.back(), AffectedLineStart);
-	int AffectedLineEnd = AffectedLineStart + MeNewLine->GetElementsCount();
-	if (bOutsideVisibleArea)
-	{
-		//If Path outside visible region
-		//Cache elements that can be affected by insertion
-		VisibleElementsToRedraw = FTAMeHelpers::GetMeRange(Children, AffectedLineStart, VisibleTo);
-		FTAMeHelpers::SetShouldHide(VisibleElementsToRedraw);
-	}
-
-	//Arrange math elements and find last visible index
-	FTAMeHelpers::CalculateMeCountInLines(this, AffectedLineStart, AffectedLineEnd);
-	PreAligned.Invoke(Children, AffectedLineStart, AffectedLineEnd);
-	FTAMeHelpers::ArrangeElementsInLines(this, AffectedLineStart, AffectedLineEnd);
-	if (!bOutsideVisibleArea)
-	{
-		//If elements are inside visible area
-		if (AffectedLineStart == VisibleFrom)
-		{
-			//If this is first line in visible area-> we don't want to take line above into account
-			FTAMeHelpers::ArrangeLines(this, 0, AffectedLineStart, AffectedLineEnd);
-		}
-		else
-		{
-			FTAMeHelpers::ArrangeLines(this, AffectedLineStart, AffectedLineEnd);
-		}
-		//Update visible to nd redraw needed elements
-		VisibleTo = AffectedLineEnd;
-		FTAMeHelpers::ShowElements(Children, AffectedLineStart, AffectedLineEnd);
-		FTAMeHelpers::HideIfShould(VisibleElementsToRedraw);
-	}
 }
 
 void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const std::wstring& InMathElements)
@@ -93,6 +50,8 @@ void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const 
 	}
 	else
 	{
+		UpdateLinesCount(FTAMeHelpers::GetLinesCount(GeneratedMathElements));
+		FTAMeHelpers::CalculateMeCountInLines(this, Path.TreePath[0], Path.TreePath[0] + GeneratedMathElements.size());
 		FTAMeHelpers::CalculateSize(GeneratedMathElements);
 	}
 	ArrangeVisibleElements();
@@ -102,11 +61,18 @@ void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const 
 void MathElementV2::FTAMeDocument::RemoveMathElements(FTAMePath Path, int Count)
 {
 	TTypedWeak<FTAMeComposite> ParentElement = FTAMeHelpers::GetParentElement(this, Path);
-
+	if (ParentElement.Get() == this)
+	{
+		UpdateLinesCount(-FTAMeHelpers::GetLinesCount(Children, Path.TreePath[0], Path.TreePath[0] + Count));
+	}
 	auto CachedMe = ParentElement->RemoveChildren(Path, Count);
 	if (ParentElement.Get() != this)
 	{
 		Children[Path.TreePath[0]]->CalculateSize(Children[Path.TreePath[0]]->GetParent()->GetAccumulatedScalingFactor());
+	}
+	else
+	{
+		FTAMeHelpers::CalculateMeCountInLines(this, Path.TreePath[0]-1, Path.TreePath[0]);
 	}
 	ArrangeVisibleElements();
 	OnMeRemoved.Invoke(Path, CachedMe, Count);
@@ -119,57 +85,17 @@ void MathElementV2::FTAMeDocument::SetMeGenerator(const std::weak_ptr<FTAMathEle
 
 void MathElementV2::FTAMeDocument::ScrollY(int Count)
 {
-	int VisibleFromOld = VisibleFrom;
-	int VisibleToOld = VisibleTo;
-	VisibleFrom = FTAMeHelpers::ScrollY(this, Count);
-	//Set line pose to zero
-	//Arrange lines while elements are within screen area
-	FTAMeHelpers::ArrangeLines(this, 0, VisibleFrom, VisibleTo);
-	if (Count > 0)
-	{
-		//Hide elements above
-		FTAMeHelpers::HideElements(Children, VisibleFromOld, VisibleFrom);
-	}
-	else
-	{
-		//Hide elements below
-		FTAMeHelpers::HideElements(Children, VisibleTo, VisibleToOld);
-	}
-	FTAMeHelpers::ShowElements(Children, VisibleFrom, VisibleTo);
-	InvokeOnScrolled();
+	
 }
 
 void MathElementV2::FTAMeDocument::ScrollYDelta(float& Delta)
 {
-	if (Children.empty())
-	{
-		Delta = 0;
-		return;
-	}
-	int NewVisibleFrom = Children.size() * Delta;
-	FTAMeHelpers::FindLineStart(this, NewVisibleFrom, NewVisibleFrom);
-	Delta = (float)NewVisibleFrom / (float)Children.size();
-	if (NewVisibleFrom == VisibleFrom)
-	{
-		return;
-	}
-	//Hide elements
-	FTAMeHelpers::HideElements(Children, VisibleFrom, VisibleTo);
-	VisibleFrom = NewVisibleFrom;
-	//Arrange lines while elements are within screen area
-	FTAMeHelpers::ArrangeLines(this, 0, VisibleFrom, VisibleTo);
-	FTAMeHelpers::ShowElements(Children, VisibleFrom, VisibleTo);
-	InvokeOnScrolled();
+
 }
 
 void MathElementV2::FTAMeDocument::InvokeOnScrolled()
 {
-	float ScrollDelta = 0;
-	if (Children.size() > 0)
-	{
-		ScrollDelta = float(VisibleFrom)/float(Children.size());
-	}
-	OnScrolled.Invoke(ScrollDelta);
+	
 }
 
 void MathElementV2::FTAMeDocument::SetHeight(float InHeight)
@@ -181,7 +107,7 @@ void MathElementV2::FTAMeDocument::SetHeight(float InHeight)
 void MathElementV2::FTAMeDocument::UpdateLinesCount(int Count)
 {
 	LinesCount += Count;
-	OnLinesCountUpdated.Invoke(LinesCount);
+	OnLinesCountUpdated.Invoke(LinesCount, LinesOnPage);
 }
 
 void MathElementV2::FTAMeDocument::SetDocumentToChildren(const FMathElements& MathElements)

@@ -2,6 +2,7 @@
 #include <QUrl>
 
 #include <Modules/MathElementsV2/CompatibilityData.h>
+#include <Modules/MathElementsV2/Me/MeDocument.h>
 #include <Modules/MainWindowModule.h>
 #include <Modules/MathDocument/MathDocument.h>
 #include <FunctionLibraries/FileHelpers.h>
@@ -21,6 +22,21 @@ DocumentControl::DocumentControl(QObject *parent)
 	filesControl->setMeDocStatePtr(&m_meDocState);
 	//connect to event when document selected
 	QObject::connect(filesControl, &FilesControl::onCurrentDocumentChanged, this, &DocumentControl::onCurrentDocumentChanged, Qt::DirectConnection);
+}
+
+float DocumentControl::scrollHandleSize()
+{
+	return m_scrollHandleSize;
+}
+
+void DocumentControl::setScrollHandleSize(float newSize)
+{
+	if (newSize == m_scrollHandleSize)
+	{
+		return;
+	}
+	m_scrollHandleSize = newSize;
+	emit scrollHandleSizeChanged(newSize);
 }
 
 void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
@@ -97,7 +113,7 @@ void DocumentControl::mathDocumentReady()
 	//disconnecting from "renderer ready"
 	QObject::disconnect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady);
 	QObject::connect(m_mathDocument, &MathDocument::onResized, this, &DocumentControl::onResized);
-	isMathDocumentReady = true;
+	m_isMathDocumentReady = true;
 }
 
 MathElementInfoModel* DocumentControl::getMeInfoModel()
@@ -150,7 +166,9 @@ void DocumentControl::onCurrentDocumentChanged(qint32 ind)
 	// new doc id is valid
 	//search for new doc info
 	m_docInfo = AppGlobal::mainModule->GetAllDocuments()[ind];
-	if (isMathDocumentReady)
+	auto MeDoc = m_docInfo.lock()->MathDocument->GetMeDocument();
+	m_onLinesCountUpdated = MeDoc->OnLinesCountUpdated.AddFunc(this, &DocumentControl::onLinesCountUpdated);
+	if (m_isMathDocumentReady)
 	{
 		//math document allowed to render
 		//render content
@@ -163,6 +181,11 @@ void DocumentControl::onResized(const QSize& newSize)
 	m_docInfo.lock()->MathDocument->SetHeight(newSize.height());
 	//rendering current document content
 	updateElements(true, true, true);
+}
+
+float DocumentControl::getScrollHandleSize()
+{
+	return 0.7f;
 }
 
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)
@@ -187,6 +210,12 @@ void DocumentControl::clearDocument()
 	//move caret outside visible area
 	m_meDocState.SetCaret({ {-100, -100}, {1,1} });
 	m_mathDocument->update();
+}
+
+void DocumentControl::onLinesCountUpdated(int linesCount, int linesOnPage)
+{
+	float newScrollSize = qMin(float(linesOnPage) / float(linesCount), 1.f);
+	setScrollHandleSize(newScrollSize);
 }
 
 

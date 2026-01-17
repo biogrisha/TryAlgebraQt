@@ -48,20 +48,6 @@ void MathElementV2::FTAMeFraction::AdjustChildrenSize()
 	Children[1]->SetAbsoluteSize(Size2);
 }
 
-void MathElementV2::FTAMeFraction::ChildrenChanged(const FTAMePath& RequestPath, bool bSizeChanged)
-{
-	auto SizeTemp = AbsoluteSize;
-	//Recalculate size, since containers adjusted
-	CalculateSize();
-	if (Parent.Get())
-	{
-		//If size changed -> signal to parent
-		FTAMePath PathTemp = RequestPath;
-		PathTemp.TreePath.pop_back();
-		Parent->ChildrenChanged(PathTemp, SizeTemp != AbsoluteSize);
-	}
-}
-
 float MathElementV2::FTAMeFraction::GetHorizontalAlignmentOffset() const
 {
 	return GetLineLocalPosition().y;

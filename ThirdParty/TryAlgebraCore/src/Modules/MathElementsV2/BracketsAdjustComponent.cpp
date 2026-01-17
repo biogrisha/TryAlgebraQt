@@ -21,7 +21,7 @@ namespace
 void FTABracketsAdjustComponent::OnComponentAdded()
 {
 	MeDocument = Host->Cast<MathElementV2::FTAMeDocument>()->GetSelfWeak();
-	PreAlignedHandle = MeDocument->PreAligned.AddFunc(this, &FTABracketsAdjustComponent::PreAligned);
+	//PreAlignedHandle = MeDocument->PreAligned.AddFunc(this, &FTABracketsAdjustComponent::PreAligned);
 }
 
 void FTABracketsAdjustComponent::PreAligned(const MathElementV2::FMathElements& MathElements, int From, int To)

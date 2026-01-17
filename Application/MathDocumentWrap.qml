@@ -114,6 +114,9 @@ Rectangle {
         anchors.right: parent.right 
         anchors.top: parent.top 
         anchors.bottom: parent.bottom // Full range 
-        size: 0.4 
+        size: m_docControl ? m_docControl.scrollHandleSize : 0.1
+		onPositionChanged: {
+			
+		}
     }
 }

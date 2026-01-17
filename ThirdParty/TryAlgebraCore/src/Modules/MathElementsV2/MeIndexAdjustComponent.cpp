@@ -11,7 +11,7 @@
 void FTAMeIndexAdjustComponent::OnComponentAdded()
 {
 	MeDocument = Host->Cast<MathElementV2::FTAMeDocument>()->GetSelfWeak();
-	PreAlignedHandle = MeDocument->PreAligned.AddFunc(this, &FTAMeIndexAdjustComponent::PreAligned);
+	//PreAlignedHandle = MeDocument->PreAligned.AddFunc(this, &FTAMeIndexAdjustComponent::PreAligned);
 }
 
 void FTAMeIndexAdjustComponent::PreAligned(const MathElementV2::FMathElements& MathElements, int From, int To)
