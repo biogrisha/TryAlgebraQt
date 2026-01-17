@@ -27,6 +27,7 @@ private slots:
     void invalidateSceneGraph();
 signals:
     void onNodeCreated();
+    void onResized(const QSize& newSize);
 private:
     void releaseResources() override;
     CustomTextureNodePrivate* m_node = nullptr;

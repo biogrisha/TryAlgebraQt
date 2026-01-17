@@ -108,5 +108,12 @@ Rectangle {
 		MouseArea { anchors.fill: parent; onClicked: { mathDoc.focus = true } }
 	}
         
-
+	ScrollBar { 
+        id: vbar 
+        orientation: Qt.Vertical 
+        anchors.right: parent.right 
+        anchors.top: parent.top 
+        anchors.bottom: parent.bottom // Full range 
+        size: 0.4 
+    }
 }

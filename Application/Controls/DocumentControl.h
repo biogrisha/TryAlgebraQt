@@ -45,6 +45,9 @@ public slots:
 	//Called when new math document is selected
 	void onCurrentDocumentChanged(qint32 ind);
 
+	//Handles item size update
+	void onResized(const QSize& newSize);
+
 private:
 	//Updates the rendering data of the selected elements
 	void updateElements(bool bRect, bool bText, bool bCaret);

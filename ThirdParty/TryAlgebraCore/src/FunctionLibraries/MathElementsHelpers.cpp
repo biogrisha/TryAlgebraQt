@@ -189,7 +189,7 @@ void FTAMeHelpers::ArrangeLines(MathElementV2::FTAMeDocument* InDocument, float 
 {
 	for (int i = From; i < InDocument->Children.size();)
 	{
-		if (MinY >= InDocument->RelativeHeight)
+		if (MinY >= InDocument->Height)
 		{
 			//If Line height is below screen
 			OutTo = i;

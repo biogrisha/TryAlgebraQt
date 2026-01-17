@@ -36,7 +36,7 @@ public:
 	void CopySelected();
 	void CutSelected();
 	void Paste();
-	void SetRelativeSize(float Val);
+	void SetHeight(float Val);
 	void Undo();
 	void Redo();
 	TTypedWeak<class FTACursorComponent> GetCursorComponent();

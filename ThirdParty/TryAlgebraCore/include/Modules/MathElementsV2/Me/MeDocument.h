@@ -34,14 +34,14 @@ namespace MathElementV2
 		void ScrollY(int Count);
 		void ScrollYDelta(float& Delta);
 		void InvokeOnScrolled();
-		void SetRelativeHeight(float InRelativeHeight);
+		void SetHeight(float InHeight);
 	private:
 		void UpdateLinesCount(int Count);
 		void SetDocumentToChildren(const FMathElements& MathElements);
 		void ArrangeVisibleElements();
 		std::weak_ptr<FTAMathElementGenerator> Generator;
 		//Think of it as How many lines of ordinary symbols can fit on the page
-		float RelativeHeight;
+		float Height;
 		int VisibleFrom;
 		int VisibleTo;
 		int LinesCount;

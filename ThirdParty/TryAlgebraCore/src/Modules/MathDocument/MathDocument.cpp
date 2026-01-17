@@ -215,9 +215,9 @@ void FTAMathDocument::Paste()
 	AddMathElements(CopiedMathData);
 }
 
-void FTAMathDocument::SetRelativeSize(float Val)
+void FTAMathDocument::SetHeight(float Val)
 {
-	MeDocument->SetRelativeHeight(Val);
+	MeDocument->SetHeight(Val);
 }
 
 void FTAMathDocument::Undo()

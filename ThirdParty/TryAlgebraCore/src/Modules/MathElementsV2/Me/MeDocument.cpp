@@ -9,15 +9,11 @@
 #include "Modules/MathElementsV2/Me/MeNewLine.h"
 MathElementV2::FTAMeDocument::FTAMeDocument()
 {
-	RelativeHeight = 1200.f;
+	Height = 1200.f;
 	VisibleFrom = 0;
 	VisibleTo = 0;
 	LinesCount = 0;
 	SetDefaultSize({1,1});
-	//Init first line
-	//auto FirstLine = FTAMeNewLine::MakeTypedShared();
-	//FirstLine->SetParent(this);
-	//Children.push_back(FirstLine);
 }
 
 float MathElementV2::FTAMeDocument::GetScalingFactor(int ChildIndex)
@@ -176,19 +172,10 @@ void MathElementV2::FTAMeDocument::InvokeOnScrolled()
 	OnScrolled.Invoke(ScrollDelta);
 }
 
-void MathElementV2::FTAMeDocument::SetRelativeHeight(float InRelativeHeight)
+void MathElementV2::FTAMeDocument::SetHeight(float InHeight)
 {
-	std::vector<TTypedWeak<FTAMathElementBase>> VisibleElementsToRedraw;
-	if (RelativeHeight > InRelativeHeight)
-	{
-		VisibleElementsToRedraw = FTAMeHelpers::GetMeRange(Children, VisibleFrom, VisibleTo);
-		FTAMeHelpers::SetShouldHide(VisibleElementsToRedraw);
-	}
-	RelativeHeight = InRelativeHeight;
-	FTAMeHelpers::ArrangeLines(this, 0, VisibleFrom, VisibleTo);
-	FTAMeHelpers::ShowElements(Children, VisibleFrom, VisibleTo);
-	FTAMeHelpers::HideIfShould(VisibleElementsToRedraw);
-	OnRelativeHeightUpdated.Invoke(RelativeHeight);
+	Height = InHeight;
+	ArrangeVisibleElements();
 }
 
 void MathElementV2::FTAMeDocument::UpdateLinesCount(int Count)
@@ -244,7 +231,7 @@ void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 			XOffset = 0;
 			YOffset = MaxYOffset;
 			VisibleTo = LineStart;
-			if (YOffset >= RelativeHeight)
+			if (YOffset >= Height)
 			{
 				return;
 			}

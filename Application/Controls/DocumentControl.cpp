@@ -96,8 +96,7 @@ void DocumentControl::mathDocumentReady()
 	m_mathDocument->setMeDocState(&m_meDocState);
 	//disconnecting from "renderer ready"
 	QObject::disconnect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady);
-	//rendering current document content
-	updateElements(true, true, true);
+	QObject::connect(m_mathDocument, &MathDocument::onResized, this, &DocumentControl::onResized);
 	isMathDocumentReady = true;
 }
 
@@ -157,6 +156,13 @@ void DocumentControl::onCurrentDocumentChanged(qint32 ind)
 		//render content
 		updateElements(true, true, true);
 	}
+}
+
+void DocumentControl::onResized(const QSize& newSize)
+{
+	m_docInfo.lock()->MathDocument->SetHeight(newSize.height());
+	//rendering current document content
+	updateElements(true, true, true);
 }
 
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)

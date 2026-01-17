@@ -36,6 +36,8 @@ public:
 
     //Cache doc state ptr in node
     void setMeDocState(FMathDocumentState* meDocState);
+signals:
+    void onResized(const QSize& newSize);
 private slots:
     //Rendering logic
     void render();
@@ -138,6 +140,7 @@ QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
     if (!n) {
         m_node = new CustomTextureNodePrivate(this);
         n = m_node;
+        QObject::connect(m_node, &CustomTextureNodePrivate::onResized, this, &MathDocument::onResized);
         emit onNodeCreated();
     }
     m_node->sync();
@@ -335,6 +338,8 @@ void CustomTextureNodePrivate::sync()
         m_size = newSize;
         m_documentRendering.SetDocumentExtent({ uint32_t(m_size.width()), uint32_t(m_size.height()) });
         m_meDocState->Invalidate();
+        emit onResized(newSize);
+
     }
 
     if (!m_initialized) {
