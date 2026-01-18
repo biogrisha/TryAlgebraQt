@@ -45,9 +45,6 @@ struct FTAMeHelpers
 	static void MoveMathElementsInY(const MathElementV2::FMathElements& MathElements, int From, int To, float Offset);
 	static void MoveMathElementsInX(const MathElementV2::FMathElements& MathElements, float Offset);
 	static void OffsetMathElements(const MathElementV2::FMathElements& MathElements, const TACommonTypes::FTAVector2d& Offset);
-	//If InLineInd = -1, returns elements count from MeDocument, otherwise returns me count from NewLine
-	static int GetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InLineInd);
-	static void SetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InLineInd, int InMeCount);
 	//Assuming that containers are aligned vertically
 	//This function will align their children elements
 	static void AlignContentInContainersVertically(const MathElementV2::FMathElements& MathElements, int From, int To);
@@ -99,7 +96,10 @@ struct FTAMeHelpers
 
 	static int GetLinesCount(const MathElementV2::FMathElements& AddedMe);
 	static int GetLinesCount(const MathElementV2::FMathElements& MathElements, int From, int To);
-	
+	//If InLineInd = -1, returns elements count from MeDocument, otherwise returns me count from NewLine
+	static int GetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InNewLineInd);
+	static int GetMeCountInPrevLine(MathElementV2::FTAMeDocument* InDocument, int InNewLineInd);
+	static void SetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InNewLineInd, int InMeCount);
 	//Returns new line or nullptr first encountered while moving backward from "From"
 	static MathElementV2::FTAMeNewLine* FindLineStart(MathElementV2::FTAMeDocument* InDocument, int From);
 	
@@ -110,6 +110,8 @@ struct FTAMeHelpers
 	//If found line, returns index after it, otherwise Children.size()
 	static int FindNextLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From);
 	static void IterateOverLines(MathElementV2::FTAMeDocument* InDocument, int From, int To, const std::function<void(const MathElementV2::FMathElements&, int /*From*/,int /*To*/)>& Callable);
+	//Scroll
+	static int ScrollY(MathElementV2::FTAMeDocument* InDocument, int Num);
 	//------------Selection----------------
 	
 	static std::vector<TTypedWeak<MathElementV2::FTAMathElementBase>> GetSelectedElements(MathElementV2::FTAMeDocument* InDocument,FTAMePath InPath1,FTAMePath InPath2, FTAMePath& OutCursorPos, bool& bPath1From);

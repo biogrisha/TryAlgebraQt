@@ -29,6 +29,11 @@ float DocumentControl::scrollHandleSize()
 	return m_scrollHandleSize;
 }
 
+float DocumentControl::scrollHandlePos()
+{
+	return m_scrollHandlePos;
+}
+
 void DocumentControl::setScrollHandleSize(float newSize)
 {
 	if (newSize == m_scrollHandleSize)
@@ -37,6 +42,11 @@ void DocumentControl::setScrollHandleSize(float newSize)
 	}
 	m_scrollHandleSize = newSize;
 	emit scrollHandleSizeChanged(newSize);
+}
+
+void DocumentControl::setScrollHandlePos(float newPos)
+{
+	m_scrollHandlePos = newPos;
 }
 
 void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
@@ -168,6 +178,8 @@ void DocumentControl::onCurrentDocumentChanged(qint32 ind)
 	m_docInfo = AppGlobal::mainModule->GetAllDocuments()[ind];
 	auto MeDoc = m_docInfo.lock()->MathDocument->GetMeDocument();
 	m_onLinesCountUpdated = MeDoc->OnLinesCountUpdated.AddFunc(this, &DocumentControl::onLinesCountUpdated);
+	m_onLinesOnPageUpdated = MeDoc->OnLinesOnPageUpdated.AddFunc(this, &DocumentControl::onLinesOnPageUpdated);
+	onLinesCountUpdated(MeDoc.Get());
 	if (m_isMathDocumentReady)
 	{
 		//math document allowed to render
@@ -186,6 +198,12 @@ void DocumentControl::onResized(const QSize& newSize)
 float DocumentControl::getScrollHandleSize()
 {
 	return 0.7f;
+}
+
+void DocumentControl::scrollY(bool Up)
+{
+	m_docInfo.lock()->MathDocument->ScrollY(Up ? -1 : 1);
+	updateElements(true, true, true);
 }
 
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)
@@ -212,9 +230,15 @@ void DocumentControl::clearDocument()
 	m_mathDocument->update();
 }
 
-void DocumentControl::onLinesCountUpdated(int linesCount, int linesOnPage)
+void DocumentControl::onLinesCountUpdated(MathElementV2::FTAMeDocument* doc)
 {
-	float newScrollSize = qMin(float(linesOnPage) / float(linesCount), 1.f);
+	float newScrollSize = qMin(float(doc->GetLinesOnPage()) / float(doc->GetLinesCount()), 1.f);
+	setScrollHandleSize(newScrollSize);
+}
+
+void DocumentControl::onLinesOnPageUpdated(MathElementV2::FTAMeDocument* doc)
+{
+	float newScrollSize = qMin(float(doc->GetLinesOnPage()) / float(doc->GetLinesCount()), 1.f);
 	setScrollHandleSize(newScrollSize);
 }
 

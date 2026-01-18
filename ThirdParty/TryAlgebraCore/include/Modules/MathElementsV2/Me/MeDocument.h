@@ -29,7 +29,8 @@ namespace MathElementV2
 		void SetMeGenerator(const std::weak_ptr<FTAMathElementGenerator>& InGenerator);
 		int GetVisibleFrom() const { return VisibleFrom; }
 		int GetVisibleTo() const { return VisibleTo; }
-
+		int GetLinesOnPage() const { return LinesOnPage; }
+		int GetLinesCount() const { return LinesCount; }
 		void ScrollY(int Count);
 		void ScrollYDelta(float& Delta);
 		void InvokeOnScrolled();
@@ -46,15 +47,13 @@ namespace MathElementV2
 
 		int LinesCount;
 		int CurrentLine;
-		//This value used only for visual purpose, don't rely on it
-		//It stores approximate number of lines that could fit on the page
 		int LinesOnPage;
 
 		int FirstLineMeCount;
 	public:
 		FTAMulticastDelegate<const FTAMePath&, const FMathElements&> OnMeAdded;
 		FTAMulticastDelegate<const FTAMePath&, const std::wstring&, int> OnMeRemoved;
-		FTAMulticastDelegate<int /*LinesNum*/, int /*CurrentLine*/> OnScrolled;
-		FTAMulticastDelegate<int /*LinesNum*/, int /*LinesOnPage*/> OnLinesCountUpdated;
+		FTAMulticastDelegate<FTAMeDocument*> OnLinesCountUpdated;
+		FTAMulticastDelegate<FTAMeDocument*> OnLinesOnPageUpdated;
 	};
 }

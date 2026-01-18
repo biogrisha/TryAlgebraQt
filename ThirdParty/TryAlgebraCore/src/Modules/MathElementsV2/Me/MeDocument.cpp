@@ -12,10 +12,10 @@ MathElementV2::FTAMeDocument::FTAMeDocument()
 	Height = 1200.f;
 	VisibleFrom = 0;
 	VisibleTo = 0;
-	LinesCount = 0;
+	LinesCount = 1;
 	FirstLineMeCount = 0;
 	CurrentLine = 0;
-	LinesOnPage = 20;
+	LinesOnPage = 1;
 	SetDefaultSize({1,1});
 }
 
@@ -85,7 +85,8 @@ void MathElementV2::FTAMeDocument::SetMeGenerator(const std::weak_ptr<FTAMathEle
 
 void MathElementV2::FTAMeDocument::ScrollY(int Count)
 {
-	
+	VisibleFrom = FTAMeHelpers::ScrollY(this, Count);
+	ArrangeVisibleElements();
 }
 
 void MathElementV2::FTAMeDocument::ScrollYDelta(float& Delta)
@@ -106,8 +107,12 @@ void MathElementV2::FTAMeDocument::SetHeight(float InHeight)
 
 void MathElementV2::FTAMeDocument::UpdateLinesCount(int Count)
 {
+	if (Count == 0)
+	{
+		return;
+	}
 	LinesCount += Count;
-	OnLinesCountUpdated.Invoke(LinesCount, LinesOnPage);
+	OnLinesCountUpdated.Invoke(this);
 }
 
 void MathElementV2::FTAMeDocument::SetDocumentToChildren(const FMathElements& MathElements)
@@ -128,6 +133,7 @@ void MathElementV2::FTAMeDocument::SetDocumentToChildren(const FMathElements& Ma
 void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 {
 
+	int LinesOnPageTemp = VisibleFrom == 0 ? 1 : 0;
 	if (Children.empty())
 	{
 		VisibleFrom = 0;
@@ -142,9 +148,10 @@ void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 		auto NewLine = Children[i]->Cast<MathElementV2::FTAMeNewLine>();
 		if (NewLine)
 		{
+			LinesOnPageTemp++;
 			//if new line
 			//lower all elements in line by max hor alignment and YOffset
-			float MaxYOffset = NewLine->GetAbsoluteSize().y;
+			float MaxYOffset = VisibleFrom == 0 ? NewLine->GetAbsoluteSize().y : 0;
 			for (int j = LineStart; j < i; j++)
 			{
 				auto LocalPos = Children[j]->GetLocalPosition();
@@ -184,5 +191,10 @@ void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 				Children[j]->SetLocalPosition(LocalPos);
 			}
 		}
+	}
+	if (LinesOnPage != LinesOnPageTemp)
+	{
+		LinesOnPage = LinesOnPageTemp;
+		OnLinesOnPageUpdated.Invoke(this);
 	}
 }

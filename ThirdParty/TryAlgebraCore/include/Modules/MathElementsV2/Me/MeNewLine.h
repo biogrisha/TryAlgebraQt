@@ -16,6 +16,7 @@ namespace MathElementV2
 	private:
 		//Number of elements in line, excluding NewLine
 		int ElementsCount = 0;
+		int PrevLineElementsCount = 0;
 	public:
 		static std::wstring GetName() { return L"lb"; }
 

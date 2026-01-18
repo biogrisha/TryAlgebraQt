@@ -8,6 +8,7 @@
 #include <FreeTypeWrap.h>
 #include <FunctionLibraries/FileHelpers.h>
 #include <Modules/CommonTypes/MulticastDelegate.h>
+#include <Modules/MathElementsV2/Me/MeDocument.h>
 
 #include <MathDocument.h>
 #include <Models/MathElementInfoModel.h>
@@ -27,10 +28,12 @@ public:
 	DocumentControl() = default;
 
 	float scrollHandleSize();
+	float scrollHandlePos();
 	void setScrollHandleSize(float newSize);
-
+	void setScrollHandlePos(float newPos);
 signals:
 	void scrollHandleSizeChanged(float newSize);
+	void scrollHandlePosChanged(float newSize);
 
 public slots:
 
@@ -58,6 +61,7 @@ public slots:
 	
 	float getScrollHandleSize();
 
+	void scrollY(bool Up);
 private:
 	//Updates the rendering data of the selected elements
 	void updateElements(bool bRect, bool bText, bool bCaret);
@@ -65,7 +69,10 @@ private:
 	//Forces rendering to clear items texture
 	void clearDocument();
 
-	void onLinesCountUpdated(int linesCount, int linesOnPage);
+	void onLinesCountUpdated(MathElementV2::FTAMeDocument* doc);
+
+	void onLinesOnPageUpdated(MathElementV2::FTAMeDocument* doc);
+
 	//Math document used to render content
 	MathDocument* m_mathDocument = nullptr;
 	//Selected document info
@@ -78,7 +85,9 @@ private:
 	bool m_isMathDocumentReady = false;
 
 	float m_scrollHandleSize = 0.5;
+	float m_scrollHandlePos = 0.f;
 
-	FTAMulticastDelegate<int, int>::HndlPtr m_onLinesCountUpdated;
+	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onLinesCountUpdated;
+	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onLinesOnPageUpdated;
 };
 

@@ -11,6 +11,7 @@ Rectangle {
         { 
             m_docControl = docControl
             m_docControl.bindMathDocumentItem(mathDoc)
+			m_docControl.scrollHandlePosChanged.connect(scrollHandlePosChanged)
             filteredMeList.model = m_docControl.getMeInfoModel();
         }
 
@@ -105,7 +106,15 @@ Rectangle {
 		Keys.onPressed: (event) => {
 			m_docControl.keyInput(event.key, event.text, event.modifiers)
 		}
-		MouseArea { anchors.fill: parent; onClicked: { mathDoc.focus = true } }
+		MouseArea { 
+			anchors.fill: parent
+			onClicked: { 
+				mathDoc.focus = true 
+			} 
+			onWheel: (event) => {
+				m_docControl.scrollY(event.angleDelta.y > 0)
+			}
+		}
 	}
         
 	ScrollBar { 
@@ -119,4 +128,9 @@ Rectangle {
 			
 		}
     }
+
+	function scrollHandlePosChanged(newPos: real)
+	{
+		vbar.position = newPos
+	}
 }

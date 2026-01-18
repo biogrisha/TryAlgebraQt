@@ -264,6 +264,36 @@ void FTAMeHelpers::IterateOverLines(MathElementV2::FTAMeDocument* InDocument, in
 	}
 }
 
+int FTAMeHelpers::ScrollY(MathElementV2::FTAMeDocument* InDocument, int Num)
+{
+	if (InDocument->LinesCount == 1)
+	{
+		return 0;
+	}
+	bool bDown = Num > 0;
+	int Start = InDocument->VisibleFrom;
+	Start = FindLineStartInd(InDocument, Start);
+	if (Start == -1 && !bDown)
+	{
+		return 0;
+	}
+	for (int i = 0; i < std::abs(Num); i++)
+	{
+		int Step = bDown ? GetMeCountInLine(InDocument, Start) + 1 : -GetMeCountInPrevLine(InDocument, Start) - 1;
+		int StartTemp = Start + Step;
+		if (StartTemp == InDocument->Children.size())
+		{
+			return Start;
+		}
+		else if (StartTemp <= 0)
+		{
+			return 0;
+		}
+		Start = StartTemp;
+	}
+	return Start;
+}
+
 void FTAMeHelpers::CalculateMeCountInLines(MathElementV2::FTAMeDocument* InDocument, int From, int To)
 {
 	//Cache first line
@@ -271,8 +301,9 @@ void FTAMeHelpers::CalculateMeCountInLines(MathElementV2::FTAMeDocument* InDocum
 	int MeCount = 0;
 	for (int i = CurrentLineInd + 1; i < InDocument->Children.size(); i++)
 	{
-		if (InDocument->Children[i]->IsOfType(MathElementV2::FTAMeNewLine::StaticType()))
+		if (auto NewLine = InDocument->Children[i]->Cast<MathElementV2::FTAMeNewLine>())
 		{
+			NewLine->PrevLineElementsCount = MeCount;
 			SetMeCountInLine(InDocument, CurrentLineInd, MeCount);
 			MeCount = 0;
 			CurrentLineInd = i;
@@ -287,20 +318,29 @@ void FTAMeHelpers::CalculateMeCountInLines(MathElementV2::FTAMeDocument* InDocum
 	SetMeCountInLine(InDocument, CurrentLineInd, MeCount);
 }
 
-int FTAMeHelpers::GetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InLineInd)
+int FTAMeHelpers::GetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InNewLineInd)
 {
-	if (InLineInd != -1)
+	if (InNewLineInd != -1)
 	{
-		return InDocument->Children[InLineInd]->Cast<MathElementV2::FTAMeNewLine>()->ElementsCount;
+		return InDocument->Children[InNewLineInd]->Cast<MathElementV2::FTAMeNewLine>()->ElementsCount;
 	}
 	return InDocument->FirstLineMeCount;
 }
 
-void FTAMeHelpers::SetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InLineInd, int InMeCount)
+int FTAMeHelpers::GetMeCountInPrevLine(MathElementV2::FTAMeDocument* InDocument, int InNewLineInd)
 {
-	if (InLineInd != -1)
+	if (InNewLineInd >= 0)
 	{
-		InDocument->Children[InLineInd]->Cast<MathElementV2::FTAMeNewLine>()->ElementsCount = InMeCount;
+		return InDocument->Children[InNewLineInd]->Cast<MathElementV2::FTAMeNewLine>()->PrevLineElementsCount;
+	}
+	return 0;
+}
+
+void FTAMeHelpers::SetMeCountInLine(MathElementV2::FTAMeDocument* InDocument, int InNewLineInd, int InMeCount)
+{
+	if (InNewLineInd != -1)
+	{
+		InDocument->Children[InNewLineInd]->Cast<MathElementV2::FTAMeNewLine>()->ElementsCount = InMeCount;
 		return;
 	}
 	InDocument->FirstLineMeCount = InMeCount;
