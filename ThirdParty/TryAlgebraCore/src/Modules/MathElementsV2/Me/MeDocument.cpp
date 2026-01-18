@@ -51,7 +51,8 @@ void MathElementV2::FTAMeDocument::AddMathElements(const FTAMePath& Path, const 
 	else
 	{
 		UpdateLinesCount(FTAMeHelpers::GetLinesCount(GeneratedMathElements));
-		FTAMeHelpers::CalculateMeCountInLines(this, Path.TreePath[0], Path.TreePath[0] + GeneratedMathElements.size());
+		bool bStartedWithNewLine = GeneratedMathElements[0]->IsOfType(MathElementV2::FTAMeNewLine::StaticType());
+		FTAMeHelpers::CalculateMeCountInLines(this, Path.TreePath[0] - int(bStartedWithNewLine), Path.TreePath[0] + GeneratedMathElements.size());
 		FTAMeHelpers::CalculateSize(GeneratedMathElements);
 	}
 	ArrangeVisibleElements();
@@ -73,6 +74,8 @@ void MathElementV2::FTAMeDocument::RemoveMathElements(FTAMePath Path, int Count)
 	else
 	{
 		FTAMeHelpers::CalculateMeCountInLines(this, Path.TreePath[0]-1, Path.TreePath[0]);
+		//Correct line start
+		VisibleFrom = std::min(VisibleFrom, std::max(0, FTAMeHelpers::FindLineStartInd(this, Path.TreePath[0])));
 	}
 	ArrangeVisibleElements();
 	OnMeRemoved.Invoke(Path, CachedMe, Count);
@@ -132,7 +135,6 @@ void MathElementV2::FTAMeDocument::SetDocumentToChildren(const FMathElements& Ma
 
 void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 {
-
 	int LinesOnPageTemp = VisibleFrom == 0 ? 1 : 0;
 	if (Children.empty())
 	{
@@ -166,7 +168,7 @@ void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 			VisibleTo = LineStart;
 			if (YOffset >= Height)
 			{
-				return;
+				break;
 			}
 		}
 
@@ -197,4 +199,9 @@ void MathElementV2::FTAMeDocument::ArrangeVisibleElements()
 		LinesOnPage = LinesOnPageTemp;
 		OnLinesOnPageUpdated.Invoke(this);
 	}
+}
+
+int MathElementV2::FTAMeDocument::GetClampedLinesOnPage() const
+{
+	return std::max(LinesOnPage, int(Height/30));
 }

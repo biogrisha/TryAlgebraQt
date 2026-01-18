@@ -26,16 +26,17 @@ MathElementV2::FMathElementPtr MathElementGeneratorQt::CreateCharacter(wchar_t C
 	auto ft = AppGlobal::application->getFreeTypeWrap();
 	if (Char == L'\n' || Char == L'\r')
 	{
-		auto size = ft->GetGlyphSize({ .Glyph = L'M', .Height = 20});
+		auto height = ft->GetHeightFromFontSize(15);
 		auto newLine = MathElementV2::FTAMeNewLine::MakeTypedShared();
-		newLine->SetDefaultSize({ 0, size.y });
+		newLine->SetDefaultSize({ 0, double(height) });
 		return newLine;
 	}
 	if (Char == L' ')
 	{
+		auto height = ft->GetHeightFromFontSize(15);
 		auto MeChar = MathElementV2::FTAMeCharacter::MakeTypedShared(Char);
 		MeChar->SetVisual(std::make_shared<CharVisual>(MeChar.get(), m_meDocState));
-		MeChar->SetDefaultSize({ 20,0 });
+		MeChar->SetDefaultSize({ 20,double(height) });
 		return MeChar;
 	}
 

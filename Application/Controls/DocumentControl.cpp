@@ -203,6 +203,7 @@ float DocumentControl::getScrollHandleSize()
 void DocumentControl::scrollY(bool Up)
 {
 	m_docInfo.lock()->MathDocument->ScrollY(Up ? -1 : 1);
+	onLinesCountUpdated(m_docInfo.lock()->MathDocument->GetMeDocument().Get());
 	updateElements(true, true, true);
 }
 

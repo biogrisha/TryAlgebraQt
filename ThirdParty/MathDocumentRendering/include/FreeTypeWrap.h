@@ -12,8 +12,8 @@ public:
 	FGlyphRenderData LoadGlyph(const FGlyphId& GlyphId);
 	FGlyphRenderData* GetGlyphRenderData(const FGlyphId& GlyphId);
 	glm::vec2 GetGlyphSize(const FGlyphId& GlyphId);
-private:
 	uint32_t GetHeightFromFontSize(float Points);
+private:
 	FT_Library  Library;
 	FT_Face     Face;
 	FT_Face     FaceFallback;

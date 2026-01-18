@@ -29,7 +29,7 @@ namespace MathElementV2
 		void SetMeGenerator(const std::weak_ptr<FTAMathElementGenerator>& InGenerator);
 		int GetVisibleFrom() const { return VisibleFrom; }
 		int GetVisibleTo() const { return VisibleTo; }
-		int GetLinesOnPage() const { return LinesOnPage; }
+		int GetLinesOnPage() const { return GetClampedLinesOnPage(); }
 		int GetLinesCount() const { return LinesCount; }
 		void ScrollY(int Count);
 		void ScrollYDelta(float& Delta);
@@ -39,6 +39,7 @@ namespace MathElementV2
 		void UpdateLinesCount(int Count);
 		void SetDocumentToChildren(const FMathElements& MathElements);
 		void ArrangeVisibleElements();
+		int GetClampedLinesOnPage() const;
 		std::weak_ptr<FTAMathElementGenerator> Generator;
 		//Think of it as How many lines of ordinary symbols can fit on the page
 		float Height;
