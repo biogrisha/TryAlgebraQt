@@ -111,6 +111,29 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 			break;
 		}
 		[[fallthrough]];
+	case Qt::Key_C:
+		if (bCtrl)
+		{
+			doc->CopySelected();
+			break;
+		}
+		[[fallthrough]];
+	case Qt::Key_X:
+		if (bCtrl)
+		{
+			doc->CutSelected();
+			updateElements(true, true, true);
+			break;
+		}
+		[[fallthrough]];
+	case Qt::Key_V:
+		if (bCtrl)
+		{
+			doc->Paste();
+			updateElements(true, true, true);
+			break;
+		}
+		[[fallthrough]];
 	default:
 		if (!text.isEmpty() && text != "\b")
 		{
@@ -225,6 +248,29 @@ void DocumentControl::moveScrollHandle(float newPos)
 	doc->ScrollY(step);
 	m_updateScrollFromDoc = true;
 	updateElements(true, true, true);
+}
+
+void DocumentControl::mouseBtnDown(float x, float y)
+{
+	m_bLmbDown = true;
+	m_docInfo.lock()->MathDocument->UpdateSelecting({ x, y });
+	updateElements(true, false, true);
+}
+
+void DocumentControl::mouseBtnUp(float x, float y)
+{
+	m_bLmbDown = false;
+	m_docInfo.lock()->MathDocument->StopSelecting();
+}
+
+void DocumentControl::mousePosUpdated(float x, float y)
+{
+	if (!m_bLmbDown)
+	{
+		return;
+	}
+	m_docInfo.lock()->MathDocument->UpdateSelecting({ x, y });
+	updateElements(true, false, true);
 }
 
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)

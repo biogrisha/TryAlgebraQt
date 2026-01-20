@@ -111,6 +111,15 @@ Rectangle {
 			onClicked: { 
 				mathDoc.focus = true 
 			} 
+			onPressed: (event) => {
+				m_docControl.mouseBtnDown(event.x, event.y)
+			}
+			onReleased: (event) => {
+				m_docControl.mouseBtnUp(event.x, event.y)
+			}
+			onPositionChanged: (event) => {
+				m_docControl.mousePosUpdated(event.x, event.y)
+			}
 			onWheel: (event) => {
 				m_docControl.scrollY(event.angleDelta.y > 0)
 			}

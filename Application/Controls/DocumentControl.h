@@ -64,6 +64,12 @@ public slots:
 	void scrollY(bool Up);
 
 	void moveScrollHandle(float newPos);
+
+	void mouseBtnDown(float x, float y);
+
+	void mouseBtnUp(float x, float y);
+
+	void mousePosUpdated(float x, float y);
 private:
 	//Updates the rendering data of the selected elements
 	void updateElements(bool bRect, bool bText, bool bCaret);
@@ -90,6 +96,7 @@ private:
 	float m_scrollHandlePos = 0.f;
 	bool m_updateScrollFromHandle = true;
 	bool m_updateScrollFromDoc = true;
+	bool m_bLmbDown = false;
 
 	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onLinesCountUpdated;
 	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onCurrentLineUpdated;
