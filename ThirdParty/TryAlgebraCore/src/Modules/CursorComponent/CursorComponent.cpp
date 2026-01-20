@@ -219,13 +219,12 @@ void FTACursorComponent::OnComponentAdded()
 
 bool FTACursorComponent::CursorInVisibleArea() const
 {
-	/*int IndexAdjusted = (std::max)(0,CurrentPath.TreePath[0]-1);
+	int IndexAdjusted = (std::max)(0,CurrentPath.TreePath[0]-1);
 	if (IndexAdjusted < Document->GetVisibleTo() && IndexAdjusted >= Document->GetVisibleFrom())
 	{
 		return true;
 	}
-	return false;*/
-	return true;
+	return false;
 }
 
 void FTACursorComponent::Redraw()

@@ -12,6 +12,7 @@ class CaretVisual : public FTAVisual
 public:
 	CaretVisual(FTACursorComponent* cursorComp, FMathDocumentState* meDocState);
 	virtual void Show() override;
+	virtual void Hide() override;
 private:
 	FTACursorComponent* m_cursorComp = nullptr;
 	FMathDocumentState* m_meDocState = nullptr;

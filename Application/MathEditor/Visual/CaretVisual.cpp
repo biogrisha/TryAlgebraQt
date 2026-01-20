@@ -18,3 +18,13 @@ void CaretVisual::Show()
 	//Updating caret info
 	m_meDocState->SetCaret(caretData);
 }
+
+void CaretVisual::Hide()
+{
+	FCaretData caretData;
+	//moving it slightly to the left
+	caretData.Pos = glm::vec2{ -100, -100 };
+	caretData.Size = glm::vec2{ 1, 1 };
+	//Updating caret info
+	m_meDocState->SetCaret(caretData);
+}
