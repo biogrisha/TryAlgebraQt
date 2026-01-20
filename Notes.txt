@@ -1,3 +1,35 @@
-T) Add pipeline cache into FPipeline
-T)	replace Extent2D with Extent3D in imageBuffer
-T) Try to use same command buffer when possible
+add line-> update size->update pos
+remove line->update size->update pos
+scroll up->update pos
+scroll down->update pos
+paste text here
+
+
+drag scroll->visible from updated
+resize->update scroll size->update scroll pos
+
+update scroll size, pos
+
+
+C - curr line
+F - delete from
+T - delete to
+
+
+C < F -> do nothing
+C > F -> C = lineNum(F)
+
+
+C - curr line 
+N - Curr el id
+T - Target el id
+
+
+
+
+
+
+
+
+
+

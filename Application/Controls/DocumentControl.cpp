@@ -46,7 +46,12 @@ void DocumentControl::setScrollHandleSize(float newSize)
 
 void DocumentControl::setScrollHandlePos(float newPos)
 {
+	if (newPos == m_scrollHandlePos)
+	{
+		return;
+	}
 	m_scrollHandlePos = newPos;
+	emit scrollHandlePosChanged(newPos);
 }
 
 void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
@@ -178,7 +183,7 @@ void DocumentControl::onCurrentDocumentChanged(qint32 ind)
 	m_docInfo = AppGlobal::mainModule->GetAllDocuments()[ind];
 	auto MeDoc = m_docInfo.lock()->MathDocument->GetMeDocument();
 	m_onLinesCountUpdated = MeDoc->OnLinesCountUpdated.AddFunc(this, &DocumentControl::onLinesCountUpdated);
-	m_onLinesOnPageUpdated = MeDoc->OnLinesOnPageUpdated.AddFunc(this, &DocumentControl::onLinesOnPageUpdated);
+	m_onCurrentLineUpdated = MeDoc->OnCurrentLineUpdated.AddFunc(this, &DocumentControl::onCurrentLineUpdated);
 	onLinesCountUpdated(MeDoc.Get());
 	if (m_isMathDocumentReady)
 	{
@@ -204,6 +209,21 @@ void DocumentControl::scrollY(bool Up)
 {
 	m_docInfo.lock()->MathDocument->ScrollY(Up ? -1 : 1);
 	onLinesCountUpdated(m_docInfo.lock()->MathDocument->GetMeDocument().Get());
+	updateElements(true, true, true);
+}
+
+void DocumentControl::moveScrollHandle(float newPos)
+{
+	if (!m_updateScrollFromHandle || m_scrollHandleSize == 1)
+	{
+		return;
+	}
+	auto doc = m_docInfo.lock()->MathDocument->GetMeDocument();
+	int newCurrLine = qFloor((newPos * (doc->GetLinesCount() - 1)) / (1.f - m_scrollHandleSize));
+	m_updateScrollFromDoc = false;
+	auto step = newCurrLine - doc->GetCurrentLine();
+	doc->ScrollY(step);
+	m_updateScrollFromDoc = true;
 	updateElements(true, true, true);
 }
 
@@ -233,14 +253,26 @@ void DocumentControl::clearDocument()
 
 void DocumentControl::onLinesCountUpdated(MathElementV2::FTAMeDocument* doc)
 {
-	float newScrollSize = qMin(float(doc->GetLinesOnPage()) / float(doc->GetLinesCount()), 1.f);
+	float newScrollSize = 1 / (( float(doc->GetLinesCount() - 1) / float(doc->GetLinesOnPage())) + 1);
 	setScrollHandleSize(newScrollSize);
 }
 
-void DocumentControl::onLinesOnPageUpdated(MathElementV2::FTAMeDocument* doc)
+void DocumentControl::onCurrentLineUpdated(MathElementV2::FTAMeDocument* doc)
 {
-	float newScrollSize = qMin(float(doc->GetLinesOnPage()) / float(doc->GetLinesCount()), 1.f);
-	setScrollHandleSize(newScrollSize);
+	if (!m_updateScrollFromDoc)
+	{
+		return;
+	}
+	m_updateScrollFromHandle = false;
+	if (doc->GetLinesCount() == 1)
+	{
+		setScrollHandlePos(0);
+		return;
+	}
+	float newScrollPos = float(doc->GetCurrentLine()) / float(doc->GetLinesCount() - 1);
+	float remainderOfScrollBar = 1.f - m_scrollHandleSize;
+	setScrollHandlePos(newScrollPos * remainderOfScrollBar);
+	m_updateScrollFromHandle = true;
 }
 
 

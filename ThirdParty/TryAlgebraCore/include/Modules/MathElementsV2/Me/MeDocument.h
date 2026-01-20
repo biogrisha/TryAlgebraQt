@@ -27,19 +27,21 @@ namespace MathElementV2
 		void AddMathElements(const FTAMePath& Path, const std::wstring& InMathElements);
 		void RemoveMathElements(FTAMePath Path, int Count);
 		void SetMeGenerator(const std::weak_ptr<FTAMathElementGenerator>& InGenerator);
-		int GetVisibleFrom() const { return VisibleFrom; }
+		int GetVisibleFrom() const { return std::max(0, VisibleFrom); }
 		int GetVisibleTo() const { return VisibleTo; }
-		int GetLinesOnPage() const { return GetClampedLinesOnPage(); }
+		int GetLinesOnPage() const { return int(Height / 30); }
 		int GetLinesCount() const { return LinesCount; }
+		int GetCurrentLine() const { return CurrentLine; }
 		void ScrollY(int Count);
 		void ScrollYDelta(float& Delta);
 		void InvokeOnScrolled();
 		void SetHeight(float InHeight);
+		bool IsOutsideVisibleArea(int MeInd);
 	private:
 		void UpdateLinesCount(int Count);
+		void ActualizeCurrentLine();
 		void SetDocumentToChildren(const FMathElements& MathElements);
 		void ArrangeVisibleElements();
-		int GetClampedLinesOnPage() const;
 		std::weak_ptr<FTAMathElementGenerator> Generator;
 		//Think of it as How many lines of ordinary symbols can fit on the page
 		float Height;
@@ -48,13 +50,13 @@ namespace MathElementV2
 
 		int LinesCount;
 		int CurrentLine;
-		int LinesOnPage;
 
 		int FirstLineMeCount;
+		bool bTextFillsVisibleArea;
 	public:
 		FTAMulticastDelegate<const FTAMePath&, const FMathElements&> OnMeAdded;
 		FTAMulticastDelegate<const FTAMePath&, const std::wstring&, int> OnMeRemoved;
 		FTAMulticastDelegate<FTAMeDocument*> OnLinesCountUpdated;
-		FTAMulticastDelegate<FTAMeDocument*> OnLinesOnPageUpdated;
+		FTAMulticastDelegate<FTAMeDocument*> OnCurrentLineUpdated;
 	};
 }

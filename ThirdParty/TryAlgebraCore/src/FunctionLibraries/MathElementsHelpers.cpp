@@ -244,6 +244,10 @@ int FTAMeHelpers::FindNextLineStartInd(MathElementV2::FTAMeDocument* InDocument,
 
 int FTAMeHelpers::FindLineStartInd(MathElementV2::FTAMeDocument* InDocument, int From)
 {
+	if (InDocument->Children.empty())
+	{
+		return -1;
+	}
 	for (int i = From; i >= 0; i--)
 	{
 		if (InDocument->Children[i]->IsOfType(MathElementV2::FTAMeNewLine::StaticType()))
@@ -266,32 +270,56 @@ void FTAMeHelpers::IterateOverLines(MathElementV2::FTAMeDocument* InDocument, in
 
 int FTAMeHelpers::ScrollY(MathElementV2::FTAMeDocument* InDocument, int Num)
 {
+	bool bDown = Num > 0;
+	int Start = InDocument->VisibleFrom;
+	if ((Start == -1 && !bDown) || InDocument->LinesCount == 1)
+	{
+		//Already at the top and want to scroll up
+		//or there is only a single line
+		return -1;
+	}
+
+	for (int i = 0; i < std::abs(Num); i++)
+	{
+		//Get the number of elements to advance to the next line
+		int Step = bDown ? GetMeCountInLine(InDocument, Start) + 1 : -GetMeCountInPrevLine(InDocument, Start) - 1;
+		//Calculate next line start
+		int StartTemp = Start + Step;
+		if (StartTemp == InDocument->Children.size())
+		{
+			//next line start is the end of document -> return prev line
+			return Start;
+		}
+		else if (StartTemp <= -1)
+		{
+			//next line start is the first line
+			return -1;
+		}
+		//succesfull advance of line
+		Start = StartTemp;
+	}
+	return Start;
+}
+
+int FTAMeHelpers::GetLineByMeId(MathElementV2::FTAMeDocument* InDocument, int MeIndex)
+{
 	if (InDocument->LinesCount == 1)
 	{
 		return 0;
 	}
-	bool bDown = Num > 0;
-	int Start = InDocument->VisibleFrom;
-	Start = FindLineStartInd(InDocument, Start);
-	if (Start == -1 && !bDown)
+	int CurrentLine = 0;
+	int CurrentIndex = -1;
+	while (true)
 	{
-		return 0;
-	}
-	for (int i = 0; i < std::abs(Num); i++)
-	{
-		int Step = bDown ? GetMeCountInLine(InDocument, Start) + 1 : -GetMeCountInPrevLine(InDocument, Start) - 1;
-		int StartTemp = Start + Step;
-		if (StartTemp == InDocument->Children.size())
+		int Step = GetMeCountInLine(InDocument, CurrentIndex);
+		CurrentIndex += Step + 1;
+		if (CurrentIndex > MeIndex)
 		{
-			return Start;
+			return CurrentLine;
 		}
-		else if (StartTemp <= 0)
-		{
-			return 0;
-		}
-		Start = StartTemp;
+		CurrentLine++;
 	}
-	return Start;
+	return CurrentLine;
 }
 
 void FTAMeHelpers::CalculateMeCountInLines(MathElementV2::FTAMeDocument* InDocument, int From, int To)
@@ -737,7 +765,7 @@ void FTAMeHelpers::ParseToString(const MathElementV2::FMathElements& MathElement
 void FTAMeHelpers::GetIndexAtPosition(MathElementV2::FTAMeDocument* InDocument, const TACommonTypes::FTAVector2d& Position, FTAMePath& Path)
 {
 	Path.TreePath.clear();
-	for (int i = InDocument->VisibleFrom; i < InDocument->VisibleTo; i++)
+	for (int i = InDocument->GetVisibleFrom(); i < InDocument->GetVisibleTo(); i++)
 	{
 		if (IsWithinMe(InDocument->Children[i], Position))
 		{
@@ -761,7 +789,7 @@ void FTAMeHelpers::GetIndexAtPosition(MathElementV2::FTAMeDocument* InDocument, 
 		}
 	}
 	//If no element was under cursor, find the closest one
-	int ClosestIndex = FindClosestIndex(InDocument->Children, Position, InDocument->VisibleFrom, InDocument->VisibleTo);
+	int ClosestIndex = FindClosestIndex(InDocument->Children, Position, InDocument->GetVisibleFrom(), InDocument->GetVisibleTo());
 	if (CommonHelpers::IsValidId(InDocument->Children, ClosestIndex))
 	{
 		ClosestIndex = IsLeftHalf(InDocument->Children[ClosestIndex], Position) ? ClosestIndex : ClosestIndex + 1;

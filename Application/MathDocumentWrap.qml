@@ -125,7 +125,7 @@ Rectangle {
         anchors.bottom: parent.bottom // Full range 
         size: m_docControl ? m_docControl.scrollHandleSize : 0.1
 		onPositionChanged: {
-			
+			m_docControl.moveScrollHandle(position)
 		}
     }
 

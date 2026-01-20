@@ -112,6 +112,9 @@ struct FTAMeHelpers
 	static void IterateOverLines(MathElementV2::FTAMeDocument* InDocument, int From, int To, const std::function<void(const MathElementV2::FMathElements&, int /*From*/,int /*To*/)>& Callable);
 	//Scroll
 	static int ScrollY(MathElementV2::FTAMeDocument* InDocument, int Num);
+
+	//Finds line number for MeIndex
+	static int GetLineByMeId(MathElementV2::FTAMeDocument* InDocument, int MeIndex);
 	//------------Selection----------------
 	
 	static std::vector<TTypedWeak<MathElementV2::FTAMathElementBase>> GetSelectedElements(MathElementV2::FTAMeDocument* InDocument,FTAMePath InPath1,FTAMePath InPath2, FTAMePath& OutCursorPos, bool& bPath1From);

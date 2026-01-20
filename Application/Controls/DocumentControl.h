@@ -33,7 +33,7 @@ public:
 	void setScrollHandlePos(float newPos);
 signals:
 	void scrollHandleSizeChanged(float newSize);
-	void scrollHandlePosChanged(float newSize);
+	void scrollHandlePosChanged(float newPos);
 
 public slots:
 
@@ -62,6 +62,8 @@ public slots:
 	float getScrollHandleSize();
 
 	void scrollY(bool Up);
+
+	void moveScrollHandle(float newPos);
 private:
 	//Updates the rendering data of the selected elements
 	void updateElements(bool bRect, bool bText, bool bCaret);
@@ -70,8 +72,8 @@ private:
 	void clearDocument();
 
 	void onLinesCountUpdated(MathElementV2::FTAMeDocument* doc);
-
-	void onLinesOnPageUpdated(MathElementV2::FTAMeDocument* doc);
+	
+	void onCurrentLineUpdated(MathElementV2::FTAMeDocument* doc);
 
 	//Math document used to render content
 	MathDocument* m_mathDocument = nullptr;
@@ -86,8 +88,10 @@ private:
 
 	float m_scrollHandleSize = 0.5;
 	float m_scrollHandlePos = 0.f;
+	bool m_updateScrollFromHandle = true;
+	bool m_updateScrollFromDoc = true;
 
 	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onLinesCountUpdated;
-	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onLinesOnPageUpdated;
+	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onCurrentLineUpdated;
 };
 
