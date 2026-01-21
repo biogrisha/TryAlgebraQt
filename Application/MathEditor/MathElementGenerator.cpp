@@ -35,25 +35,27 @@ MathElementV2::FMathElementPtr MathElementGeneratorQt::CreateCharacter(wchar_t C
 	{
 		auto height = ft->GetHeightFromFontSize(15);
 		auto MeChar = MathElementV2::FTAMeCharacter::MakeTypedShared(Char);
-		MeChar->SetVisual(std::make_shared<CharVisual>(MeChar.get(), m_meDocState));
+		MeChar->SetVisual(m_chVisual.get());
 		MeChar->SetDefaultSize({ 20,double(height) });
 		return MeChar;
 	}
 
 	auto MeChar = MathElementV2::FTAMeCharacter::MakeTypedShared(Char);
-	MeChar->SetVisual(std::make_shared<CharVisual>(MeChar.get(), m_meDocState));
+	MeChar->SetVisual(m_chVisual.get());
 	return MeChar;
 }
 
 void MathElementGeneratorQt::initMeGenerators()
 {
+	m_ftVisual = std::make_unique<FromToVisual>(m_meDocState);
+	m_chVisual = std::make_unique<CharVisual>(m_meDocState);
+	m_visualBase = std::make_unique<MeVisualBase>(m_meDocState);
 	//Container
 	{
 		FuncCreateMe FuncCreateMe = [this](const std::wstring& Info)->MathElementV2::FMathElementPtr
 			{
 				auto Container = MathElementV2::FTAMeContainer::MakeTypedShared();
-				auto MeVisual = std::make_shared<FTAVisual>();
-				Container->SetVisual(MeVisual);
+				Container->SetVisual(m_visualBase.get());
 				return Container;
 			};
 		m_meGenerators.emplace(MathElementV2::FTAMeContainer::GetName(), FuncCreateMe);
@@ -63,8 +65,7 @@ void MathElementGeneratorQt::initMeGenerators()
 		FuncCreateMe FuncCreateMe = [this](const std::wstring& Info)->MathElementV2::FMathElementPtr
 			{
 				auto FromTo = MathElementV2::FTAMeFromTo::MakeTypedShared(Info);
-				auto CharVisual = std::make_shared<FromToVisual>(FromTo.get(), m_meDocState);
-				FromTo->SetVisual(CharVisual);
+				FromTo->SetVisual(m_ftVisual.get());
 				return FromTo;
 			};
 		m_meGenerators.emplace(MathElementV2::FTAMeFromTo::GetName(), FuncCreateMe);

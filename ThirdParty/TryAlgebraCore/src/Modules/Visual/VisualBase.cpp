@@ -3,17 +3,17 @@
 
 #include "Modules/Visual/VisualBase.h"
 
-void FTAVisual::Show()
+void FTAVisual::Show(MathElementV2::FTAMathElementBase* Me)
 {
-	bShown = true;
+	Me->bVisible = true;
 }
 
-void FTAVisual::Hide()
+void FTAVisual::Hide(MathElementV2::FTAMathElementBase* Me)
 {
-	bShown = false;
+	Me->bVisible = false;
 }
 
-TACommonTypes::FTAVector2d FTAVisual::GetVisualSize()
+TACommonTypes::FTAVector2d FTAVisual::GetVisualSize(MathElementV2::FTAMathElementBase* me)
 {
 	return TACommonTypes::FTAVector2d();
 }

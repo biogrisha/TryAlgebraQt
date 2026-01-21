@@ -55,7 +55,7 @@ void MathElementV2::FTAMeFromTo::CalculateSize(float InAccumulatedScalingFactor)
 	if(!bScaleFactorApplied)
 	{
 		FontSize *= InAccumulatedScalingFactor;
-		SymbolSize = Visual->GetVisualSize();
+		SymbolSize = Visual->GetVisualSize(this);
 		DefaultSize = SymbolSize;
 		AccumulatedScalingFactor *= InAccumulatedScalingFactor;
 		bScaleFactorApplied = true;

@@ -26,7 +26,7 @@ class FTACursorComponent : public FTAComponentBase
 protected:
 	FTACursorComponent();
 public:
-	void SetVisual(const std::shared_ptr<class FTAVisual>& InVisual);
+	void SetVisual(const std::shared_ptr<class FTACursorVisualBase>& InVisual);
 	void Show();
 	void Hide();
 	FTACursorParameters GetParameters();
@@ -60,7 +60,7 @@ public:
 	FTAMulticastDelegate<FTACursorComponent*> OnSelectionUpdated;
 protected:
 	TTypedWeak<MathElementV2::FTAMeDocument> Document;
-	std::shared_ptr<class FTAVisual> Visual;
+	std::shared_ptr<class FTACursorVisualBase> Visual;
 	FTAMePath CurrentPath;
 	FTAMePath SelectionStart;
 	FTAMePath SelectionEnd;

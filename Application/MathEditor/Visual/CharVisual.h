@@ -1,18 +1,13 @@
 #pragma once
-#include <Modules/Visual/VisualBase.h>
-#include <Modules/MathElementsV2/Me/MeCharacter.h>
-#include <MathDocumentState.h>
+#include <MathEditor/Visual/MeVisualBase.h>
 
 /*
-* Collects visual info for characters as well as highlighting
+* Collects visual info for characters
 */
-class CharVisual : public FTAVisual
+class CharVisual : public MeVisualBase
 {
 public:
-	CharVisual(MathElementV2::FTAMeCharacter* InMeChar, FMathDocumentState* meDocState);
-	virtual void Show() override;
-	virtual TACommonTypes::FTAVector2d GetVisualSize() override;
-private:
-	FMathDocumentState* m_meDocState = nullptr;
-	MathElementV2::FTAMeCharacter* m_me = nullptr;
+	CharVisual(FMathDocumentState* meDocState);
+	virtual void Show(MathElementV2::FTAMathElementBase* me) override;
+	virtual TACommonTypes::FTAVector2d GetVisualSize(MathElementV2::FTAMathElementBase* me) override;
 };

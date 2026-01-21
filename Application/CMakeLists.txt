@@ -38,6 +38,8 @@ qt_add_qml_module(Application
         MathEditor/Visual/CaretVisual.cpp
         MathEditor/Visual/FromToVisual.h
         MathEditor/Visual/FromToVisual.cpp
+        MathEditor/Visual/MeVisualBase.h
+        MathEditor/Visual/MeVisualBase.cpp
 )
 
 target_link_libraries(Application

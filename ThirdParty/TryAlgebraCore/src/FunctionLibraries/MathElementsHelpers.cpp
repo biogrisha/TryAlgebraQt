@@ -478,7 +478,7 @@ void FTAMeHelpers::DrawElementsDown(MathElementV2::FTAMeDocument* InDocument, in
 {
 	for (int i = From; i < To; i++)
 	{
-		InDocument->Children[i]->Visual->Show();
+		InDocument->Children[i]->Visual->Show(InDocument->Children[i].get());
 	}
 }
 
@@ -508,7 +508,7 @@ void FTAMeHelpers::HideIfShould(const std::vector<TTypedWeak<MathElementV2::FTAM
 		{
 			if (Me->Visual)
 			{
-				Me->Visual->Hide();
+				Me->Visual->Hide(Me.Get());
 			}
 			if (auto Comp = Me->Cast<MathElementV2::FTAMeComposite>())
 			{
@@ -529,7 +529,7 @@ void FTAMeHelpers::HideElements(const MathElementV2::FMathElements& MathElements
 	{
 		if (MathElements[i]->Visual)
 		{
-			MathElements[i]->Visual->Hide();
+			MathElements[i]->Visual->Hide(MathElements[i].get());
 		}
 		if (auto Comp = MathElements[i]->Cast<MathElementV2::FTAMeComposite>())
 		{
@@ -544,7 +544,7 @@ void FTAMeHelpers::ShowElements(const MathElementV2::FMathElements& MathElements
 	{
 		if (MathElements[i]->Visual)
 		{
-			MathElements[i]->Visual->Show();
+			MathElements[i]->Visual->Show(MathElements[i].get());
 		}
 		MathElements[i]->bShouldHide = false;
 		if (auto Comp = MathElements[i]->Cast<MathElementV2::FTAMeComposite>())
@@ -563,9 +563,9 @@ void FTAMeHelpers::RedrawIfVisible(const std::vector<TTypedWeak<MathElementV2::F
 {
 	for (auto Me : MathElements)
 	{
-		if (Me->Visual && Me->Visual->IsShown())
+		if (Me->Visual && Me->bVisible)
 		{
-			Me->Visual->Show();
+			Me->Visual->Show(Me.Get());
 		}
 	}
 }
@@ -574,9 +574,9 @@ void FTAMeHelpers::RedrawIfVisible(const MathElementV2::FMathElements& MathEleme
 {
 	for (auto Me : MathElements)
 	{
-		if (Me->Visual && Me->Visual->IsShown())
+		if (Me->Visual && Me->bVisible)
 		{
-			Me->Visual->Show();
+			Me->Visual->Show(Me.get());
 		}
 	}
 }

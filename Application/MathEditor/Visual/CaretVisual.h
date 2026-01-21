@@ -1,5 +1,5 @@
 #pragma once
-#include <Modules/Visual/VisualBase.h>
+#include <Modules/Visual/CursorVisualBase.h>
 #include <MathDocumentState.h>
 
 class FTACursorComponent;
@@ -7,12 +7,12 @@ class FTACursorComponent;
 /*
 * Collects visual data for caret
 */
-class CaretVisual : public FTAVisual
+class CaretVisual : public FTACursorVisualBase
 {
 public:
 	CaretVisual(FTACursorComponent* cursorComp, FMathDocumentState* meDocState);
-	virtual void Show() override;
-	virtual void Hide() override;
+	void Show();
+	void Hide();
 private:
 	FTACursorComponent* m_cursorComp = nullptr;
 	FMathDocumentState* m_meDocState = nullptr;

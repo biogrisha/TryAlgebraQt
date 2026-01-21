@@ -7,7 +7,7 @@
 #include "Modules/MathElementsV2/Me/MeContainer.h"
 #include "Modules/MathElementsV2/Me/MeDocument.h"
 #include "Modules/MathElementsV2/Me/MeNewLine.h"
-#include "Modules/Visual/VisualBase.h"
+#include "Modules/Visual/CursorVisualBase.h"
 
 FTACursorComponent::FTACursorComponent()
 {
@@ -15,7 +15,7 @@ FTACursorComponent::FTACursorComponent()
 	bStartedSelection = false;
 }
 
-void FTACursorComponent::SetVisual(const std::shared_ptr<class FTAVisual>& InVisual)
+void FTACursorComponent::SetVisual(const std::shared_ptr<class FTACursorVisualBase>& InVisual)
 {
 	Visual = InVisual;
 }

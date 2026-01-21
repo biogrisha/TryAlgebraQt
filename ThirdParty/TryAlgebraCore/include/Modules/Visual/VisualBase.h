@@ -3,15 +3,12 @@
 #pragma once
 #include <cstdint>
 #include "Modules/CommonTypes/Vector2D.h"
-
+#include "Modules/MathElementsV2/Me/MathElementBaseV2.h"
 class FTAVisual
 {
 public:
 	virtual ~FTAVisual() = default;
-	virtual void Show();
-	virtual void Hide();
-	virtual TACommonTypes::FTAVector2d GetVisualSize();
-	bool IsShown() const {return bShown;};
-private:
-	bool bShown = false;
+	virtual void Show(MathElementV2::FTAMathElementBase* Me);
+	virtual void Hide(MathElementV2::FTAMathElementBase* Me);
+	virtual TACommonTypes::FTAVector2d GetVisualSize(MathElementV2::FTAMathElementBase* me);
 };

@@ -63,7 +63,7 @@ void MathElementV2::FTAMathElementBase::SetParent(const FTAMeComposite* InParent
 	Parent = InParent->GetSelfWeak();
 }
 
-void MathElementV2::FTAMathElementBase::SetVisual(const std::shared_ptr<FTAVisual>& InVisual)
+void MathElementV2::FTAMathElementBase::SetVisual(FTAVisual* InVisual)
 {
 	Visual = InVisual;
 }
@@ -75,9 +75,9 @@ void MathElementV2::FTAMathElementBase::SetLocalPosition(const TACommonTypes::FT
 
 void MathElementV2::FTAMathElementBase::Destroy()
 {
-	if (Visual && Visual->IsShown())
+	if (Visual && bVisible)
 	{
-		Visual->Hide();
+		Visual->Hide(this);
 	}
 }
 

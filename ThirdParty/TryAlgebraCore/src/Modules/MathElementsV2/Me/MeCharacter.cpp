@@ -19,7 +19,7 @@ void MathElementV2::FTAMeCharacter::CalculateSize(float AccumulatedScalingFactor
 	if(!bScaleFactorApplied)
 	{
 		FontSize *= AccumulatedScalingFactor;
-		AbsoluteSize = Visual->GetVisualSize();
+		AbsoluteSize = Visual->GetVisualSize(this);
 		bScaleFactorApplied = true;
 	}
 }

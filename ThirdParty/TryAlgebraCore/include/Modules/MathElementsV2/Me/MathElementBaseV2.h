@@ -38,7 +38,7 @@ namespace MathElementV2
 		//Use this function in AdjustChildren
 		void SetAbsoluteSize(const TACommonTypes::FTAVector2d& InSize);
 		void SetParent(const FTAMeComposite* InParent);
-		void SetVisual(const std::shared_ptr<FTAVisual>& InVisual);
+		void SetVisual(FTAVisual* InVisual);
 		void SetLocalPosition(const TACommonTypes::FTAVector2d& InLocalPosition);
 		virtual void Destroy();
 	protected:
@@ -48,14 +48,14 @@ namespace MathElementV2
 		TACommonTypes::FTAVector2d DefaultSize;
 		TACommonTypes::FTAVector2d AbsoluteSize;
 		float InitialHeight = 1.f; 
-		std::shared_ptr<FTAVisual> Visual;
+		FTAVisual* Visual = nullptr;
 		int Depth = 0;
 		bool bShouldHide = true;
 	public:
 		bool bSelected = false;
 		bool bHighlight = false;
 		bool bSelectionMatchHighlight = false;
-
+		bool bVisible = true;
 		//new logic
 	public:
 		virtual void CalculateSize(float AccumulatedScalingFactor);
