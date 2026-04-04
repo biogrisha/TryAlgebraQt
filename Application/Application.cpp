@@ -1,10 +1,12 @@
 #include "Application.h"
+#include "Application.h"
 #include <QQuickWindow>
 #include <QVulkanInstance>
 
 #include <VulkanContext.h>
 #include <FreeTypeWrap.h>
 #include <Modules/MathElementsV2/CompatibilityData.h>
+#include <Modules/Visual/MathElementsAtlas.h>
 
 #include <MathEditor/CursorComponentGenerator.h>
 #include <MathEditor/MathElementGenerator.h>
@@ -34,7 +36,7 @@ Application::Application(QObject *parent)
 	m_menuControl = new MenuControl(this);
 	m_tabsControl = new TabsControl(this);
 	m_documentControl = new DocumentControl(this);
-
+	PrepareMeAtlas();
 	//caching dpi
 	QScreen* screen = QGuiApplication::primaryScreen(); 
 	qreal logicalDpiX = screen->logicalDotsPerInchX(); 
@@ -47,6 +49,16 @@ Application::Application(QObject *parent)
 DocumentControl* Application::getDocumentControl()
 {
 	return m_documentControl;
+}
+
+void Application::PrepareMeAtlas()
+{
+	//FTAMathElementsAtlas meAtlas;
+	//FMathDocumentState meDocState;
+	//auto meGen = std::make_unique<MathElementGeneratorQt>();
+	//meGen->m_meDocState = &meDocState;
+	//meGen->initMeGenerators();
+	//meAtlas.Init(meGen.get());
 }
 
 FFreeTypeWrap* Application::getFreeTypeWrap()

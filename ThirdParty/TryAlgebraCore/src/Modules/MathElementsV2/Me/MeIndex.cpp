@@ -8,6 +8,7 @@
 
 MathElementV2::FTAMeIndex::FTAMeIndex(const std::wstring& Info)
 {
+	//Get index type from info
 	if (Info == FTAMeDefinition::SubscriptInfo)
 	{
 		IndexType = EType::Subscript;

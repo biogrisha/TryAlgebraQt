@@ -23,7 +23,7 @@ void FromToVisual::Show(MathElementV2::FTAMathElementBase* me)
 		g.Pos = { symbPos.x, symbPos.y };
 		m_meDocState->AddGlyph(g);
 	}
-	FTAVisual::Show(me);
+	MeVisualBase::Show(me);
 }
 
 TACommonTypes::FTAVector2d FromToVisual::GetVisualSize(MathElementV2::FTAMathElementBase* me)

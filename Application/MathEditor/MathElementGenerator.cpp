@@ -5,6 +5,7 @@
 #include <Modules/MathElementsV2/Me/MeNewLine.h>
 #include <Modules/MathElementsV2/Me/MeContainer.h>
 #include <Modules/MathElementsV2/Me/MeFromTo.h>
+#include <Modules/MathElementsV2/Me/MeIndex.h>
 
 #include <Application.h>
 #include <AppGlobal.h>
@@ -69,5 +70,15 @@ void MathElementGeneratorQt::initMeGenerators()
 				return FromTo;
 			};
 		m_meGenerators.emplace(MathElementV2::FTAMeFromTo::GetName(), FuncCreateMe);
+	}
+	//Index
+	{
+		FuncCreateMe FuncCreateMe = [this](const std::wstring& Info)->MathElementV2::FMathElementPtr
+			{
+				auto FromTo = MathElementV2::FTAMeIndex::MakeTypedShared(Info);
+				FromTo->SetVisual(m_visualBase.get());
+				return FromTo;
+			};
+		m_meGenerators.emplace(MathElementV2::FTAMeIndex::GetName(), FuncCreateMe);
 	}
 }

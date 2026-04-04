@@ -50,6 +50,7 @@ add_library(TryAlgebraCore STATIC
 	include/Modules/Search/HighlightSameAsSelected.h
 	include/Modules/Visual/VisualBase.h
 	include/Modules/Visual/CursorVisualBase.h
+	include/Modules/Visual/MathElementsAtlas.h
 	include/FunctionLibraries/MeDefinition.h
 	include/FunctionLibraries/ScriptingHelpers.h
 	include/FunctionLibraries/CommonHelpers.h
@@ -109,6 +110,7 @@ add_library(TryAlgebraCore STATIC
 	src/Modules/Search/HighlightSameAsSelected.cpp
 	src/Modules/Visual/VisualBase.cpp
 	src/Modules/Visual/CursorVisualBase.cpp
+	src/Modules/Visual/MathElementsAtlas.cpp
 	src/FunctionLibraries/MeDefinition.cpp
 	src/FunctionLibraries/ScriptingHelpers.cpp
 	src/FunctionLibraries/CommonHelpers.cpp
@@ -116,9 +118,7 @@ add_library(TryAlgebraCore STATIC
 	src/FunctionLibraries/ExpressionsLibraryExtra.cpp
 	src/FunctionLibraries/FileHelpers.cpp
 	src/FunctionLibraries/MathElementsHelpers.cpp
-
-
- "include/Modules/Visual/CursorVisualBase.h")
+)
 
 # Set include directories
 target_include_directories(TryAlgebraCore

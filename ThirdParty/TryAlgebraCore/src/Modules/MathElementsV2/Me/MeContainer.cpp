@@ -9,7 +9,7 @@
 
 MathElementV2::FTAMeContainer::FTAMeContainer()
 {
-	DefaultSize = { 10,20 };
+	DefaultSize = { 20,20 };
 }
 
 void MathElementV2::FTAMeContainer::ArrangeChildren()

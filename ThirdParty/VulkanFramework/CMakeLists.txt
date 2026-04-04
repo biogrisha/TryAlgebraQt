@@ -52,3 +52,4 @@ target_link_libraries(VulkanFramework
 		MyRTTI
 		nlohmann_json::nlohmann_json
 )
+

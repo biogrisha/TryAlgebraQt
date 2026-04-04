@@ -7,9 +7,12 @@
       "binaryDir": "${sourceDir}/out/build/debug",
       "installDir": "${sourceDir}/out/install/debug",
       "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "D:/Projects/ThirdParty/VCPackage/vcpkg/scripts/buildsystems/vcpkg.cmake",
         "CMAKE_BUILD_TYPE": "Debug"
       },
       "environment": {
+        "QTDIR": "C:/Qt/6.11.0/msvc2022_64",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.11.0/msvc2022_64",
         "QML_DEBUG_ARGS": "-qmljsdebugger=file:{3fc0409e-32d0-4376-a3fa-1a41c0c50033},block"
       }
     },
@@ -25,35 +28,17 @@
     {
       "hidden": true,
       "name": "Qt-Default",
-      "inherits": "6.10.0_msvc2022_64",
+      "inherits": null,
       "vendor": {
         "qt-project.org/Default": {
-          "checksum": "zq0FM69rn9DqFNaR+j05x3FkQsY="
-        }
-      }
-    },
-    {
-      "hidden": true,
-      "name": "6.10.0_msvc2022_64",
-      "inherits": "Qt",
-      "environment": {
-        "QTDIR": "C:/Qt/6.10.0/msvc2022_64"
-      },
-      "architecture": {
-        "strategy": "external",
-        "value": "x64"
-      },
-      "generator": "Ninja",
-      "vendor": {
-        "qt-project.org/Version": {
-          "checksum": "nkxTuVMjX2NRd4pCRmmf07LmWaE="
+          "checksum": "VoalogTkyWuFomeO1TLFx0olLJ4="
         }
       }
     }
   ],
   "vendor": {
     "qt-project.org/Presets": {
-      "checksum": "cZuMSDcain/gQaHaqcMWnPKJ19U="
+      "checksum": "KkXQdEZ3xckQ+NjipF7d+nnAYw8="
     }
   }
 }

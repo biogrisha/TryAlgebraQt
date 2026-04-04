@@ -35,6 +35,8 @@ public slots:
 	//Returns document control
 	DocumentControl* getDocumentControl();
 private:
+	void PrepareMeAtlas();
+
 	MenuControl* m_menuControl = nullptr;
 	DocumentControl* m_documentControl = nullptr;
 	TabsControl* m_tabsControl = nullptr;
