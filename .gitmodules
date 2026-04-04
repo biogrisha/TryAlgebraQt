@@ -1,0 +1,3 @@
+[submodule "ThirdParty/VulkanFramework"]
+	path = ThirdParty/VulkanFramework
+	url = https://github.com/biogrisha/VulkanFramework.git
