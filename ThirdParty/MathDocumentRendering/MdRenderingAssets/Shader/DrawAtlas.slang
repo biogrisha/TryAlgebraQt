@@ -26,7 +26,7 @@ struct CurvePoints {
 layout(binding = 0) StructuredBuffer<CurvePoints> curves;
 
 struct UniformBuffer {
-    uint2 Extent;
+    uint3 Extent;
 };
 layout(binding = 1) ConstantBuffer<UniformBuffer> ubo;
 
@@ -37,7 +37,7 @@ VSOutput vertMain() {
     VertPos.x *= InstanceData.Size.x;
     VertPos.y *= InstanceData.Size.y;
     VertPos += InstanceData.Offset;
-    vec2 ndc = (VertPos / ubo.Extent) * 2.0 - 1.0;
+    vec2 ndc = (VertPos / ubo.Extent.xy) * 2.0 - 1.0;
     output.pos = float4(ndc,0 ,1);
     output.Offset = InstanceData.Offset;
     output.StartIndex = InstanceData.StartIndex;

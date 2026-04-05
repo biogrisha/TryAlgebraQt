@@ -20,7 +20,7 @@ struct VSOutput
 
 layout (set = 0, binding = 0) uniform Sampler2D texSampler;
 struct UniformBuffer {
-    uint2 Extent;
+    uint3 Extent;
 };
 layout(set = 0, binding = 1) ConstantBuffer<UniformBuffer> ubo;
 
@@ -32,7 +32,7 @@ VSOutput vertMain() {
     VertPos.y *= InstanceData.Size.y;
     VertPos += InstanceData.Pos;
     output.PixelPos = int2(int(InstanceData.Pos.x), int(InstanceData.Pos.y));
-    vec2 ndc = (VertPos / ubo.Extent) * 2.0 - 1.0;
+    vec2 ndc = (VertPos / ubo.Extent.xy) * 2.0 - 1.0;
     output.pos = float4(ndc,0 ,1);
     output.fragTexCoord = input.TexCoord;
     output.TextureOffset = InstanceData.TextureOffset;

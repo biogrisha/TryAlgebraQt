@@ -2,6 +2,8 @@
 #include "ImageBuffer.h"
 #include "VulkanHelpers.h"
 #include "FileSystemUtilities.h"
+
+
 namespace {
 	uint16_t S_1;
 	uint16_t P_1;

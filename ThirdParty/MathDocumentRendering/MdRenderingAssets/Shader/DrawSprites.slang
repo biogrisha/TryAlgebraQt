@@ -15,7 +15,7 @@ layout (location = 2) in VSInstanceData {
 layout (set = 0, binding = 0) uniform Sampler2D Atlas;
 
 struct UniformBuffer {
-    uint2 Extent;
+    uint3 Extent;
 };
 layout(set = 0, binding = 1) ConstantBuffer<UniformBuffer> Ubo;
 
@@ -26,7 +26,7 @@ VSOutput vertMain() {
     VertPos.x *= Inst.Size.x;
     VertPos.y *= Inst.Size.y;
     VertPos += Inst.Pos;
-    float2 NormVertPos = (VertPos / Ubo.Extent) * 2.0 - 1.0;
+    float2 NormVertPos = (VertPos / Ubo.Extent.xy) * 2.0 - 1.0;
     Output.pos = float4(NormVertPos,0 ,1);
     Output.TexCoord = Vert.TexCoord;
     Output.TexPos = Inst.TexPos;

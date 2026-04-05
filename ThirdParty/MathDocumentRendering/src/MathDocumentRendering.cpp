@@ -171,7 +171,7 @@ FImageBuffer* FMathDocumentRendering::Render()
 		UpdateCaret(State.GetCaretData());
 	}
 	SpriteRendering.Render();
-	return TextFromAtlasRendering.GetResultImage();
+	return SpriteRendering.GetResult();
 }
 
 bool FMathDocumentRendering::HasContent()

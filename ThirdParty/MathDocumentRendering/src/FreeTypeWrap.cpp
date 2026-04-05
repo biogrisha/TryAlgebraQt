@@ -1,5 +1,4 @@
 ﻿#include "FreeTypeWrap.h"
-#include "FreeTypeWrap.h"
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
