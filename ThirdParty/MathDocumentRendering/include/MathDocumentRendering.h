@@ -16,7 +16,7 @@ class FMathDocumentRendering
 {
 public:
 	void Init(FFreeTypeWrap* InFreeTypeWrap);
-	void SetDocumentExtent(const VkExtent2D& InExtent);
+	void SetDocumentExtent(const VkExtent3D& InExtent);
 	void UpdateText(const std::vector<FGlyphData>& InDocumentContent);
 	void UpdateRects(const std::vector<FRectInst>& InRects);
 	void UpdateCaret(const FCaretData& caretData);
@@ -31,7 +31,7 @@ private:
 	FTextFromAtlasRendering TextFromAtlasRendering;
 	FSpriteRendering SpriteRendering;
 
-	VkExtent2D Extent = { 0, 0 };
+	VkExtent3D Extent = { 0, 0, 1 };
 	std::unique_ptr<FRendering> Rendering;
 	FFreeTypeWrap* FreeTypeWrap = nullptr;
 

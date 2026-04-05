@@ -33,7 +33,7 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 	
 }
 
-void FMathDocumentRendering::SetDocumentExtent(const VkExtent2D& InExtent)
+void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& InExtent)
 {
 	RectRendering.SetExtent(InExtent);
 	AtlasRendering.SetExtent(InExtent);
@@ -145,7 +145,9 @@ FImageBuffer* FMathDocumentRendering::Render()
 	if (!HasContent())
 	{
 		auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+		VkHelpers::ImageTransition_ToTransferDst(TextFromAtlasRendering.GetResultImage(), CommandBuffer, vk::PipelineStageFlagBits::eFragmentShader);
 		VkHelpers::ClearImage(TextFromAtlasRendering.GetResultImage(), CommandBuffer);
+		VkHelpers::ImageTransition_ToShaderRead(TextFromAtlasRendering.GetResultImage(), CommandBuffer, vk::PipelineStageFlagBits::eTransfer);
 		VkHelpers::EndSingleTimeCommands(CommandBuffer);
 	}
 	else if (State.IsRectsUpdated())
@@ -169,7 +171,7 @@ FImageBuffer* FMathDocumentRendering::Render()
 		UpdateCaret(State.GetCaretData());
 	}
 	SpriteRendering.Render();
-	return SpriteRendering.GetResult();
+	return TextFromAtlasRendering.GetResultImage();
 }
 
 bool FMathDocumentRendering::HasContent()

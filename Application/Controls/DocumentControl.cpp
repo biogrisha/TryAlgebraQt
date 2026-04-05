@@ -21,7 +21,7 @@ DocumentControl::DocumentControl(QObject *parent)
 	auto filesControl = AppGlobal::application->getFilesControl();
 	filesControl->setMeDocStatePtr(&m_meDocState);
 	//connect to event when document selected
-	QObject::connect(filesControl, &FilesControl::onCurrentDocumentChanged, this, &DocumentControl::onCurrentDocumentChanged, Qt::DirectConnection);
+	connect(filesControl, &FilesControl::onCurrentDocumentChanged, this, &DocumentControl::onCurrentDocumentChanged, Qt::DirectConnection);
 }
 
 float DocumentControl::scrollHandleSize()

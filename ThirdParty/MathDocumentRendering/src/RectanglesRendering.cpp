@@ -42,9 +42,10 @@ void FRectRendering::Init(FRendering* InRendering)
 		UniformBuffer->SetData(sizeof(Extent), &Extent);
 	}
 	{
-		Output = MyRTTI::MakeTypedUnique<FImageBuffer>();
-		Output->SetExtent(Extent);
-		Output->AddUsageFlags(VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+		FImageBufferInfo image_info;
+		image_info.Extent = Extent;
+		image_info.UsageFlags |= vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc;
+		Output = MyRTTI::MakeTypedUnique<FImageBuffer>(image_info);
 		Output->Init();
 	}
 
@@ -61,7 +62,7 @@ void FRectRendering::InitPLine()
 	PLine = Rendering->AddPipeline(P_1, &RectLayout, AssetsPath + "/Shader/DrawRectangles.spv");
 }
 
-void FRectRendering::SetExtent(const VkExtent2D& InExtent)
+void FRectRendering::SetExtent(const VkExtent3D& InExtent)
 {
 	if (Output)
 	{

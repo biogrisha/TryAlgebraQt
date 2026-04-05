@@ -29,9 +29,10 @@ void FGlyphAtlasRendering::Init(FRendering* InRendering)
 	UniformBuffer->SetProperties({ VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT , false });
 	UniformBuffer->SetData(sizeof(Extent), &Extent);
 
-	Atlas = MyRTTI::MakeTypedUnique<FImageBuffer>();
-	Atlas->SetExtent(Extent);
-	Atlas->AddUsageFlags(VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+	FImageBufferInfo image_info;
+	image_info.Extent = Extent;
+	image_info.UsageFlags  |= vk::ImageUsageFlagBits::eTransferSrc;
+	Atlas = MyRTTI::MakeTypedUnique<FImageBuffer>(image_info);
 	Atlas->Init();
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet(
@@ -49,7 +50,7 @@ void FGlyphAtlasRendering::InitPLine()
 	PLine = Rendering->AddPipeline(P_1, &GlyphAtlasInputLayout, AssetsPath + "/Shader/DrawAtlas.spv");
 }
 
-void FGlyphAtlasRendering::SetExtent(const VkExtent2D& InExtent)
+void FGlyphAtlasRendering::SetExtent(const VkExtent3D& InExtent)
 {
 	if (Atlas)
 	{

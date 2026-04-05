@@ -54,7 +54,7 @@ void FTextFromAtlasRendering::InitPLine()
 	PLine = Rendering->AddPipeline(P_1, &TextFromAtlasLayout, AssetsPath + "/Shader/TextFromAtlas.spv");
 }
 
-void FTextFromAtlasRendering::SetExtent(const VkExtent2D& InExtent)
+void FTextFromAtlasRendering::SetExtent(const VkExtent3D& InExtent)
 {
 	if (UniformBuffer)
 	{

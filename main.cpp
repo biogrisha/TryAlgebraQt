@@ -5,15 +5,18 @@
 #include <QVulkanInstance>
 #include <Application/Application.h>
 #include <QDebug>
+#include <VulkanContext.h>
 
 int main(int argc, char* argv[])
 {
     //system("cmd /c \"cd /d D:\\Projects\\TryAlgebraQt\\TryAlgebraQt\\ThirdParty\\Shader && compile.bat\"");
 
+    //Initialize vulkan context
+    FVulkanStatic::InitContext();
+
     QGuiApplication app(argc, argv);
     QVulkanInstance inst;
-    // Enable validation layer, if supported. Messages go to qDebug by default.
-    inst.setLayers({ "VK_LAYER_KHRONOS_validation" });
+    inst.setVkInstance(static_cast<VkInstance>(*FVulkanStatic::Context->Instance));
 
     bool ok = inst.create();
     if (!ok) {

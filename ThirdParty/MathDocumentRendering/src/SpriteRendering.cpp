@@ -46,9 +46,10 @@ void FSpriteRendering::Init(FRendering* InRendering)
 		UniformBuffer->SetData(sizeof(Extent), &Extent);
 	}
 	{
-		Output = MyRTTI::MakeTypedUnique<FImageBuffer>();
-		Output->SetExtent(Extent);
-		Output->AddUsageFlags(VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+		FImageBufferInfo image_info;
+		image_info.Extent = Extent;
+		image_info.UsageFlags |= vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;
+		Output = MyRTTI::MakeTypedUnique<FImageBuffer>(image_info);
 		Output->Init();
 	}
 
@@ -66,7 +67,7 @@ void FSpriteRendering::InitPLine()
 	PLine = Rendering->AddPipeline(P_1, &SpriteLayout, AssetsPath + "/Shader/DrawSprites.spv");
 }
 
-void FSpriteRendering::SetExtent(const VkExtent2D& InExtent)
+void FSpriteRendering::SetExtent(const VkExtent3D& InExtent)
 {
 	Extent = InExtent;
 	if (UniformBuffer)
@@ -84,7 +85,11 @@ void FSpriteRendering::SetInput(FImageBuffer* InInput)
 void FSpriteRendering::Render()
 {
 	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
+	VkHelpers::ImageTransition_ToTransferSrc(Input, CommandBuffer, vk::PipelineStageFlagBits::eFragmentShader);
+	VkHelpers::ImageTransition_ToTransferDst(Output.get(), CommandBuffer, vk::PipelineStageFlagBits::eFragmentShader);
 	VkHelpers::CopyImageToImage(Input, Output.get(), CommandBuffer);
+	VkHelpers::ImageTransition_ToShaderRead(Input, CommandBuffer, vk::PipelineStageFlagBits::eTransfer);
+	VkHelpers::ImageTransition_ToShaderRead(Output.get(), CommandBuffer, vk::PipelineStageFlagBits::eTransfer);
 	VkHelpers::EndSingleTimeCommands(CommandBuffer);
 	FRunPipelineInfo Run;
 	Run.PipelineId = PLine;

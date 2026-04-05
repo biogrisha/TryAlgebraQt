@@ -32,7 +32,7 @@ class FSpriteRendering
 public:
 	void Init(FRendering* InRendering);
 	void InitPLine();
-	void SetExtent(const VkExtent2D& InExtent);
+	void SetExtent(const VkExtent3D& InExtent);
 	void SetInput(FImageBuffer* InInput);
 	void Render();
 	void SetInstances(const std::vector<FSpriteInstByName>& Sprites);
@@ -58,7 +58,7 @@ public:
 	const std::vector<uint16_t> RectIndices = {
 		0,3,2,2,1,0
 	};
-	VkExtent2D Extent = { 300,300 };
+	VkExtent3D Extent = { 300,300,1 };
 
 	FRendering* Rendering;
 };

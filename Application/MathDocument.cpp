@@ -88,16 +88,6 @@ private:
     QVulkanDeviceFunctions* m_devFuncs = nullptr;
     QVulkanFunctions* m_funcs = nullptr;
 
-    //Request to destroy vulkan context if Item destroyed
-    struct ContextDestroyer
-    {
-        ~ContextDestroyer()
-        {
-            FVulkanStatic::UnsubscribeFromContext();
-        }
-    } m_contextDestroyer;
-
-
     FMathDocumentRendering m_documentRendering;
     uint32_t m_graphicsFamily = 0;
     VkCommandPool m_commandPool = nullptr;
@@ -291,9 +281,6 @@ bool CustomTextureNodePrivate::initialize()
     m_dev = *static_cast<VkDevice*>(rif->getResource(m_window, QSGRendererInterface::DeviceResource));
     Q_ASSERT(m_physDev && m_dev);
 
-    //Initializing math renderer
-    FVulkanStatic::SubscribeToContext(inst->vkInstance(), m_physDev);
-
     m_documentRendering.Init(AppGlobal::application->getFreeTypeWrap());
 
     m_devFuncs = inst->deviceFunctions(m_dev);
@@ -336,7 +323,7 @@ void CustomTextureNodePrivate::sync()
         //if window resized - update size
         needsNew = true;
         m_size = newSize;
-        m_documentRendering.SetDocumentExtent({ uint32_t(m_size.width()), uint32_t(m_size.height()) });
+        m_documentRendering.SetDocumentExtent({ uint32_t(m_size.width()), uint32_t(m_size.height()), 1 });
         m_meDocState->Invalidate();
         emit onResized(newSize);
 

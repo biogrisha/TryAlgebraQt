@@ -45,7 +45,7 @@ class FGlyphAtlasRendering
 public:
 	void Init(FRendering* InRendering);
 	void InitPLine();
-	void SetExtent(const VkExtent2D& InExetent);
+	void SetExtent(const VkExtent3D& InExetent);
 	void SetInstances(const std::vector<FGlyphInstance>& InInstances);
 	void SetOutlineCurves(const std::vector<FOutlineCurvePoints>& InOutlineCurves);
 	void Render();
@@ -71,7 +71,7 @@ private:
 	const std::vector<uint16_t> RectIndices = {
 		0,3,2,2,1,0
 	};
-	VkExtent2D Extent = { 0, 0 };
+	VkExtent3D Extent = { 0, 0, 1 };
 
 	FRendering* Rendering = nullptr;
 };
