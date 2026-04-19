@@ -53,6 +53,7 @@ target_link_libraries(Application
     PUBLIC
     MathDocumentRendering
     TryAlgebraCore
+    TryAlgebraCore2
 )
 
 target_include_directories(Application BEFORE PRIVATE 

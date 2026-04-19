@@ -7,11 +7,11 @@
 #include <MathDocumentState.h>
 #include <FreeTypeWrap.h>
 #include <FunctionLibraries/FileHelpers.h>
-#include <Modules/CommonTypes/MulticastDelegate.h>
-#include <Modules/MathElementsV2/Me/MeDocument.h>
 
 #include <MathDocument.h>
 #include <Models/MathElementInfoModel.h>
+
+#include <MathEditor/include/MathDocument.h>
 
 class FTAMathDocumentInfo;
 
@@ -22,18 +22,9 @@ class DocumentControl  : public QObject
 {
 	Q_OBJECT
 	QML_ELEMENT
-	Q_PROPERTY(float scrollHandleSize READ scrollHandleSize WRITE setScrollHandleSize NOTIFY scrollHandleSizeChanged)
 public:
 	DocumentControl(QObject *parent);
 	DocumentControl() = default;
-
-	float scrollHandleSize();
-	float scrollHandlePos();
-	void setScrollHandleSize(float newSize);
-	void setScrollHandlePos(float newPos);
-signals:
-	void scrollHandleSizeChanged(float newSize);
-	void scrollHandlePosChanged(float newPos);
 
 public slots:
 
@@ -77,28 +68,16 @@ private:
 	//Forces rendering to clear items texture
 	void clearDocument();
 
-	void onLinesCountUpdated(MathElementV2::FTAMeDocument* doc);
-	
-	void onCurrentLineUpdated(MathElementV2::FTAMeDocument* doc);
-
 	//Math document used to render content
 	MathDocument* m_mathDocument = nullptr;
-	//Selected document info
-	std::weak_ptr<FTAMathDocumentInfo> m_docInfo;
 	//Model for math elements selector
 	MathElementInfoModel* m_meInfoModel = nullptr;
 	//Render state of math document
 	FMathDocumentState m_meDocState;
 	//Indicates that MathDocument Item is ready to render
 	bool m_isMathDocumentReady = false;
-
-	float m_scrollHandleSize = 0.5;
-	float m_scrollHandlePos = 0.f;
-	bool m_updateScrollFromHandle = true;
-	bool m_updateScrollFromDoc = true;
 	bool m_bLmbDown = false;
 
-	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onLinesCountUpdated;
-	FTAMulticastDelegate<MathElementV2::FTAMeDocument*>::HndlPtr m_onCurrentLineUpdated;
+	std::unique_ptr<TryAlgebraCore2::MathDocument> m_math_doc;
 };
 

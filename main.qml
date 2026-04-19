@@ -44,6 +44,7 @@ Item {
         {
             switch (reason) { 
                 case "openFile":
+                    //open file in menu control
                     menuControl.openDocument(fileDialog.selectedFile)
                     if(!documentLoader.source.href)
                     {

@@ -15,33 +15,33 @@ FilesControl::FilesControl(QObject* parent)
 
 void FilesControl::openDocument(const QUrl& url)
 {
-	//searching doc id by file path among opened docs
-	int docInd = AppGlobal::mainModule->FindDocumentInd(url.toLocalFile().toStdWString());
-	if (docInd != -1)
-	{
-		//found id
-		//selecting doc
-		selectDocument(docInd);
-		return;
-	}
-	//no doc found 
-	//creating compatibility data
-	std::weak_ptr<FTAMathDocumentInfo> docInfo;
-	auto compatibilityData = FTACompatibilityData::MakeTypedShared();
-	auto cursorGen = std::make_shared<CursorComponentGeneratorQt>();
-	cursorGen->m_meDocState = m_meDocState;
-	compatibilityData->CursorComponentGenerator = cursorGen;
-	auto meGen = std::make_shared<MathElementGeneratorQt>();
-	meGen->m_meDocState = m_meDocState;
-	meGen->initMeGenerators();
-	compatibilityData->MeGenerator = meGen;
+	////searching doc id by file path among opened docs
+	//int docInd = AppGlobal::mainModule->FindDocumentInd(url.toLocalFile().toStdWString());
+	//if (docInd != -1)
+	//{
+	//	//found id
+	//	//selecting doc
+	//	selectDocument(docInd);
+	//	return;
+	//}
+	////no doc found 
+	////creating compatibility data
+	//std::weak_ptr<FTAMathDocumentInfo> docInfo;
+	//auto compatibilityData = FTACompatibilityData::MakeTypedShared();
+	//auto cursorGen = std::make_shared<CursorComponentGeneratorQt>();
+	//cursorGen->m_meDocState = m_meDocState;
+	//compatibilityData->CursorComponentGenerator = cursorGen;
+	//auto meGen = std::make_shared<MathElementGeneratorQt>();
+	//meGen->m_meDocState = m_meDocState;
+	//meGen->initMeGenerators();
+	//compatibilityData->MeGenerator = meGen;
 
-	//Opening doc by file path
-	AppGlobal::mainModule->OpenDocument(url.toLocalFile().toStdWString(), compatibilityData);
-	//selecting document
-	docInd = AppGlobal::mainModule->GetAllDocuments().size() - 1;
-	emit onDocumentOpened(docInd);
-	selectDocument(docInd);
+	////Opening doc by file path
+	//AppGlobal::mainModule->OpenDocument(url.toLocalFile().toStdWString(), compatibilityData);
+	////selecting document
+	//docInd = AppGlobal::mainModule->GetAllDocuments().size() - 1;
+	//emit onDocumentOpened(docInd);
+	//selectDocument(docInd);
 }
 
 void FilesControl::setMeDocStatePtr(FMathDocumentState* meDocState)

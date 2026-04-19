@@ -1,5 +1,5 @@
 #pragma once
-#include <MeBase.h>
+#include <Me/include/MeBase.h>
 
 namespace TryAlgebraCore2
 {
@@ -7,6 +7,8 @@ namespace TryAlgebraCore2
 	{
 		TYPED_CLASS1(MeBase)
 	public:
-		MeCharacter();
+		MeCharacter(wchar_t ch);
+	private:
+		wchar_t m_ch = L'\0';
 	};
 }

@@ -11,7 +11,6 @@ Rectangle {
         { 
             m_docControl = docControl
             m_docControl.bindMathDocumentItem(mathDoc)
-			m_docControl.scrollHandlePosChanged.connect(scrollHandlePosChanged)
             filteredMeList.model = m_docControl.getMeInfoModel();
         }
 
@@ -121,7 +120,7 @@ Rectangle {
 				m_docControl.mousePosUpdated(event.x, event.y)
 			}
 			onWheel: (event) => {
-				m_docControl.scrollY(event.angleDelta.y > 0)
+				//m_docControl.scrollY(event.angleDelta.y > 0)
 			}
 		}
 	}
@@ -132,14 +131,9 @@ Rectangle {
         anchors.right: parent.right 
         anchors.top: parent.top 
         anchors.bottom: parent.bottom // Full range 
-        size: m_docControl ? m_docControl.scrollHandleSize : 0.1
+        //size: m_docControl ? m_docControl.scrollHandleSize : 0.1
 		onPositionChanged: {
-			m_docControl.moveScrollHandle(position)
+			//m_docControl.moveScrollHandle(position)
 		}
     }
-
-	function scrollHandlePosChanged(newPos: real)
-	{
-		vbar.position = newPos
-	}
 }
