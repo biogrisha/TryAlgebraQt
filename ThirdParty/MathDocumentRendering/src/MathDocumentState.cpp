@@ -44,10 +44,10 @@ void FMathDocumentState::AddGlyph(const FGlyphData& Glyph)
 	Text.push_back(Glyph);
 }
 
-void FMathDocumentState::addGlyphs(std::vector<FGlyphData>&& glyphs)
+void FMathDocumentState::appendGlyphs(const std::vector<FGlyphData>& glyphs)
 {
 	bTextUpdated = true;
-	Text = std::move(glyphs);
+	Text.insert(Text.end(), glyphs.begin(), glyphs.end());
 }
 
 void FMathDocumentState::SetCaret(const FCaretData& InCaretData)

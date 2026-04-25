@@ -104,8 +104,12 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 	default:
 		if (!text.isEmpty() && text != "\b")
 		{
+			m_meDocState.Clear(true, true);
 			m_math_doc->type(text.toStdWString());
-			m_meDocState.addGlyphs(m_math_doc->getRenderingData(AppGlobal::application->getFreeTypeWrap()));
+			VisualToolkit vt;
+			vt.ft = AppGlobal::application->getFreeTypeWrap();
+			vt.mdoc_state = &m_meDocState;
+			m_math_doc->draw(&vt);
 			updateElements(true, true, true);
 		}
 		break;

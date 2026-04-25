@@ -1,5 +1,6 @@
 #pragma once
 #include <Me/include/MeBase.h>
+#include <MathDocumentRenderingStructs.h>
 
 namespace TryAlgebraCore2
 {
@@ -7,8 +8,12 @@ namespace TryAlgebraCore2
 	{
 		TYPED_CLASS1(MeBase)
 	public:
-		MeCharacter(wchar_t ch);
+		MeCharacter(const std::wstring& str);
+		virtual void calculate(float size_scale, VisualToolkit* visual_toolkit) override;
+		virtual void draw(VisualToolkit* visual_toolkit) override;
 	private:
-		wchar_t m_ch = L'\0';
+		std::wstring m_str;
+		std::vector<FGlyphData> m_glyphs;
+		static const uint32_t font_def_height = 12;
 	};
 }

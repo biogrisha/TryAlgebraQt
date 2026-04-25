@@ -1,7 +1,6 @@
 #pragma once
 #include <MathEditor/include/TextBuffer.h>
-#include <MathDocumentRenderingStructs.h>
-#include <FreeTypeWrap.h>
+#include <MathDocumentState.h>
 
 namespace TryAlgebraCore2
 {
@@ -10,8 +9,8 @@ namespace TryAlgebraCore2
 	public:
 		MathDocument();
 		void type(const std::wstring& str);
-		std::vector<FGlyphData> getRenderingData(FFreeTypeWrap* ft);
-		TextBuffer text_buffer;
-		std::vector<int> caret_path;
+		void draw(VisualToolkit* visual_toolkit);
+		TextBuffer m_text_buffer;
+		int m_current_pos;
 	};
 }

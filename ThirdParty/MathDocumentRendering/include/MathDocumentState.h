@@ -1,6 +1,6 @@
 #pragma once
 #include "MathDocumentRenderingStructs.h"
-
+class FFreeTypeWrap;
 class FMathDocumentState
 {
 public:
@@ -8,7 +8,7 @@ public:
 	void Clear(bool bText, bool bRects);
 	void Invalidate();
 	void AddGlyph(const FGlyphData& Glyph);
-	void addGlyphs(std::vector<FGlyphData>&& glyphs);
+	void appendGlyphs(const std::vector<FGlyphData>& glyphs);
 	void SetCaret(const FCaretData& InCaretData);
 	void AddRect(const FRectInst& Rect);
 	void Update();
@@ -26,4 +26,10 @@ private:
 	bool bTextUpdated = false;
 	bool bCaretUpdated = false;
 	bool bRectsUpdated = false;
+};
+
+struct VisualToolkit
+{
+	FMathDocumentState* mdoc_state = nullptr;
+	FFreeTypeWrap* ft = nullptr;
 };

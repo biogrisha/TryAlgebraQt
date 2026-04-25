@@ -1,31 +1,36 @@
 #include <MathEditor/include/MathDocument.h>
+#include <Me/include/MeContainer.h>
+#include <Me/include/MeParser.h>
+#include <FreeTypeWrap.h>
 
-TryAlgebraCore2::MathDocument::MathDocument()
+namespace TryAlgebraCore2
 {
-	caret_path = { 1 };
-}
-
-void TryAlgebraCore2::MathDocument::type(const std::wstring& str)
-{
-	text_buffer.insert(str, caret_path);
-}
-
-std::vector<FGlyphData> TryAlgebraCore2::MathDocument::getRenderingData(FFreeTypeWrap* ft)
-{
-	std::vector<FGlyphData> glyph_data;
-	TextBufferIterator it(text_buffer);
-	glm::vec2 pos = {0,0};
-	it.setPos({ 1 });
-	while (!it.isEnd())
+	MathDocument::MathDocument()
+		: m_current_pos(0)
 	{
-		auto& ch = it.next();
-		FGlyphData g;
-		g.GlyphId.Glyph = ch.ch;
-		g.GlyphId.Height = 20;
-		g.Pos = pos;
-		glyph_data.push_back(g);
-		auto size = ft->GetGlyphSize(g.GlyphId);
-		pos.x += size.x;
+
 	}
-	return glyph_data;
+
+	void MathDocument::type(const std::wstring& str)
+	{
+		m_text_buffer.insert(str, m_current_pos);
+	}
+
+	void MathDocument::draw(VisualToolkit* visual_toolkit)
+	{
+		std::vector<FGlyphData> glyph_data;
+		MeContainer container;
+		MeParser parser(m_text_buffer, 0);
+		while (true)
+		{
+			auto new_line = parser.parseLine();
+			if (new_line.empty())
+			{
+				break;
+			}
+			container.addLine(std::move(new_line));
+			container.calcLine(visual_toolkit);
+		}
+		container.draw(visual_toolkit);
+	}
 }
