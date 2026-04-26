@@ -4,9 +4,11 @@ find_package(glm REQUIRED)
 add_library(TryAlgebraCore2 STATIC 
 	MathEditor/include/MathDocument.h
 	MathEditor/include/TextBuffer.h
+	MathEditor/include/DocumentNavigation.h
 
 	MathEditor/src/MathDocument.cpp
 	MathEditor/src/TextBuffer.cpp
+	MathEditor/src/DocumentNavigation.cpp
 
 
 	Me/include/MeBase.h

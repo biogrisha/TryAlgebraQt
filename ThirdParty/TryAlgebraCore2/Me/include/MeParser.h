@@ -20,7 +20,7 @@ namespace TryAlgebraCore2
 	{
 	public:
 		MeParser(const TextBuffer& text_buffer, int line_num);
-		std::vector<std::unique_ptr<MeBase>> parseLine();
+		bool parseLine(std::vector<std::unique_ptr<MeBase>>& line);
 	private:
 		TextBufferIterator m_it;
 	};

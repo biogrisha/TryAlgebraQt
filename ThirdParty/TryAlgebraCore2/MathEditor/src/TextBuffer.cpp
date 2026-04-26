@@ -17,6 +17,16 @@ namespace TryAlgebraCore2
         return m_buffer;
     }
 
+    bool TextBuffer::isEmpty()
+    {
+        return m_buffer.empty();
+    }
+
+    int TextBuffer::getSize()
+    {
+        return m_buffer.size();
+    }
+
     TextBufferIterator::TextBufferIterator(const TextBuffer& text_buffer, int line_num)
         : m_buffer(text_buffer.getBuff())
         , m_from_ind(0)

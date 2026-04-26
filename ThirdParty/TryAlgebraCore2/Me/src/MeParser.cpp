@@ -1,5 +1,6 @@
 #include <Me/include/MeParser.h>
 #include <Me/include/MeCharacter.h>
+
 namespace TryAlgebraCore2
 {
 	std::unique_ptr<MeBase> MeGenerator::generateMe(const std::wstring& me_str)
@@ -16,18 +17,26 @@ namespace TryAlgebraCore2
 	{
 
 	}
-	std::vector<std::unique_ptr<MeBase>> MeParser::parseLine()
+	bool MeParser::parseLine(std::vector<std::unique_ptr<MeBase>>& line)
 	{
-		std::vector<std::unique_ptr<MeBase>> line;
-		std::wstring str;
-		while (!m_it.isEnd() && !m_it.isNewLine())
+		if (m_it.isEnd())
 		{
+			return false;
+		}
+		std::wstring str;
+		while (!m_it.isEnd())
+		{
+			if (m_it.isNewLine())
+			{
+				m_it.next();
+				break;
+			}
 			str += m_it.next();
 		}
-		if(!str.empty())
+		if (!str.empty())
 		{
 			line.push_back(MyRTTI::MakeTypedUnique<MeCharacter>(str));
 		}
-		return line;
+		return true;
 	}
 }

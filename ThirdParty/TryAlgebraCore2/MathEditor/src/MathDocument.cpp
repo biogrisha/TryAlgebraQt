@@ -14,6 +14,26 @@ namespace TryAlgebraCore2
 	void MathDocument::type(const std::wstring& str)
 	{
 		m_text_buffer.insert(str, m_current_pos);
+		m_current_pos += str.size();
+	}
+
+	void MathDocument::delBackward()
+	{
+		if (m_current_pos == 0)
+		{
+			return;
+		}
+		m_text_buffer.del(m_current_pos - 1, m_current_pos);
+		--m_current_pos;
+	}
+
+	void MathDocument::delForward()
+	{
+		if (m_current_pos == m_text_buffer.getSize())
+		{
+			return;
+		}
+		m_text_buffer.del(m_current_pos, m_current_pos + 1);
 	}
 
 	void MathDocument::draw(VisualToolkit* visual_toolkit)
@@ -23,12 +43,13 @@ namespace TryAlgebraCore2
 		MeParser parser(m_text_buffer, 0);
 		while (true)
 		{
-			auto new_line = parser.parseLine();
-			if (new_line.empty())
+			std::vector<std::unique_ptr<MeBase>> line;
+			bool result = parser.parseLine(line);
+			if (!result)
 			{
 				break;
 			}
-			container.addLine(std::move(new_line));
+			container.addLine(std::move(line));
 			container.calcLine(visual_toolkit);
 		}
 		container.draw(visual_toolkit);

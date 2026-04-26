@@ -34,7 +34,10 @@ void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
 
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 {	
-	
+	VisualToolkit vt;
+	vt.ft = AppGlobal::application->getFreeTypeWrap();
+	vt.mdoc_state = &m_meDocState;
+
 	bool bShift = modifiers == Qt::Modifier::SHIFT;
 	bool bCtrl = modifiers == Qt::Modifier::CTRL;
 	switch (key) {
@@ -55,11 +58,15 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Backspace:
-		//doc->DeleteBackward();
+		m_meDocState.Clear(true, true);
+		m_math_doc->delBackward();
+		m_math_doc->draw(&vt);
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Delete:
-		//doc->DeleteForward();
+		m_meDocState.Clear(true, true);
+		m_math_doc->delForward();
+		m_math_doc->draw(&vt);
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Z:
@@ -106,9 +113,6 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 		{
 			m_meDocState.Clear(true, true);
 			m_math_doc->type(text.toStdWString());
-			VisualToolkit vt;
-			vt.ft = AppGlobal::application->getFreeTypeWrap();
-			vt.mdoc_state = &m_meDocState;
 			m_math_doc->draw(&vt);
 			updateElements(true, true, true);
 		}

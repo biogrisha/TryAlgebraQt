@@ -9,6 +9,10 @@ namespace TryAlgebraCore2
 	public:
 		MathDocument();
 		void type(const std::wstring& str);
+		void delBackward();
+		void delForward();
+		void stepLeft();
+		void stepRight();
 		void draw(VisualToolkit* visual_toolkit);
 		TextBuffer m_text_buffer;
 		int m_current_pos;

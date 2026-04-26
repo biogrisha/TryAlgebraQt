@@ -11,6 +11,8 @@ namespace TryAlgebraCore2
         void insert(const std::wstring& str, int pos);
         void del(int from, int to);
         const std::wstring& getBuff() const;
+        bool isEmpty();
+        int getSize();
     private:
         std::wstring m_buffer;
     };

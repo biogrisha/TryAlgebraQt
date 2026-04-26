@@ -186,5 +186,5 @@ glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
 
 uint32_t FFreeTypeWrap::GetHeightFromFontSize(float Points)
 {
-	return static_cast<int>(Points * (DpiY / 72.0f)) * 1.5;
+	return static_cast<uint32_t>(Points * (DpiY / 72.0f) * 1.5f);
 }
