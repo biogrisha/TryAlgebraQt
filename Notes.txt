@@ -1,28 +1,19 @@
-add line-> update size->update pos
-remove line->update size->update pos
-scroll up->update pos
-scroll down->update pos
-paste text here
+Open file from menu->
+create doc
+show doc on canvas
+add entry to tabs
 
+Close file in tabs->
+delete doc form array
+remove entry from tabs
+conditionally: remove or replace doc on canvas
 
-drag scroll->visible from updated
-resize->update scroll size->update scroll pos
+select doc menu, tabs->
+set curr doc index
+switch in canvas
 
-update scroll size, pos
+file module: create, select, close doc
 
-
-C - curr line
-F - delete from
-T - delete to
-
-
-C < F -> do nothing
-C > F -> C = lineNum(F)
-
-
-C - curr line 
-N - Curr el id
-T - Target el id
 
 
 

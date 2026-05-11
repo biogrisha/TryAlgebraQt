@@ -44,11 +44,6 @@ void FilesControl::openDocument(const QUrl& url)
 	//selectDocument(docInd);
 }
 
-void FilesControl::setMeDocStatePtr(FMathDocumentState* meDocState)
-{
-	m_meDocState = meDocState;
-}
-
 void FilesControl::selectDocument(qint32 ind)
 {
 	m_currentDocInd = ind;
@@ -57,26 +52,5 @@ void FilesControl::selectDocument(qint32 ind)
 
 void FilesControl::closeDocument(qint32 ind)
 {
-	qint32 docNum = AppGlobal::mainModule->GetAllDocuments().size();
-	//closing document
-	AppGlobal::mainModule->CloseDocument(ind);
-	emit onDocumentClosed(ind);
-	//updating current doc id
-	if (m_currentDocInd > ind)
-	{
-		m_currentDocInd--;
-		emit onCurrentDocumentChanged(m_currentDocInd);
-	}
-	else if(m_currentDocInd == ind)
-	{
-		if (docNum == 1)
-		{
-			m_currentDocInd = -1;
-		}
-		else
-		{
-			m_currentDocInd = qBound(0, m_currentDocInd, docNum - 2);
-		}
-		emit onCurrentDocumentChanged(m_currentDocInd);
-	}
+	
 }

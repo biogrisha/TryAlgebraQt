@@ -28,6 +28,8 @@ qt_add_qml_module(Application
         Models/MathElementInfoModel.cpp
         Models/DocumentTabModel.h
         Models/DocumentTabModel.cpp
+        Models/ApplicationModel.h
+        Models/ApplicationModel.cpp
         MathEditor/CursorComponentGenerator.h
         MathEditor/CursorComponentGenerator.cpp
         MathEditor/MathElementGenerator.h

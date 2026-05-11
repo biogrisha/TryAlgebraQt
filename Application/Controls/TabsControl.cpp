@@ -57,8 +57,7 @@ void TabsControl::onCurrentDocumentChanged(qint32 ind)
 
 void TabsControl::onDocumentOpened(qint32 ind)
 {
-	auto& docInfo = AppGlobal::mainModule->GetAllDocuments()[ind];
-	m_tabInfoModel->addDocumentTabInfo(DocumentTabInfo(QString::fromStdWString(docInfo->FileName), QString::fromStdWString(docInfo->FilePath)));
+
 }
 
 void TabsControl::onDocumentClosed(qint32 ind)

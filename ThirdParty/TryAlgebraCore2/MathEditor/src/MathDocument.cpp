@@ -11,6 +11,11 @@ namespace TryAlgebraCore2
 
 	}
 
+	void MathDocument::setText(const std::wstring& str)
+	{
+		m_text_buffer.insert(str, 0);
+	}
+
 	void MathDocument::type(const std::wstring& str)
 	{
 		m_text_buffer.insert(str, m_current_pos);
@@ -41,17 +46,6 @@ namespace TryAlgebraCore2
 		std::vector<FGlyphData> glyph_data;
 		MeContainer container;
 		MeParser parser(m_text_buffer, 0);
-		while (true)
-		{
-			std::vector<std::unique_ptr<MeBase>> line;
-			bool result = parser.parseLine(line);
-			if (!result)
-			{
-				break;
-			}
-			container.addLine(std::move(line));
-			container.calcLine(visual_toolkit);
-		}
-		container.draw(visual_toolkit);
+		parser.parse();
 	}
 }

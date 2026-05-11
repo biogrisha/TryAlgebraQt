@@ -10,7 +10,7 @@ class DocumentControl;
 class TabsControl;
 class FilesControl;
 class FFreeTypeWrap;
-
+class ApplicationModel;
 class Application  : public QObject
 {
 	Q_OBJECT
@@ -37,13 +37,15 @@ public slots:
 private:
 	void PrepareMeAtlas();
 
-	MenuControl* m_menuControl = nullptr;
-	DocumentControl* m_documentControl = nullptr;
-	TabsControl* m_tabsControl = nullptr;
-	FilesControl* m_filesControl = nullptr;
+	MenuControl* m_menu_control = nullptr;
+	DocumentControl* m_document_control = nullptr;
+	TabsControl* m_tabs_control = nullptr;
+	FilesControl* m_files_control = nullptr;
+
+	ApplicationModel* m_app_model = nullptr;
 
 	//try algebra core module
 	FTAMainModule m_mainModule;
 	//free type module
-	FFreeTypeWrap m_freeTypeWrap;
+	FFreeTypeWrap m_ft_wrap;
 };

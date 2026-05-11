@@ -95,32 +95,32 @@ private:
     FMathDocumentState* m_meDocState = nullptr;
 };
 
-MathDocument::MathDocument()
+MathDocumentCanvas::MathDocumentCanvas()
 {
     setFlag(ItemHasContents, true);
 }
 
-void MathDocument::setMeDocState(FMathDocumentState* meDocState)
+void MathDocumentCanvas::setMeDocState(FMathDocumentState* meDocState)
 {
     m_node->setMeDocState(meDocState);
 }
 
-bool MathDocument::isNodeCreated()
+bool MathDocumentCanvas::isNodeCreated()
 {
     return m_node != nullptr;
 }
 
-void MathDocument::invalidateSceneGraph() // called on the render thread when the scenegraph is invalidated
+void MathDocumentCanvas::invalidateSceneGraph() // called on the render thread when the scenegraph is invalidated
 {
     m_node = nullptr;
 }
 
-void MathDocument::releaseResources() // called on the gui thread if the item is removed from scene
+void MathDocumentCanvas::releaseResources() // called on the gui thread if the item is removed from scene
 {
     m_node = nullptr;
 }
 
-QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
+QSGNode* MathDocumentCanvas::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
 {
     CustomTextureNodePrivate* n = static_cast<CustomTextureNodePrivate*>(node);
 
@@ -130,7 +130,7 @@ QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
     if (!n) {
         m_node = new CustomTextureNodePrivate(this);
         n = m_node;
-        QObject::connect(m_node, &CustomTextureNodePrivate::onResized, this, &MathDocument::onResized);
+        QObject::connect(m_node, &CustomTextureNodePrivate::onResized, this, &MathDocumentCanvas::onResized);
         emit onNodeCreated();
     }
     m_node->sync();
@@ -144,7 +144,7 @@ QSGNode* MathDocument::updatePaintNode(QSGNode* node, UpdatePaintNodeData*)
     return n;
 }
 
-void MathDocument::geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry)
+void MathDocumentCanvas::geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry)
 {
     QQuickItem::geometryChange(newGeometry, oldGeometry);
 

@@ -27,6 +27,8 @@ namespace TryAlgebraCore2
 	{
 		TYPED_CLASS
 	public:
+		virtual void setMeta(const std::wstring& meta) {}
+		void addChild(std::unique_ptr<MeBase>&& child);
 		virtual void draw(VisualToolkit* visual_toolkit) {}
 		virtual void calculate(float size_scale, VisualToolkit* visual_toolkit) {}
 		virtual void step(StepDir dir, StepFrom step_from, std::vector<int>& path) {}

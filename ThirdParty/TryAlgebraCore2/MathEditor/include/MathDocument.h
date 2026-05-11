@@ -8,6 +8,7 @@ namespace TryAlgebraCore2
 	{
 	public:
 		MathDocument();
+		void setText(const std::wstring& str);
 		void type(const std::wstring& str);
 		void delBackward();
 		void delForward();

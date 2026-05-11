@@ -11,7 +11,6 @@ namespace TryAlgebraCore2
 	{
 	public:
 		std::unique_ptr<MeBase> generateMe(const std::wstring& me_str);
-		std::unique_ptr<MeBase> generateMeChar(const std::wstring& str);
 	private:
 		std::map<std::string, std::function<MeBase*>> m_generators_map;
 	};
@@ -20,8 +19,16 @@ namespace TryAlgebraCore2
 	{
 	public:
 		MeParser(const TextBuffer& text_buffer, int line_num);
-		bool parseLine(std::vector<std::unique_ptr<MeBase>>& line);
+		void parse();
+		void consumeMe();
+		void consumeMeta();
+		void startChildren();
 	private:
 		TextBufferIterator m_it;
+		std::wstring line_str;
+		MeBase* m_current = nullptr;
+		MeBase* m_parent = nullptr;
+		std::vector<std::unique_ptr<MeBase>> generated_me;
+		int depth = -1;
 	};
 }

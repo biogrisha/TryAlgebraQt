@@ -57,8 +57,18 @@ namespace TryAlgebraCore2
 
     const wchar_t& TextBufferIterator::next()
     {
-        const wchar_t& ch = m_buffer[m_from_ind] ;
+        const wchar_t& ch = m_buffer[m_from_ind];
         ++m_from_ind;
+        return ch;
+    }
+    void TextBufferIterator::back()
+    {
+        --m_from_ind;
+    }
+
+    const wchar_t& TextBufferIterator::current()
+    {
+        const wchar_t& ch = m_buffer[m_from_ind];
         return ch;
     }
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
-
+#include <optional>
 namespace TryAlgebraCore2
 {
 
@@ -24,6 +24,8 @@ namespace TryAlgebraCore2
         bool isEnd();
         bool isNewLine();
         const wchar_t& next();
+        void back();
+        const wchar_t& current();
     private:
         const std::wstring& m_buffer;
         int m_from_ind;

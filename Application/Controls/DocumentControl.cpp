@@ -9,6 +9,7 @@
 #include <FunctionLibraries/MathElementsHelpers.h>
 
 #include <Application.h>
+#include <ApplicationModel.h>
 #include <AppGlobal.h>
 #include <FilesControl.h>
 #include <MathEditor/CursorComponentGenerator.h>
@@ -19,24 +20,22 @@ DocumentControl::DocumentControl(QObject *parent)
 	: QObject(parent)
 {
 	m_math_doc = std::make_unique<TryAlgebraCore2::MathDocument>();
-	auto filesControl = AppGlobal::application->getFilesControl();
-	filesControl->setMeDocStatePtr(&m_meDocState);
-	//connect to event when document selected
-	connect(filesControl, &FilesControl::onCurrentDocumentChanged, this, &DocumentControl::onCurrentDocumentChanged, Qt::DirectConnection);
+	QObject::connect(AppGlobal::app_mod, &ApplicationModel::onCurrentDocChanged, this, &DocumentControl::onCurrentDocChanged);
+	
 }
 
-void DocumentControl::bindMathDocumentItem(MathDocument* mathDocument)
+void DocumentControl::bindMathDocumentItem(MathDocumentCanvas* mathDocument)
 {
 	//cache math document and wait until it's ready
-	m_mathDocument = mathDocument;
-	QObject::connect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady, Qt::ConnectionType::DirectConnection);
+	m_doc_canvas = mathDocument;
+	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::mathDocumentReady, Qt::ConnectionType::DirectConnection);
 }
 
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 {	
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_meDocState;
+	vt.mdoc_state = &m_visual_state;
 
 	bool bShift = modifiers == Qt::Modifier::SHIFT;
 	bool bCtrl = modifiers == Qt::Modifier::CTRL;
@@ -58,13 +57,13 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Backspace:
-		m_meDocState.Clear(true, true);
+		m_visual_state.Clear(true, true);
 		m_math_doc->delBackward();
 		m_math_doc->draw(&vt);
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Delete:
-		m_meDocState.Clear(true, true);
+		m_visual_state.Clear(true, true);
 		m_math_doc->delForward();
 		m_math_doc->draw(&vt);
 		updateElements(true, true, true);
@@ -111,7 +110,7 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 	default:
 		if (!text.isEmpty() && text != "\b")
 		{
-			m_meDocState.Clear(true, true);
+			m_visual_state.Clear(true, true);
 			m_math_doc->type(text.toStdWString());
 			m_math_doc->draw(&vt);
 			updateElements(true, true, true);
@@ -123,11 +122,15 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 void DocumentControl::mathDocumentReady()
 {
 	//caching doc state ptr in MathDocument
-	m_mathDocument->setMeDocState(&m_meDocState);
+	m_doc_canvas->setMeDocState(&m_visual_state);
 	//disconnecting from "renderer ready"
-	QObject::disconnect(m_mathDocument, &MathDocument::onNodeCreated, this, &DocumentControl::mathDocumentReady);
-	QObject::connect(m_mathDocument, &MathDocument::onResized, this, &DocumentControl::onResized);
-	m_isMathDocumentReady = true;
+	QObject::disconnect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::mathDocumentReady);
+	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
+	m_is_canvas_ready = true;
+	VisualToolkit vt;
+	vt.ft = AppGlobal::application->getFreeTypeWrap();
+	vt.mdoc_state = &m_visual_state;
+	m_math_doc->draw(&vt);
 }
 
 MathElementInfoModel* DocumentControl::getMeInfoModel()
@@ -152,9 +155,9 @@ void DocumentControl::addMeByName(const QString& meName)
 	
 }
 
-void DocumentControl::onCurrentDocumentChanged(qint32 ind)
+void DocumentControl::onCurrentDocChanged()
 {
-	
+	qDebug() << "test";
 }
 
 void DocumentControl::onResized(const QSize& newSize)
@@ -199,16 +202,16 @@ void DocumentControl::mousePosUpdated(float x, float y)
 
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)
 {
-	m_mathDocument->update();
+	m_doc_canvas->update();
 }
 
 void DocumentControl::clearDocument()
 {
 	//clearing render data
-	m_meDocState.Clear(true, true);
+	m_visual_state.Clear(true, true);
 	//move caret outside visible area
-	m_meDocState.SetCaret({ {-100, -100}, {1,1} });
-	m_mathDocument->update();
+	m_visual_state.SetCaret({ {-100, -100}, {1,1} });
+	m_doc_canvas->update();
 }
 
 

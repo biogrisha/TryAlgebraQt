@@ -1,5 +1,4 @@
 #include "Application.h"
-#include "Application.h"
 #include <QQuickWindow>
 #include <QVulkanInstance>
 
@@ -14,12 +13,13 @@
 #include <Controls/DocumentControl.h>
 #include <Controls/TabsControl.h>
 #include <Controls/FilesControl.h>
+#include <Models/ApplicationModel.h>
 #include <AppGlobal.h>
 
 Application::~Application()
 {
-	AppGlobal::mainModule = nullptr;
 	AppGlobal::application = nullptr;
+	AppGlobal::app_mod = nullptr;
 }
 
 Application::Application(QObject *parent)
@@ -29,13 +29,17 @@ Application::Application(QObject *parent)
 	// 
 	//caching global variables
 	AppGlobal::application = this;
-	AppGlobal::mainModule = &m_mainModule;
+
+
+	//creating model
+	m_app_model = new ApplicationModel(this);
+	AppGlobal::app_mod = m_app_model;
 
 	//creating controls
-	m_filesControl = new FilesControl(this);
-	m_menuControl = new MenuControl(this);
-	m_tabsControl = new TabsControl(this);
-	m_documentControl = new DocumentControl(this);
+	m_files_control = new FilesControl(this);
+	m_menu_control = new MenuControl(this);
+	m_tabs_control = new TabsControl(this);
+	m_document_control = new DocumentControl(this);
 	PrepareMeAtlas();
 	//caching dpi
 	QScreen* screen = QGuiApplication::primaryScreen(); 
@@ -43,12 +47,12 @@ Application::Application(QObject *parent)
 	qreal logicalDpiY = screen->logicalDotsPerInchY();
 
 	//initializing freetype
-	m_freeTypeWrap.Init(logicalDpiX, logicalDpiY);
+	m_ft_wrap.Init(logicalDpiX, logicalDpiY);
 }
 
 DocumentControl* Application::getDocumentControl()
 {
-	return m_documentControl;
+	return m_document_control;
 }
 
 void Application::PrepareMeAtlas()
@@ -63,21 +67,21 @@ void Application::PrepareMeAtlas()
 
 FFreeTypeWrap* Application::getFreeTypeWrap()
 {
-	return &m_freeTypeWrap;
+	return &m_ft_wrap;
 }
 
 FilesControl* Application::getFilesControl()
 {
-	return m_filesControl;
+	return m_files_control;
 }
 
 TabsControl* Application::getTabs()
 {
-	return m_tabsControl;
+	return m_tabs_control;
 }
 
 MenuControl* Application::getMenu()
 {
-	return m_menuControl;
+	return m_menu_control;
 }
 

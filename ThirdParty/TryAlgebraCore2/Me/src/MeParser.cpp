@@ -1,5 +1,7 @@
 #include <Me/include/MeParser.h>
 #include <Me/include/MeCharacter.h>
+#include <Me/include/MeContainer.h>
+#include <Me/include/MeNewLine.h>
 
 namespace TryAlgebraCore2
 {
@@ -7,36 +9,83 @@ namespace TryAlgebraCore2
 	{
 		return std::unique_ptr<MeBase>();
 	}
-	std::unique_ptr<MeBase> MeGenerator::generateMeChar(const std::wstring& str)
-	{
-		std::unique_ptr<MeCharacter> me = std::make_unique<MeCharacter>(str);
-		return me;
-	}
 	MeParser::MeParser(const TextBuffer& text_buffer, int line_num)
 		:m_it(text_buffer, line_num)
 	{
 
 	}
-	bool MeParser::parseLine(std::vector<std::unique_ptr<MeBase>>& line)
+
+	void MeParser::parse()
 	{
+		depth++;
 		if (m_it.isEnd())
 		{
-			return false;
+			return;
 		}
-		std::wstring str;
-		while (!m_it.isEnd())
+		while (true)
 		{
-			if (m_it.isNewLine())
+			if (depth == 0 && (m_it.isEnd() || m_it.isNewLine()))
 			{
-				m_it.next();
-				break;
+				return;
 			}
-			str += m_it.next();
+			wchar_t ch = m_it.next();
+			if (ch == '\\')
+			{
+				consumeMe();
+			}
+			else if(ch == L'\n')
+			{
+				m_parent->addChild(MyRTTI::MakeTypedUnique<MeNewLine>());
+			}
+			else
+			{
+				m_parent->addChild(MyRTTI::MakeTypedUnique<MeCharacter>(ch));
+			}
 		}
-		if (!str.empty())
-		{
-			line.push_back(MyRTTI::MakeTypedUnique<MeCharacter>(str));
-		}
-		return true;
+		depth--;
 	}
+
+	void MeParser::consumeMe()
+	{
+		std::wstring str;
+		while (true)
+		{
+			wchar_t ch = m_it.next();
+			if (ch == L'\\')
+			{
+				consumeMeta();
+			}
+		}
+	}
+
+	void MeParser::consumeMeta()
+	{
+		std::wstring str;
+		while (true)
+		{
+			wchar_t ch = m_it.next();
+			if (ch == L'{')
+			{
+				m_current->setMeta(str);
+				startChildren();
+				return;
+			}
+			str += ch;
+		}
+	}
+
+	void MeParser::startChildren()
+	{
+		MeBase* parent = m_parent;
+		MeBase* current = m_current;
+		while(m_it.current() != '\}')
+		{
+			auto cont = MyRTTI::MakeTypedUnique<MeContainer>();
+			m_parent = cont.get();
+			current->addChild(std::move(cont));
+			parse();
+		}
+		m_parent = parent;
+	}
+
 }

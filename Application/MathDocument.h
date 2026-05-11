@@ -5,13 +5,13 @@
 
 class CustomTextureNodePrivate;
 
-class MathDocument : public QQuickItem
+class MathDocumentCanvas : public QQuickItem
 {
     Q_OBJECT
     QML_ELEMENT
 
 public:
-    MathDocument();
+    MathDocumentCanvas();
     
     //Set new state to update rendering
     void setMeDocState(FMathDocumentState* meDocState);

@@ -29,7 +29,7 @@ public:
 public slots:
 
 	//Sets MathDocument Item being used for layout rendering
-	void bindMathDocumentItem(MathDocument* mathDocument);
+	void bindMathDocumentItem(MathDocumentCanvas* mathDocument);
 
 	//Handles key input
 	void keyInput(int key, const QString& text, int modifiers);
@@ -45,7 +45,7 @@ public slots:
 	void addMeByName(const QString& meName);
 
 	//Called when new math document is selected
-	void onCurrentDocumentChanged(qint32 ind);
+	void onCurrentDocChanged();
 
 	//Handles item size update
 	void onResized(const QSize& newSize);
@@ -69,13 +69,13 @@ private:
 	void clearDocument();
 
 	//Math document used to render content
-	MathDocument* m_mathDocument = nullptr;
+	MathDocumentCanvas* m_doc_canvas = nullptr;
 	//Model for math elements selector
 	MathElementInfoModel* m_meInfoModel = nullptr;
 	//Render state of math document
-	FMathDocumentState m_meDocState;
+	FMathDocumentState m_visual_state;
 	//Indicates that MathDocument Item is ready to render
-	bool m_isMathDocumentReady = false;
+	bool m_is_canvas_ready = false;
 	bool m_bLmbDown = false;
 
 	std::unique_ptr<TryAlgebraCore2::MathDocument> m_math_doc;

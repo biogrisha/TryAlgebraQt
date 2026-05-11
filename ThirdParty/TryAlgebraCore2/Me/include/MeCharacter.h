@@ -8,13 +8,13 @@ namespace TryAlgebraCore2
 	{
 		TYPED_CLASS1(MeBase)
 	public:
-		MeCharacter(const std::wstring& str);
+		MeCharacter(wchar_t ch);
 		virtual void calculate(float size_scale, VisualToolkit* visual_toolkit) override;
 		virtual void draw(VisualToolkit* visual_toolkit) override;
 	public:
 		static const uint32_t font_def_height = 16;
 	private:
-		std::wstring m_str;
-		std::vector<FGlyphData> m_glyphs;
+		wchar_t m_ch;
+		FGlyphData m_glyph;
 	};
 }

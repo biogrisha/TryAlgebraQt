@@ -94,7 +94,7 @@ Rectangle {
 		}
 	}
 
-	MathDocument {
+	MathDocumentCanvas {
 		id:mathDoc
 		focus: true
 		anchors.left: mathElementsList.right
