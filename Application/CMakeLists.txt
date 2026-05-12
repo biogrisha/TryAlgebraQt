@@ -14,8 +14,8 @@ qt_add_qml_module(Application
         AppGlobal.h
         Application.h
         Application.cpp
-        MathDocument.h
-        MathDocument.cpp
+        MathDocumentCanvas.h
+        MathDocumentCanvas.cpp
         Controls/MenuControl.h
         Controls/MenuControl.cpp
         Controls/DocumentControl.h

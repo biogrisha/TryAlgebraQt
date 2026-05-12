@@ -8,7 +8,7 @@
 #include <FreeTypeWrap.h>
 #include <FunctionLibraries/FileHelpers.h>
 
-#include <MathDocument.h>
+#include <MathDocumentCanvas.h>
 #include <Models/MathElementInfoModel.h>
 
 #include <MathEditor/include/MathDocument.h>
@@ -35,7 +35,7 @@ public slots:
 	void keyInput(int key, const QString& text, int modifiers);
 
 	//Handles signal when math document is ready to render
-	void mathDocumentReady();
+	void canvasReady();
 
 	//Returns me info model
 	//Note that the model is owned by DocumentControl
@@ -48,7 +48,7 @@ public slots:
 	void onCurrentDocChanged();
 
 	//Handles item size update
-	void onResized(const QSize& newSize);
+	void onResized(const QSize& new_size);
 	
 	float getScrollHandleSize();
 
@@ -78,6 +78,6 @@ private:
 	bool m_is_canvas_ready = false;
 	bool m_bLmbDown = false;
 
-	std::unique_ptr<TryAlgebraCore2::MathDocument> m_math_doc;
+	TryAlgebraCore2::MathDocument* m_current_doc;
 };
 

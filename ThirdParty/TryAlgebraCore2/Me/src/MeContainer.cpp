@@ -1,47 +1,38 @@
 #include <Me/include/MeContainer.h>
 #include <FreeTypeWrap.h>
 #include <Me/include/MeCharacter.h>
-
+#include <Me/include/MeGlobals.h>
 namespace TryAlgebraCore2
 {
-	void MeContainer::addLine(std::vector<std::unique_ptr<MeBase>>&& line)
+	void MeContainer::calcLine(VisualToolkit* visual_toolkit, float size_scale)
 	{
-		m_lines.push_back(std::move(line));
-	}
-	bool MeContainer::calcLine(VisualToolkit* visual_toolkit)
-	{
-		//handle empty line
-		if (m_lines.back().empty())
-		{
-			next_line_y += visual_toolkit->ft->GetHeightFromFontSize(MeCharacter::font_def_height * 1);
-			return true;
-		}
-
-		float y_pos = 0;
-		float max_y = 0;
 		float max_bearing = 0;
-		for (auto& me : m_lines.back())
+		float x = 0;
+		for (int i = end_line_i; i < m_children.size(); ++i)
 		{
-			me->calculate(1, visual_toolkit);
-			me->setPosY(y_pos - me->getBearingY());
-			max_y = std::max(me->getSizeY() - me->getBearingY(), max_y);
-			max_bearing = std::max(me->getBearingY(), max_bearing);
+			auto& ch = m_children[i];
+			ch->calculate(size_scale, visual_toolkit);
+			max_bearing = std::max(max_bearing, ch->getBearingY());
+			ch->setPosY(-ch->getBearingY());
+			ch->setPosX(x);
+			x += ch->getSizeX();
 		}
-		for (auto& me : m_lines.back())
+		float max_y_offset = 0;
+		for (int i = end_line_i; i < m_children.size(); ++i)
 		{
-			me->setPosY(me->getPosY() + max_bearing + next_line_y);
+			auto& ch = m_children[i];
+			ch->setPosY(next_line_y + max_bearing);
+			max_y_offset = std::max(max_y_offset, ch->getPosY() + ch->getSizeY());
 		}
-		next_line_y += max_y + max_bearing;
-		return true;
+		next_line_y = max_y_offset;
+		m_size.x = std::max(x, m_size.x);
+		m_size.y = next_line_y;
 	}
 	void MeContainer::draw(VisualToolkit* visual_toolkit)
 	{
-		for (auto& line : m_lines)
+		for (auto& ch : m_children)
 		{
-			for (auto& me : line)
-			{
-				me->draw(visual_toolkit);
-			}
+			ch->draw(visual_toolkit);
 		}
 	}
 	void MeContainer::step(StepDir dir, StepFrom step_from, std::vector<int>& path)

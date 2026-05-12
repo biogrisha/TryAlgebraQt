@@ -12,6 +12,7 @@ public:
 	ApplicationModel(QObject* parent = nullptr);
 	void addMathDoc(const std::wstring& file_path, std::unique_ptr<TryAlgebraCore2::MathDocument>&& math_doc);
 	bool isDocOpened(const std::wstring& file_path);
+	TryAlgebraCore2::MathDocument* getCurrentDoc();
 signals:
 	void onNewDoc();
 	void onCurrentDocChanged();

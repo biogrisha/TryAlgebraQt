@@ -19,118 +19,112 @@
 DocumentControl::DocumentControl(QObject *parent)
 	: QObject(parent)
 {
-	m_math_doc = std::make_unique<TryAlgebraCore2::MathDocument>();
 	QObject::connect(AppGlobal::app_mod, &ApplicationModel::onCurrentDocChanged, this, &DocumentControl::onCurrentDocChanged);
-	
 }
 
 void DocumentControl::bindMathDocumentItem(MathDocumentCanvas* mathDocument)
 {
 	//cache math document and wait until it's ready
 	m_doc_canvas = mathDocument;
-	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::mathDocumentReady, Qt::ConnectionType::DirectConnection);
+	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady, Qt::ConnectionType::DirectConnection);
 }
 
 void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 {	
-	VisualToolkit vt;
-	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_visual_state;
+	//VisualToolkit vt;
+	//vt.ft = AppGlobal::application->getFreeTypeWrap();
+	//vt.mdoc_state = &m_visual_state;
 
-	bool bShift = modifiers == Qt::Modifier::SHIFT;
-	bool bCtrl = modifiers == Qt::Modifier::CTRL;
-	switch (key) {
-	case Qt::Key_Left:
-		//doc->StepX(-1, bShift);
-		updateElements(true, false, true);
-		break;
-	case Qt::Key_Right:
-		//doc->StepX(1, bShift);
-		updateElements(true, false, true);
-		break;
-	case Qt::Key_Up:
-		//doc->StepY(-1, bShift);
-		updateElements(true, false, true);
-		break;
-	case Qt::Key_Down:
-		//doc->StepY(1, bShift);
-		updateElements(true, false, true);
-		break;
-	case Qt::Key_Backspace:
-		m_visual_state.Clear(true, true);
-		m_math_doc->delBackward();
-		m_math_doc->draw(&vt);
-		updateElements(true, true, true);
-		break;
-	case Qt::Key_Delete:
-		m_visual_state.Clear(true, true);
-		m_math_doc->delForward();
-		m_math_doc->draw(&vt);
-		updateElements(true, true, true);
-		break;
-	case Qt::Key_Z:
-		if (bCtrl)
-		{
-			//doc->Undo();
-			updateElements(true, true, true);
-			break;
-		}
-		[[fallthrough]];
-	case Qt::Key_Y:
-		if (bCtrl)
-		{
-			//doc->Redo();
-			updateElements(true, true, true);
-			break;
-		}
-		[[fallthrough]];
-	case Qt::Key_C:
-		if (bCtrl)
-		{
-			//doc->CopySelected();
-			break;
-		}
-		[[fallthrough]];
-	case Qt::Key_X:
-		if (bCtrl)
-		{
-			//doc->CutSelected();
-			updateElements(true, true, true);
-			break;
-		}
-		[[fallthrough]];
-	case Qt::Key_V:
-		if (bCtrl)
-		{
-			//doc->Paste();
-			updateElements(true, true, true);
-			break;
-		}
-		[[fallthrough]];
-	default:
-		if (!text.isEmpty() && text != "\b")
-		{
-			m_visual_state.Clear(true, true);
-			m_math_doc->type(text.toStdWString());
-			m_math_doc->draw(&vt);
-			updateElements(true, true, true);
-		}
-		break;
-	}
+	//bool bShift = modifiers == Qt::Modifier::SHIFT;
+	//bool bCtrl = modifiers == Qt::Modifier::CTRL;
+	//switch (key) {
+	//case Qt::Key_Left:
+	//	//doc->StepX(-1, bShift);
+	//	updateElements(true, false, true);
+	//	break;
+	//case Qt::Key_Right:
+	//	//doc->StepX(1, bShift);
+	//	updateElements(true, false, true);
+	//	break;
+	//case Qt::Key_Up:
+	//	//doc->StepY(-1, bShift);
+	//	updateElements(true, false, true);
+	//	break;
+	//case Qt::Key_Down:
+	//	//doc->StepY(1, bShift);
+	//	updateElements(true, false, true);
+	//	break;
+	//case Qt::Key_Backspace:
+	//	m_visual_state.Clear(true, true);
+	//	m_math_doc->delBackward();
+	//	m_math_doc->draw(&vt);
+	//	updateElements(true, true, true);
+	//	break;
+	//case Qt::Key_Delete:
+	//	m_visual_state.Clear(true, true);
+	//	m_math_doc->delForward();
+	//	m_math_doc->draw(&vt);
+	//	updateElements(true, true, true);
+	//	break;
+	//case Qt::Key_Z:
+	//	if (bCtrl)
+	//	{
+	//		//doc->Undo();
+	//		updateElements(true, true, true);
+	//		break;
+	//	}
+	//	[[fallthrough]];
+	//case Qt::Key_Y:
+	//	if (bCtrl)
+	//	{
+	//		//doc->Redo();
+	//		updateElements(true, true, true);
+	//		break;
+	//	}
+	//	[[fallthrough]];
+	//case Qt::Key_C:
+	//	if (bCtrl)
+	//	{
+	//		//doc->CopySelected();
+	//		break;
+	//	}
+	//	[[fallthrough]];
+	//case Qt::Key_X:
+	//	if (bCtrl)
+	//	{
+	//		//doc->CutSelected();
+	//		updateElements(true, true, true);
+	//		break;
+	//	}
+	//	[[fallthrough]];
+	//case Qt::Key_V:
+	//	if (bCtrl)
+	//	{
+	//		//doc->Paste();
+	//		updateElements(true, true, true);
+	//		break;
+	//	}
+	//	[[fallthrough]];
+	//default:
+	//	if (!text.isEmpty() && text != "\b")
+	//	{
+	//		m_visual_state.Clear(true, true);
+	//		m_math_doc->type(text.toStdWString());
+	//		m_math_doc->draw(&vt);
+	//		updateElements(true, true, true);
+	//	}
+	//	break;
+	//}
 }
 
-void DocumentControl::mathDocumentReady()
+void DocumentControl::canvasReady()
 {
 	//caching doc state ptr in MathDocument
 	m_doc_canvas->setMeDocState(&m_visual_state);
 	//disconnecting from "renderer ready"
-	QObject::disconnect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::mathDocumentReady);
+	QObject::disconnect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady);
 	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
 	m_is_canvas_ready = true;
-	VisualToolkit vt;
-	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_visual_state;
-	m_math_doc->draw(&vt);
 }
 
 MathElementInfoModel* DocumentControl::getMeInfoModel()
@@ -157,14 +151,23 @@ void DocumentControl::addMeByName(const QString& meName)
 
 void DocumentControl::onCurrentDocChanged()
 {
-	qDebug() << "test";
+	m_current_doc = AppGlobal::app_mod->getCurrentDoc();
+	if (m_is_canvas_ready)
+	{
+		VisualToolkit vt;
+		vt.ft = AppGlobal::application->getFreeTypeWrap();
+		vt.mdoc_state = &m_visual_state;
+		m_current_doc->draw(&vt);
+	}
 }
 
-void DocumentControl::onResized(const QSize& newSize)
+void DocumentControl::onResized(const QSize& new_size)
 {
-	//m_docInfo.lock()->MathDocument->SetHeight(newSize.height());
-	//rendering current document content
-	//updateElements(true, true, true);
+	VisualToolkit vt;
+	vt.ft = AppGlobal::application->getFreeTypeWrap();
+	vt.mdoc_state = &m_visual_state;
+	m_current_doc->setDocHeight(m_doc_canvas->getSize().height());
+	m_current_doc->draw(&vt);
 }
 
 float DocumentControl::getScrollHandleSize()

@@ -22,7 +22,6 @@ namespace TryAlgebraCore2
     public:
         TextBufferIterator(const TextBuffer& text_buffer, int line_num);
         bool isEnd();
-        bool isNewLine();
         const wchar_t& next();
         void back();
         const wchar_t& current();

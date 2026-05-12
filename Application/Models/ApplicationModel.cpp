@@ -21,3 +21,9 @@ bool ApplicationModel::isDocOpened(const std::wstring& file_path)
 	return m_documents.contains(file_path);
 }
 
+TryAlgebraCore2::MathDocument* ApplicationModel::getCurrentDoc()
+{
+	auto found_doc = m_documents.find(m_curr_doc);
+	return found_doc != m_documents.end() ? found_doc->second.get() : nullptr;
+}
+

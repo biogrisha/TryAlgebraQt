@@ -15,34 +15,43 @@ namespace TryAlgebraCore2
 
 	}
 
-	void MeParser::parse()
+	bool MeParser::parseLine(MeContainer* container)
 	{
-		depth++;
+		m_parent = container;
 		if (m_it.isEnd())
 		{
-			return;
+			return false;
 		}
+		parse(true);
+		return true;
+	}
+
+	void MeParser::parse(bool parse_one_line)
+	{
 		while (true)
 		{
-			if (depth == 0 && (m_it.isEnd() || m_it.isNewLine()))
+			if (m_it.isEnd())
 			{
 				return;
 			}
 			wchar_t ch = m_it.next();
-			if (ch == '\\')
-			{
-				consumeMe();
-			}
-			else if(ch == L'\n')
+			if (ch == L'\n')
 			{
 				m_parent->addChild(MyRTTI::MakeTypedUnique<MeNewLine>());
+				if (parse_one_line)
+				{
+					return;
+				}
+			}
+			else if (ch == '\\')
+			{
+				consumeMe();
 			}
 			else
 			{
 				m_parent->addChild(MyRTTI::MakeTypedUnique<MeCharacter>(ch));
 			}
 		}
-		depth--;
 	}
 
 	void MeParser::consumeMe()
@@ -83,7 +92,7 @@ namespace TryAlgebraCore2
 			auto cont = MyRTTI::MakeTypedUnique<MeContainer>();
 			m_parent = cont.get();
 			current->addChild(std::move(cont));
-			parse();
+			parse(false);
 		}
 		m_parent = parent;
 	}

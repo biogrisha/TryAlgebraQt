@@ -43,9 +43,16 @@ namespace TryAlgebraCore2
 
 	void MathDocument::draw(VisualToolkit* visual_toolkit)
 	{
-		std::vector<FGlyphData> glyph_data;
-		MeContainer container;
+		m_container = MyRTTI::MakeTypedUnique<MeContainer>();
 		MeParser parser(m_text_buffer, 0);
-		parser.parse();
+		while (parser.parseLine(m_container.get()))
+		{
+			m_container->calcLine(visual_toolkit, 1);
+			if (m_container->getSizeY() > m_doc_height)
+			{
+				break;
+			}
+		}
+		m_container->draw(visual_toolkit);
 	}
 }

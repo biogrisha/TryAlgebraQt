@@ -1,7 +1,7 @@
 // Copyright (C) 2019 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
-#include <MathDocument.h>
+#include <MathDocumentCanvas.h>
 
 #include <QtGui/QScreen>
 #include <QtQuick/QQuickWindow>
@@ -36,6 +36,8 @@ public:
 
     //Cache doc state ptr in node
     void setMeDocState(FMathDocumentState* meDocState);
+
+    QSize getSize() { return m_size; }
 signals:
     void onResized(const QSize& newSize);
 private slots:
@@ -108,6 +110,11 @@ void MathDocumentCanvas::setMeDocState(FMathDocumentState* meDocState)
 bool MathDocumentCanvas::isNodeCreated()
 {
     return m_node != nullptr;
+}
+
+QSize MathDocumentCanvas::getSize()
+{
+    return m_node->getSize();
 }
 
 void MathDocumentCanvas::invalidateSceneGraph() // called on the render thread when the scenegraph is invalidated
@@ -549,4 +556,4 @@ void CustomTextureNodePrivate::copyBufferToImage(VkBuffer buffer, VkImage image,
     EndSingleTimeCommands(CommandBuffer);
 }
 
-#include "MathDocument.moc"
+#include "MathDocumentCanvas.moc"

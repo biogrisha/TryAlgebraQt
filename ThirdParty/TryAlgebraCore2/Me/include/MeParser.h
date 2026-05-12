@@ -7,6 +7,7 @@
 
 namespace TryAlgebraCore2
 {
+	class MeContainer;
 	class MeGenerator
 	{
 	public:
@@ -19,7 +20,8 @@ namespace TryAlgebraCore2
 	{
 	public:
 		MeParser(const TextBuffer& text_buffer, int line_num);
-		void parse();
+		bool parseLine(MeContainer* container);
+		void parse(bool parse_one_line);
 		void consumeMe();
 		void consumeMeta();
 		void startChildren();

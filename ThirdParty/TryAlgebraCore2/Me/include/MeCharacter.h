@@ -11,8 +11,6 @@ namespace TryAlgebraCore2
 		MeCharacter(wchar_t ch);
 		virtual void calculate(float size_scale, VisualToolkit* visual_toolkit) override;
 		virtual void draw(VisualToolkit* visual_toolkit) override;
-	public:
-		static const uint32_t font_def_height = 16;
 	private:
 		wchar_t m_ch;
 		FGlyphData m_glyph;

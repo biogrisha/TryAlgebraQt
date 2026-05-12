@@ -50,11 +50,6 @@ namespace TryAlgebraCore2
         return m_from_ind == m_buffer.size();
     }
 
-    bool TextBufferIterator::isNewLine()
-    {
-        return m_buffer[m_from_ind] == '\r';
-    }
-
     const wchar_t& TextBufferIterator::next()
     {
         const wchar_t& ch = m_buffer[m_from_ind];

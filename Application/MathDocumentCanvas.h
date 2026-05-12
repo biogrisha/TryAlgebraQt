@@ -19,6 +19,7 @@ public:
     //Is underlying node created
     bool isNodeCreated();
 
+    QSize getSize();
 protected:
     QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) override;
     void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
