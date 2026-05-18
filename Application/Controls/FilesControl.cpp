@@ -1,11 +1,5 @@
 #include "Controls/FilesControl.h"
 
-#include <FunctionLibraries/FileHelpers.h>
-#include <Modules/MathElementsV2/CompatibilityData.h>
-#include <Modules/MainWindowModule.h>
-
-#include <MathEditor/CursorComponentGenerator.h>
-#include <MathEditor/MathElementGenerator.h>
 #include <AppGlobal.h>
 
 FilesControl::FilesControl(QObject* parent)

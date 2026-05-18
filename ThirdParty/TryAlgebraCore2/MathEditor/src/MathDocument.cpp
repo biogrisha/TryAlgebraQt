@@ -1,58 +1,105 @@
 #include <MathEditor/include/MathDocument.h>
 #include <Me/include/MeContainer.h>
 #include <Me/include/MeParser.h>
+#include <Me/include/MeNewLine.h>
+#include <Helpers/include/MeHelpers.h>
 #include <FreeTypeWrap.h>
+#include <iostream>
 
 namespace TryAlgebraCore2
 {
 	MathDocument::MathDocument()
-		: m_current_pos(0)
 	{
-
+		m_doc_size = { 0, 0 };
 	}
 
 	void MathDocument::setText(const std::wstring& str)
 	{
 		m_text_buffer.insert(str, 0);
+		content_updated = true;
 	}
 
 	void MathDocument::type(const std::wstring& str)
 	{
-		m_text_buffer.insert(str, m_current_pos);
-		m_current_pos += str.size();
+
 	}
 
 	void MathDocument::delBackward()
 	{
-		if (m_current_pos == 0)
-		{
-			return;
-		}
-		m_text_buffer.del(m_current_pos - 1, m_current_pos);
-		--m_current_pos;
+
 	}
 
 	void MathDocument::delForward()
 	{
-		if (m_current_pos == m_text_buffer.getSize())
-		{
-			return;
-		}
-		m_text_buffer.del(m_current_pos, m_current_pos + 1);
+
+	}
+
+	void MathDocument::stepLeft()
+	{
+		caret_updated = true;
+	}
+
+	void MathDocument::stepRight()
+	{
+		caret_updated = true;
+	}
+
+	void MathDocument::updateSelection(const glm::vec2& pos)
+	{
+		
+	}
+
+	void MathDocument::stopSelection()
+	{
+		selecting = false;
 	}
 
 	void MathDocument::draw(VisualToolkit* visual_toolkit)
 	{
-		m_container = MyRTTI::MakeTypedUnique<MeContainer>();
-		MeParser parser(m_text_buffer, 0);
-		while (parser.parseLine(m_container.get()))
+		highlight_updated |= content_updated;
+		caret_updated |= content_updated;
+		if(content_updated)
 		{
-			m_container->calcLine(visual_toolkit, 1);
-			if (m_container->getSizeY() > m_doc_height)
+			m_container = MyRTTI::MakeTypedUnique<MeContainer>();
+			MeParser parser(m_text_buffer, 0);
+			while (true)
 			{
-				break;
+				if (!parser.parseLine(m_container.get()))
+				{
+					if (m_container->getChildren().empty() || MyRTTI::Is<MeNewLine>(m_container->getChildren().back().get()))
+					{
+						m_container->addEmptyLine();
+					}
+					break;
+				}
+				m_container->setScalingFactor(1);
+				m_container->calcLine(visual_toolkit);
+				if (m_container->getSizeY() > m_doc_size.y)
+				{
+					break;
+				}
 			}
+			m_container->setSize(m_doc_size);
+			restoreCaretPos(m_container.get());
+			m_container->draw(visual_toolkit);
 		}
-		m_container->draw(visual_toolkit);
+		if(caret_updated)
+		{
+			//draw caret
+			//auto caret_data = MeHelpers::getCaretData(m_container.get(), m_caret_pos);
+			//visual_toolkit->mdoc_state->SetCaret(caret_data);
+		}
+		if (highlight_updated)
+		{
+			//visual_toolkit->mdoc_state->AddRect
+		}
+
+		content_updated = false;
+		caret_updated = false;
+		highlight_updated = false;
+	}
+	bool MathDocument::restoreCaretPos(MeBase* me)
+	{
+		return false;
 	}
 }

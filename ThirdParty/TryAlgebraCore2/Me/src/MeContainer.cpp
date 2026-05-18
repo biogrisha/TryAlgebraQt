@@ -4,14 +4,15 @@
 #include <Me/include/MeGlobals.h>
 namespace TryAlgebraCore2
 {
-	void MeContainer::calcLine(VisualToolkit* visual_toolkit, float size_scale)
+	void MeContainer::calcLine(VisualToolkit* visual_toolkit)
 	{
 		float max_bearing = 0;
 		float x = 0;
 		for (int i = end_line_i; i < m_children.size(); ++i)
 		{
 			auto& ch = m_children[i];
-			ch->calculate(size_scale, visual_toolkit);
+			ch->setScalingFactor(m_scaling_factor);
+			ch->calculate(visual_toolkit);
 			max_bearing = std::max(max_bearing, ch->getBearingY());
 			ch->setPosY(-ch->getBearingY());
 			ch->setPosX(x);
@@ -21,12 +22,17 @@ namespace TryAlgebraCore2
 		for (int i = end_line_i; i < m_children.size(); ++i)
 		{
 			auto& ch = m_children[i];
-			ch->setPosY(next_line_y + max_bearing);
+			ch->setPosY(ch->getPosY() + next_line_y + max_bearing);
 			max_y_offset = std::max(max_y_offset, ch->getPosY() + ch->getSizeY());
 		}
 		next_line_y = max_y_offset;
 		m_size.x = std::max(x, m_size.x);
 		m_size.y = next_line_y;
+		end_line_i = m_children.size();
+	}
+	void MeContainer::addEmptyLine()
+	{
+		m_size.y += g_caret_height * m_scaling_factor;
 	}
 	void MeContainer::draw(VisualToolkit* visual_toolkit)
 	{
@@ -35,7 +41,7 @@ namespace TryAlgebraCore2
 			ch->draw(visual_toolkit);
 		}
 	}
-	void MeContainer::step(StepDir dir, StepFrom step_from, std::vector<int>& path)
+	void MeContainer::step(StepDir dir, StepFrom step_from, std::vector<AbsPathEl>& path)
 	{
 
 		//last, next cont (neighbour(start,end),grandparent(next,prev))
@@ -46,7 +52,7 @@ namespace TryAlgebraCore2
 
 		if (dir == StepDir::right)
 		{
-			if (path.back() == m_children.size())
+			/*if (path.back() == m_children.size())
 			{
 				if (m_parent)
 				{
@@ -60,11 +66,11 @@ namespace TryAlgebraCore2
 			else
 			{
 				++path.back();
-			}
+			}*/
 		}
 		else if (dir == StepDir::left)
 		{
-			if (path.back() == 0)
+			/*if (path.back() == 0)
 			{
 				if (m_parent)
 				{
@@ -78,7 +84,7 @@ namespace TryAlgebraCore2
 			else
 			{
 				--path.back();
-			}
+			}*/
 		}
 
 	}

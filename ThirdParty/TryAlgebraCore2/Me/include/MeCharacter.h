@@ -9,7 +9,7 @@ namespace TryAlgebraCore2
 		TYPED_CLASS1(MeBase)
 	public:
 		MeCharacter(wchar_t ch);
-		virtual void calculate(float size_scale, VisualToolkit* visual_toolkit) override;
+		virtual void calculate(VisualToolkit* visual_toolkit) override;
 		virtual void draw(VisualToolkit* visual_toolkit) override;
 	private:
 		wchar_t m_ch;

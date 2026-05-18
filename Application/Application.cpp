@@ -4,11 +4,7 @@
 
 #include <VulkanContext.h>
 #include <FreeTypeWrap.h>
-#include <Modules/MathElementsV2/CompatibilityData.h>
-#include <Modules/Visual/MathElementsAtlas.h>
 
-#include <MathEditor/CursorComponentGenerator.h>
-#include <MathEditor/MathElementGenerator.h>
 #include <Controls/MenuControl.h>
 #include <Controls/DocumentControl.h>
 #include <Controls/TabsControl.h>

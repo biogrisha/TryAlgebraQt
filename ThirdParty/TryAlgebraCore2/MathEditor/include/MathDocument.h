@@ -2,6 +2,7 @@
 #include <MathEditor/include/TextBuffer.h>
 #include <Me/include/MeContainer.h>
 #include <MathDocumentState.h>
+#include <MathEditor/include/Structs.h>
 
 namespace TryAlgebraCore2
 {
@@ -9,17 +10,27 @@ namespace TryAlgebraCore2
 	{
 	public:
 		MathDocument();
-		void setDocHeight(float height) { m_doc_height = height; }
+		void setDocSize(const glm::vec2& size) { m_doc_size = size; }
 		void setText(const std::wstring& str);
 		void type(const std::wstring& str);
 		void delBackward();
 		void delForward();
 		void stepLeft();
 		void stepRight();
+		void updateSelection(const glm::vec2& pos);
+		void stopSelection();
 		void draw(VisualToolkit* visual_toolkit);
+		bool restoreCaretPos(MeBase* me);
 		TextBuffer m_text_buffer;
-		int m_current_pos;
 		std::unique_ptr<MeContainer> m_container;
-		float m_doc_height = 0;
+		glm::vec2 m_doc_size;
+
+		bool caret_updated = false;
+		bool content_updated = false;
+		bool highlight_updated = false;
+
+		bool selecting = false;
+		std::vector<AbsPathEl> caret_pos;
+
 	};
 }

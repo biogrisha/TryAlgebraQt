@@ -2,7 +2,6 @@
 
 #include <QObject>
 #include <QString>
-#include <Modules/MainWindowModule.h>
 #include <FreeTypeWrap.h>
 
 class MenuControl;
@@ -43,9 +42,6 @@ private:
 	FilesControl* m_files_control = nullptr;
 
 	ApplicationModel* m_app_model = nullptr;
-
-	//try algebra core module
-	FTAMainModule m_mainModule;
 	//free type module
 	FFreeTypeWrap m_ft_wrap;
 };

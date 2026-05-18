@@ -10,16 +10,16 @@ namespace TryAlgebraCore2
 		m_glyph.GlyphId.Glyph = (ch == L' ') ? L'M' : ch;
 	}
 
-	void MeCharacter::calculate(float size_scale, VisualToolkit* visual_toolkit)
+	void MeCharacter::calculate(VisualToolkit* visual_toolkit)
 	{
-		uint32_t font_size = std::max(uint32_t(font_def_height * size_scale), min_font_size);
+		uint32_t font_size = std::max(uint32_t(g_font_def_height * m_scaling_factor), g_min_font_size);
 		m_glyph.GlyphId.Height = font_size;
 		auto render_data = visual_toolkit->ft->GetGlyphRenderData(m_glyph.GlyphId);
 		if(render_data)
 		{
 			m_size.y = render_data->HeightInPixels;
 			m_size.x = render_data->WidthInPixels;
-			m_size *= size_scale;
+			m_size *= m_scaling_factor;
 			m_bearing_y = m_size.y / 2;
 		}
 	}

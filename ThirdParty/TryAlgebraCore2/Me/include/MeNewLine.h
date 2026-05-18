@@ -9,6 +9,6 @@ namespace TryAlgebraCore2
 		TYPED_CLASS1(MeBase)
 
 	public:
-		virtual void calculate(float size_scale, VisualToolkit* visual_toolkit) override;
+		virtual void calculate(VisualToolkit* visual_toolkit) override;
 	};
 }

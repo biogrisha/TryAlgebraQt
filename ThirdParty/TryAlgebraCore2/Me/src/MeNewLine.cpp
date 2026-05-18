@@ -5,9 +5,9 @@
 
 namespace TryAlgebraCore2
 {
-	void MeNewLine::calculate(float size_scale, VisualToolkit* visual_toolkit)
+	void MeNewLine::calculate(VisualToolkit* visual_toolkit)
 	{
-		uint32_t font_size = std::max(uint32_t(font_def_height * size_scale), min_font_size);
+		uint32_t font_size = std::max(uint32_t(g_font_def_height * m_scaling_factor), g_min_font_size);
 		FGlyphId gl;
 		gl.Glyph = L'M';
 		gl.Height = font_size;
@@ -16,7 +16,7 @@ namespace TryAlgebraCore2
 		{
 			m_size.y = render_data->HeightInPixels;
 			m_size.x = 0;
-			m_size *= size_scale;
+			m_size *= m_scaling_factor;
 			m_bearing_y = m_size.y / 2;
 		}
 	}

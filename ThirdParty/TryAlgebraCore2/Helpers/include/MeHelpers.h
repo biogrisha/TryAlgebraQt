@@ -2,11 +2,33 @@
 #include <string>
 #include <vector>
 #include <Me/include/MeBase.h>
+#include <MathDocumentRenderingStructs.h>
 
 namespace TryAlgebraCore2
 {
 	class MeHelpers
 	{
-	
+	public:
+		enum class GetByPathStatus
+		{
+			last,
+			cont,
+			me
+		};
+		struct GetByPathRes
+		{
+			GetByPathStatus status = GetByPathStatus::me;
+			MeBase* me = nullptr;
+		};
+
+		static GetByPathRes getByPath(MeBase* from, const std::vector<int>& path);
+		static FCaretData getCaretData(MeBase* from, const std::vector<int>& path);
+		static void updateSelection(VisualToolkit* vt, MeBase* cont, int from, int to);
+		static int getAbsCaretPos(MeBase* from, const std::vector<int>& path);
+		static std::vector<AbsPathEl> getAbsCaretPath(MeBase* from, const std::vector<int>& path);
+		static bool isWithinMe(const glm::vec2& pos, MeBase* me);
+		static bool isLeft(const glm::vec2& pos, MeBase* me);
+		static bool getPathAtPos(MeBase* from, const glm::vec2& pos, std::vector<int>& path);
+		static void normalizeSelection(std::vector<int>& from, std::vector<int>& to);
 	};
 }

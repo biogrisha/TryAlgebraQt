@@ -5,6 +5,7 @@ add_library(TryAlgebraCore2 STATIC
 	MathEditor/include/MathDocument.h
 	MathEditor/include/TextBuffer.h
 	MathEditor/include/DocumentNavigation.h
+	MathEditor/include/Structs.h
 
 	MathEditor/src/MathDocument.cpp
 	MathEditor/src/TextBuffer.cpp
@@ -27,7 +28,8 @@ add_library(TryAlgebraCore2 STATIC
 	
 
 	Helpers/include/MeHelpers.h
-	Helpers/src/MeHelpers.cpp)
+	Helpers/src/MeHelpers.cpp 
+)
 
 # Set include directories
 target_include_directories(TryAlgebraCore2

@@ -29,7 +29,7 @@ namespace TryAlgebraCore2
 
     TextBufferIterator::TextBufferIterator(const TextBuffer& text_buffer, int line_num)
         : m_buffer(text_buffer.getBuff())
-        , m_from_ind(0)
+        , m_ch_id(0)
     {
         for (const wchar_t& ch : m_buffer)
         {
@@ -41,29 +41,29 @@ namespace TryAlgebraCore2
             {
                 --line_num;
             }
-            ++m_from_ind;
+            ++m_ch_id;
         }
     }
 
     bool TextBufferIterator::isEnd()
     {
-        return m_from_ind == m_buffer.size();
+        return m_ch_id == m_buffer.size();
     }
 
     const wchar_t& TextBufferIterator::next()
     {
-        const wchar_t& ch = m_buffer[m_from_ind];
-        ++m_from_ind;
+        const wchar_t& ch = m_buffer[m_ch_id];
+        ++m_ch_id;
         return ch;
     }
     void TextBufferIterator::back()
     {
-        --m_from_ind;
+        --m_ch_id;
     }
 
     const wchar_t& TextBufferIterator::current()
     {
-        const wchar_t& ch = m_buffer[m_from_ind];
+        const wchar_t& ch = m_buffer[m_ch_id];
         return ch;
     }
 }

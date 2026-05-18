@@ -28,6 +28,7 @@ namespace TryAlgebraCore2
 
 	void MeParser::parse(bool parse_one_line)
 	{
+		m_parent->setChTo(m_it.getChId());
 		while (true)
 		{
 			if (m_it.isEnd())
@@ -37,7 +38,11 @@ namespace TryAlgebraCore2
 			wchar_t ch = m_it.next();
 			if (ch == L'\n')
 			{
-				m_parent->addChild(MyRTTI::MakeTypedUnique<MeNewLine>());
+				auto me = MyRTTI::MakeTypedUnique<MeNewLine>();
+				me->setParent(m_parent);
+				me->setChFrom(m_it.getChId() - 1);
+				me->setChTo(m_it.getChId());
+				m_parent->addChild(std::move(me));
 				if (parse_one_line)
 				{
 					return;
@@ -49,7 +54,11 @@ namespace TryAlgebraCore2
 			}
 			else
 			{
-				m_parent->addChild(MyRTTI::MakeTypedUnique<MeCharacter>(ch));
+				auto me = MyRTTI::MakeTypedUnique<MeCharacter>(ch);
+				me->setParent(m_parent);
+				me->setChFrom(m_it.getChId() - 1);
+				me->setChTo(m_it.getChId());
+				m_parent->addChild(std::move(me));
 			}
 		}
 	}

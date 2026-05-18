@@ -1,18 +1,14 @@
-Open file from menu->
-create doc
-show doc on canvas
-add entry to tabs
+caret in visible area
+step left -> path logig
+step down below screen -> redraw layout
 
-Close file in tabs->
-delete doc form array
-remove entry from tabs
-conditionally: remove or replace doc on canvas
+line path
+get ch id by path - fast
+get path by ch id - slow
+get path by line and ch - 
+caret outside visible area, caret inside visible area
+caret pos corresponds to the last elements
 
-select doc menu, tabs->
-set curr doc index
-switch in canvas
-
-file module: create, select, close doc
 
 
 

@@ -6,7 +6,6 @@
 
 #include <MathDocumentState.h>
 #include <FreeTypeWrap.h>
-#include <FunctionLibraries/FileHelpers.h>
 
 #include <MathDocumentCanvas.h>
 #include <Models/MathElementInfoModel.h>

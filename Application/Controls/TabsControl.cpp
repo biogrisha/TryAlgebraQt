@@ -1,6 +1,5 @@
 #include "TabsControl.h"
 #include <QDebug>
-#include <Modules/MainWindowModule.h>
 #include <Application.h>
 #include <AppGlobal.h>
 #include <Controls/FilesControl.h>

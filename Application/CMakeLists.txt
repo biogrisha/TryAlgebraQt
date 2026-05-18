@@ -30,18 +30,6 @@ qt_add_qml_module(Application
         Models/DocumentTabModel.cpp
         Models/ApplicationModel.h
         Models/ApplicationModel.cpp
-        MathEditor/CursorComponentGenerator.h
-        MathEditor/CursorComponentGenerator.cpp
-        MathEditor/MathElementGenerator.h
-        MathEditor/MathElementGenerator.cpp
-        MathEditor/Visual/CharVisual.h
-        MathEditor/Visual/CharVisual.cpp
-        MathEditor/Visual/CaretVisual.h
-        MathEditor/Visual/CaretVisual.cpp
-        MathEditor/Visual/FromToVisual.h
-        MathEditor/Visual/FromToVisual.cpp
-        MathEditor/Visual/MeVisualBase.h
-        MathEditor/Visual/MeVisualBase.cpp
 )
 
 target_link_libraries(Application
@@ -54,7 +42,6 @@ target_link_libraries(Application
     VulkanFramework
     PUBLIC
     MathDocumentRendering
-    TryAlgebraCore
     TryAlgebraCore2
 )
 

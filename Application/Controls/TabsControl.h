@@ -3,8 +3,6 @@
 #include <QString>
 #include <QUrl>
 #include <qqml.h>
-#include <FunctionLibraries/FileHelpers.h>
-#include <Modules/CommonTypes/MulticastDelegate.h>
 #include <Models/DocumentTabModel.h>
 
 /*

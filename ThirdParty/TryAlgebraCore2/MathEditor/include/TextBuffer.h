@@ -25,8 +25,9 @@ namespace TryAlgebraCore2
         const wchar_t& next();
         void back();
         const wchar_t& current();
+        int getChId() { return m_ch_id; }
     private:
         const std::wstring& m_buffer;
-        int m_from_ind;
+        int m_ch_id;
     };
 }
