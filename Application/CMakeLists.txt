@@ -42,7 +42,7 @@ target_link_libraries(Application
     VulkanFramework
     PUBLIC
     MathDocumentRendering
-    TryAlgebraCore2
+    TryAlgebraCore
 )
 
 target_include_directories(Application BEFORE PRIVATE 

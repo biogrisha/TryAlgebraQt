@@ -1,6 +1,6 @@
 ﻿#include <MathEditor/include/TextBuffer.h>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
     void TextBuffer::insert(const std::wstring& str, int pos)
     {

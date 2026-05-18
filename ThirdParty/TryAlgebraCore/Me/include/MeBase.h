@@ -7,7 +7,7 @@
 #include <MathEditor/include/Structs.h>
 
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	
 	enum class StepDir

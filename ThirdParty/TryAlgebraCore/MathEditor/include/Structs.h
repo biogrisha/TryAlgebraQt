@@ -1,6 +1,6 @@
 #pragma once
 
-namespace TryAlgebraCore2{
+namespace TryAlgebraCore{
 	struct AbsPathEl
 	{
 		int from = 0;

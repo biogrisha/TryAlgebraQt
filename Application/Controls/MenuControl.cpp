@@ -31,7 +31,7 @@ void MenuControl::openDocument(const QUrl& url)
 
     QString text = stream.readAll();
 
-    auto new_doc = std::make_unique<TryAlgebraCore2::MathDocument>();
+    auto new_doc = std::make_unique<TryAlgebraCore::MathDocument>();
     new_doc->setText(text.toStdWString());
     AppGlobal::app_mod->addMathDoc(url.toLocalFile().toStdWString(), std::move(new_doc));
 }

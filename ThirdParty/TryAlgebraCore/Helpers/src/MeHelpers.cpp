@@ -3,7 +3,7 @@
 #include <Me/include/MeGlobals.h>
 #include <Me/include/MeContainer.h>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	MeHelpers::GetByPathRes MeHelpers::getByPath(MeBase* from, const std::vector<int>& path)
 	{

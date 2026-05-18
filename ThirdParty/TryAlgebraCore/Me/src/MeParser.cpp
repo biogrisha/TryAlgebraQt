@@ -3,7 +3,7 @@
 #include <Me/include/MeContainer.h>
 #include <Me/include/MeNewLine.h>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	std::unique_ptr<MeBase> MeGenerator::generateMe(const std::wstring& me_str)
 	{

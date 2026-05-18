@@ -3,7 +3,7 @@
 #include <MathDocumentState.h>
 #include <FreeTypeWrap.h>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	void MeNewLine::calculate(VisualToolkit* visual_toolkit)
 	{

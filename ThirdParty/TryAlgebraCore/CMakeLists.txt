@@ -1,7 +1,7 @@
 find_package(glm REQUIRED)
 
 # Create a library target
-add_library(TryAlgebraCore2 STATIC 
+add_library(TryAlgebraCore STATIC 
 	MathEditor/include/MathDocument.h
 	MathEditor/include/TextBuffer.h
 	MathEditor/include/DocumentNavigation.h
@@ -32,12 +32,12 @@ add_library(TryAlgebraCore2 STATIC
 )
 
 # Set include directories
-target_include_directories(TryAlgebraCore2
+target_include_directories(TryAlgebraCore
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(TryAlgebraCore2
+target_link_libraries(TryAlgebraCore
 		PUBLIC
 		MyRTTI
 		glm::glm

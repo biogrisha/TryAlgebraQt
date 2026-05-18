@@ -2,7 +2,7 @@
 #include <Me/include/MeGlobals.h>
 #include <FreeTypeWrap.h>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	MeCharacter::MeCharacter(wchar_t ch)
 		:m_ch(ch)

@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <optional>
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 
     class TextBuffer

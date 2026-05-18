@@ -15,7 +15,7 @@ add_subdirectory(ThirdParty/VulkanFramework/VulkanFramework)
 add_subdirectory(ThirdParty/VulkanFramework/MyRTTI)
 add_subdirectory(ThirdParty/MathDocumentRendering)
 add_subdirectory(ThirdParty/VulkanFramework/MathLibrary)
-add_subdirectory(ThirdParty/TryAlgebraCore2)
+add_subdirectory(ThirdParty/TryAlgebraCore)
 add_subdirectory(Application)
 
 

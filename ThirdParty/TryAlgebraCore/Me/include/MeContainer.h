@@ -2,7 +2,7 @@
 #include <Me/include/MeBase.h>
 #include <vector>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	class MeContainer : public MeBase
 	{

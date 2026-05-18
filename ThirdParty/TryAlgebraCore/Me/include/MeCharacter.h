@@ -2,7 +2,7 @@
 #include <Me/include/MeBase.h>
 #include <MathDocumentRenderingStructs.h>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	class MeCharacter : public MeBase
 	{

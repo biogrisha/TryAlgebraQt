@@ -4,7 +4,7 @@
 #include <MathDocumentState.h>
 #include <MathEditor/include/Structs.h>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	class MathDocument
 	{

@@ -2,7 +2,7 @@
 #include <FreeTypeWrap.h>
 #include <Me/include/MeCharacter.h>
 #include <Me/include/MeGlobals.h>
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	void MeContainer::calcLine(VisualToolkit* visual_toolkit)
 	{

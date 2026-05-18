@@ -5,7 +5,7 @@
 #include <Me/include/MeBase.h>
 #include <MathEditor/include/TextBuffer.h>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	class MeContainer;
 	class MeGenerator

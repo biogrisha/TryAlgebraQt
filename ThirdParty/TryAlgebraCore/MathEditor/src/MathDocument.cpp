@@ -6,7 +6,7 @@
 #include <FreeTypeWrap.h>
 #include <iostream>
 
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	MathDocument::MathDocument()
 	{

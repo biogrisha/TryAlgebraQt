@@ -2,7 +2,7 @@
 #include <Me/include/MeBase.h>
 
 struct VisualToolkit;
-namespace TryAlgebraCore2
+namespace TryAlgebraCore
 {
 	class MeNewLine : public MeBase
 	{

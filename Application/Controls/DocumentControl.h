@@ -77,6 +77,6 @@ private:
 	bool m_is_canvas_ready = false;
 	bool m_bLmbDown = false;
 
-	TryAlgebraCore2::MathDocument* m_current_doc;
+	TryAlgebraCore::MathDocument* m_current_doc;
 };
 
