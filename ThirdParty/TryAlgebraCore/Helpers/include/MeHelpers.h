@@ -3,6 +3,7 @@
 #include <vector>
 #include <Me/include/MeBase.h>
 #include <MathDocumentRenderingStructs.h>
+#include <MathEditor/include/Structs.h>
 
 namespace TryAlgebraCore
 {
@@ -13,7 +14,8 @@ namespace TryAlgebraCore
 		{
 			last,
 			cont,
-			me
+			me,
+			outside
 		};
 		struct GetByPathRes
 		{
@@ -21,8 +23,9 @@ namespace TryAlgebraCore
 			MeBase* me = nullptr;
 		};
 
-		static GetByPathRes getByPath(MeBase* from, const std::vector<int>& path);
-		static FCaretData getCaretData(MeBase* from, const std::vector<int>& path);
+		static GetByPathRes getByPath(MeBase* from, const AbsPath& path);
+		static FCaretData getCaretData(MeBase* from, const std::vector<AbsPathEl>& path);
+
 		static void updateSelection(VisualToolkit* vt, MeBase* cont, int from, int to);
 		static int getAbsCaretPos(MeBase* from, const std::vector<int>& path);
 		static std::vector<AbsPathEl> getAbsCaretPath(MeBase* from, const std::vector<int>& path);

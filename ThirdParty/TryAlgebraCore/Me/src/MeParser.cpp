@@ -86,6 +86,7 @@ namespace TryAlgebraCore
 	void MeParser::consumeMe()
 	{
 		std::wstring me_name;
+		size_t ch_from = m_it.getChId() - 1;
 		while (true)
 		{
 			wchar_t ch = m_it.next();
@@ -95,6 +96,7 @@ namespace TryAlgebraCore
 				assert(new_me);
 				m_current = new_me.get();
 				m_parent->addChild(std::move(new_me));
+				m_current->setChFrom(ch_from);
 				if (auto next_ch = m_it.lookAhead(0))
 				{
 					if (*next_ch == L'{')
@@ -107,6 +109,7 @@ namespace TryAlgebraCore
 						consumeMeta();
 					}
 				}
+				m_current->setChTo(m_it.getChId());
 				return;
 			}
 			me_name += ch;
@@ -143,6 +146,7 @@ namespace TryAlgebraCore
 		while(true)
 		{
 			auto cont = MyRTTI::MakeTypedUnique<MeContainer>();
+			cont->setChFrom(m_it.getChId());
 			m_parent = cont.get();
 			current->addChild(std::move(cont));
 			if (parse(false) == ParsingResult::end_children)
@@ -151,6 +155,7 @@ namespace TryAlgebraCore
 			}
 			
 		}
+		m_current = current;
 		m_parent = parent;
 	}
 

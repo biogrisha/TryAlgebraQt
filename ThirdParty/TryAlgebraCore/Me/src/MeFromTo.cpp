@@ -8,11 +8,12 @@ namespace TryAlgebraCore
 	void MeFromTo::setMeta(const std::wstring& meta)
 	{
 		m_glyph.GlyphId.Glyph = meta.back();
+		m_glyph.GlyphId.bCompact = true;
 	}
 	void MeFromTo::calculate(VisualToolkit* visual_toolkit)
 	{
 		assert(m_children.size() == 2);
-		float ch_scaling_factor = m_scaling_factor * 0.3f;
+		float ch_scaling_factor = m_scaling_factor / 1.5f;
 		for (auto& ch : m_children)
 		{
 			ch->setScalingFactor(ch_scaling_factor);
@@ -30,6 +31,9 @@ namespace TryAlgebraCore
 			m_children[1]->setPosY(m_children[0]->getSize().y + render_data->HeightInPixels);
 			setSizeY(m_children[1]->getPos().y + m_children[1]->getSize().y);
 			setSizeX(center * 2.f);
+			m_glyph.Pos.x = center - m_symbol_width/2;
+			m_glyph.Pos.y = m_children[0]->getSize().y;
+			setBearing(m_children[0]->getSize().y + render_data->HeightInPixels / 2.f);
 		}
 		
 	}
@@ -40,6 +44,7 @@ namespace TryAlgebraCore
 			ch->setPos(ch->getPos() + getPos());
 			ch->draw(visual_toolkit);
 		}
+		m_glyph.Pos += getPos();
 		visual_toolkit->mdoc_state->AddGlyph(m_glyph);
 	}
 }

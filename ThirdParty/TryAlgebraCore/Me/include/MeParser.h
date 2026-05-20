@@ -30,10 +30,8 @@ namespace TryAlgebraCore
 		std::unique_ptr<MeBase> make(const std::wstring& name);
 
 		TextBufferIterator m_it;
-		std::wstring line_str;
 		MeBase* m_current = nullptr;
 		MeBase* m_parent = nullptr;
-		std::vector<std::unique_ptr<MeBase>> generated_me;
 		std::unordered_map<std::wstring, std::function<std::unique_ptr<MeBase>()>> m_factory;
 		int depth = -1;
 	};

@@ -3,7 +3,11 @@
 namespace TryAlgebraCore{
 	struct AbsPathEl
 	{
-		int from = 0;
-		int to = 0;
+		size_t from = 0;
+		size_t to = 0;
+	};
+
+	class AbsPath : public std::vector<AbsPathEl>
+	{
 	};
 }

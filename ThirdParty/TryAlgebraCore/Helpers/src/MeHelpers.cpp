@@ -5,74 +5,111 @@
 
 namespace TryAlgebraCore
 {
-	MeHelpers::GetByPathRes MeHelpers::getByPath(MeBase* from, const std::vector<int>& path)
+	MeHelpers::GetByPathRes MeHelpers::getByPath(MeBase* from, const AbsPath& path)
 	{
 		GetByPathRes res;
 		res.me = from;
-		for(int i : path)
+		for(int i = 0; i < path.size() - 1; ++i)
 		{
-			if (i >= res.me->getChildren().size() && res.me->getChildren().size() > 0)
+			auto& children = from->getChildren();
+			auto& path_el = path[i];
+			auto it = std::lower_bound(
+				children.begin(),
+				children.end(),
+				path_el.from,
+				[](const std::unique_ptr<MeBase>& me, size_t value) {
+					return me->getChFrom() < value;
+				}
+			);
+			if (it != children.end())
 			{
-				res.me = res.me->getChildren()[i - 1].get();
-				res.status = GetByPathStatus::last;
-				return res;
+				assert(it->get()->getChFrom() == path_el.from);
+				from = it->get();
 			}
-			if (res.me->getChildren().size() == 0)
-			{
-				res.status = GetByPathStatus::cont;
-				return res;
+		}
+
+		auto& children = from->getChildren();
+		if (children.empty())
+		{
+			res.me = from;
+			res.status = GetByPathStatus::cont;
+		}
+		auto& path_el = path.back();
+		auto it = std::lower_bound(
+			children.begin(),
+			children.end(),
+			path_el.from,
+			[](const std::unique_ptr<MeBase>& me, size_t value) {
+				return me->getChFrom() < value;
 			}
-			res.me = res.me->getChildren()[i].get();
+		);
+		if (it != children.end())
+		{
+			res.me = it->get();
+			res.status = GetByPathStatus::me;
+		}
+		else if (children.back()->getChTo() == path_el.from)
+		{
+			res.me = children.back().get();
+			res.status = GetByPathStatus::last;
+		}
+		else
+		{
+			res.me = from;
+			res.status = GetByPathStatus::outside;
 		}
 		return res;
 	}
-	FCaretData MeHelpers::getCaretData(MeBase* from, const std::vector<int>& path)
+	FCaretData MeHelpers::getCaretData(MeBase* from, const std::vector<AbsPathEl>& path)
 	{
-		auto res = getByPath(from, path);
+		//auto res = getByPath(from, path);
 
-		FCaretData caret_data;
-		caret_data.Pos = { -100, -100 };
-		glm::vec2 caret_def_size = { 3, 12 };
-		caret_data.Size = caret_def_size * res.me->getScalingFactor();
-		switch (res.status)
-		{
-		case MeHelpers::GetByPathStatus::cont:
-			//containter is empty
-			caret_data.Pos = res.me->getPos();
-			break;
-		case MeHelpers::GetByPathStatus::last:
-			if (MyRTTI::Is<MeNewLine>(res.me))
-			{
-				auto cont = res.me->getParent();
-				//find next line y
-				float y = res.me->getPos().y + res.me->getSize().y;
-				auto& children = from->getChildren();
-				for (int i = children.size() - 2; i >= 0; --i)
-				{
-					if (MyRTTI::Is<MeNewLine>(children[i].get()))
-					{
-						break;
-					}
-					y = std::max(y, children[i]->getPos().y + children[i]->getSize().y);
-				}
-				caret_data.Pos.x = 0;
-				caret_data.Pos.y = y;
-			}
-			else
-			{
-				caret_data.Pos.x = res.me->getPos().x + res.me->getSize().x;
-				caret_data.Pos.y = res.me->getPos().y + res.me->getBearingY() - g_caret_height/2;
-			}
-			break;
-		case MeHelpers::GetByPathStatus::me:
-			caret_data.Pos = res.me->getPos();
-			caret_data.Pos.y += res.me->getBearingY() - g_caret_height / 2;
-			break;
-		default:
-			break;
-		}
-		return caret_data;
+		//FCaretData caret_data;
+		//caret_data.Pos = { -100, -100 };
+		//glm::vec2 caret_def_size = { 3, 12 };
+		//caret_data.Size = caret_def_size * res.me->getScalingFactor();
+		//switch (res.status)
+		//{
+		//case MeHelpers::GetByPathStatus::cont:
+		//	//containter is empty
+		//	caret_data.Pos = res.me->getPos();
+		//	break;
+		//case MeHelpers::GetByPathStatus::last:
+		//	if (MyRTTI::Is<MeNewLine>(res.me))
+		//	{
+		//		auto cont = res.me->getParent();
+		//		//find next line y
+		//		float y = res.me->getPos().y + res.me->getSize().y;
+		//		auto& children = from->getChildren();
+		//		for (int i = children.size() - 2; i >= 0; --i)
+		//		{
+		//			if (MyRTTI::Is<MeNewLine>(children[i].get()))
+		//			{
+		//				break;
+		//			}
+		//			y = std::max(y, children[i]->getPos().y + children[i]->getSize().y);
+		//		}
+		//		caret_data.Pos.x = 0;
+		//		caret_data.Pos.y = y;
+		//	}
+		//	else
+		//	{
+		//		caret_data.Pos.x = res.me->getPos().x + res.me->getSize().x;
+		//		caret_data.Pos.y = res.me->getPos().y + res.me->getBearingY() - g_caret_height/2;
+		//	}
+		//	break;
+		//case MeHelpers::GetByPathStatus::me:
+		//	caret_data.Pos = res.me->getPos();
+		//	caret_data.Pos.y += res.me->getBearingY() - g_caret_height / 2;
+		//	break;
+		//default:
+		//	break;
+		//}
+		//return caret_data;
+		return {};
 	}
+
+
 	void MeHelpers::updateSelection(VisualToolkit* vt, MeBase* cont, int from, int to)
 	{
 		auto& children = cont->getChildren();
@@ -85,7 +122,7 @@ namespace TryAlgebraCore
 	}
 	int MeHelpers::getAbsCaretPos(MeBase* from, const std::vector<int>& path)
 	{
-		auto res = getByPath(from, path);
+		/*auto res = getByPath(from, path);
 		switch (res.status)
 		{
 		case MeHelpers::GetByPathStatus::cont:
@@ -99,7 +136,7 @@ namespace TryAlgebraCore
 			break;
 		default:
 			break;
-		}
+		}*/
 		return 0;
 	}
 

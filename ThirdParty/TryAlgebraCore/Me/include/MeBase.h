@@ -42,6 +42,7 @@ namespace TryAlgebraCore
 
 		void setSizeY(float y) { m_size.y = y; }
 		void setSizeX(float x) { m_size.x = x; }
+		void setBearing(float val) { m_bearing_y = val; }
 
 		float getBearingY() { return m_bearing_y; }
 		std::vector<std::unique_ptr<MeBase>>& getChildren() { return m_children; }

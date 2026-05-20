@@ -19,7 +19,6 @@ namespace TryAlgebraCore
 		{
 			m_size.y = render_data->HeightInPixels;
 			m_size.x = render_data->WidthInPixels;
-			m_size *= m_scaling_factor;
 			m_bearing_y = m_size.y / 2;
 		}
 	}

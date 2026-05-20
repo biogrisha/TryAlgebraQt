@@ -9,10 +9,12 @@ namespace TryAlgebraCore
 		TYPED_CLASS1(MeBase)
 
 	public:
-		void calcLine(VisualToolkit* visual_toolkit);
-		void addEmptyLine();
 		virtual void draw(VisualToolkit* visual_toolkit) override;
 		virtual void step(StepDir dir, StepFrom step_from, std::vector<AbsPathEl>& path) override;
+		virtual void calculate(VisualToolkit* visual_toolkit) override;
+
+		void calcLine(VisualToolkit* visual_toolkit, size_t end = UINT64_MAX);
+		void addEmptyLine();
 	private:
 		float next_line_y = 0;
 		int end_line_i = 0;
