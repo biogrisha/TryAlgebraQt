@@ -18,6 +18,7 @@ add_library(TryAlgebraCore STATIC
 	Me/include/MeNewLine.h
 	Me/include/MeContainer.h
 	Me/include/MeGlobals.h
+	Me/include/MeFromTo.h
 	
 
 	Me/src/MeBase.cpp
@@ -25,11 +26,12 @@ add_library(TryAlgebraCore STATIC
 	Me/src/MeParser.cpp
 	Me/src/MeNewLine.cpp
 	Me/src/MeContainer.cpp
+	Me/src/MeFromTo.cpp
 	
 
 	Helpers/include/MeHelpers.h
 	Helpers/src/MeHelpers.cpp 
-)
+ )
 
 # Set include directories
 target_include_directories(TryAlgebraCore

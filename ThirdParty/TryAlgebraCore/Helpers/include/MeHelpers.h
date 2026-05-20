@@ -30,5 +30,9 @@ namespace TryAlgebraCore
 		static bool isLeft(const glm::vec2& pos, MeBase* me);
 		static bool getPathAtPos(MeBase* from, const glm::vec2& pos, std::vector<int>& path);
 		static void normalizeSelection(std::vector<int>& from, std::vector<int>& to);
+
+
+		//me arrangement
+		static void alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x);
 	};
 }

@@ -29,21 +29,20 @@ namespace TryAlgebraCore
 		TYPED_CLASS
 	public:
 		virtual void setMeta(const std::wstring& meta) {}
-		void addChild(std::unique_ptr<MeBase>&& child);
 		virtual void draw(VisualToolkit* visual_toolkit) {}
 		virtual void calculate(VisualToolkit* visual_toolkit) {}
 		virtual void step(StepDir dir, StepFrom step_from, std::vector<AbsPathEl>& path) {}
+		void addChild(std::unique_ptr<MeBase>&& child);
 		const glm::vec2& getSize() { return m_size; }
+		const glm::vec2& getPos() { return m_pos; }
+		void setSize(const glm::vec2& size) { m_size = size; }
+		void setPos(const glm::vec2& pos) { m_pos = pos; }
 		void setPosX(float x) { m_pos.x = x; }
 		void setPosY(float y) { m_pos.y = y; }
+
 		void setSizeY(float y) { m_size.y = y; }
 		void setSizeX(float x) { m_size.x = x; }
-		void setSize(const glm::vec2& size) { m_size = size; }
-		const glm::vec2& getPos() { return m_pos; }
-		float getPosY() { return m_pos.y; }
-		float getPosX() { return m_pos.x; }
-		float getSizeY() { return m_size.y; }
-		float getSizeX() { return m_size.x; }
+
 		float getBearingY() { return m_bearing_y; }
 		std::vector<std::unique_ptr<MeBase>>& getChildren() { return m_children; }
 		void setChFrom(int i) { m_ch_from = i; }

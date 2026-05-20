@@ -56,6 +56,15 @@ namespace TryAlgebraCore
         ++m_ch_id;
         return ch;
     }
+    std::optional<wchar_t> TextBufferIterator::lookAhead(size_t num)
+    {
+        if (m_ch_id + num < m_buffer.size())
+        {
+            return m_buffer[m_ch_id + num];
+        }
+        return {};
+    }
+
     void TextBufferIterator::back()
     {
         --m_ch_id;

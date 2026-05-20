@@ -36,11 +36,13 @@ namespace TryAlgebraCore
 
 	void MathDocument::stepLeft()
 	{
+		m_container->step(StepDir::left, StepFrom::none, m_caret_pos);
 		caret_updated = true;
 	}
 
 	void MathDocument::stepRight()
 	{
+		m_container->step(StepDir::right, StepFrom::none, m_caret_pos);
 		caret_updated = true;
 	}
 
@@ -74,7 +76,7 @@ namespace TryAlgebraCore
 				}
 				m_container->setScalingFactor(1);
 				m_container->calcLine(visual_toolkit);
-				if (m_container->getSizeY() > m_doc_size.y)
+				if (m_container->getSize().y > m_doc_size.y)
 				{
 					break;
 				}

@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+
 namespace TryAlgebraCore
 {
 
@@ -23,11 +24,12 @@ namespace TryAlgebraCore
         TextBufferIterator(const TextBuffer& text_buffer, int line_num);
         bool isEnd();
         const wchar_t& next();
+        std::optional<wchar_t> lookAhead(size_t num);
         void back();
         const wchar_t& current();
         int getChId() { return m_ch_id; }
     private:
         const std::wstring& m_buffer;
-        int m_ch_id;
+        size_t m_ch_id;
     };
 }

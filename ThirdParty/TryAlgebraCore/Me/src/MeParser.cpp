@@ -2,17 +2,19 @@
 #include <Me/include/MeCharacter.h>
 #include <Me/include/MeContainer.h>
 #include <Me/include/MeNewLine.h>
+#include <Me/include/MeGlobals.h>
+#include <Me/include/MeFromTo.h>
 
 namespace TryAlgebraCore
 {
-	std::unique_ptr<MeBase> MeGenerator::generateMe(const std::wstring& me_str)
-	{
-		return std::unique_ptr<MeBase>();
-	}
 	MeParser::MeParser(const TextBuffer& text_buffer, int line_num)
 		:m_it(text_buffer, line_num)
 	{
-
+		auto gen = m_factory.emplace(MeNames::from_to,
+			[]()
+			{
+				return std::make_unique<MeFromTo>();
+			});
 	}
 
 	bool MeParser::parseLine(MeContainer* container)
@@ -26,16 +28,17 @@ namespace TryAlgebraCore
 		return true;
 	}
 
-	void MeParser::parse(bool parse_one_line)
+	MeParser::ParsingResult MeParser::parse(bool parse_one_line)
 	{
 		m_parent->setChTo(m_it.getChId());
 		while (true)
 		{
 			if (m_it.isEnd())
 			{
-				return;
+				return ParsingResult::end;
 			}
 			wchar_t ch = m_it.next();
+
 			if (ch == L'\n')
 			{
 				auto me = MyRTTI::MakeTypedUnique<MeNewLine>();
@@ -45,11 +48,28 @@ namespace TryAlgebraCore
 				m_parent->addChild(std::move(me));
 				if (parse_one_line)
 				{
-					return;
+					return ParsingResult::end_line;
 				}
 			}
 			else if (ch == '\\')
 			{
+				if (auto next_ch = m_it.lookAhead(0))
+				{
+					if (*next_ch == L',')
+					{
+						//next child
+						//go up the stack
+						m_it.next();
+						return ParsingResult::next_child;
+					}
+					else if (*next_ch == L'}')
+					{
+						//end children
+						// go up the stack
+						m_it.next();
+						return ParsingResult::end_children;
+					}
+				}
 				consumeMe();
 			}
 			else
@@ -65,14 +85,31 @@ namespace TryAlgebraCore
 
 	void MeParser::consumeMe()
 	{
-		std::wstring str;
+		std::wstring me_name;
 		while (true)
 		{
 			wchar_t ch = m_it.next();
 			if (ch == L'\\')
 			{
-				consumeMeta();
+				auto new_me = make(me_name);
+				assert(new_me);
+				m_current = new_me.get();
+				m_parent->addChild(std::move(new_me));
+				if (auto next_ch = m_it.lookAhead(0))
+				{
+					if (*next_ch == L'{')
+					{
+						m_it.next();
+						startChildren();
+					}
+					else
+					{
+						consumeMeta();
+					}
+				}
+				return;
 			}
+			me_name += ch;
 		}
 	}
 
@@ -82,11 +119,18 @@ namespace TryAlgebraCore
 		while (true)
 		{
 			wchar_t ch = m_it.next();
-			if (ch == L'{')
+			if (ch == L'\\')
 			{
-				m_current->setMeta(str);
-				startChildren();
-				return;
+				if (auto next = m_it.lookAhead(0))
+				{
+					if (*next == L'{')
+					{
+						m_current->setMeta(str);
+						m_it.next();
+						startChildren();
+						return;
+					}
+				}
 			}
 			str += ch;
 		}
@@ -96,14 +140,28 @@ namespace TryAlgebraCore
 	{
 		MeBase* parent = m_parent;
 		MeBase* current = m_current;
-		while(m_it.current() != '\}')
+		while(true)
 		{
 			auto cont = MyRTTI::MakeTypedUnique<MeContainer>();
 			m_parent = cont.get();
 			current->addChild(std::move(cont));
-			parse(false);
+			if (parse(false) == ParsingResult::end_children)
+			{
+				break;
+			}
+			
 		}
 		m_parent = parent;
+	}
+
+	std::unique_ptr<MeBase> MeParser::make(const std::wstring& name)
+	{
+		auto found = m_factory.find(name);
+		if (found != m_factory.end())
+		{
+			return found->second();
+		}
+		return std::unique_ptr<MeBase>();
 	}
 
 }

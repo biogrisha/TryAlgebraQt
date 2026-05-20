@@ -176,4 +176,17 @@ namespace TryAlgebraCore
 		}
 		return false;
 	}
+	void MeHelpers::alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x)
+	{
+		for (auto& me : mes)
+		{
+			float me_center = me->getSize().x / 2;
+			me->setPosX(-me_center);
+			center_x = std::max(center_x, me_center);
+		}
+		for (auto& me : mes)
+		{
+			me->setPosX(me->getPos().x + center_x);
+		}
+	}
 }
