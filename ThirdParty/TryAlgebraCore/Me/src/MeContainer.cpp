@@ -5,7 +5,7 @@
 #include <Me/include/MeNewLine.h>
 #include <Helpers/include/MeHelpers.h>
 #include <algorithm>
-
+#include <iostream>
 namespace TryAlgebraCore
 {
 	void MeContainer::calcLine(VisualToolkit* visual_toolkit, size_t end)
@@ -53,18 +53,18 @@ namespace TryAlgebraCore
 	}
 	void MeContainer::step(StepDir dir, StepFrom step_from, AbsPath& path)
 	{
-		MeHelpers::absToChildPos()
+		std::optional<int> child_id = MeHelpers::absToChildPos(this, path.back().from);
 		if (dir == StepDir::right)
 		{
 			//not last -> next -> has child -> inside
 			//                    no child  -> next
 			//last -> parent.outside
-
-		}
-		else if (dir == StepDir::left)
-		{
 			
 		}
+		//else if (dir == StepDir::left)
+		//{
+		//	
+		//}
 
 	}
 	void MeContainer::calculate(VisualToolkit* visual_toolkit)

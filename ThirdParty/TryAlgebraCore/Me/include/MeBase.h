@@ -46,10 +46,11 @@ namespace TryAlgebraCore
 
 		float getBearingY() { return m_bearing_y; }
 		std::vector<std::unique_ptr<MeBase>>& getChildren() { return m_children; }
+		const std::vector<std::unique_ptr<MeBase>>& getChildren() const { return m_children; }
 		void setChFrom(int i) { m_ch_from = i; }
-		int getChFrom() { return m_ch_from; }
+		int getChFrom() const { return m_ch_from; }
 		void setChTo(int i) { m_ch_to = i; }
-		int getChTo() { return m_ch_to; }
+		int getChTo() const { return m_ch_to; }
 		float getScalingFactor() { return m_scaling_factor; }
 		void setScalingFactor(float val) { m_scaling_factor = val; }
 		void setParent(MeBase* parent) { m_parent = parent; }

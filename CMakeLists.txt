@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(X_VCPKG_APPLOCAL_DEPS_INSTALL ON)
 project(TryAlgebraProj LANGUAGES CXX)
 
+enable_testing()
+
+find_package(GTest CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
 
 qt_standard_project_setup(REQUIRES 6.5)
@@ -17,6 +20,7 @@ add_subdirectory(ThirdParty/MathDocumentRendering)
 add_subdirectory(ThirdParty/VulkanFramework/MathLibrary)
 add_subdirectory(ThirdParty/TryAlgebraCore)
 add_subdirectory(Application)
+add_subdirectory(tests)
 
 
 qt_add_executable(TryAlgebra

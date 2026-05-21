@@ -5,9 +5,13 @@
 
 namespace TryAlgebraCore
 {
-	std::optional<int> MeHelpers::absToChildPos(MeBase* from, size_t pos)
+	std::optional<size_t> MeHelpers::absToChildPos(const MeBase* from, size_t pos)
 	{
 		auto& children = from->getChildren();
+		if (children.empty())
+		{
+			return std::nullopt;
+		}
 		auto it = std::lower_bound(
 			children.begin(),
 			children.end(),
@@ -18,6 +22,10 @@ namespace TryAlgebraCore
 		);
 		if(it != children.end())
 		{
+			if (it->get()->getChFrom() != pos)
+			{
+				return std::nullopt;
+			}
 			return std::distance(children.begin(), it);
 		}
 		return std::nullopt;

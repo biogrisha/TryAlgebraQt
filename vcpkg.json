@@ -7,6 +7,7 @@
     "tinyobjloader",
     "vulkan",
     "boost-signals2",
-    "nlohmann-json"
+    "nlohmann-json",
+    "gtest"
   ]
 }
