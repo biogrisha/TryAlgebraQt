@@ -11,6 +11,9 @@ namespace TryAlgebraCore
 	MathDocument::MathDocument()
 	{
 		m_doc_size = { 0, 0 };
+		m_caret_pos = { 
+			{0,0}
+		};
 	}
 
 	void MathDocument::setText(const std::wstring& str)
@@ -88,8 +91,8 @@ namespace TryAlgebraCore
 		if(caret_updated)
 		{
 			//draw caret
-			//auto caret_data = MeHelpers::getCaretData(m_container.get(), m_caret_pos);
-			//visual_toolkit->mdoc_state->SetCaret(caret_data);
+			auto caret_data = MeHelpers::getCaretData(m_container.get(), m_caret_pos);
+			visual_toolkit->mdoc_state->SetCaret(caret_data);
 		}
 		if (highlight_updated)
 		{

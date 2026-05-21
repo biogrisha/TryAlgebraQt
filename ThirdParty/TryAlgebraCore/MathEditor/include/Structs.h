@@ -7,7 +7,11 @@ namespace TryAlgebraCore{
 		size_t to = 0;
 	};
 
-	class AbsPath : public std::vector<AbsPathEl>
-	{
-	};
+    class AbsPath : public std::vector<AbsPathEl>
+    {
+    public:
+        using Base = std::vector<AbsPathEl>;
+        using Base::Base;
+        using Base::operator=;
+    };
 }

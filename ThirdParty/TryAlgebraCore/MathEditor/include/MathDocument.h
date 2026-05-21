@@ -30,7 +30,7 @@ namespace TryAlgebraCore
 		bool highlight_updated = false;
 
 		bool selecting = false;
-		std::vector<AbsPathEl> m_caret_pos;
+		AbsPath m_caret_pos;
 
 	};
 }

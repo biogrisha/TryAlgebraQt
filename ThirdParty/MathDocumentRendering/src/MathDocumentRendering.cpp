@@ -123,7 +123,7 @@ void FMathDocumentRendering::UpdateCaret(const FCaretData& CaretData)
 	Caret.Alpha = 1;
 	Caret.Pos = CaretData.Pos;
 	Caret.Size = CaretData.Size;
-	Caret.SpriteName = "TextCaret.png";
+	Caret.SpriteName = "Caret.png";
 	SpriteRendering.SetInstances({ Caret });
 }
 

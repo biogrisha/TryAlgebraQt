@@ -97,6 +97,7 @@ namespace TryAlgebraCore
 				m_current = new_me.get();
 				m_parent->addChild(std::move(new_me));
 				m_current->setChFrom(ch_from);
+				m_current->setParent(m_parent);
 				if (auto next_ch = m_it.lookAhead(0))
 				{
 					if (*next_ch == L'{')
@@ -147,6 +148,7 @@ namespace TryAlgebraCore
 		{
 			auto cont = MyRTTI::MakeTypedUnique<MeContainer>();
 			cont->setChFrom(m_it.getChId());
+			cont->setParent(m_current);
 			m_parent = cont.get();
 			current->addChild(std::move(cont));
 			if (parse(false) == ParsingResult::end_children)

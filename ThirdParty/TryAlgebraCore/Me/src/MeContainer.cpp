@@ -3,6 +3,7 @@
 #include <Me/include/MeCharacter.h>
 #include <Me/include/MeGlobals.h>
 #include <Me/include/MeNewLine.h>
+#include <Helpers/include/MeHelpers.h>
 #include <algorithm>
 
 namespace TryAlgebraCore
@@ -35,7 +36,7 @@ namespace TryAlgebraCore
 	}
 	void MeContainer::addEmptyLine()
 	{
-		m_size.y += g_caret_height * m_scaling_factor;
+		m_size.y += g_caret_def_size.y * m_scaling_factor;
 	}
 	void MeContainer::draw(VisualToolkit* visual_toolkit)
 	{
@@ -50,32 +51,15 @@ namespace TryAlgebraCore
 		rect.Size = getSize();
 		visual_toolkit->mdoc_state->AddRect(rect);
 	}
-	void MeContainer::step(StepDir dir, StepFrom step_from, std::vector<AbsPathEl>& path)
+	void MeContainer::step(StepDir dir, StepFrom step_from, AbsPath& path)
 	{
-
-		//last, next cont (neighbour(start,end),grandparent(next,prev))
-		//up - line above,next cont(neighbour(start,end),grandparent(next,prev))
-		//down - line below, next cont(neighbour(start,end),grandparent(next,prev))
-		//next - next me, in cont child
-		//prev -> prev me, in cont prev child
-
+		MeHelpers::absToChildPos()
 		if (dir == StepDir::right)
 		{
-			/*auto it = std::lower_bound(
-				m_children.begin(),
-				m_children.end(),
-				10,
-				[](const std::unique_ptr<MeBase>& ch, int value) {
-					return ch->getChFrom() < value;
-				}
-			);
+			//not last -> next -> has child -> inside
+			//                    no child  -> next
+			//last -> parent.outside
 
-			if (it != m_children.end() && it->id == targetId) {
-				std::cout << "Found: " << it->name << '\n';
-			}
-			else {
-				std::cout << "Not found\n";
-			}*/
 		}
 		else if (dir == StepDir::left)
 		{
@@ -103,6 +87,6 @@ namespace TryAlgebraCore
 			calcLine(visual_toolkit);
 		}
 		setSizeX(std::max(getSize().x, m_scaling_factor * 10));
-		setSizeY(std::max(getSize().y, m_scaling_factor * g_caret_height));
+		setSizeY(std::max(getSize().y, m_scaling_factor * g_caret_def_size.y));
 	}
 }

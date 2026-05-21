@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <optional>
 #include <Me/include/MeBase.h>
 #include <MathDocumentRenderingStructs.h>
 #include <MathEditor/include/Structs.h>
@@ -23,8 +24,9 @@ namespace TryAlgebraCore
 			MeBase* me = nullptr;
 		};
 
+		static std::optional<int> absToChildPos(MeBase* from, size_t pos);
 		static GetByPathRes getByPath(MeBase* from, const AbsPath& path);
-		static FCaretData getCaretData(MeBase* from, const std::vector<AbsPathEl>& path);
+		static FCaretData getCaretData(MeBase* from, const AbsPath& path);
 
 		static void updateSelection(VisualToolkit* vt, MeBase* cont, int from, int to);
 		static int getAbsCaretPos(MeBase* from, const std::vector<int>& path);

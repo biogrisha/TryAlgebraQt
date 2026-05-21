@@ -173,7 +173,7 @@
         </struct>
         <key>individualSpriteSettings</key>
         <map type="IndividualSpriteSettingsMap">
-            <key type="filename">../Icons/Smile.png</key>
+            <key type="filename">../Icons/Caret.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -182,24 +182,9 @@
                 <key>scale9Enabled</key>
                 <false/>
                 <key>scale9Borders</key>
-                <rect>20,16,39,32</rect>
+                <rect>2,8,3,15</rect>
                 <key>scale9Paddings</key>
-                <rect>20,16,39,32</rect>
-                <key>scale9FromFile</key>
-                <false/>
-            </struct>
-            <key type="filename">../Icons/TextCaret.png</key>
-            <struct type="IndividualSpriteSettings">
-                <key>pivotPoint</key>
-                <point_f>0.5,0.5</point_f>
-                <key>spriteScale</key>
-                <double>1</double>
-                <key>scale9Enabled</key>
-                <false/>
-                <key>scale9Borders</key>
-                <rect>8,16,16,32</rect>
-                <key>scale9Paddings</key>
-                <rect>8,16,16,32</rect>
+                <rect>2,8,3,15</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -210,8 +195,7 @@
             <struct type="SpriteSheet">
                 <key>files</key>
                 <array>
-                    <filename>../Icons/TextCaret.png</filename>
-                    <filename>../Icons/Smile.png</filename>
+                    <filename>../Icons/Caret.png</filename>
                 </array>
             </struct>
         </map>

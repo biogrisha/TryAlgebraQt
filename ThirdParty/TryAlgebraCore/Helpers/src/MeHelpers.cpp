@@ -5,6 +5,24 @@
 
 namespace TryAlgebraCore
 {
+	std::optional<int> MeHelpers::absToChildPos(MeBase* from, size_t pos)
+	{
+		auto& children = from->getChildren();
+		auto it = std::lower_bound(
+			children.begin(),
+			children.end(),
+			pos,
+			[](const std::unique_ptr<MeBase>& me, size_t value) {
+				return me->getChFrom() < value;
+			}
+		);
+		if(it != children.end())
+		{
+			return std::distance(children.begin(), it);
+		}
+		return std::nullopt;
+	}
+
 	MeHelpers::GetByPathRes MeHelpers::getByPath(MeBase* from, const AbsPath& path)
 	{
 		GetByPathRes res;
@@ -33,6 +51,7 @@ namespace TryAlgebraCore
 		{
 			res.me = from;
 			res.status = GetByPathStatus::cont;
+			return res;
 		}
 		auto& path_el = path.back();
 		auto it = std::lower_bound(
@@ -60,53 +79,52 @@ namespace TryAlgebraCore
 		}
 		return res;
 	}
-	FCaretData MeHelpers::getCaretData(MeBase* from, const std::vector<AbsPathEl>& path)
+	FCaretData MeHelpers::getCaretData(MeBase* from, const AbsPath& path)
 	{
-		//auto res = getByPath(from, path);
+		auto res = getByPath(from, path);
 
-		//FCaretData caret_data;
-		//caret_data.Pos = { -100, -100 };
-		//glm::vec2 caret_def_size = { 3, 12 };
-		//caret_data.Size = caret_def_size * res.me->getScalingFactor();
-		//switch (res.status)
-		//{
-		//case MeHelpers::GetByPathStatus::cont:
-		//	//containter is empty
-		//	caret_data.Pos = res.me->getPos();
-		//	break;
-		//case MeHelpers::GetByPathStatus::last:
-		//	if (MyRTTI::Is<MeNewLine>(res.me))
-		//	{
-		//		auto cont = res.me->getParent();
-		//		//find next line y
-		//		float y = res.me->getPos().y + res.me->getSize().y;
-		//		auto& children = from->getChildren();
-		//		for (int i = children.size() - 2; i >= 0; --i)
-		//		{
-		//			if (MyRTTI::Is<MeNewLine>(children[i].get()))
-		//			{
-		//				break;
-		//			}
-		//			y = std::max(y, children[i]->getPos().y + children[i]->getSize().y);
-		//		}
-		//		caret_data.Pos.x = 0;
-		//		caret_data.Pos.y = y;
-		//	}
-		//	else
-		//	{
-		//		caret_data.Pos.x = res.me->getPos().x + res.me->getSize().x;
-		//		caret_data.Pos.y = res.me->getPos().y + res.me->getBearingY() - g_caret_height/2;
-		//	}
-		//	break;
-		//case MeHelpers::GetByPathStatus::me:
-		//	caret_data.Pos = res.me->getPos();
-		//	caret_data.Pos.y += res.me->getBearingY() - g_caret_height / 2;
-		//	break;
-		//default:
-		//	break;
-		//}
-		//return caret_data;
-		return {};
+		FCaretData caret_data;
+		caret_data.Pos = g_invalid_caret_pos;
+		caret_data.Size = g_caret_def_size;
+		caret_data.Size.y *= res.me->getScalingFactor();
+		switch (res.status)
+		{
+		case MeHelpers::GetByPathStatus::cont:
+			//containter is empty
+			caret_data.Pos = res.me->getPos();
+			break;
+		case MeHelpers::GetByPathStatus::last:
+			if (MyRTTI::Is<MeNewLine>(res.me))
+			{
+				auto cont = res.me->getParent();
+				//find next line y
+				float y = res.me->getPos().y + res.me->getSize().y;
+				auto& children = from->getChildren();
+				for (int i = children.size() - 2; i >= 0; --i)
+				{
+					if (MyRTTI::Is<MeNewLine>(children[i].get()))
+					{
+						break;
+					}
+					y = std::max(y, children[i]->getPos().y + children[i]->getSize().y);
+				}
+				caret_data.Pos.x = 0;
+				caret_data.Pos.y = y;
+			}
+			else
+			{
+				caret_data.Pos.x = res.me->getPos().x + res.me->getSize().x;
+				caret_data.Pos.y = res.me->getPos().y + res.me->getBearingY() - g_caret_def_size.y / 2;
+			}
+			break;
+		case MeHelpers::GetByPathStatus::me:
+			caret_data.Pos = res.me->getPos();
+			caret_data.Pos.y += res.me->getBearingY() - g_caret_def_size.y * res.me->getScalingFactor() / 2;
+			break;
+		default:
+			break;
+		}
+		return caret_data;
 	}
 
 
