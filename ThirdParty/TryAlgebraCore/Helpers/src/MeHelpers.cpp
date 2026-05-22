@@ -34,24 +34,13 @@ namespace TryAlgebraCore
 	MeHelpers::GetByPathRes MeHelpers::getByPath(MeBase* from, const MePath& path)
 	{
 		GetByPathRes res;
-		/*res.me = from;
+		res.me = from;
 		for(int i = 0; i < path.size() - 1; ++i)
 		{
-			auto& children = from->getChildren();
-			auto& path_el = path[i];
-			auto it = std::lower_bound(
-				children.begin(),
-				children.end(),
-				path_el.from,
-				[](const std::unique_ptr<MeBase>& me, size_t value) {
-					return me->getChFrom() < value;
-				}
-			);
-			if (it != children.end())
-			{
-				assert(it->get()->getChFrom() == path_el.from);
-				from = it->get();
-			}
+			size_t pos = getPosOrFrom(path[i]);
+			auto child_pos = absToChildPos(from, pos);
+			assert(child_pos.has_value());
+			from = from->getChildren()[child_pos.value()].get();
 		}
 
 		auto& children = from->getChildren();
@@ -61,21 +50,14 @@ namespace TryAlgebraCore
 			res.status = GetByPathStatus::cont;
 			return res;
 		}
-		auto& path_el = path.back();
-		auto it = std::lower_bound(
-			children.begin(),
-			children.end(),
-			path_el.from,
-			[](const std::unique_ptr<MeBase>& me, size_t value) {
-				return me->getChFrom() < value;
-			}
-		);
-		if (it != children.end())
+		size_t leaf_pos = std::get<LeafPos>(path.back()).pos;
+		auto child_pos = absToChildPos(from, std::get<LeafPos>(path.back()).pos);
+		if (child_pos.has_value())
 		{
-			res.me = it->get();
+			res.me = from->getChildren()[child_pos.value()].get();
 			res.status = GetByPathStatus::me;
 		}
-		else if (children.back()->getChTo() == path_el.from)
+		else if (children.back()->getChTo() == leaf_pos)
 		{
 			res.me = children.back().get();
 			res.status = GetByPathStatus::last;
@@ -84,7 +66,7 @@ namespace TryAlgebraCore
 		{
 			res.me = from;
 			res.status = GetByPathStatus::outside;
-		}*/
+		}
 		return res;
 	}
 	FCaretData MeHelpers::getCaretData(MeBase* from, const MePath& path)

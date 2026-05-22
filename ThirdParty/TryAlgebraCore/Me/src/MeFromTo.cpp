@@ -52,43 +52,73 @@ namespace TryAlgebraCore
 		//handling container selection
 		if (step_from == StepFrom::inside)
 		{
+			path.pop_back();
 			ContPos& cont_pos = std::get<ContPos>(path.back());
 			std::optional<size_t> child_pos = MeHelpers::absToChildPos(this, cont_pos.from);
 			if (child_pos == 0)
 			{
 				if (dir == StepDir::right || dir == StepDir::down)
 				{
-					const auto& child = getChildren()[1];
-					cont_pos.from = child->getChFrom();
-					path.emplace_back(0, 0);
+					const auto& second_cont = getChildren()[1];
+					cont_pos.from = second_cont->getChFrom();
+					path.push_back(LeafPos(second_cont->getChFrom()));
 				}
 				else
 				{
 					path.pop_back();
+					MePos& me_pos = std::get<MePos>(path.back());
+					path.back() = LeafPos(me_pos.from);
 				}
 			}
-			else
+			else if(child_pos == 1)
 			{
 				if (dir == StepDir::left || dir == StepDir::up)
 				{
-					const auto& child = getChildren()[0];
-					path.back().from = child->getChFrom();
-					if(child->getChildren().empty())
+					const auto& first_cont = getChildren()[0];
+					cont_pos.from = first_cont->getChFrom();
+
+					auto& cont_children = first_cont->getChildren();
+					if(cont_children.empty())
 					{
-						path.emplace_back(0, 0);
+						path.push_back(LeafPos(first_cont->getChFrom()));
 					}
 					else
 					{
-
+						path.push_back(LeafPos(cont_children.back()->getChTo()));
 					}
 				}
 				else
 				{
 					path.pop_back();
+					MePos& me_pos = std::get<MePos>(path.back());
+					path.back() = LeafPos(me_pos.to);
 				}
 			}
 			
 		}
-
+		else if (step_from == StepFrom::outside)
+		{
+			//path points at this
+			path.back() = MePos(getChFrom(), getChTo());
+			if (dir == StepDir::left)
+			{
+				auto& second_cont = getChildren()[1];
+				auto& cont_children = second_cont->getChildren();
+				path.push_back(ContPos(second_cont->getChFrom()));
+				if (cont_children.empty())
+				{
+					path.push_back(LeafPos(second_cont->getChFrom()));
+				}
+				else
+				{
+					path.push_back(LeafPos(cont_children.back()->getChTo()));
+				}
+			}
+			else if (dir == StepDir::right)
+			{
+				path.push_back(ContPos(getChildren()[0]->getChFrom()));
+				path.push_back(LeafPos(getChildren()[0]->getChFrom()));
+			}
+		}
 	}
 }

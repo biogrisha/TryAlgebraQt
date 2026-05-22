@@ -20,9 +20,9 @@ inline std::unique_ptr<MeContainer> parse(const std::wstring& str)
 
 inline std::wstring str1 = L"abc\\ft\\A\\{abc\\,efg\\}";
 
-void absToChildPosTest(size_t pos, int child_pos, bool valid, MeBase* cont)
+void absToChildPosTest(size_t pos, size_t child_pos, bool valid, MeBase* cont)
 {
-    std::optional<int> child_id = MeHelpers::absToChildPos(cont, pos);
+    std::optional<size_t> child_id = MeHelpers::absToChildPos(cont, pos);
     EXPECT_EQ(child_id.has_value(), valid);
     if(child_id.has_value())
         EXPECT_EQ(child_id.value(), child_pos);
@@ -80,14 +80,128 @@ TEST(MeHelper, absToChildPosTestFrom_to1Cont0)
 
 //navigation
 //path always points at element in 
-TEST(MeNavigation, step)
+void fromToStepTest(MePath path_start, MePath path_res, StepDir dir, StepFrom step_from)
 {
-    MePath path = {
-        MePos{3,20},
-        ContPos{10},
-    };
     auto cont = parse(str1);
     auto from_to = MyRTTI::Cast<MeFromTo>(cont->getChildren()[3].get());
-    from_to->step(StepDir::right, StepFrom::outside, path);
+    from_to->step(dir, step_from, path_start);
+    EXPECT_EQ(path_start, path_res);
+}
 
+TEST(MeNavigation, fromToStepTest1)
+{
+    MePath path_start = {
+        MePos{3,20},
+        ContPos{10},
+        LeafPos{10}
+    };
+
+    MePath path_res = {
+        LeafPos{3},
+    };
+    fromToStepTest(path_start, path_res, StepDir::left, StepFrom::inside);
+}
+
+TEST(MeNavigation, fromToStepTest2)
+{
+    MePath path_start = {
+        MePos{3,20},
+        ContPos{10},
+        LeafPos{13}
+    };
+
+    MePath path_res = {
+        MePos{3,20},
+        ContPos{15},
+        LeafPos{15},
+    };
+    fromToStepTest(path_start, path_res, StepDir::right, StepFrom::inside);
+}
+
+TEST(MeNavigation, fromToStepTest3)
+{
+    MePath path_start = {
+        MePos{3,20},
+        ContPos{15},
+        LeafPos{18}
+    };
+
+    MePath path_res = {
+        LeafPos{20},
+    };
+    fromToStepTest(path_start, path_res, StepDir::right, StepFrom::inside);
+}
+
+TEST(MeNavigation, fromToStepTest4)
+{
+    MePath path_start = {
+        MePos{3,20},
+        ContPos{15},
+        LeafPos{15}
+    };
+
+    MePath path_res = {
+        MePos{3,20},
+        ContPos{10},
+        LeafPos{13}
+    };
+    fromToStepTest(path_start, path_res, StepDir::left, StepFrom::inside);
+}
+
+TEST(MeNavigation, fromToStepTest5)
+{
+    MePath path_start = {
+        LeafPos{20}
+    };
+
+    MePath path_res = {
+        MePos{3,20},
+        ContPos{15},
+        LeafPos{18}
+    };
+    fromToStepTest(path_start, path_res, StepDir::left, StepFrom::outside);
+}
+
+TEST(MeNavigation, fromToStepTest6)
+{
+    MePath path_start = {
+        LeafPos{3}
+    };
+
+    MePath path_res = {
+        MePos{3,20},
+        ContPos{10},
+        LeafPos{10}
+    };
+    fromToStepTest(path_start, path_res, StepDir::right, StepFrom::outside);
+}
+
+inline std::wstring str2 = L"abc\\ft\\A\\{abc\\,efg\\}efg";
+inline std::wstring str3 = L"abc\\ft\\A\\{abc\\,e\\ft\\A\\{a\\,b\\}fg\\}efg";
+inline std::wstring str4 = L"\\ft\\A\\{\\,efg\\}efg";
+
+void getByPathTest(const MePath& path, MeBase* from, MeBase* res_me, MeHelpers::GetByPathStatus status)
+{
+    auto res = MeHelpers::getByPath(from, path);
+    EXPECT_EQ(res.status, status);
+    EXPECT_EQ(res.me, res_me);
+}
+TEST(MeNavigation, getByPathTest1)
+{
+    MePath path = {
+        LeafPos{3}
+    };
+    auto cont = parse(str2);
+    auto ch = cont->getChildren()[3].get();
+    getByPathTest(path, cont.get(), ch, MeHelpers::GetByPathStatus::me);
+}
+
+TEST(MeNavigation, getByPathTest2)
+{
+    MePath path = {
+        LeafPos{23}
+    };
+    auto cont = parse(str2);
+    auto ch = cont->getChildren().back().get();
+    getByPathTest(path, cont.get(), ch, MeHelpers::GetByPathStatus::last);
 }

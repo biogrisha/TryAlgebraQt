@@ -32,7 +32,10 @@ namespace TryAlgebraCore
 		virtual void draw(VisualToolkit* visual_toolkit) {}
 		virtual void calculate(VisualToolkit* visual_toolkit) {}
 
-		//path must point at a child of this me
+		//updates path giving direction and from where step received
+		//assertions for non-container:
+		//1)if step_from == inside -> path points to element in child container
+		//2)if step_from == outside -> path ends with LeafPos and points at element
 		virtual void step(StepDir dir, StepFrom step_from, MePath& path) {}
 		void addChild(std::unique_ptr<MeBase>&& child);
 		const glm::vec2& getSize() { return m_size; }
