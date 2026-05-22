@@ -51,15 +51,26 @@ namespace TryAlgebraCore
 		rect.Size = getSize();
 		visual_toolkit->mdoc_state->AddRect(rect);
 	}
-	void MeContainer::step(StepDir dir, StepFrom step_from, AbsPath& path)
+	void MeContainer::step(StepDir dir, StepFrom step_from, MePath& path)
 	{
-		std::optional<int> child_id = MeHelpers::absToChildPos(this, path.back().from);
+		auto res = MeHelpers::getByPath(this, path);
+
 		if (dir == StepDir::right)
 		{
 			//not last -> next -> has child -> inside
 			//                    no child  -> next
 			//last -> parent.outside
-			
+			if (res.status == MeHelpers::GetByPathStatus::cont)
+			{
+				//this means that cont is empty
+				//step left will chose next cont
+				auto parent = res.me->getParent();
+				if (!parent)
+				{
+					return;
+				}
+				parent->step(dir, StepFrom::inside, path);
+			}
 		}
 		//else if (dir == StepDir::left)
 		//{

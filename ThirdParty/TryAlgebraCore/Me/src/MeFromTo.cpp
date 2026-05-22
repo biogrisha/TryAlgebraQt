@@ -47,4 +47,48 @@ namespace TryAlgebraCore
 		m_glyph.Pos += getPos();
 		visual_toolkit->mdoc_state->AddGlyph(m_glyph);
 	}
+	void MeFromTo::step(StepDir dir, StepFrom step_from, MePath& path)
+	{
+		//handling container selection
+		if (step_from == StepFrom::inside)
+		{
+			ContPos& cont_pos = std::get<ContPos>(path.back());
+			std::optional<size_t> child_pos = MeHelpers::absToChildPos(this, cont_pos.from);
+			if (child_pos == 0)
+			{
+				if (dir == StepDir::right || dir == StepDir::down)
+				{
+					const auto& child = getChildren()[1];
+					cont_pos.from = child->getChFrom();
+					path.emplace_back(0, 0);
+				}
+				else
+				{
+					path.pop_back();
+				}
+			}
+			else
+			{
+				if (dir == StepDir::left || dir == StepDir::up)
+				{
+					const auto& child = getChildren()[0];
+					path.back().from = child->getChFrom();
+					if(child->getChildren().empty())
+					{
+						path.emplace_back(0, 0);
+					}
+					else
+					{
+
+					}
+				}
+				else
+				{
+					path.pop_back();
+				}
+			}
+			
+		}
+
+	}
 }

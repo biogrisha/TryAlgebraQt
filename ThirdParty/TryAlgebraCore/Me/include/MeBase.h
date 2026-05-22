@@ -31,7 +31,9 @@ namespace TryAlgebraCore
 		virtual void setMeta(const std::wstring& meta) {}
 		virtual void draw(VisualToolkit* visual_toolkit) {}
 		virtual void calculate(VisualToolkit* visual_toolkit) {}
-		virtual void step(StepDir dir, StepFrom step_from, AbsPath& path) {}
+
+		//path must point at a child of this me
+		virtual void step(StepDir dir, StepFrom step_from, MePath& path) {}
 		void addChild(std::unique_ptr<MeBase>&& child);
 		const glm::vec2& getSize() { return m_size; }
 		const glm::vec2& getPos() { return m_pos; }

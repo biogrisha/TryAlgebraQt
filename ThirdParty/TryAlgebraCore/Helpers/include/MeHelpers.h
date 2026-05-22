@@ -25,12 +25,12 @@ namespace TryAlgebraCore
 		};
 
 		static std::optional<size_t> absToChildPos(const MeBase* from, size_t pos);
-		static GetByPathRes getByPath(MeBase* from, const AbsPath& path);
-		static FCaretData getCaretData(MeBase* from, const AbsPath& path);
+		static GetByPathRes getByPath(MeBase* from, const MePath& path);
+		static FCaretData getCaretData(MeBase* from, const MePath& path);
 
 		static void updateSelection(VisualToolkit* vt, MeBase* cont, int from, int to);
 		static int getAbsCaretPos(MeBase* from, const std::vector<int>& path);
-		static std::vector<AbsPathEl> getAbsCaretPath(MeBase* from, const std::vector<int>& path);
+		static std::vector<MePos> getAbsCaretPath(MeBase* from, const std::vector<int>& path);
 		static bool isWithinMe(const glm::vec2& pos, MeBase* me);
 		static bool isLeft(const glm::vec2& pos, MeBase* me);
 		static bool getPathAtPos(MeBase* from, const glm::vec2& pos, std::vector<int>& path);

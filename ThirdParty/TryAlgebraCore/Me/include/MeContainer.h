@@ -10,7 +10,7 @@ namespace TryAlgebraCore
 
 	public:
 		virtual void draw(VisualToolkit* visual_toolkit) override;
-		virtual void step(StepDir dir, StepFrom step_from, AbsPath& path) override;
+		virtual void step(StepDir dir, StepFrom step_from, MePath& path) override;
 		virtual void calculate(VisualToolkit* visual_toolkit) override;
 
 		void calcLine(VisualToolkit* visual_toolkit, size_t end = UINT64_MAX);

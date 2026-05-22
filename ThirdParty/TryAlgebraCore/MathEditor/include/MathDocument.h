@@ -30,7 +30,7 @@ namespace TryAlgebraCore
 		bool highlight_updated = false;
 
 		bool selecting = false;
-		AbsPath m_caret_pos;
+		MePath m_caret_pos;
 
 	};
 }

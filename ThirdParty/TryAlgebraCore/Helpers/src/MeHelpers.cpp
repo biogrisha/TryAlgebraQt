@@ -31,10 +31,10 @@ namespace TryAlgebraCore
 		return std::nullopt;
 	}
 
-	MeHelpers::GetByPathRes MeHelpers::getByPath(MeBase* from, const AbsPath& path)
+	MeHelpers::GetByPathRes MeHelpers::getByPath(MeBase* from, const MePath& path)
 	{
 		GetByPathRes res;
-		res.me = from;
+		/*res.me = from;
 		for(int i = 0; i < path.size() - 1; ++i)
 		{
 			auto& children = from->getChildren();
@@ -84,10 +84,10 @@ namespace TryAlgebraCore
 		{
 			res.me = from;
 			res.status = GetByPathStatus::outside;
-		}
+		}*/
 		return res;
 	}
-	FCaretData MeHelpers::getCaretData(MeBase* from, const AbsPath& path)
+	FCaretData MeHelpers::getCaretData(MeBase* from, const MePath& path)
 	{
 		auto res = getByPath(from, path);
 
@@ -166,9 +166,9 @@ namespace TryAlgebraCore
 		return 0;
 	}
 
-	std::vector<AbsPathEl> MeHelpers::getAbsCaretPath(MeBase* from, const std::vector<int>& path)
+	std::vector<MePos> MeHelpers::getAbsCaretPath(MeBase* from, const std::vector<int>& path)
 	{
-		std::vector<AbsPathEl> res;
+		std::vector<MePos> res;
 		////can point at cont, last, me
 		//int i = 0;
 		//for (int pos : path)
