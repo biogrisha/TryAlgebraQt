@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "Navigation.h"
+//#include "Navigation.h"
+//#include "MathDocumentTest.h"
+#include "SelectionTest.h"
+
 int main(int argc, char* argv[])
 {
 	testing::InitGoogleTest(&argc, argv);

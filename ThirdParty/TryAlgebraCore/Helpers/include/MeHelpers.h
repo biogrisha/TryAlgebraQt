@@ -21,6 +21,7 @@ namespace TryAlgebraCore
 		struct GetByPathRes
 		{
 			GetByPathStatus status = GetByPathStatus::me;
+			std::optional<size_t> pos;
 			MeBase* me = nullptr;
 		};
 

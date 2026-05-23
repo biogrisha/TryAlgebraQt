@@ -2,6 +2,10 @@
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
+FFreeTypeWrap::~FFreeTypeWrap()
+{
+	Shutdown();
+}
 void FFreeTypeWrap::Init(float InDpiX, float InDpiY)
 {
 	
@@ -40,6 +44,27 @@ void FFreeTypeWrap::Init(float InDpiX, float InDpiY)
 	else if (error)
 	{
 		throw std::runtime_error("FontError");
+	}
+}
+
+void FFreeTypeWrap::Shutdown()
+{
+	if (Face)
+	{
+		FT_Done_Face(Face);
+		Face = nullptr;
+	}
+
+	if (FaceFallback)
+	{
+		FT_Done_Face(FaceFallback);
+		FaceFallback = nullptr;
+	}
+
+	if (Library)
+	{
+		FT_Done_FreeType(Library);
+		Library = nullptr;
 	}
 }
 

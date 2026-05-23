@@ -54,22 +54,52 @@ namespace TryAlgebraCore
 	void MeContainer::step(StepDir dir, StepFrom step_from, MePath& path)
 	{
 		auto res = MeHelpers::getByPath(this, path);
-
-		if (dir == StepDir::right)
+		auto cont = res.status == MeHelpers::GetByPathStatus::cont ? res.me : res.me->getParent();
+		assert(cont);
+		auto parent = cont->getParent();
+		if (res.status == MeHelpers::GetByPathStatus::cont
+			|| (res.status == MeHelpers::GetByPathStatus::last && dir == StepDir::right)
+			|| (res.status == MeHelpers::GetByPathStatus::me && res.pos == 0 && dir == StepDir::left)
+			)
 		{
-			//not last -> next -> has child -> inside
-			//                    no child  -> next
-			//last -> parent.outside
-			if (res.status == MeHelpers::GetByPathStatus::cont)
+			//this means that cont is empty
+			//step left will chose next cont
+			if (!parent)
 			{
-				//this means that cont is empty
-				//step left will chose next cont
-				auto parent = res.me->getParent();
-				if (!parent)
-				{
-					return;
-				}
-				parent->step(dir, StepFrom::inside, path);
+				return;
+			}
+			parent->step(dir, StepFrom::inside, path);
+		}
+		else if (dir == StepDir::right)
+		{
+			auto next_me = res.me;
+			if (next_me->getChildren().empty())
+			{
+				path.back() = LeafPos(next_me->getChTo());
+			}
+			else
+			{
+				next_me->step(dir, StepFrom::outside, path);
+			}
+		}
+		else if (dir == StepDir::left)
+		{
+			MeBase* prev = nullptr;
+			if (res.status == MeHelpers::GetByPathStatus::last)
+			{
+				prev = res.me;
+			}
+			else
+			{
+				prev = cont->getChildren()[res.pos.value() - 1].get();
+			}
+			if (prev->getChildren().empty())
+			{
+				path.back() = LeafPos(prev->getChFrom());
+			}
+			else
+			{
+				prev->step(dir, StepFrom::outside, path);
 			}
 		}
 		//else if (dir == StepDir::left)

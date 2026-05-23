@@ -60,6 +60,8 @@ namespace TryAlgebraCore
 		void setScalingFactor(float val) { m_scaling_factor = val; }
 		void setParent(MeBase* parent) { m_parent = parent; }
 		MeBase* getParent() { return m_parent; }
+
+		MeBase& operator[](size_t pos) { return *getChildren()[pos].get(); }
 	protected:
 		glm::vec2 m_pos = { 0, 0 };
 		glm::vec2 m_size = { 0, 0 };

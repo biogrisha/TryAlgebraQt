@@ -54,6 +54,7 @@ namespace TryAlgebraCore
 		auto child_pos = absToChildPos(from, std::get<LeafPos>(path.back()).pos);
 		if (child_pos.has_value())
 		{
+			res.pos = child_pos;
 			res.me = from->getChildren()[child_pos.value()].get();
 			res.status = GetByPathStatus::me;
 		}

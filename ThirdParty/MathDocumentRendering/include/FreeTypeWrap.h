@@ -8,7 +8,9 @@
 class FFreeTypeWrap
 {
 public:
+	~FFreeTypeWrap();
 	void Init(float InDpiX, float InDpiY);
+	void Shutdown();
 	FGlyphRenderData LoadGlyph(const FGlyphId& GlyphId);
 	FGlyphRenderData* GetGlyphRenderData(const FGlyphId& GlyphId);
 	glm::vec2 GetGlyphSize(const FGlyphId& GlyphId);

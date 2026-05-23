@@ -12,7 +12,6 @@ namespace TryAlgebraCore
 	{
 		m_doc_size = { 0, 0 };
 		m_caret_pos = { 
-			ContPos(0),
 			LeafPos(0)
 		};
 	}
