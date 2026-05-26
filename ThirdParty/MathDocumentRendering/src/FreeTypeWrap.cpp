@@ -2,6 +2,13 @@
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
+FFreeTypeWrap::FFreeTypeWrap()
+	: Library(nullptr)
+	, Face(nullptr)
+	, FaceFallback(nullptr)
+{
+}
+
 FFreeTypeWrap::~FFreeTypeWrap()
 {
 	Shutdown();

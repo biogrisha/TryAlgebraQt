@@ -118,59 +118,11 @@ namespace TryAlgebraCore
 		return caret_data;
 	}
 
-
-	void MeHelpers::updateSelection(VisualToolkit* vt, MeBase* cont, int from, int to)
-	{
-		auto& children = cont->getChildren();
-		if (children.empty())
-		{
-			return;
-		}
-		from = std::min(from, children.front()->getChFrom());
-
-	}
-	int MeHelpers::getAbsCaretPos(MeBase* from, const std::vector<int>& path)
-	{
-		/*auto res = getByPath(from, path);
-		switch (res.status)
-		{
-		case MeHelpers::GetByPathStatus::cont:
-			return res.me->getChTo();
-			break;
-		case MeHelpers::GetByPathStatus::last:
-			return res.me->getChTo();
-			break;
-		case MeHelpers::GetByPathStatus::me:
-			return res.me->getChFrom();
-			break;
-		default:
-			break;
-		}*/
-		return 0;
-	}
-
-	std::vector<MePos> MeHelpers::getAbsCaretPath(MeBase* from, const std::vector<int>& path)
-	{
-		std::vector<MePos> res;
-		////can point at cont, last, me
-		//int i = 0;
-		//for (int pos : path)
-		//{
-		//	auto& children = from->getChildren();
-		//	if (children.empty())
-		//	{
-
-		//	}
-		//	from = children[pos]
-		//}
-		return res;
-	}
-
 	bool MeHelpers::isWithinMe(const glm::vec2& pos, MeBase* me)
 	{
 		auto& me_pos = me->getPos();
 		auto me_rb = me->getSize() + me_pos;
-		return pos.x >= me_pos.x && pos.y >= me_pos.y && pos.x <= me_rb.x && pos.y <= me_rb.y;
+		return pos.x >= me_pos.x && pos.y >= me_pos.y && pos.x < me_rb.x && pos.y < me_rb.y;
 	}
 
 	bool MeHelpers::isLeft(const glm::vec2& pos, MeBase* me)
@@ -179,14 +131,22 @@ namespace TryAlgebraCore
 		return pos.x < center;
 	}
 
-	bool MeHelpers::getPathAtPos(MeBase* from, const glm::vec2& pos, std::vector<int>& path)
+	bool MeHelpers::getPathAtPos(MeBase* from, const glm::vec2& pos, MePath& path)
 	{
 		if (isWithinMe(pos, from))
 		{
 			auto& children = from->getChildren();
 			for (int i = 0; i < children.size(); ++i)
 			{
-				path.push_back(i);
+				if (MyRTTI::Is<MeContainer>(children[i].get()))
+				{
+					path.push_back(ContPos(children[i]->getChFrom()));
+				}
+				else
+				{
+					path.push_back(MePos(children[i]->getChFrom(), children[i]->getChTo()));
+				}
+				
 				if (getPathAtPos(children[i].get(), pos, path))
 				{
 					return true;
@@ -197,7 +157,7 @@ namespace TryAlgebraCore
 			{
 				// if pos not pointing at child, but points inside container
 				// find me on the same line or last
-				path.push_back(children.size());
+				path.push_back(LeafPos{children.back()->getChTo()});
 				for (int i = 0; i < children.size(); ++i)
 				{
 					if (children[i]->getPos().y + children[i]->getSize().y > pos.y)
@@ -206,21 +166,28 @@ namespace TryAlgebraCore
 						{
 							if (MyRTTI::Is<MeNewLine>(children[i].get()))
 							{
-								path.back() = i;
+								path.back() = LeafPos{children[i]->getChFrom()};
 								break;
 							}
 						}
 						break;
 					}
 				}
+				return true;
 			}
-			else if (!isLeft(pos, from))
-			{
-				path.back()++;
-			}
+			auto last_me_pos = std::get<MePos>(path.back());
+			path.back() = LeafPos{ isLeft(pos, from) ? last_me_pos.from : last_me_pos.to };
 			return true;
 		}
 		return false;
+	}
+	MeBase* MeHelpers::getByTreePath(MeBase* from, const std::vector<size_t>& path)
+	{
+		for (size_t pos : path)
+		{
+			from = from->getChildren()[pos].get();
+		}
+		return from;
 	}
 	void MeHelpers::alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x)
 	{

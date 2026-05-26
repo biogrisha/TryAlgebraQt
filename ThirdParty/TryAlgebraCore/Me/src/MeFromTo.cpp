@@ -34,14 +34,12 @@ namespace TryAlgebraCore
 			m_glyph.Pos.x = center - m_symbol_width/2;
 			m_glyph.Pos.y = m_children[0]->getSize().y;
 			setBearing(m_children[0]->getSize().y + render_data->HeightInPixels / 2.f);
-		}
-		
+		}		
 	}
 	void MeFromTo::draw(VisualToolkit* visual_toolkit)
 	{
 		for (auto& ch : m_children)
 		{
-			ch->setPos(ch->getPos() + getPos());
 			ch->draw(visual_toolkit);
 		}
 		m_glyph.Pos += getPos();

@@ -42,7 +42,6 @@ namespace TryAlgebraCore
 	{
 		for (auto& ch : m_children)
 		{
-			ch->setPos(ch->getPos() + getPos());
 			ch->draw(visual_toolkit);
 		}
 		FRectInst rect;

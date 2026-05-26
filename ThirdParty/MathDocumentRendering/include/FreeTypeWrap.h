@@ -8,6 +8,7 @@
 class FFreeTypeWrap
 {
 public:
+	FFreeTypeWrap();
 	~FFreeTypeWrap();
 	void Init(float InDpiX, float InDpiY);
 	void Shutdown();

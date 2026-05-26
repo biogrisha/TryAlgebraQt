@@ -31,12 +31,12 @@ namespace TryAlgebraCore
 		virtual void setMeta(const std::wstring& meta) {}
 		virtual void draw(VisualToolkit* visual_toolkit) {}
 		virtual void calculate(VisualToolkit* visual_toolkit) {}
-
 		//updates path giving direction and from where step received
 		//assertions for non-container:
 		//1)if step_from == inside -> path points to element in child container
 		//2)if step_from == outside -> path ends with LeafPos and points at element
 		virtual void step(StepDir dir, StepFrom step_from, MePath& path) {}
+		void calculatePos();
 		void addChild(std::unique_ptr<MeBase>&& child);
 		const glm::vec2& getSize() { return m_size; }
 		const glm::vec2& getPos() { return m_pos; }
@@ -52,10 +52,10 @@ namespace TryAlgebraCore
 		float getBearingY() { return m_bearing_y; }
 		std::vector<std::unique_ptr<MeBase>>& getChildren() { return m_children; }
 		const std::vector<std::unique_ptr<MeBase>>& getChildren() const { return m_children; }
-		void setChFrom(int i) { m_ch_from = i; }
-		int getChFrom() const { return m_ch_from; }
-		void setChTo(int i) { m_ch_to = i; }
-		int getChTo() const { return m_ch_to; }
+		void setChFrom(size_t i) { m_ch_from = i; }
+		size_t getChFrom() const { return m_ch_from; }
+		void setChTo(size_t i) { m_ch_to = i; }
+		size_t getChTo() const { return m_ch_to; }
 		float getScalingFactor() { return m_scaling_factor; }
 		void setScalingFactor(float val) { m_scaling_factor = val; }
 		void setParent(MeBase* parent) { m_parent = parent; }
@@ -68,8 +68,8 @@ namespace TryAlgebraCore
 		float m_bearing_y = 0;
 		std::vector<std::unique_ptr<MeBase>> m_children;
 		MeBase* m_parent = nullptr;
-		int m_ch_from = -1;
-		int m_ch_to = -1;
+		size_t m_ch_from = -1;
+		size_t m_ch_to = -1;
 		float m_scaling_factor = 1.f;
 
 	};

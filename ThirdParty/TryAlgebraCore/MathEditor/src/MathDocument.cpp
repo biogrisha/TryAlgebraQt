@@ -51,7 +51,9 @@ namespace TryAlgebraCore
 
 	void MathDocument::updateSelection(const glm::vec2& pos)
 	{
-		
+		m_caret_pos.clear();
+		MeHelpers::getPathAtPos(m_container.get(), pos, m_caret_pos);
+		caret_updated = true;
 	}
 
 	void MathDocument::stopSelection()
@@ -84,6 +86,7 @@ namespace TryAlgebraCore
 					break;
 				}
 			}
+			m_container->calculatePos();
 			m_container->setSize(m_doc_size);
 			restoreCaretPos(m_container.get());
 			m_container->draw(visual_toolkit);

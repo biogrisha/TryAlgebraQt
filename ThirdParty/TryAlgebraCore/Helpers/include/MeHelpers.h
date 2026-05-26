@@ -16,11 +16,12 @@ namespace TryAlgebraCore
 			last,
 			cont,
 			me,
-			outside
+			outside,
+			none
 		};
 		struct GetByPathRes
 		{
-			GetByPathStatus status = GetByPathStatus::me;
+			GetByPathStatus status = GetByPathStatus::none;
 			std::optional<size_t> pos;
 			MeBase* me = nullptr;
 		};
@@ -29,14 +30,10 @@ namespace TryAlgebraCore
 		static GetByPathRes getByPath(MeBase* from, const MePath& path);
 		static FCaretData getCaretData(MeBase* from, const MePath& path);
 
-		static void updateSelection(VisualToolkit* vt, MeBase* cont, int from, int to);
-		static int getAbsCaretPos(MeBase* from, const std::vector<int>& path);
-		static std::vector<MePos> getAbsCaretPath(MeBase* from, const std::vector<int>& path);
 		static bool isWithinMe(const glm::vec2& pos, MeBase* me);
 		static bool isLeft(const glm::vec2& pos, MeBase* me);
-		static bool getPathAtPos(MeBase* from, const glm::vec2& pos, std::vector<int>& path);
-		static void normalizeSelection(std::vector<int>& from, std::vector<int>& to);
-
+		static bool getPathAtPos(MeBase* from, const glm::vec2& pos, MePath& path);
+		static MeBase* getByTreePath(MeBase* from, const std::vector<size_t>& path);
 
 		//me arrangement
 		static void alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x);

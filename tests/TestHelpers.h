@@ -12,6 +12,6 @@ inline std::unique_ptr<MeContainer> parse(const std::wstring& str)
     tb.insert(str, 0);
     MeParser pr(tb, 0);
     std::unique_ptr<MeContainer> cont = MyRTTI::MakeTypedUnique<MeContainer>();
-    pr.parseLine(cont.get());
+    while(pr.parseLine(cont.get()));
     return cont;
 }
