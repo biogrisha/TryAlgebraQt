@@ -12,7 +12,7 @@ namespace TryAlgebraCore{
 
     struct ContPos
     {
-        size_t from = 0;
+        size_t pos = 0;
         bool operator==(const ContPos&) const = default;
     };
 
@@ -41,24 +41,6 @@ namespace TryAlgebraCore{
         }
     };
 
-    inline size_t getPosOrFrom(const std::variant<MePos, ContPos, LeafPos>& v)
-    {
-        return std::visit([](const auto& x) -> size_t
-            {
-                using T = std::decay_t<decltype(x)>;
-
-                if constexpr (std::is_same_v<T, LeafPos>)
-                {
-                    return x.pos;
-                }
-                else
-                {
-                    return x.from;
-                }
-            }, v);
-    }
-
-
     inline std::ostream& operator<<(std::ostream& os, const MePos& p)
     {
         return os << "MePos{from=" << p.from << ", to=" << p.to << "}";
@@ -66,7 +48,7 @@ namespace TryAlgebraCore{
 
     inline std::ostream& operator<<(std::ostream& os, const ContPos& p)
     {
-        return os << "ContPos{from=" << p.from << "}";
+        return os << "ContPos{from=" << p.pos << "}";
     }
 
     inline std::ostream& operator<<(std::ostream& os, const LeafPos& p)

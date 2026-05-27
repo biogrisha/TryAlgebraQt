@@ -118,6 +118,85 @@ namespace TryAlgebraCore
 		return caret_data;
 	}
 
+	void MeHelpers::orderPaths(MePath& path1, MePath& path2)
+	{
+		for (int i = 0; i < std::min(path1.size(), path2.size()); ++i)
+		{
+			size_t pos1 = getPosOrFrom(path1[i]);
+			size_t pos2 = getPosOrFrom(path2[i]);
+			if (pos1 > pos2)
+			{
+				std::swap(path1, path2);
+				return;
+			}
+			else if (pos2 < pos1)
+			{
+				return;
+			}
+		}
+	}
+
+	void MeHelpers::trimToCommonContainer(MePath& path1, MePath& path2)
+	{
+		size_t min_size = std::min(path1.size(), path2.size());
+		path1.resize(min_size);
+		path2.resize(min_size);
+
+		for (int i = path1.size() - 1; i >= 2; i -= 1)
+		{
+			auto path1_pos = std::get_if<ContPos>(&path1[i - 1]);
+			auto path2_pos = std::get_if<ContPos>(&path2[i - 1]);
+			if (path1_pos && path2_pos)
+			{
+				if (path1_pos->pos == path2_pos->pos)
+				{
+					path1.back() = LeafPos(getPosOrFrom(path1.back()));
+					path2.back() = LeafPos(getPosOrTo(path2.back()));
+					return;
+				}
+			}
+			path1.pop_back();
+			path2.pop_back();
+
+		}
+		path1.back() = LeafPos(getPosOrFrom(path1.back()));
+		path2.back() = LeafPos(getPosOrTo(path2.back()));
+	}
+
+	size_t MeHelpers::getPosOrFrom(const std::variant<MePos, ContPos, LeafPos>& v)
+	{
+		return std::visit([](const auto& x) -> size_t
+			{
+				using T = std::decay_t<decltype(x)>;
+
+				if constexpr (std::is_same_v<T, MePos>)
+				{
+					return x.from;
+				}
+				else
+				{
+					return x.pos;
+				}
+			}, v);
+	}
+
+	size_t MeHelpers::getPosOrTo(const std::variant<MePos, ContPos, LeafPos>& v)
+	{
+		return std::visit([](const auto& x) -> size_t
+			{
+				using T = std::decay_t<decltype(x)>;
+
+				if constexpr (std::is_same_v<T, MePos>)
+				{
+					return x.to;
+				}
+				else
+				{
+					return x.pos;
+				}
+			}, v);
+	}
+
 	bool MeHelpers::isWithinMe(const glm::vec2& pos, MeBase* me)
 	{
 		auto& me_pos = me->getPos();
@@ -201,5 +280,32 @@ namespace TryAlgebraCore
 		{
 			me->setPosX(me->getPos().x + center_x);
 		}
+	}
+	void MeHelpers::highlightSelected(MeBase* cont, MePath from_path, MePath to_path, VisualToolkit* vt)
+	{
+		orderPaths(from_path, to_path);
+		trimToCommonContainer(from_path, to_path);
+		auto me_from_res = getByPath(cont, from_path);
+		if (me_from_res.status == GetByPathStatus::cont || me_from_res.status == GetByPathStatus::last)
+		{
+			return;
+		}
+		else if (me_from_res.status == GetByPathStatus::me)
+		{
+			auto& siblings = me_from_res.me->getParent()->getChildren();
+			size_t i = me_from_res.pos.value();
+			size_t to = std::get<LeafPos>(to_path.back()).pos;
+			while (i < siblings.size() && siblings[i]->getChFrom() < to)
+			{
+				FRectInst rect;
+				rect.Color = { 0,0,0.3,1 };
+				rect.Pos = siblings[i]->getPos();
+				rect.Size = siblings[i]->getSize();
+				vt->mdoc_state->AddRect(rect);
+				++i;
+			}
+
+		}
+
 	}
 }

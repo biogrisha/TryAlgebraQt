@@ -7,11 +7,14 @@
 using namespace TryAlgebraCore;
 
 inline int xDpi, yDpi = 96;
-
+namespace SelectionTest
+{
+	inline std::wstring str1 = L"abc\\ft\\A\\{abc\\,e\\ft\\A\\{\\,\\}fg\\}efg";
+	inline std::wstring str2 = L"abc\\ft\\A\\{abc\\,e\\ft\\A\\{\\,\\}fg\\}e\nfg";
+}
 struct SelectionFixture
 {
-	static inline std::wstring str1 = L"abc\\ft\\A\\{abc\\,e\\ft\\A\\{\\,\\}fg\\}efg";
-	static inline std::wstring str2 = L"abc\\ft\\A\\{abc\\,e\\ft\\A\\{\\,\\}fg\\}e\nfg";
+	
 	SelectionFixture(const std::wstring& str)
 	{
 		ft.Init(xDpi, yDpi);
@@ -34,7 +37,7 @@ enum class PosCase
 	br,
 	br_inside
 };
-glm::vec2 getPosCase(PosCase pos_case, MeBase* me)
+inline glm::vec2 getPosCase(PosCase pos_case, MeBase* me)
 {
 	switch (pos_case)
 	{
@@ -56,7 +59,7 @@ glm::vec2 getPosCase(PosCase pos_case, MeBase* me)
 	
 }
 
-MeHelpers::GetByPathRes meToPosToMe(const SelectionFixture& sf, MeBase* me, PosCase pos_case)
+inline MeHelpers::GetByPathRes meToPosToMe(const SelectionFixture& sf, MeBase* me, PosCase pos_case)
 {
 	auto pos = getPosCase(pos_case, me);
 	MePath path;
@@ -70,72 +73,80 @@ MeHelpers::GetByPathRes meToPosToMe(const SelectionFixture& sf, MeBase* me, PosC
 	}
 }
 
-void getPathAtPosTest_leafTl(const std::vector<size_t>& path)
+inline MePath treePathToMePath(const std::vector<size_t>& tree_path, SelectionFixture& sf)
 {
-	SelectionFixture sf(SelectionFixture::str1);
+	MePath path;
+	auto me = MeHelpers::getByTreePath(sf.cont.get(), tree_path);
+	MeHelpers::getPathAtPos(sf.cont.get(), me->getPos(), path);
+	return path;
+}
+
+inline void getPathAtPosTest_leafTl(const std::vector<size_t>& path)
+{
+	SelectionFixture sf(SelectionTest::str1);
 	auto me = MeHelpers::getByTreePath(sf.cont.get(), path);
 	auto res = meToPosToMe(sf, me, PosCase::tl);
 	EXPECT_EQ(res.status, MeHelpers::GetByPathStatus::me);
 	EXPECT_EQ(res.me, me);
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafTl_0)
+TEST(SelectionTest, getPathAtPosTest_leafTl_0)
 {	
 	getPathAtPosTest_leafTl({ 0 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafTl_1)
+TEST(SelectionTest, getPathAtPosTest_leafTl_1)
 {
 	getPathAtPosTest_leafTl({ 1 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafTl_2)
+TEST(SelectionTest, getPathAtPosTest_leafTl_2)
 {
 	getPathAtPosTest_leafTl({ 6 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafTl_3)
+TEST(SelectionTest, getPathAtPosTest_leafTl_3)
 {
 	getPathAtPosTest_leafTl({ 3,0,0 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafTl_4)
+TEST(SelectionTest, getPathAtPosTest_leafTl_4)
 {
 	getPathAtPosTest_leafTl({ 3,1,2 });
 }
 
-void getPathAtPosTest_leafBr(const std::vector<size_t>& path)
+inline void getPathAtPosTest_leafBr(const std::vector<size_t>& path)
 {
-	SelectionFixture sf(SelectionFixture::str1);
+	SelectionFixture sf(SelectionTest::str1);
 	auto me = MeHelpers::getByTreePath(sf.cont.get(), path);
 	auto res = meToPosToMe(sf, me, PosCase::br);
 	bool check = res.status == MeHelpers::GetByPathStatus::me && res.me == me;
 	EXPECT_FALSE(check);
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBr_0)
+TEST(SelectionTest, getPathAtPosTest_leafBr_0)
 {
 	getPathAtPosTest_leafBr({ 0 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBr_1)
+TEST(SelectionTest, getPathAtPosTest_leafBr_1)
 {
 	getPathAtPosTest_leafBr({ 3 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBr_2)
+TEST(SelectionTest, getPathAtPosTest_leafBr_2)
 {
 	getPathAtPosTest_leafBr({ 6 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBr_3)
+TEST(SelectionTest, getPathAtPosTest_leafBr_3)
 {
 	getPathAtPosTest_leafBr({ 3,1,2 });
 }
 
-void getPathAtPosTest_leafBrInside(const std::vector<size_t>& path, const std::vector<size_t>& path2)
+inline void getPathAtPosTest_leafBrInside(const std::vector<size_t>& path, const std::vector<size_t>& path2)
 {
-	SelectionFixture sf(SelectionFixture::str2);
+	SelectionFixture sf(SelectionTest::str2);
 	auto me1 = MeHelpers::getByTreePath(sf.cont.get(), path);
 
 	auto res = meToPosToMe(sf, me1, PosCase::br_inside);
@@ -144,24 +155,24 @@ void getPathAtPosTest_leafBrInside(const std::vector<size_t>& path, const std::v
 	EXPECT_EQ(res.me, me2);
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBrInside_0)
+TEST(SelectionTest, getPathAtPosTest_leafBrInside_0)
 {
 	getPathAtPosTest_leafBrInside({ 0 }, { 1 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBrInside_1)
+TEST(SelectionTest, getPathAtPosTest_leafBrInside_1)
 {
 	getPathAtPosTest_leafBrInside({ 1 }, { 2 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBrInside_2)
+TEST(SelectionTest, getPathAtPosTest_leafBrInside_2)
 {
 	getPathAtPosTest_leafBrInside({ 4 }, { 5 });
 }
 
-void getPathAtPosTest_leafBrInside_lastInCont(const std::vector<size_t>& path)
+inline void getPathAtPosTest_leafBrInside_lastInCont(const std::vector<size_t>& path)
 {
-	SelectionFixture sf(SelectionFixture::str2);
+	SelectionFixture sf(SelectionTest::str2);
 	auto me = MeHelpers::getByTreePath(sf.cont.get(), path);
 
 	auto res = meToPosToMe(sf, me, PosCase::br_inside);
@@ -169,12 +180,49 @@ void getPathAtPosTest_leafBrInside_lastInCont(const std::vector<size_t>& path)
 	EXPECT_EQ(res.me, me);
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBrInside_lastInCont_0)
+TEST(SelectionTest, getPathAtPosTest_leafBrInside_lastInCont_0)
 {
 	getPathAtPosTest_leafBrInside_lastInCont({ 7 });
 }
 
-TEST(MathDocumentTest, getPathAtPosTest_leafBrInside_lastInCont_1)
+TEST(SelectionTest, getPathAtPosTest_leafBrInside_lastInCont_1)
 {
 	getPathAtPosTest_leafBrInside_lastInCont({ 3,0,2 });
+}
+
+namespace SelectionTest
+{
+	inline std::wstring str3 = L"abc\\ft\\A\\{abc\\,efg\\}dvsdv\\ft\\A\\{abc\\,efg\\}";
+	std::vector<size_t> str3_3me_0cont_1me = { 3,0,1 };
+	std::vector<size_t> str3_9me_0cont_1me = { 9,0,1 };
+	std::vector<size_t> str3_1me = { 1 };
+	std::vector<size_t> str3_2me = { 2 };
+}
+
+void OrderTest(const std::vector<size_t>& tree_path1, const std::vector<size_t>& tree_path2, bool swap)
+{
+	SelectionFixture sf(SelectionTest::str3);
+	auto path1 = treePathToMePath(tree_path1, sf);
+	auto path2 = treePathToMePath(tree_path2, sf);
+	auto path1_copy = path1;
+	auto path2_copy = path2;
+	MeHelpers::orderPaths(path1, path2);
+	EXPECT_EQ(path1, swap ? path2_copy : path1_copy);
+	EXPECT_EQ(path2, swap ? path1_copy : path2_copy);
+}
+
+TEST(SelectionTest, OrderTest0)
+{
+	OrderTest(SelectionTest::str3_3me_0cont_1me, SelectionTest::str3_9me_0cont_1me, false);
+}
+
+TEST(SelectionTest, OrderTest1)
+{
+	OrderTest(SelectionTest::str3_9me_0cont_1me, SelectionTest::str3_3me_0cont_1me, true);
+}
+
+TEST(SelectionTest, OrderTest2)
+{
+	OrderTest(SelectionTest::str3_1me, SelectionTest::str3_2me, false);
+	OrderTest(SelectionTest::str3_2me, SelectionTest::str3_1me, true);
 }

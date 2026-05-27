@@ -29,8 +29,10 @@ namespace TryAlgebraCore
 		bool content_updated = false;
 		bool highlight_updated = false;
 
-		bool selecting = false;
+		bool m_selecting = false;
 		MePath m_caret_pos;
+		MePath m_selection_start;
+		MePath m_selection_end;
 
 	};
 }

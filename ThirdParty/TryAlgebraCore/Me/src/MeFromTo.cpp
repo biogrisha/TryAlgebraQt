@@ -52,13 +52,13 @@ namespace TryAlgebraCore
 		{
 			path.pop_back();
 			ContPos& cont_pos = std::get<ContPos>(path.back());
-			std::optional<size_t> child_pos = MeHelpers::absToChildPos(this, cont_pos.from);
+			std::optional<size_t> child_pos = MeHelpers::absToChildPos(this, cont_pos.pos);
 			if (child_pos == 0)
 			{
 				if (dir == StepDir::right || dir == StepDir::down)
 				{
 					const auto& second_cont = getChildren()[1];
-					cont_pos.from = second_cont->getChFrom();
+					cont_pos.pos = second_cont->getChFrom();
 					path.push_back(LeafPos(second_cont->getChFrom()));
 				}
 				else
@@ -73,7 +73,7 @@ namespace TryAlgebraCore
 				if (dir == StepDir::left || dir == StepDir::up)
 				{
 					const auto& first_cont = getChildren()[0];
-					cont_pos.from = first_cont->getChFrom();
+					cont_pos.pos = first_cont->getChFrom();
 
 					auto& cont_children = first_cont->getChildren();
 					if(cont_children.empty())

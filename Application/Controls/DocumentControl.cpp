@@ -181,6 +181,7 @@ void DocumentControl::moveScrollHandle(float newPos)
 
 void DocumentControl::mouseBtnDown(float x, float y)
 {
+	m_current_doc->stopSelection();
 	m_bLmbDown = true;
 	m_current_doc->updateSelection({ x,y });
 	VisualToolkit vt;
@@ -192,13 +193,17 @@ void DocumentControl::mouseBtnDown(float x, float y)
 
 void DocumentControl::mouseBtnUp(float x, float y)
 {
-	//m_bLmbDown = false;
-	//m_docInfo.lock()->MathDocument->StopSelecting();
+	
 }
 
 void DocumentControl::mousePosUpdated(float x, float y)
 {
-	
+	m_current_doc->updateSelection({ x,y });
+	VisualToolkit vt;
+	vt.ft = AppGlobal::application->getFreeTypeWrap();
+	vt.mdoc_state = &m_visual_state;
+	m_current_doc->draw(&vt);
+	updateElements(true, false, true);
 }
 
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)

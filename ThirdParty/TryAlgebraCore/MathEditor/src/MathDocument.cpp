@@ -14,6 +14,12 @@ namespace TryAlgebraCore
 		m_caret_pos = { 
 			LeafPos(0)
 		};
+		m_selection_start = { 
+			LeafPos(0)
+		};
+		m_selection_end = {
+			LeafPos(0)
+		};
 	}
 
 	void MathDocument::setText(const std::wstring& str)
@@ -51,14 +57,21 @@ namespace TryAlgebraCore
 
 	void MathDocument::updateSelection(const glm::vec2& pos)
 	{
-		m_caret_pos.clear();
-		MeHelpers::getPathAtPos(m_container.get(), pos, m_caret_pos);
+		if (!m_selecting)
+		{
+			m_selecting = true;
+			m_selection_start.clear();
+			MeHelpers::getPathAtPos(m_container.get(), pos, m_selection_start);
+		}
+		m_selection_end.clear();
+		MeHelpers::getPathAtPos(m_container.get(), pos, m_selection_end);
 		caret_updated = true;
+		highlight_updated = true;
 	}
 
 	void MathDocument::stopSelection()
 	{
-		selecting = false;
+		m_selecting = false;
 	}
 
 	void MathDocument::draw(VisualToolkit* visual_toolkit)
@@ -94,12 +107,13 @@ namespace TryAlgebraCore
 		if(caret_updated)
 		{
 			//draw caret
-			auto caret_data = MeHelpers::getCaretData(m_container.get(), m_caret_pos);
+			auto caret_data = MeHelpers::getCaretData(m_container.get(), m_selection_end);
 			visual_toolkit->mdoc_state->SetCaret(caret_data);
 		}
 		if (highlight_updated)
 		{
-			//visual_toolkit->mdoc_state->AddRect
+			visual_toolkit->mdoc_state->Clear(false, true);
+			MeHelpers::highlightSelected(m_container.get(), m_selection_start, m_selection_end, visual_toolkit);
 		}
 
 		content_updated = false;
