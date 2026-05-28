@@ -60,11 +60,17 @@ namespace TryAlgebraCore
 		if (!m_selecting)
 		{
 			m_selecting = true;
-			m_selection_start.clear();
-			MeHelpers::getPathAtPos(m_container.get(), pos, m_selection_start);
+			MePath selection_start;
+			if (MeHelpers::getPathAtPos(m_container.get(), pos, selection_start))
+			{
+				m_selection_start = std::move(selection_start);
+			}
 		}
-		m_selection_end.clear();
-		MeHelpers::getPathAtPos(m_container.get(), pos, m_selection_end);
+		MePath selection_end;
+		if (MeHelpers::getPathAtPos(m_container.get(), pos, selection_end))
+		{
+			m_selection_end = std::move(selection_end);
+		}
 		caret_updated = true;
 		highlight_updated = true;
 	}

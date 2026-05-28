@@ -199,7 +199,7 @@ namespace SelectionTest
 	std::vector<size_t> str3_2me = { 2 };
 }
 
-void OrderTest(const std::vector<size_t>& tree_path1, const std::vector<size_t>& tree_path2, bool swap)
+void orderTest(const std::vector<size_t>& tree_path1, const std::vector<size_t>& tree_path2, bool swap)
 {
 	SelectionFixture sf(SelectionTest::str3);
 	auto path1 = treePathToMePath(tree_path1, sf);
@@ -213,16 +213,176 @@ void OrderTest(const std::vector<size_t>& tree_path1, const std::vector<size_t>&
 
 TEST(SelectionTest, OrderTest0)
 {
-	OrderTest(SelectionTest::str3_3me_0cont_1me, SelectionTest::str3_9me_0cont_1me, false);
+	orderTest(SelectionTest::str3_3me_0cont_1me, SelectionTest::str3_9me_0cont_1me, false);
 }
 
 TEST(SelectionTest, OrderTest1)
 {
-	OrderTest(SelectionTest::str3_9me_0cont_1me, SelectionTest::str3_3me_0cont_1me, true);
+	orderTest(SelectionTest::str3_9me_0cont_1me, SelectionTest::str3_3me_0cont_1me, true);
 }
 
 TEST(SelectionTest, OrderTest2)
 {
-	OrderTest(SelectionTest::str3_1me, SelectionTest::str3_2me, false);
-	OrderTest(SelectionTest::str3_2me, SelectionTest::str3_1me, true);
+	orderTest(SelectionTest::str3_1me, SelectionTest::str3_2me, false);
+}
+
+TEST(SelectionTest, OrderTest3)
+{
+	orderTest(SelectionTest::str3_2me, SelectionTest::str3_1me, true);
+}
+
+TEST(SelectionTest, OrderTest4)
+{
+	orderTest(SelectionTest::str3_3me_0cont_1me, SelectionTest::str3_1me, true);
+}
+
+TEST(SelectionTest, OrderTest5)
+{
+	orderTest(SelectionTest::str3_1me, SelectionTest::str3_3me_0cont_1me, false);
+}
+
+
+TEST(SelectionTest, OrderTest6)
+{
+	orderTest(SelectionTest::str3_1me, SelectionTest::str3_3me_0cont_1me, false);
+}
+
+void trimToCommonContainerTest(MePath& path1, MePath& path2, const MePath& path1_res, const MePath& path2_res)
+{
+	MeHelpers::orderPaths(path1, path2);
+	MeHelpers::trimToCommonContainer(path1, path2);
+	EXPECT_EQ(path1, path1_res);
+	EXPECT_EQ(path2, path2_res);
+	EXPECT_NE(path1, path2);
+}
+
+TEST(SelectionTest, trimToCommonContainerTest1)
+{
+	MePath p1 = {
+		MePos{0,10},
+		ContPos{5},
+		LeafPos{6}
+	};
+
+	MePath p2 = {
+		MePos{0,10},
+		ContPos{15},
+		LeafPos{16}
+	};
+	MePath p1_res = {
+		LeafPos{0}
+	};
+
+	MePath p2_res = {
+		LeafPos{10}
+	};
+	trimToCommonContainerTest(p1, p2, p1_res, p2_res);
+}
+
+TEST(SelectionTest, trimToCommonContainerTest2)
+{
+	MePath p1 = {
+		LeafPos{6}
+	};
+
+	MePath p2 = {
+		LeafPos{16}
+	};
+	MePath p1_res = {
+		LeafPos{6}
+	};
+
+	MePath p2_res = {
+		LeafPos{16}
+	};
+	trimToCommonContainerTest(p1, p2, p1_res, p2_res);
+}
+
+TEST(SelectionTest, trimToCommonContainerTest3)
+{
+	MePath p1 = {
+		MePos{10, 30},
+		ContPos{14},
+		MePos{15, 21},
+		ContPos{17},
+		LeafPos{20}
+	};
+
+	MePath p2 = {
+		LeafPos{16}
+	};
+	MePath p1_res = {
+		LeafPos{10}
+	};
+
+	MePath p2_res = {
+		LeafPos{16}
+	};
+	trimToCommonContainerTest(p1, p2, p1_res, p2_res);
+}
+
+TEST(SelectionTest, trimToCommonContainerTest4)
+{
+	MePath p2 = {
+		MePos{10, 30},
+		ContPos{14},
+		MePos{15, 21},
+		ContPos{17},
+		LeafPos{18}
+	};
+
+	MePath p1 = {
+		MePos{10, 30},
+		ContPos{14},
+		MePos{15, 21},
+		ContPos{17},
+		LeafPos{20}
+	};
+
+	MePath p1_res = {
+		MePos{10, 30},
+		ContPos{14},
+		MePos{15, 21},
+		ContPos{17},
+		LeafPos{18}
+	};
+
+	MePath p2_res = {
+		MePos{10, 30},
+		ContPos{14},
+		MePos{15, 21},
+		ContPos{17},
+		LeafPos{20}
+	};
+	trimToCommonContainerTest(p1, p2, p1_res, p2_res);
+}
+
+TEST(SelectionTest, trimToCommonContainerTest5)
+{
+	MePath p2 = {
+		MePos{10, 30},
+		ContPos{14},
+		MePos{15, 21},
+		ContPos{17},
+		LeafPos{18}
+	};
+
+	MePath p1 = {
+		MePos{10, 30},
+		ContPos{14},
+		LeafPos{22}
+	};
+
+	MePath p1_res = {
+		MePos{10, 30},
+		ContPos{14},
+		LeafPos{15}
+	};
+
+	MePath p2_res = {
+		MePos{10, 30},
+		ContPos{14},
+		LeafPos{22}
+	};
+	trimToCommonContainerTest(p1, p2, p1_res, p2_res);
 }

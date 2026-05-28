@@ -154,10 +154,9 @@ namespace TryAlgebraCore
 					path2.back() = LeafPos(getPosOrTo(path2.back()));
 					return;
 				}
-			}
-			path1.pop_back();
-			path2.pop_back();
-
+				path1.resize(path1.size() - 2);
+				path2.resize(path2.size() - 2);
+			}		
 		}
 		path1.back() = LeafPos(getPosOrFrom(path1.back()));
 		path2.back() = LeafPos(getPosOrTo(path2.back()));
