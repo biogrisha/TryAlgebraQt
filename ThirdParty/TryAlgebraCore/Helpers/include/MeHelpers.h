@@ -26,6 +26,7 @@ namespace TryAlgebraCore
 			MeBase* me = nullptr;
 		};
 
+		static MePath textPosToPath(MeBase* from, size_t pos);
 		static std::optional<size_t> absToChildPos(const MeBase* from, size_t pos);
 		static GetByPathRes getByPath(MeBase* from, const MePath& path);
 		static FCaretData getCaretData(MeBase* from, const MePath& path);

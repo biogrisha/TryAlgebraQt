@@ -11,9 +11,6 @@ namespace TryAlgebraCore
 	MathDocument::MathDocument()
 	{
 		m_doc_size = { 0, 0 };
-		m_caret_pos = { 
-			LeafPos(0)
-		};
 		m_selection_start = { 
 			LeafPos(0)
 		};
@@ -30,7 +27,17 @@ namespace TryAlgebraCore
 
 	void MathDocument::type(const std::wstring& str)
 	{
-
+		MeHelpers::orderPaths(m_selection_start, m_selection_end);
+		MeHelpers::trimToCommonContainer(m_selection_start, m_selection_end);
+		size_t from = std::get<LeafPos>(m_selection_start.back()).pos;
+		size_t to = std::get<LeafPos>(m_selection_end.back()).pos;
+		m_text_buffer.del(from, to);
+		m_text_buffer.insert(str, from);
+		std::get<LeafPos>(m_selection_start.back()).pos += str.size();
+		m_selection_end = m_selection_start;
+		content_updated = true;
+		caret_updated = true;
+		highlight_updated = true;
 	}
 
 	void MathDocument::delBackward()
@@ -45,18 +52,34 @@ namespace TryAlgebraCore
 
 	void MathDocument::stepLeft()
 	{
-		m_container->step(StepDir::left, StepFrom::none, m_caret_pos);
+		if (m_container->getChildren().empty())
+		{
+			return;
+		}
+		m_container->step(StepDir::left, StepFrom::none, m_selection_end);
+		m_selection_start = m_selection_end;
 		caret_updated = true;
+		highlight_updated = true;
 	}
 
 	void MathDocument::stepRight()
 	{
-		m_container->step(StepDir::right, StepFrom::none, m_caret_pos);
+		if (m_container->getChildren().empty())
+		{
+			return;
+		}
+		m_container->step(StepDir::right, StepFrom::none, m_selection_end);
+		m_selection_start = m_selection_end;
 		caret_updated = true;
+		highlight_updated = true;
 	}
 
 	void MathDocument::updateSelection(const glm::vec2& pos)
 	{
+		if (m_container->getChildren().empty())
+		{
+			return;
+		}
 		if (!m_selecting)
 		{
 			m_selecting = true;

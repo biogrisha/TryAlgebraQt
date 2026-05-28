@@ -30,7 +30,6 @@ namespace TryAlgebraCore
 		bool highlight_updated = false;
 
 		bool m_selecting = false;
-		MePath m_caret_pos;
 		MePath m_selection_start;
 		MePath m_selection_end;
 

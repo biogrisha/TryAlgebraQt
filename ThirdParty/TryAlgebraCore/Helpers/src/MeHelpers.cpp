@@ -5,6 +5,34 @@
 
 namespace TryAlgebraCore
 {
+	MePath MeHelpers::textPosToPath(MeBase* from, size_t pos)
+	{
+		/*MePath res;
+		while(true)
+		{
+			auto& children = from->getChildren();
+			assert(!children.empty());
+			auto it = std::lower_bound(
+				children.begin(),
+				children.end(),
+				pos,
+				[](const std::unique_ptr<MeBase>& me, size_t value) {
+					return me->getChFrom() < value;
+				}
+			);
+			auto me = it->get();
+			if (MyRTTI::Is<MeContainer>(me))
+			{
+				res.push_back(ContPos{ me->getChFrom() });
+			}
+			if (it->get()->getChFrom() == pos)
+			{
+
+			}
+		}*/
+		return MePath();
+	}
+
 	std::optional<size_t> MeHelpers::absToChildPos(const MeBase* from, size_t pos)
 	{
 		auto& children = from->getChildren();
