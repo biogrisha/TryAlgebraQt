@@ -20,7 +20,7 @@ void DocumentControl::bindMathDocumentItem(MathDocumentCanvas* mathDocument)
 	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady, Qt::ConnectionType::DirectConnection);
 }
 
-void DocumentControl::keyInput(int key, const QString& text, int modifiers)
+void DocumentControl::keyInput(int key, QString text, int modifiers)
 {	
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
@@ -101,6 +101,10 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 	default:
 		if (!text.isEmpty() && text != "\b")
 		{
+			if (text == "\r")
+			{
+				text = "\n";
+			}
 			m_visual_state.Clear(true, true);
 			m_current_doc->type(text.toStdWString());
 			m_current_doc->draw(&vt);

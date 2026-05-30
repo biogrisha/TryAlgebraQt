@@ -31,7 +31,7 @@ public slots:
 	void bindMathDocumentItem(MathDocumentCanvas* mathDocument);
 
 	//Handles key input
-	void keyInput(int key, const QString& text, int modifiers);
+	void keyInput(int key, QString text, int modifiers);
 
 	//Handles signal when math document is ready to render
 	void canvasReady();

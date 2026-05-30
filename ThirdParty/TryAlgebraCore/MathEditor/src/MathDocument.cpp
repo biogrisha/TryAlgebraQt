@@ -36,6 +36,7 @@ namespace TryAlgebraCore
 		from.pos += str.size();
 		MeHelpers::propagateMeChange(m_selection_start, str.size());
 		m_selection_end = m_selection_start;
+		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
 	}
 
@@ -54,6 +55,7 @@ namespace TryAlgebraCore
 			}
 		}
 		m_selection_end = m_selection_start;
+		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
 	}
 
@@ -72,6 +74,7 @@ namespace TryAlgebraCore
 			}
 		}
 		m_selection_end = m_selection_start;
+		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
 	}
 
@@ -247,5 +250,17 @@ namespace TryAlgebraCore
 	bool MathDocument::hasSelection()
 	{
 		return m_selection_end != m_selection_start;
+	}
+	void MathDocument::adjustLineFrom()
+	{
+		std::optional<uint64_t> line_num = m_text_buffer.getLineNumber(std::get<LeafPos>(m_selection_end.back()).pos);
+		if (line_num.has_value())
+		{
+			if(line_num >= m_line_to || line_num < m_line_from)
+			{
+				m_line_from = line_num.value();
+			}
+		}
+		
 	}
 }

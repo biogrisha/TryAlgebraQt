@@ -37,6 +37,7 @@ namespace TryAlgebraCore
 		void deleteSelected();
 		bool hasSelection();
 		DirtyState getDirtyState() { return m_dirty_states; }
+		void adjustLineFrom();
 		TextBuffer m_text_buffer;
 		std::unique_ptr<MeContainer> m_container;
 		glm::vec2 m_doc_size;
