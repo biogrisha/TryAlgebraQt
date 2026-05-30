@@ -5,20 +5,20 @@
 namespace TryAlgebraCore{
 	struct MePos
 	{
-		size_t from = 0;
-		size_t to = 0;
+		uint64_t from = 0;
+		uint64_t to = 0;
         bool operator==(const MePos&) const = default;
 	};
 
     struct ContPos
     {
-        size_t pos = 0;
+        uint64_t pos = 0;
         bool operator==(const ContPos&) const = default;
     };
 
     struct LeafPos
     {
-        size_t pos = 0;
+        uint64_t pos = 0;
         bool operator==(const LeafPos&) const = default;
     };
 

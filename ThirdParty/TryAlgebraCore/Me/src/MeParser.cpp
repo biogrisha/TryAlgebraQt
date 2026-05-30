@@ -148,7 +148,7 @@ namespace TryAlgebraCore
 		{
 			auto cont = MyRTTI::MakeTypedUnique<MeContainer>();
 			cont->setChFrom(m_it.getChId());
-			cont->setParent(m_current);
+			cont->setParent(current);
 			m_parent = cont.get();
 			current->addChild(std::move(cont));
 			if (parse(false) == ParsingResult::end_children)

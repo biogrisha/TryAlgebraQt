@@ -22,9 +22,49 @@ namespace TryAlgebraCore
         return m_buffer.empty();
     }
 
-    int TextBuffer::getSize()
+    size_t TextBuffer::getSize()
     {
         return m_buffer.size();
+    }
+
+    std::optional<uint64_t> TextBuffer::getLineNumber(uint64_t char_num)
+    {
+        if (char_num > m_buffer.size())
+        {
+            return std::nullopt;
+        }
+        if (char_num == m_buffer.size())
+        {
+            return getLinesCount();
+        }
+        uint64_t line_num = 0;
+        uint64_t ch_i = 0;
+        for (auto ch : m_buffer)
+        {
+            if (char_num == ch_i)
+            {
+                return line_num;
+            }
+            if (ch == L'\n')
+            {
+                ++line_num;
+            }
+            ++ch_i;
+        }
+        return std::nullopt;
+    }
+
+    size_t TextBuffer::getLinesCount()
+    {
+        uint64_t line_num = 0;
+        for (auto ch : m_buffer)
+        {
+            if (ch == L'\n')
+            {
+                ++line_num;
+            }
+        }
+        return line_num;
     }
 
     TextBufferIterator::TextBufferIterator(const TextBuffer& text_buffer, int line_num)

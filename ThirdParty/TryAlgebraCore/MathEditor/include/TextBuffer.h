@@ -13,7 +13,9 @@ namespace TryAlgebraCore
         void del(int from, int to);
         const std::wstring& getBuff() const;
         bool isEmpty();
-        int getSize();
+        size_t getSize();
+        std::optional<uint64_t> getLineNumber(uint64_t char_num);
+        size_t getLinesCount();
     private:
         std::wstring m_buffer;
     };

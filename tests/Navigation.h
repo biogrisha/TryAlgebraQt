@@ -262,7 +262,7 @@ TEST(MeNavigation, getByPathTest6)
     getByPathTest(path, cont.get(), &ch, {}, MeHelpers::GetByPathStatus::cont);
 }
 
-void contStepTest(MePath path_start, MePath path_res, StepDir dir, StepFrom step_from, const std::wstring& str)
+void stepTest(MePath path_start, MePath path_res, StepDir dir, StepFrom step_from, const std::wstring& str)
 {
     auto cont = parse(str);
     cont->step(dir, step_from, path_start);
@@ -292,7 +292,7 @@ TEST(MeNavigation, cont_step1)
     MePath path_res = {
         LeafPos{0}
     };
-    contStepTest(path, path_res, StepDir::left, StepFrom::none, str5);
+    stepTest(path, path_res, StepDir::left, StepFrom::none, str5);
 }
 
 TEST(MeNavigation, cont_step2)
@@ -303,7 +303,7 @@ TEST(MeNavigation, cont_step2)
     MePath path_res = {
         LeafPos{str5_last}
     };
-    contStepTest(path, path_res, StepDir::right, StepFrom::none, str5);
+    stepTest(path, path_res, StepDir::right, StepFrom::none, str5);
 }
 
 TEST(MeNavigation, cont_step3)
@@ -314,7 +314,7 @@ TEST(MeNavigation, cont_step3)
     MePath path_res = {
         LeafPos{1}
     };
-    contStepTest(path, path_res, StepDir::right, StepFrom::none, str5);
+    stepTest(path, path_res, StepDir::right, StepFrom::none, str5);
 }
 
 TEST(MeNavigation, cont_step4)
@@ -325,7 +325,7 @@ TEST(MeNavigation, cont_step4)
     MePath path_res = {
         LeafPos{str5_last - 1}
     };
-    contStepTest(path, path_res, StepDir::left, StepFrom::none, str5);
+    stepTest(path, path_res, StepDir::left, StepFrom::none, str5);
 }
 
 TEST(MeNavigation, cont_step5)
@@ -336,7 +336,7 @@ TEST(MeNavigation, cont_step5)
     MePath path_res = {
         LeafPos{str5_last - 2}
     };
-    contStepTest(path, path_res, StepDir::left, StepFrom::none, str5);
+    stepTest(path, path_res, StepDir::left, StepFrom::none, str5);
 }
 
 TEST(MeNavigation, cont_step6)
@@ -349,7 +349,7 @@ TEST(MeNavigation, cont_step6)
         ContPos{str5_3ft_0cont},
         LeafPos{str5_3ft_0cont_0me}
     };
-    contStepTest(path, path_res, StepDir::right, StepFrom::none, str5);
+    stepTest(path, path_res, StepDir::right, StepFrom::none, str5);
 }
 
 TEST(MeNavigation, cont_step7)
@@ -366,7 +366,7 @@ TEST(MeNavigation, cont_step7)
         ContPos{str5_3ft_1cont_1ft_0cont},
         LeafPos{str5_3ft_1cont_1ft_0cont_0me}
     };
-    contStepTest(path, path_res, StepDir::right, StepFrom::none, str5);
+    stepTest(path, path_res, StepDir::right, StepFrom::none, str5);
 }
 
 TEST(MeNavigation, cont_step8)
@@ -383,7 +383,7 @@ TEST(MeNavigation, cont_step8)
         ContPos{str5_3ft_1cont_1ft_1cont},
         LeafPos{str5_3ft_1cont_1ft_1cont_last}
     };
-    contStepTest(path, path_res, StepDir::left, StepFrom::none, str5);
+    stepTest(path, path_res, StepDir::left, StepFrom::none, str5);
 }
 
 inline std::wstring str6 =                                L"abc\\ft\\A\\{abc\\,e\\ft\\A\\{\\,\\}fg\\}efg";
@@ -414,7 +414,7 @@ TEST(MeNavigation, cont_step9)
         ContPos{str6_3ft_1cont_1ft_1cont},
         LeafPos{str6_3ft_1cont_1ft_1cont_last}
     };
-    contStepTest(path, path_res, StepDir::left, StepFrom::none, str6);
+    stepTest(path, path_res, StepDir::left, StepFrom::none, str6);
 }
 
 TEST(MeNavigation, cont_step10)
@@ -431,7 +431,7 @@ TEST(MeNavigation, cont_step10)
         ContPos{str6_3ft_1cont_1ft_0cont},
         LeafPos{str6_3ft_1cont_1ft_0cont_0me}
     };
-    contStepTest(path, path_res, StepDir::right, StepFrom::none, str6);
+    stepTest(path, path_res, StepDir::right, StepFrom::none, str6);
 }
 TEST(MeNavigation, cont_step11)
 {
@@ -449,7 +449,7 @@ TEST(MeNavigation, cont_step11)
         ContPos{str6_3ft_1cont_1ft_1cont},
         LeafPos{str6_3ft_1cont_1ft_1cont_last}
     };
-    contStepTest(path, path_res, StepDir::right, StepFrom::none, str6);
+    stepTest(path, path_res, StepDir::right, StepFrom::none, str6);
 }
 
 TEST(MeNavigation, cont_step12)
@@ -468,5 +468,38 @@ TEST(MeNavigation, cont_step12)
         ContPos{str6_3ft_1cont_1ft_0cont},
         LeafPos{str6_3ft_1cont_1ft_0cont_0me}
     };
-    contStepTest(path, path_res, StepDir::left, StepFrom::none, str6);
+    stepTest(path, path_res, StepDir::left, StepFrom::none, str6);
+}
+
+namespace MeNavigationTest{
+    inline std::wstring str = L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}";
+    inline uint64_t str_0mes = 0;
+    inline uint64_t str_0mee =          std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}");
+    inline uint64_t str_0me_1cont =     std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,");
+    inline uint64_t str_0me_1cont_3 =   std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1");
+    inline uint64_t str_1 =             std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}");
+}
+
+TEST(MeNavigationTest, getByPathTest7)
+{
+    MePath path = {
+        MePos{MeNavigationTest::str_0mes, MeNavigationTest::str_0mee},
+        ContPos{MeNavigationTest::str_0me_1cont},
+        LeafPos{MeNavigationTest::str_0me_1cont_3}
+    };
+    auto cont = parse(MeNavigationTest::str);
+    getByPathTest(path, cont.get(), &(*cont)[0][1][2], std::nullopt, MeHelpers::GetByPathStatus::last);
+}
+
+TEST(MeNavigationTest, step1)
+{
+    MePath path = {
+        MePos{MeNavigationTest::str_0mes, MeNavigationTest::str_0mee},
+        ContPos{MeNavigationTest::str_0me_1cont},
+        LeafPos{MeNavigationTest::str_0me_1cont_3}
+    };
+    MePath path_res = {
+        LeafPos{MeNavigationTest::str_1}
+    };
+    stepTest(path, path_res, StepDir::right, StepFrom::none, MeNavigationTest::str);
 }

@@ -6,6 +6,8 @@ add_executable(TryAlgebraTest
     MathDocumentTest.h
     TestHelpers.h
     SelectionTest.h
+    TextBufferTest.h
+    ParseTest.h
 )
 
 target_link_libraries(TryAlgebraTest 

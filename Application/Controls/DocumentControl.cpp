@@ -49,8 +49,8 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 		break;
 	case Qt::Key_Backspace:
 		m_visual_state.Clear(true, true);
-		//m_math_doc->delBackward();
-		//m_math_doc->draw(&vt);
+		m_current_doc->delBackward();
+		m_current_doc->draw(&vt);
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Delete:
@@ -102,7 +102,7 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 		if (!text.isEmpty() && text != "\b")
 		{
 			m_visual_state.Clear(true, true);
-			m_current_doc->type(L"\\ft\\A\\{st\\,dsf\\}");
+			m_current_doc->type(text.toStdWString());
 			m_current_doc->draw(&vt);
 			updateElements(true, true, true);
 		}
