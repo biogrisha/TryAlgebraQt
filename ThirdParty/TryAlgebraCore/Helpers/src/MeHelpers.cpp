@@ -5,6 +5,16 @@
 
 namespace TryAlgebraCore
 {
+	void MeHelpers::propagateMeChange(MePath& path, int text_added)
+	{
+		for (auto& pos : path)
+		{
+			if (auto mePos = std::get_if<MePos>(&pos))
+			{
+				mePos->to += text_added;
+			}
+		}
+	}
 	MePath MeHelpers::textPosToPath(MeBase* from, size_t pos)
 	{
 		/*MePath res;
@@ -67,7 +77,11 @@ namespace TryAlgebraCore
 		{
 			size_t pos = getPosOrFrom(path[i]);
 			auto child_pos = absToChildPos(from, pos);
-			assert(child_pos.has_value());
+			if (!child_pos.has_value())
+			{
+				res.status = GetByPathStatus::outside;
+				return res;
+			}
 			from = from->getChildren()[child_pos.value()].get();
 		}
 
@@ -100,8 +114,8 @@ namespace TryAlgebraCore
 	}
 	FCaretData MeHelpers::getCaretData(MeBase* from, const MePath& path)
 	{
-		auto res = getByPath(from, path);
 
+		auto res = getByPath(from, path);
 		FCaretData caret_data;
 		caret_data.Pos = g_invalid_caret_pos;
 		caret_data.Size = g_caret_def_size;
@@ -157,10 +171,14 @@ namespace TryAlgebraCore
 				std::swap(path1, path2);
 				return;
 			}
-			else if (pos2 < pos1)
+			else if (pos1 < pos2)
 			{
 				return;
 			}
+		}
+		if (path1.size() > path2.size())
+		{
+			std::swap(path1, path2);
 		}
 	}
 
@@ -263,7 +281,14 @@ namespace TryAlgebraCore
 			{
 				// if pos not pointing at child, but points inside container
 				// find me on the same line or last
-				path.push_back(LeafPos{children.back()->getChTo()});
+				if(children.empty())
+				{
+					path.push_back(LeafPos{ from->getChFrom() });
+				}
+				else
+				{
+					path.push_back(LeafPos{ children.back()->getChTo()});
+				}
 				for (int i = 0; i < children.size(); ++i)
 				{
 					if (children[i]->getPos().y + children[i]->getSize().y > pos.y)
@@ -310,7 +335,14 @@ namespace TryAlgebraCore
 	}
 	void MeHelpers::highlightSelected(MeBase* cont, MePath from_path, MePath to_path, VisualToolkit* vt)
 	{
+		auto& cont_children = cont->getChildren();
+		MePath min = { LeafPos{cont_children.front()->getChFrom()} };
+		MePath max = { LeafPos{cont_children.back()->getChTo()} };
+
 		orderPaths(from_path, to_path);
+		orderPaths(min, from_path);
+		orderPaths(to_path, max);
+
 		trimToCommonContainer(from_path, to_path);
 		auto me_from_res = getByPath(cont, from_path);
 		if (me_from_res.status == GetByPathStatus::cont || me_from_res.status == GetByPathStatus::last)

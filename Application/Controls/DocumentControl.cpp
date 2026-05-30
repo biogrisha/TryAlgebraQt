@@ -30,12 +30,12 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 	bool bCtrl = modifiers == Qt::Modifier::CTRL;
 	switch (key) {
 	case Qt::Key_Left:
-		m_current_doc->stepLeft();
+		m_current_doc->stepLeft(bShift);
 		m_current_doc->draw(&vt);
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Right:
-		m_current_doc->stepRight();
+		m_current_doc->stepRight(bShift);
 		m_current_doc->draw(&vt);
 		updateElements(true, false, true);
 		break;
@@ -54,10 +54,10 @@ void DocumentControl::keyInput(int key, const QString& text, int modifiers)
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Delete:
-		//m_visual_state.Clear(true, true);
-		//m_math_doc->delForward();
-		//m_math_doc->draw(&vt);
-		//updateElements(true, true, true);
+		m_visual_state.Clear(true, true);
+		m_current_doc->delForward();
+		m_current_doc->draw(&vt);
+		updateElements(true, true, true);
 		break;
 	case Qt::Key_Z:
 		if (bCtrl)
@@ -171,7 +171,12 @@ float DocumentControl::getScrollHandleSize()
 
 void DocumentControl::scrollY(bool Up)
 {
-	
+	VisualToolkit vt;
+	vt.ft = AppGlobal::application->getFreeTypeWrap();
+	vt.mdoc_state = &m_visual_state;
+	m_current_doc->scroll(Up);
+	m_current_doc->draw(&vt);
+	m_doc_canvas->update();
 }
 
 void DocumentControl::moveScrollHandle(float newPos)

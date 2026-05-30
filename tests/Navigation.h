@@ -192,6 +192,14 @@ void getByPathTest(const MePath& path, MeBase* from, MeBase* res_me, const std::
     EXPECT_EQ(res.me, res_me);
     EXPECT_EQ(res.pos, res_pos);
 }
+void getByPathTest(const std::wstring& str, const MePath& path, const std::vector<uint64_t>& me_res_tree_path, MeHelpers::GetByPathStatus status)
+{
+    auto cont = parse(str);
+    auto me_res = MeHelpers::getByTreePath(cont.get(), me_res_tree_path);
+    auto res = MeHelpers::getByPath(cont.get(), path);
+    EXPECT_EQ(res.status, status);
+    EXPECT_EQ(res.me, me_res);
+}
 TEST(MeNavigation, getByPathTest1)
 {
     MePath path = {
@@ -260,6 +268,25 @@ TEST(MeNavigation, getByPathTest6)
     auto cont = parse(str4);
     auto& ch = (*cont)[0][0];
     getByPathTest(path, cont.get(), &ch, {}, MeHelpers::GetByPathStatus::cont);
+}
+
+namespace MeNavigationTest
+{
+    inline std::wstring str1 = L"dd\\ft\\A\\{\\,\\}dd";
+    inline uint32_t str1_2mes = std::wcslen(L"dd");
+    inline uint32_t str1_2mee = std::wcslen(L"dd\\ft\\A\\{\\,\\}");
+    inline uint32_t str1_2me_0cont = std::wcslen(L"dd\\ft\\A\\{");
+    inline uint32_t str1_2me_0cont_0 = std::wcslen(L"dd\\ft\\A\\{");
+}
+
+TEST(MeNavigationTest, getByPathTest7)
+{
+    MePath path = {
+        MePos{MeNavigationTest::str1_2mes, MeNavigationTest::str1_2mee},
+        ContPos{MeNavigationTest::str1_2me_0cont},
+        LeafPos{MeNavigationTest::str1_2me_0cont_0}
+    };
+    getByPathTest(MeNavigationTest::str1, path, { 2,0 }, MeHelpers::GetByPathStatus::cont);
 }
 
 void stepTest(MePath path_start, MePath path_res, StepDir dir, StepFrom step_from, const std::wstring& str)
@@ -472,34 +499,34 @@ TEST(MeNavigation, cont_step12)
 }
 
 namespace MeNavigationTest{
-    inline std::wstring str = L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}";
-    inline uint64_t str_0mes = 0;
-    inline uint64_t str_0mee =          std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}");
-    inline uint64_t str_0me_1cont =     std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,");
-    inline uint64_t str_0me_1cont_3 =   std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1");
-    inline uint64_t str_1 =             std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}");
+    inline std::wstring str2 = L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}";
+    inline uint64_t str2_0mes = 0;
+    inline uint64_t str2_0mee =          std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}");
+    inline uint64_t str2_0me_1cont =     std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,");
+    inline uint64_t str2_0me_1cont_3 =   std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1");
+    inline uint64_t str2_1 =             std::wcslen(L"\\ft\\A\\{st\\ft\\A\\{st\\,dsf\\}\\,ds1\\}");
 }
 
-TEST(MeNavigationTest, getByPathTest7)
+TEST(MeNavigationTest, getByPathTest8)
 {
     MePath path = {
-        MePos{MeNavigationTest::str_0mes, MeNavigationTest::str_0mee},
-        ContPos{MeNavigationTest::str_0me_1cont},
-        LeafPos{MeNavigationTest::str_0me_1cont_3}
+        MePos{MeNavigationTest::str2_0mes, MeNavigationTest::str2_0mee},
+        ContPos{MeNavigationTest::str2_0me_1cont},
+        LeafPos{MeNavigationTest::str2_0me_1cont_3}
     };
-    auto cont = parse(MeNavigationTest::str);
+    auto cont = parse(MeNavigationTest::str2);
     getByPathTest(path, cont.get(), &(*cont)[0][1][2], std::nullopt, MeHelpers::GetByPathStatus::last);
 }
 
 TEST(MeNavigationTest, step1)
 {
     MePath path = {
-        MePos{MeNavigationTest::str_0mes, MeNavigationTest::str_0mee},
-        ContPos{MeNavigationTest::str_0me_1cont},
-        LeafPos{MeNavigationTest::str_0me_1cont_3}
+        MePos{MeNavigationTest::str2_0mes, MeNavigationTest::str2_0mee},
+        ContPos{MeNavigationTest::str2_0me_1cont},
+        LeafPos{MeNavigationTest::str2_0me_1cont_3}
     };
     MePath path_res = {
-        LeafPos{MeNavigationTest::str_1}
+        LeafPos{MeNavigationTest::str2_1}
     };
-    stepTest(path, path_res, StepDir::right, StepFrom::none, MeNavigationTest::str);
+    stepTest(path, path_res, StepDir::right, StepFrom::none, MeNavigationTest::str2);
 }

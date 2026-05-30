@@ -24,12 +24,13 @@ namespace TryAlgebraCore
 		void type(const std::wstring& str);
 		void delBackward();
 		void delForward();
-		void stepLeft();
-		void stepRight();
+		void stepLeft(bool with_selection = false);
+		void stepRight(bool with_selection = false);
 		void updateSelection(const glm::vec2& pos);
 		void stopSelection();
 		void draw(VisualToolkit* visual_toolkit);
 		bool restoreCaretPos(MeBase* me);
+		void scroll(bool delta);
 	private:
 		void markDirty(DirtyState flags);
 		void clearDirty();
@@ -48,6 +49,7 @@ namespace TryAlgebraCore
 		// so there is always room for a step.
 		int m_line_from = 0;
 		int m_line_to = 0;
+		bool m_snap_to_end = false;
 	};
 
 	template<>

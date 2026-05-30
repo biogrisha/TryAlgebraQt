@@ -192,6 +192,31 @@ TEST(SelectionTest, getPathAtPosTest_leafBrInside_lastInCont_1)
 
 namespace SelectionTest
 {
+	inline std::wstring str4 = L"dd\\ft\\A\\{\\,\\}";
+	inline TreePath str4_tr_2me_0cont = { 2,0 };
+	inline MePath str4_2me_0cont_0 = { 
+		MePos{std::wcslen(L"dd"), std::wcslen(L"dd\\ft\\A\\{\\,\\}")},
+		ContPos{std::wcslen(L"dd\\ft\\A\\{")},
+		LeafPos{std::wcslen(L"dd\\ft\\A\\{")},
+	};
+}
+
+inline void getPathAtPosTest_emptyCont(const std::wstring& str, const TreePath& cont_path, MePath& res_path)
+{
+	SelectionFixture sf(str);
+	auto me = MeHelpers::getByTreePath(sf.cont.get(), cont_path);
+	MePath path;
+	MeHelpers::getPathAtPos(sf.cont.get(), me->getPos(), path);
+	EXPECT_EQ(res_path, path);
+}
+
+TEST(SelectionTest, getPathAtPosTest_emptyCont)
+{
+	getPathAtPosTest_emptyCont(SelectionTest::str4, SelectionTest::str4_tr_2me_0cont, SelectionTest::str4_2me_0cont_0);
+}
+
+namespace SelectionTest
+{
 	inline std::wstring str3 = L"abc\\ft\\A\\{abc\\,efg\\}dvsdv\\ft\\A\\{abc\\,efg\\}";
 	std::vector<size_t> str3_3me_0cont_1me = { 3,0,1 };
 	std::vector<size_t> str3_9me_0cont_1me = { 9,0,1 };

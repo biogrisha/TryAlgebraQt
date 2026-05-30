@@ -68,8 +68,8 @@ namespace TryAlgebraCore
 		float m_bearing_y = 0;
 		std::vector<std::unique_ptr<MeBase>> m_children;
 		MeBase* m_parent = nullptr;
-		size_t m_ch_from = -1;
-		size_t m_ch_to = -1;
+		size_t m_ch_from = 0;
+		size_t m_ch_to = 0;
 		float m_scaling_factor = 1.f;
 
 	};

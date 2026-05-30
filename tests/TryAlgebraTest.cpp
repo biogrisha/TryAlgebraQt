@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "Navigation.h"
-//#include "MathDocumentTest.h"
-//#include "SelectionTest.h"
+#include "MathDocumentTest.h"
+#include "SelectionTest.h"
 #include "TextBufferTest.h"
 #include "ParseTest.h"
 

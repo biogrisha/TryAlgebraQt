@@ -120,7 +120,7 @@ Rectangle {
 				m_docControl.mousePosUpdated(event.x, event.y)
 			}
 			onWheel: (event) => {
-				//m_docControl.scrollY(event.angleDelta.y > 0)
+				m_docControl.scrollY(event.angleDelta.y > 0)
 			}
 		}
 	}

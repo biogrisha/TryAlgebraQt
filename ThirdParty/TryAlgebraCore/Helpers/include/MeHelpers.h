@@ -8,6 +8,7 @@
 
 namespace TryAlgebraCore
 {
+	using TreePath = std::vector<uint64_t>;
 	class MeHelpers
 	{
 	public:
@@ -26,6 +27,7 @@ namespace TryAlgebraCore
 			MeBase* me = nullptr;
 		};
 
+		static void propagateMeChange(MePath& path, int text_added);
 		static MePath textPosToPath(MeBase* from, size_t pos);
 		static std::optional<size_t> absToChildPos(const MeBase* from, size_t pos);
 		static GetByPathRes getByPath(MeBase* from, const MePath& path);
