@@ -65,7 +65,7 @@ namespace TryAlgebraCore{
         for (const auto& item : path)
         {
             if (!first)
-                os << ", ";
+                os << ",";
 
             std::visit([&](const auto& v)
                 {

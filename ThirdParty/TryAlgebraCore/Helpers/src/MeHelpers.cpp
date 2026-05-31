@@ -418,4 +418,16 @@ namespace TryAlgebraCore
 		}
 
 	}
+	bool MeHelpers::isLastLine(MeBase* cont, uint32_t child_pos)
+	{
+		auto& children = cont->getChildren();
+		for (int i = child_pos; i < children.size() - 1; ++i)
+		{
+			if (MyRTTI::Is<MeNewLine>(children[i].get()))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 }

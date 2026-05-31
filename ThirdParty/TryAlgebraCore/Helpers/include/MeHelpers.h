@@ -48,5 +48,8 @@ namespace TryAlgebraCore
 
 		//me drawing
 		static void highlightSelected(MeBase* cont, MePath from, MePath to, VisualToolkit* vt);
+
+		//lines
+		static bool isLastLine(MeBase* cont, uint32_t child_pos);
 	};
 }

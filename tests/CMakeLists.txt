@@ -12,6 +12,7 @@ add_executable(TryAlgebraTest
     TestGlobals.h
     TextPosToMePathTest.h
     TestFramework.h
+    IsLastLineTest.h
 )
 
 target_link_libraries(TryAlgebraTest 

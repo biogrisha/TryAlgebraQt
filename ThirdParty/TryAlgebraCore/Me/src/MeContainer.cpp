@@ -48,21 +48,24 @@ namespace TryAlgebraCore
 	void MeContainer::step(StepDir dir, StepFrom step_from, MePath& path)
 	{
 		auto res = MeHelpers::getByPath(this, path);
-		auto cont = res.status == MeHelpers::GetByPathStatus::cont ? res.me : res.me->getParent();
-		assert(cont);
-		auto parent = cont->getParent();
+		auto parent_cont = res.status == MeHelpers::GetByPathStatus::cont ? res.me : res.me->getParent();
+		assert(parent_cont);
+		auto grandparent = parent_cont->getParent();
 		if (res.status == MeHelpers::GetByPathStatus::cont
 			|| (res.status == MeHelpers::GetByPathStatus::last && dir == StepDir::right)
 			|| (res.status == MeHelpers::GetByPathStatus::me && res.pos == 0 && dir == StepDir::left)
+			|| (dir == StepDir::down && (res.status == MeHelpers::GetByPathStatus::last
+				|| res.status == MeHelpers::GetByPathStatus::cont
+				|| MeHelpers::isLastLine(parent_cont, res.pos.value())))
 			)
 		{
 			//this means that cont is empty
 			//step left will chose next cont
-			if (!parent)
+			if (!grandparent)
 			{
 				return;
 			}
-			parent->step(dir, StepFrom::inside, path);
+			grandparent->step(dir, StepFrom::inside, path);
 		}
 		else if (dir == StepDir::right)
 		{
@@ -85,7 +88,7 @@ namespace TryAlgebraCore
 			}
 			else
 			{
-				prev = cont->getChildren()[res.pos.value() - 1].get();
+				prev = parent_cont->getChildren()[res.pos.value() - 1].get();
 			}
 			if (prev->getChildren().empty())
 			{
@@ -96,10 +99,18 @@ namespace TryAlgebraCore
 				prev->step(dir, StepFrom::outside, path);
 			}
 		}
-		//else if (dir == StepDir::left)
-		//{
-		//	
-		//}
+		else if (dir == StepDir::down)
+		{
+			auto& siblings = parent_cont->getChildren();
+			assert(res.pos.has_value());
+			for (int i = res.pos.value(); i < siblings.size(); ++i)
+			{
+				if (MyRTTI::Is<MeNewLine>(siblings[i]))
+				{
+
+				}
+			}
+		}
 
 	}
 	void MeContainer::calculate(VisualToolkit* visual_toolkit)
