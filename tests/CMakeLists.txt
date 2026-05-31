@@ -8,6 +8,10 @@ add_executable(TryAlgebraTest
     SelectionTest.h
     TextBufferTest.h
     ParseTest.h
+    StepTest.h
+    TestGlobals.h
+    TextPosToMePathTest.h
+    TestFramework.h
 )
 
 target_link_libraries(TryAlgebraTest 

@@ -15,32 +15,82 @@ namespace TryAlgebraCore
 			}
 		}
 	}
-	MePath MeHelpers::textPosToPath(MeBase* from, size_t pos)
+	std::optional<MePath> MeHelpers::textPosToMePath(MeBase* from, uint64_t pos)
 	{
-		/*MePath res;
+		auto& outer_children = from->getChildren();
+		if (outer_children.empty()
+			|| (pos >= outer_children.back()->getChTo() || pos < outer_children.front()->getChFrom()))
+		{
+			return std::nullopt;
+		}
+
+		if (pos == outer_children.back()->getChTo())
+		{
+			return MePath{ LeafPos{outer_children.back()->getChTo()} };
+		}
+		MePath res;
 		while(true)
 		{
 			auto& children = from->getChildren();
-			assert(!children.empty());
+			if (children.empty())
+			{
+				return std::nullopt;
+			}
 			auto it = std::lower_bound(
 				children.begin(),
 				children.end(),
 				pos,
-				[](const std::unique_ptr<MeBase>& me, size_t value) {
+				[](const std::unique_ptr<MeBase>& me, uint64_t value) {
 					return me->getChFrom() < value;
 				}
 			);
-			auto me = it->get();
+			MeBase* me = nullptr;
+			if (it == children.end())
+			{
+				me = children.back().get();
+			}
+			else
+			{
+				me = it->get();
+				if (me->getChFrom() > pos)
+				{
+					if (it != children.begin()) {
+						--it;
+					}
+					else
+					{
+						return std::nullopt;
+					}
+					me = it->get();
+				}
+			}
 			if (MyRTTI::Is<MeContainer>(me))
 			{
 				res.push_back(ContPos{ me->getChFrom() });
+				if (me->getChFrom() == pos)
+				{
+					res.push_back(LeafPos{ pos });
+					return res;
+				}
+				from = me;
 			}
-			if (it->get()->getChFrom() == pos)
+			else if (me->getChFrom() == pos)
 			{
-
+				res.push_back(LeafPos{ me->getChFrom() });
+				return res;
 			}
-		}*/
-		return MePath();
+			else if (me->getChTo() == pos)
+			{
+				res.push_back(LeafPos{ me->getChTo() });
+				return res;
+			}
+			else
+			{
+				res.push_back(MePos{ me->getChFrom(), me->getChTo() });
+				from = me;
+			}
+		}
+		return std::nullopt;
 	}
 
 	std::optional<size_t> MeHelpers::absToChildPos(const MeBase* from, size_t pos)
@@ -146,8 +196,9 @@ namespace TryAlgebraCore
 			}
 			else
 			{
-				caret_data.Pos.x = res.me->getPos().x + res.me->getSize().x;
-				caret_data.Pos.y = res.me->getPos().y + res.me->getBearingY() - g_caret_def_size.y / 2;
+				caret_data.Pos = res.me->getPos();
+				caret_data.Pos.x += res.me->getSize().x;
+				caret_data.Pos.y += res.me->getBearingY() - g_caret_def_size.y * res.me->getScalingFactor() / 2;
 			}
 			break;
 		case MeHelpers::GetByPathStatus::me:

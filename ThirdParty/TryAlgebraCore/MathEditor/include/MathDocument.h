@@ -26,6 +26,7 @@ namespace TryAlgebraCore
 		void delForward();
 		void stepLeft(bool with_selection = false);
 		void stepRight(bool with_selection = false);
+		void stepDown(bool with_selection = false);
 		void updateSelection(const glm::vec2& pos);
 		void stopSelection();
 		void draw(VisualToolkit* visual_toolkit);

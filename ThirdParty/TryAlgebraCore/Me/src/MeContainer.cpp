@@ -44,11 +44,6 @@ namespace TryAlgebraCore
 		{
 			ch->draw(visual_toolkit);
 		}
-		FRectInst rect;
-		rect.Color = { 1, 1, 0, 0.3 };
-		rect.Pos = getPos();
-		rect.Size = getSize();
-		visual_toolkit->mdoc_state->AddRect(rect);
 	}
 	void MeContainer::step(StepDir dir, StepFrom step_from, MePath& path)
 	{

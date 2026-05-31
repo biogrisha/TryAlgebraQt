@@ -28,7 +28,7 @@ namespace TryAlgebraCore
 		};
 
 		static void propagateMeChange(MePath& path, int text_added);
-		static MePath textPosToPath(MeBase* from, size_t pos);
+		static std::optional<MePath> textPosToMePath(MeBase* from, uint64_t pos);
 		static std::optional<size_t> absToChildPos(const MeBase* from, size_t pos);
 		static GetByPathRes getByPath(MeBase* from, const MePath& path);
 		static FCaretData getCaretData(MeBase* from, const MePath& path);

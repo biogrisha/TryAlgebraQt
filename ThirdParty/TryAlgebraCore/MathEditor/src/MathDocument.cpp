@@ -130,6 +130,32 @@ namespace TryAlgebraCore
 		markDirty(DirtyState::Selection);
 	}
 
+	void MathDocument::stepDown(bool with_selection)
+	{
+		if (m_container->getChildren().empty())
+		{
+			return;
+		}
+		m_container->step(StepDir::down, StepFrom::none, m_selection_end);
+		if (!with_selection)
+		{
+			m_selection_start = m_selection_end;
+		}
+		std::optional<uint64_t> line_num = m_text_buffer.getLineNumber(std::get<LeafPos>(m_selection_end.back()).pos);
+		if (m_line_to == line_num)
+		{
+			++m_line_from;
+			m_snap_to_end = true;
+			markDirty(DirtyState::Text);
+		}
+		else if (line_num == m_line_to - 1 && !m_snap_to_end)
+		{
+			m_snap_to_end = true;
+			markDirty(DirtyState::Text);
+		}
+		markDirty(DirtyState::Selection);
+	}
+
 	void MathDocument::updateSelection(const glm::vec2& pos)
 	{
 		if (m_container->getChildren().empty())

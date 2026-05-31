@@ -41,10 +41,11 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 		break;
 	case Qt::Key_Up:
 		//doc->StepY(-1, bShift);
-		updateElements(true, false, true);
+		//updateElements(true, false, true);
 		break;
 	case Qt::Key_Down:
-		//doc->StepY(1, bShift);
+		m_current_doc->stepDown(bShift);
+		m_current_doc->draw(&vt);
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Backspace:
