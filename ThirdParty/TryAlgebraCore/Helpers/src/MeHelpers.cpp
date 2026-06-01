@@ -15,11 +15,11 @@ namespace TryAlgebraCore
 			}
 		}
 	}
-	std::optional<MePath> MeHelpers::textPosToMePath(MeBase* from, uint64_t pos)
+	std::optional<MePath> MeHelpers::textPosToMePath(const MeBase* from, const uint64_t pos)
 	{
 		auto& outer_children = from->getChildren();
 		if (outer_children.empty()
-			|| (pos >= outer_children.back()->getChTo() || pos < outer_children.front()->getChFrom()))
+			|| (pos > outer_children.back()->getChTo() || pos < outer_children.front()->getChFrom()))
 		{
 			return std::nullopt;
 		}
@@ -422,6 +422,18 @@ namespace TryAlgebraCore
 	{
 		auto& children = cont->getChildren();
 		for (int i = child_pos; i < children.size() - 1; ++i)
+		{
+			if (MyRTTI::Is<MeNewLine>(children[i].get()))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	bool MeHelpers::isFirstLine(MeBase* cont, uint32_t child_pos)
+	{
+		auto& children = cont->getChildren();
+		for (int i = child_pos - 1; i >= 0; --i)
 		{
 			if (MyRTTI::Is<MeNewLine>(children[i].get()))
 			{

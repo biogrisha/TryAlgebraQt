@@ -57,6 +57,9 @@ namespace TryAlgebraCore
 			|| (dir == StepDir::down && (res.status == MeHelpers::GetByPathStatus::last
 				|| res.status == MeHelpers::GetByPathStatus::cont
 				|| MeHelpers::isLastLine(parent_cont, res.pos.value())))
+			|| (dir == StepDir::up && (res.pos.has_value == MeHelpers::GetByPathStatus::last
+				|| res.status == MeHelpers::GetByPathStatus::cont
+				|| MeHelpers::isFirstLine(parent_cont, res.pos.value())))
 			)
 		{
 			//this means that cont is empty
@@ -103,13 +106,39 @@ namespace TryAlgebraCore
 		{
 			auto& siblings = parent_cont->getChildren();
 			assert(res.pos.has_value());
-			for (int i = res.pos.value(); i < siblings.size(); ++i)
+			int i = res.pos.value();
+			for (; i < siblings.size(); ++i)
 			{
 				if (MyRTTI::Is<MeNewLine>(siblings[i]))
 				{
-
+					++i;
+					for (; i < siblings.size(); ++i)
+					{
+						if (siblings[i]->getPos().x > res.me->getPos().x)
+						{
+							i--;
+							break;
+						}
+						else if (MyRTTI::Is<MeNewLine>(siblings[i]))
+						{
+							break;
+						}
+					}
+					break;
 				}
 			}
+			if (i < siblings.size())
+			{
+				path.back() = LeafPos(siblings[i]->getChFrom());
+			}
+			else
+			{
+				path.back() = LeafPos(siblings.back()->getChTo());
+			}
+		}
+		else if (dir == StepDir::up)
+		{
+
 		}
 
 	}

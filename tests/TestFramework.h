@@ -49,13 +49,13 @@ namespace TestFramework
 	template<typename T, bool OnlyLastTest = false>
 	struct Cases
 	{
-		Cases(const std::vector<T>& cases, const std::function<void(const TestData& tst, const T& data)>& func)
+		~Cases()
 		{
 			size_t failed_num = ::TestFramework::failed.size();
 			if constexpr (OnlyLastTest)
 			{
-				auto cs = cases.back();
-				func(cs.tst, cs);
+				auto cs = m_cases.back();
+				m_func(cs.tst, cs);
 				size_t new_failed_num = ::TestFramework::failed.size();
 				if (new_failed_num != failed_num)
 				{
@@ -71,9 +71,9 @@ namespace TestFramework
 			}
 			else
 			{
-				for (auto& cs : cases)
+				for (auto& cs : m_cases)
 				{
-					func(cs.tst, cs);
+					m_func(cs.tst, cs);
 					size_t new_failed_num = ::TestFramework::failed.size();
 					if (new_failed_num != failed_num)
 					{
@@ -89,6 +89,24 @@ namespace TestFramework
 				}
 			}
 		}
+		Cases(const std::vector<T>& cases, const std::function<void(const TestData& tst, const T& data)>& func)
+		{
+			m_func = func;
+			m_cases = cases;
+		}
+
+		void operator+=(const T& cs)
+		{
+			m_cases.push_back(cs);
+		}
+
+		void operator+=(const std::vector<T>& cases)
+		{
+			m_cases.insert(m_cases.end(), cases.begin(), cases.end());
+		}
+
+		std::vector<T> m_cases;
+		std::function<void(const TestData& tst, const T& data)> m_func;
 	};
 
 	struct TestData

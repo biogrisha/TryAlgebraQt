@@ -25,28 +25,38 @@ namespace StepTest
 
 	MYTEST(StepDownTest)
 	{
-		TestFramework::Cases<StepTestCase, true> cases(
-			{
-				StepTestCase{{"StepDownTest", "case1"},L"a\\ft\\A\\{\\,\\}bc\nefg\n", 
-				std::wcslen(L"a\\ft\\A\\{"), std::wcslen(L"a\\ft\\A\\{\\,")},
+		TestFramework::Cases<StepTestCase, false> cases(
+		{
+			StepTestCase{{"StepDownTest", "case1"},L"a\\ft\\A\\{\\,\\}bc\nefg\n", 
+			std::wcslen(L"a\\ft\\A\\{"), std::wcslen(L"a\\ft\\A\\{\\,")},
 
-				StepTestCase{{"StepDownTest", "case2"},L"a\\ft\\A\\{\\,\\}bc\nefg\n", 
-				std::wcslen(L"a\\ft\\A\\{\\,"), std::wcslen(L"a\\ft\\A\\{\\,\\}")},
+			StepTestCase{{"StepDownTest", "case2"},L"a\\ft\\A\\{\\,\\}bc\nefg\n", 
+			std::wcslen(L"a\\ft\\A\\{\\,"), std::wcslen(L"a\\ft\\A\\{\\,\\}")},
 
-				StepTestCase{{"StepDownTest", "case3"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n", 
-				std::wcslen(L"a\\ft\\A\\{d"), std::wcslen(L"a\\ft\\A\\{dvd\\,")},
+			StepTestCase{{"StepDownTest", "case3"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n", 
+			std::wcslen(L"a\\ft\\A\\{d"), std::wcslen(L"a\\ft\\A\\{dvd\\,")},
 
-				StepTestCase{{"StepDownTest", "case4"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
-				std::wcslen(L"a\\ft\\A\\{"), std::wcslen(L"a\\ft\\A\\{dvd\\,")},
+			StepTestCase{{"StepDownTest", "case4"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
+			std::wcslen(L"a\\ft\\A\\{"), std::wcslen(L"a\\ft\\A\\{dvd\\,")},
 
-				StepTestCase{{"StepDownTest", "case5"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
-				std::wcslen(L"a\\ft\\A\\{dvd\\,vd"), std::wcslen(L"a\\ft\\A\\{dvd\\,vdv\\}")},
+			StepTestCase{{"StepDownTest", "case5"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
+			std::wcslen(L"a\\ft\\A\\{dvd\\,vd"), std::wcslen(L"a\\ft\\A\\{dvd\\,vdv\\}")},
 
-				StepTestCase{{"StepDownTest", "case6"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
-				std::wcslen(L"a\\ft\\A\\{dvd\\,vdv"), std::wcslen(L"a\\ft\\A\\{dvd\\,vdv\\}")},
+			StepTestCase{{"StepDownTest", "case6"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
+			std::wcslen(L"a\\ft\\A\\{dvd\\,vdv"), std::wcslen(L"a\\ft\\A\\{dvd\\,vdv\\}")},
 
-				StepTestCase{{"StepDownTest", "case7"},L"abc\nefg",
-				std::wcslen(L"ab"), std::wcslen(L"abc\nef")},
-			}, &stepDownTest);
+			StepTestCase{ {"StepDownTest", "case8"},L"abc\nefg",
+			std::wcslen(L""), std::wcslen(L"abc\n") },
+
+			StepTestCase{ {"StepDownTest", "case9"},L"abc\nefg",
+			std::wcslen(L"abc"), std::wcslen(L"abc\nefg") },
+
+			StepTestCase{ {"StepDownTest", "case10"},L"abc\nefg",
+			std::wcslen(L"abc\n"), std::wcslen(L"abc\n") },
+
+			StepTestCase{ {"StepDownTest", "case11"},L"abc\nefg",
+			std::wcslen(L"abc\nefg"), std::wcslen(L"abc\nefg") },
+		}, &stepDownTest);
+
 	}
 }

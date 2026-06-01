@@ -15,7 +15,7 @@ namespace TestGlobals
 			vt.ft = &ft;
 			vt.mdoc_state = &md;
 
-			cont = parse(str);
+			cont = TestHelpers::parse(str);
 			cont->calculate(&vt);
 			cont->calculatePos();
 		}
