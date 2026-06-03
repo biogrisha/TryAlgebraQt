@@ -19,17 +19,16 @@ namespace TryAlgebraCore
 
 	public:
 		MathDocument();
+		void setVisualToolkit(const VisualToolkit& visual_toolkit);
 		void setDocSize(const glm::vec2& size) { m_doc_size = size; }
 		void setText(const std::wstring& str);
 		void type(const std::wstring& str);
 		void delBackward();
 		void delForward();
-		void stepLeft(bool with_selection = false);
-		void stepRight(bool with_selection = false);
-		void stepDown(bool with_selection = false);
+		void step(StepDir dir, bool with_selection = false);
 		void updateSelection(const glm::vec2& pos);
 		void stopSelection();
-		void draw(VisualToolkit* visual_toolkit);
+		void draw();
 		bool restoreCaretPos(MeBase* me);
 		void scroll(bool delta);
 	private:
@@ -39,6 +38,8 @@ namespace TryAlgebraCore
 		bool hasSelection();
 		DirtyState getDirtyState() { return m_dirty_states; }
 		void adjustLineFrom();
+		void calcLinesAboveBelow(int center_line);
+		bool isLineOutside(int line_num);
 		TextBuffer m_text_buffer;
 		std::unique_ptr<MeContainer> m_container;
 		glm::vec2 m_doc_size;
@@ -52,6 +53,7 @@ namespace TryAlgebraCore
 		int m_line_from = 0;
 		int m_line_to = 0;
 		bool m_snap_to_end = false;
+		VisualToolkit m_visual_toolkit = nullptr;
 	};
 
 	template<>

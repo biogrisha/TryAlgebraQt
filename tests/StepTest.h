@@ -59,4 +59,57 @@ namespace StepTest
 		}, &stepDownTest);
 
 	}
+
+	inline void stepUpTest(const TestFramework::TestData& tst, const StepTestCase& data)
+	{
+		TestGlobals::ContCalculated fx(data.str);
+		auto tst_path = MeHelpers::textPosToMePath(fx.cont.get(), data.test_pos);
+		auto exp_path = MeHelpers::textPosToMePath(fx.cont.get(), data.exp_pos);
+		fx.cont->step(StepDir::up, StepFrom::none, tst_path.value());
+		MY_EQ(tst_path.value(), exp_path.value());
+	}
+
+	MYTEST(StepUpTest)
+	{
+		TestFramework::Cases<StepTestCase, false> cases(
+			{
+				StepTestCase{{"StepUpTest", "case1"},L"a\\ft\\A\\{\\,\\}bc\nefg\n",
+				std::wcslen(L"a\\ft\\A\\{"), std::wcslen(L"a")},
+
+				StepTestCase{{"StepUpTest", "case2"},L"a\\ft\\A\\{\\,\\}bc\nefg\n",
+				std::wcslen(L"a\\ft\\A\\{\\,"), std::wcslen(L"a\\ft\\A\\{")},
+
+				StepTestCase{{"StepUpTest", "case3"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
+				std::wcslen(L"a\\ft\\A\\{d"), std::wcslen(L"a")},
+
+				StepTestCase{{"StepUpTest", "case4"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
+				std::wcslen(L"a\\ft\\A\\{"), std::wcslen(L"a")},
+
+				StepTestCase{{"StepUpTest", "case5"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
+				std::wcslen(L"a\\ft\\A\\{dvd\\,vd"), std::wcslen(L"a\\ft\\A\\{dvd")},
+
+				StepTestCase{{"StepUpTest", "case6"},L"a\\ft\\A\\{dvd\\,vdv\\}bc\nefg\n",
+				std::wcslen(L"a\\ft\\A\\{dvd\\,vdv"), std::wcslen(L"a\\ft\\A\\{dvd")},
+
+				StepTestCase{{"StepUpTest", "case7"},L"aaa\naaa",
+				std::wcslen(L"aaa\naaa"), std::wcslen(L"aaa")},
+
+				StepTestCase{{"StepUpTest", "case8"},L"aaa\naaa",
+				std::wcslen(L"aaa\naa"), std::wcslen(L"aa")},
+
+				StepTestCase{{"StepUpTest", "case9"},L"aaa\naaaaa",
+				std::wcslen(L"aaa\naaaa"), std::wcslen(L"aaa")},
+
+				StepTestCase{{"StepUpTest", "case10"},L"aaa\naaaaa",
+				std::wcslen(L"aaa\naaaaa"), std::wcslen(L"aaa")},
+
+				StepTestCase{{"StepUpTest", "case11"},L"iiMii\niiiii",
+				std::wcslen(L"iiMii\niii"), std::wcslen(L"ii")},
+
+				StepTestCase{{"StepUpTest", "case12"},L"iii\niiii\niii",
+				std::wcslen(L"iii\niiii"), std::wcslen(L"iii")},
+
+			}, &stepUpTest);
+
+	}
 }

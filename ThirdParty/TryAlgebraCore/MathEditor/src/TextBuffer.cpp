@@ -35,7 +35,7 @@ namespace TryAlgebraCore
         }
         if (char_num == m_buffer.size())
         {
-            return getLinesCount();
+            return getLinesCount() - 1;
         }
         uint64_t line_num = 0;
         uint64_t ch_i = 0;
@@ -56,7 +56,7 @@ namespace TryAlgebraCore
 
     size_t TextBuffer::getLinesCount()
     {
-        uint64_t line_num = 0;
+        uint64_t line_num = 1;
         for (auto ch : m_buffer)
         {
             if (ch == L'\n')
