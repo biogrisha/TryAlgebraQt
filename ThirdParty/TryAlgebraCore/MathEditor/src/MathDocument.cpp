@@ -4,6 +4,7 @@
 #include <Me/include/MeNewLine.h>
 #include <Helpers/include/MeHelpers.h>
 #include <FreeTypeWrap.h>
+#include <Me/include/MeGlobals.h>
 #include <iostream>
 
 namespace TryAlgebraCore
@@ -32,14 +33,16 @@ namespace TryAlgebraCore
 
 	void MathDocument::type(const std::wstring& str)
 	{
+		auto str_copy = str;
+		filterInput(str_copy);
 		if (hasSelection())
 		{
 			deleteSelected();
 		}
 		LeafPos& from = std::get<LeafPos>(m_selection_start.back());
-		m_text_buffer.insert(str, from.pos);
-		from.pos += str.size();
-		MeHelpers::propagateMeChange(m_selection_start, str.size());
+		m_text_buffer.insert(str_copy, from.pos);
+		from.pos += str_copy.size();
+		MeHelpers::propagateMeChange(m_selection_start, str_copy.size());
 		m_selection_end = m_selection_start;
 		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
@@ -286,5 +289,15 @@ namespace TryAlgebraCore
 	bool MathDocument::isLineOutside(int line_num)
 	{
 		return line_num > m_line_to || line_num < m_line_from - 1;
+	}
+	void MathDocument::filterInput(std::wstring& str)
+	{
+		if (m_selection_start.size() > 1)
+		{
+			if (str == L"\n")
+			{
+				str = L"\\" + MeNames::new_line + L"\\\\";
+			}
+		}
 	}
 }

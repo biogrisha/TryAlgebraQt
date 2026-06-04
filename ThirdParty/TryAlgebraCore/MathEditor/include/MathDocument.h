@@ -40,6 +40,7 @@ namespace TryAlgebraCore
 		void adjustLineFrom();
 		void calcLinesAboveBelow(int center_line);
 		bool isLineOutside(int line_num);
+		void filterInput(std::wstring& str);
 		TextBuffer m_text_buffer;
 		std::unique_ptr<MeContainer> m_container;
 		glm::vec2 m_doc_size;

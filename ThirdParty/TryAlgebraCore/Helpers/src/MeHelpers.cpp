@@ -182,7 +182,7 @@ namespace TryAlgebraCore
 				auto cont = res.me->getParent();
 				//find next line y
 				float y = res.me->getPos().y + res.me->getSize().y;
-				auto& children = from->getChildren();
+				auto& children = cont->getChildren();
 				for (int i = children.size() - 2; i >= 0; --i)
 				{
 					if (MyRTTI::Is<MeNewLine>(children[i].get()))
@@ -191,7 +191,7 @@ namespace TryAlgebraCore
 					}
 					y = std::max(y, children[i]->getPos().y + children[i]->getSize().y);
 				}
-				caret_data.Pos.x = 0;
+				caret_data.Pos.x = cont->getPos().x;
 				caret_data.Pos.y = y;
 			}
 			else

@@ -10,10 +10,15 @@ namespace TryAlgebraCore
 	MeParser::MeParser(const TextBuffer& text_buffer, int line_num)
 		:m_it(text_buffer, line_num)
 	{
-		auto gen = m_factory.emplace(MeNames::from_to,
+		m_factory.emplace(MeNames::from_to,
 			[]()
 			{
-				return std::make_unique<MeFromTo>();
+				return MyRTTI::MakeTypedUnique<MeFromTo>();
+			});
+		m_factory.emplace(MeNames::new_line,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeNewLine>();
 			});
 	}
 
@@ -104,6 +109,10 @@ namespace TryAlgebraCore
 					{
 						m_it.next();
 						startChildren();
+					}
+					else if (*next_ch == L'\\')
+					{
+						m_it.next();
 					}
 					else
 					{

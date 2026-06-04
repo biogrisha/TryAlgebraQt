@@ -13,5 +13,7 @@ namespace TryAlgebraCore
 	{
 		inline std::wstring from_to = L"ft";
 		inline std::wstring integral = L"∫";
+
+		inline std::wstring new_line = L"nl";
 	}
 }
