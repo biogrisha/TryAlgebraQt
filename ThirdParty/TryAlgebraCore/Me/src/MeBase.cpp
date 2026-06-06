@@ -9,6 +9,14 @@ void TryAlgebraCore::MeBase::calculatePos()
 	}
 }
 
+void TryAlgebraCore::MeBase::draw(VisualToolkit* visual_toolkit)
+{
+	for (auto& ch : m_children)
+	{
+		ch->draw(visual_toolkit);
+	}
+}
+
 void TryAlgebraCore::MeBase::addChild(std::unique_ptr<MeBase>&& child)
 {
 	m_children.push_back(std::move(child));

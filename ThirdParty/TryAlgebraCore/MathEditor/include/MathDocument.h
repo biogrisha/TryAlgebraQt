@@ -54,7 +54,7 @@ namespace TryAlgebraCore
 		int m_line_from = 0;
 		int m_line_to = 0;
 		bool m_snap_to_end = false;
-		VisualToolkit m_visual_toolkit = nullptr;
+		VisualToolkit m_visual_toolkit;
 	};
 
 	template<>

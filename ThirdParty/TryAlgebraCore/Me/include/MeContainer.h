@@ -9,7 +9,7 @@ namespace TryAlgebraCore
 		TYPED_CLASS1(MeBase)
 
 	public:
-		virtual void draw(VisualToolkit* visual_toolkit) override;
+		virtual void draw(VisualToolkit* vt);
 		virtual void step(StepDir dir, StepFrom step_from, MePath& path) override;
 		virtual void calculate(VisualToolkit* visual_toolkit) override;
 

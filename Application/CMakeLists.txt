@@ -30,6 +30,8 @@ qt_add_qml_module(Application
         Models/DocumentTabModel.cpp
         Models/ApplicationModel.h
         Models/ApplicationModel.cpp
+        Modules/MeAtlasGenerator.h
+        Modules/MeAtlasGenerator.cpp
 )
 
 target_link_libraries(Application

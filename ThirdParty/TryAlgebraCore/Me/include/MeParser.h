@@ -21,7 +21,7 @@ namespace TryAlgebraCore
 		};
 	public:
 		MeParser(const TextBuffer& text_buffer, int line_num);
-		bool parseLine(MeContainer* container);
+		bool parseLine(MeBase* container);
 	private:
 		ParsingResult parse(bool parse_one_line);
 		void consumeMe();

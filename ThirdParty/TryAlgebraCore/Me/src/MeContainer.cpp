@@ -38,13 +38,17 @@ namespace TryAlgebraCore
 	{
 		m_size.y += g_caret_def_size.y * m_scaling_factor;
 	}
-	void MeContainer::draw(VisualToolkit* visual_toolkit)
+
+	void MeContainer::draw(VisualToolkit* vt)
 	{
-		for (auto& ch : m_children)
-		{
-			ch->draw(visual_toolkit);
-		}
+		FRectInst rect;
+		rect.Color = { 1,1,1,0.5 };
+		rect.Pos = getPos();
+		rect.Size = getSize();
+		vt->mdoc_state->AddRect(rect);
+		MeBase::draw(vt);
 	}
+
 	void MeContainer::step(StepDir dir, StepFrom step_from, MePath& path)
 	{
 		auto res = MeHelpers::getByPath(this, path);

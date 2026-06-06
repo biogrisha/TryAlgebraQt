@@ -29,7 +29,7 @@ namespace TryAlgebraCore
 		TYPED_CLASS
 	public:
 		virtual void setMeta(const std::wstring& meta) {}
-		virtual void draw(VisualToolkit* visual_toolkit) {}
+		virtual void draw(VisualToolkit* visual_toolkit);
 		virtual void calculate(VisualToolkit* visual_toolkit) {}
 		//updates path giving direction and from where step received
 		//assertions for non-container:

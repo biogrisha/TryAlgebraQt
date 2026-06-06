@@ -11,6 +11,7 @@
 #include <Controls/FilesControl.h>
 #include <Models/ApplicationModel.h>
 #include <AppGlobal.h>
+#include <Modules/MeAtlasGenerator.h>
 
 Application::~Application()
 {
@@ -36,7 +37,6 @@ Application::Application(QObject *parent)
 	m_menu_control = new MenuControl(this);
 	m_tabs_control = new TabsControl(this);
 	m_document_control = new DocumentControl(this);
-	PrepareMeAtlas();
 	//caching dpi
 	QScreen* screen = QGuiApplication::primaryScreen(); 
 	qreal logicalDpiX = screen->logicalDotsPerInchX(); 
@@ -44,6 +44,8 @@ Application::Application(QObject *parent)
 
 	//initializing freetype
 	m_ft_wrap.Init(logicalDpiX, logicalDpiY);
+
+	prepareMeAtlas();
 }
 
 DocumentControl* Application::getDocumentControl()
@@ -51,14 +53,10 @@ DocumentControl* Application::getDocumentControl()
 	return m_document_control;
 }
 
-void Application::PrepareMeAtlas()
+void Application::prepareMeAtlas()
 {
-	//FTAMathElementsAtlas meAtlas;
-	//FMathDocumentState meDocState;
-	//auto meGen = std::make_unique<MathElementGeneratorQt>();
-	//meGen->m_meDocState = &meDocState;
-	//meGen->initMeGenerators();
-	//meAtlas.Init(meGen.get());
+	MeAtlasGenerator atlas_gen;
+	atlas_gen.gen();
 }
 
 FFreeTypeWrap* Application::getFreeTypeWrap()

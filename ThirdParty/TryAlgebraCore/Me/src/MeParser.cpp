@@ -22,7 +22,7 @@ namespace TryAlgebraCore
 			});
 	}
 
-	bool MeParser::parseLine(MeContainer* container)
+	bool MeParser::parseLine(MeBase* container)
 	{
 		m_parent = container;
 		if (m_it.isEnd())
