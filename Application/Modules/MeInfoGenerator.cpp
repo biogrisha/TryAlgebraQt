@@ -1,4 +1,4 @@
-#include "MeAtlasGenerator.h"
+#include "MeInfoGenerator.h"
 #include <Me/include/MeAtlas.h>
 #include <Me/include/MeParser.h>
 #include <MathEditor/include/TextBuffer.h>
@@ -8,18 +8,25 @@
 #include <MathDocumentRendering.h>
 #include <VulkanHelpers.h>
 #include <QImage>
-void MeAtlasGenerator::gen()
+
+void MeInfoGenerator::gen(MeListModel* model)
 {
 	using namespace TryAlgebraCore;
 	auto atlas = MyRTTI::MakeTypedUnique<TryAlgebraCore::MeAtlas>(500);
-	std::wstring str = L"\\ft\\∫\\{\\,\\}";
-	str += L"\\ft\\∬\\{\\,\\}";
-	str += L"\\ft\\∭\\{\\,\\}";
-	str += L"∀";
-	str += L"∃";
+	std::vector<std::pair<QString, std::wstring>> meDefinitions = 
+	{ 
+		{"Integral", L"\\ft\\∫\\{\\,\\}"},
+		{"Double integral", L"\\ft\\∬\\{\\,\\}"},
+		{"Triple integral", L"\\ft\\∭\\{\\,\\}"},
+		{"For all", L"∀"},
+		{"Exists", L"∃"},
+	};	
 
 	TextBuffer tb;
-	tb.insert(str, 0);
+	for(auto& def : meDefinitions)
+	{
+		tb.insert(def.second, tb.getSize());
+	}
 	MeParser pr(tb, 0);
 	while (pr.parseLine(atlas.get()));
 
@@ -61,8 +68,15 @@ void MeAtlasGenerator::gen()
 		);
 	}
 	RenderedDocBuffer->UnmapData();
-	image = image.mirrored(false, true);
-	bool ok = image.save("C:/Users/biogr/OneDrive/Desktop/test.png");
 
-
+	auto& children = atlas->getChildren();
+	assert(children.size() == meDefinitions.size());
+	for (int i = 0; i < children.size(); ++i)
+	{
+		QPoint pos{ int(children[i]->getPos().x), int(children[i]->getPos().y) };
+		QSize size{ int(children[i]->getSize().x), int(children[i]->getSize().y) };
+		model->addMathElementInfo({ meDefinitions[i].first, pos, size });
+	}
+	image.save("C:/Users/biogr/OneDrive/Desktop/test.png");
+	model->setImage(std::move(image));
 }

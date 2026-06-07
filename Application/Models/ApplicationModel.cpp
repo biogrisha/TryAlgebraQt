@@ -2,6 +2,7 @@
 
 ApplicationModel::ApplicationModel(QObject* parent)
 	: QObject(parent)
+	, m_meListModel(new MeListModel(this))
 {
 }
 
@@ -25,5 +26,10 @@ TryAlgebraCore::MathDocument* ApplicationModel::getCurrentDoc()
 {
 	auto found_doc = m_documents.find(m_curr_doc);
 	return found_doc != m_documents.end() ? found_doc->second.get() : nullptr;
+}
+
+MeListModel* ApplicationModel::meListModel()
+{
+	return m_meListModel;
 }
 

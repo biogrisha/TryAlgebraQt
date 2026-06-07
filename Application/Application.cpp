@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <qqmlengine.h>
 #include <QQuickWindow>
 #include <QVulkanInstance>
 
@@ -11,7 +12,8 @@
 #include <Controls/FilesControl.h>
 #include <Models/ApplicationModel.h>
 #include <AppGlobal.h>
-#include <Modules/MeAtlasGenerator.h>
+#include <Modules/MeInfoGenerator.h>
+#include <Modules/ImageProvider.h>
 
 Application::~Application()
 {
@@ -19,7 +21,7 @@ Application::~Application()
 	AppGlobal::app_mod = nullptr;
 }
 
-Application::Application(QObject *parent)
+Application::Application(QQmlEngine* engine, QObject *parent)
 	: QObject(parent)
 {
 	//initializing application components
@@ -45,7 +47,13 @@ Application::Application(QObject *parent)
 	//initializing freetype
 	m_ft_wrap.Init(logicalDpiX, logicalDpiY);
 
-	prepareMeAtlas();
+	MeInfoGenerator atlas_gen;
+	MeListModel* meListModel = m_app_model->meListModel();
+	atlas_gen.gen(meListModel);
+	auto imageProvider = new ImageProvider;
+	imageProvider->setImage(meListModel->image());
+	engine->addImageProvider(QLatin1String("MeAtlas"), imageProvider);
+
 }
 
 DocumentControl* Application::getDocumentControl()
@@ -53,10 +61,9 @@ DocumentControl* Application::getDocumentControl()
 	return m_document_control;
 }
 
-void Application::prepareMeAtlas()
+ApplicationModel* Application::applicationModel()
 {
-	MeAtlasGenerator atlas_gen;
-	atlas_gen.gen();
+	return m_app_model;
 }
 
 FFreeTypeWrap* Application::getFreeTypeWrap()

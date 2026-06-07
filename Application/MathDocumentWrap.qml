@@ -11,7 +11,7 @@ Rectangle {
         { 
             m_docControl = docControl
             m_docControl.bindMathDocumentItem(mathDoc)
-            filteredMeList.model = m_docControl.getMeInfoModel();
+            filteredMeList.model = UserApplication.applicationModel().meListModel();
         }
 
 
@@ -73,21 +73,42 @@ Rectangle {
 		anchors.left: parent.left
 		model: filteredMeList
 		clip: true
-		delegate:  Button {
-			id:button
+		delegate: Button {
+			id: button
+
 			required property string meName
+			required property point viewPos
+			required property size viewSize
 			width: 150
-			text: meName
-			background: Rectangle {
-				anchors.left: button.left
-				anchors.right: button.right
-				color: button.down ? "#c2c2c2" : "#e3e3e3"
-				border.color: "#c2c2c2"
-				border.width: 1
-				radius: 1
+			height: viewSize.height + 10
+
+			contentItem: Row {
+				spacing: 8
+
+				Item {
+					width: button.viewSize.width
+					height: button.viewSize.height
+					clip: true
+
+					Image {
+						source: "image://MeAtlas/atlas"
+
+						width: 500
+						height: 83
+
+						x: -button.viewPos.x
+						y: -button.viewPos.y
+					}
+				}
+
+				Text {
+					text: button.meName
+					anchors.verticalCenter: parent.verticalCenter
+					verticalAlignment: Text.AlignVCenter
+				}
 			}
-			onClicked:
-			{
+
+			onClicked: {
 				m_docControl.addMeByName(button.meName)
 				mathDoc.focus = true
 			}

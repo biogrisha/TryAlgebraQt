@@ -126,23 +126,6 @@ void DocumentControl::canvasReady()
 	m_is_canvas_ready = true;
 }
 
-MathElementInfoModel* DocumentControl::getMeInfoModel()
-{
-	if (m_meInfoModel)
-	{
-		//model is created->return it
-		return m_meInfoModel;
-	}
-	//model not created yet-> create it
-	m_meInfoModel = new MathElementInfoModel(this);
-	/*auto& meList = FTAMeHelpers::GetMathElementsList();
-	for (auto& me : meList)
-	{
-		m_meInfoModel->addMathElementInfo(MathElementInfo(QString::fromStdWString(me.first), ""));
-	}*/
-	return m_meInfoModel;
-}
-
 void DocumentControl::addMeByName(const QString& meName)
 {
 	

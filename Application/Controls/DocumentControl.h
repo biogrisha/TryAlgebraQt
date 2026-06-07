@@ -8,7 +8,7 @@
 #include <FreeTypeWrap.h>
 
 #include <MathDocumentCanvas.h>
-#include <Models/MathElementInfoModel.h>
+#include <Models/MeListModel.h>
 
 #include <MathEditor/include/MathDocument.h>
 
@@ -35,10 +35,6 @@ public slots:
 
 	//Handles signal when math document is ready to render
 	void canvasReady();
-
-	//Returns me info model
-	//Note that the model is owned by DocumentControl
-	MathElementInfoModel* getMeInfoModel();
 
 	//Adds math element from its string form
 	void addMeByName(const QString& meName);
@@ -70,7 +66,7 @@ private:
 	//Math document used to render content
 	MathDocumentCanvas* m_doc_canvas = nullptr;
 	//Model for math elements selector
-	MathElementInfoModel* m_meInfoModel = nullptr;
+	MeListModel* m_meInfoModel = nullptr;
 	//Render state of math document
 	FMathDocumentState m_visual_state;
 	//Indicates that MathDocument Item is ready to render

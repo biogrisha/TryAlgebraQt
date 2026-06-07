@@ -24,14 +24,16 @@ qt_add_qml_module(Application
         Controls/TabsControl.cpp
         Controls/FilesControl.h
         Controls/FilesControl.cpp
-        Models/MathElementInfoModel.h
-        Models/MathElementInfoModel.cpp
+        Models/MeListModel.h
+        Models/MeListModel.cpp
         Models/DocumentTabModel.h
         Models/DocumentTabModel.cpp
         Models/ApplicationModel.h
         Models/ApplicationModel.cpp
-        Modules/MeAtlasGenerator.h
-        Modules/MeAtlasGenerator.cpp
+        Modules/MeInfoGenerator.h
+        Modules/MeInfoGenerator.cpp
+        Modules/ImageProvider.h
+        Modules/ImageProvider.cpp
 )
 
 target_link_libraries(Application

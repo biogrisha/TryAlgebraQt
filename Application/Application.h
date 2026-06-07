@@ -10,13 +10,14 @@ class TabsControl;
 class FilesControl;
 class FFreeTypeWrap;
 class ApplicationModel;
+class QQmlEngine;
 class Application  : public QObject
 {
 	Q_OBJECT
 	
 public:
 	~Application();
-	Application(QObject *parent);
+	Application(QQmlEngine* engine, QObject *parent = nullptr);
 
 	//Returns freetype module
 	FFreeTypeWrap* getFreeTypeWrap();
@@ -33,8 +34,9 @@ public slots:
 
 	//Returns document control
 	DocumentControl* getDocumentControl();
+
+	ApplicationModel* applicationModel();
 private:
-	void prepareMeAtlas();
 
 	MenuControl* m_menu_control = nullptr;
 	DocumentControl* m_document_control = nullptr;
