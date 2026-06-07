@@ -5,5 +5,5 @@
 */
 namespace AppGlobal {
 	inline class Application* application = nullptr;
-	inline class ApplicationModel* app_mod = nullptr;
+	inline class ApplicationModel* appMod = nullptr;
 }

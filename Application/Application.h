@@ -26,9 +26,6 @@ public:
 	FilesControl* getFilesControl();
 
 public slots:
-	//Returns tabs control
-	TabsControl* getTabs();
-
 	//Returns menu control
 	MenuControl* getMenu();
 
@@ -40,7 +37,6 @@ private:
 
 	MenuControl* m_menu_control = nullptr;
 	DocumentControl* m_document_control = nullptr;
-	TabsControl* m_tabs_control = nullptr;
 	FilesControl* m_files_control = nullptr;
 
 	ApplicationModel* m_app_model = nullptr;

@@ -27,9 +27,9 @@ class MeListModel : public QAbstractListModel
 public:
     enum MathElementInfoRoles {
         MeName = Qt::UserRole + 1,
-        Image = Qt::UserRole + 2,
-        ViewPos = Qt::UserRole + 3,
-        ViewSize = Qt::UserRole + 4,
+        Image,
+        ViewPos,
+        ViewSize,
     };
 
     MeListModel(QObject* parent = nullptr);

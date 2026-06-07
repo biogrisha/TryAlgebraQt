@@ -12,15 +12,17 @@ Item {
 	Component.onCompleted: 
     { 
         menuControl = UserApplication.getMenu()
-        tabsControl = UserApplication.getTabs()
-        tabsList.model = tabsControl.getTabsModel()
         documentLoader.source = ""
     }
 
     id: window
     visible: true
     property MenuControl menuControl: null
-    property TabsControl tabsControl: null
+    
+    TabsControl
+    {
+        id: tabsControl
+    }
 
     MenuBar {
         id:menuBar
@@ -31,6 +33,12 @@ Item {
                 onTriggered: {
                     fileDialog.reason = "openFile"
                     fileDialog.open()
+                }
+            }
+            Action {
+                text: qsTr("Save")
+                onTriggered: {
+                    menuControl.saveDocument()
                 }
             }
         }
@@ -68,6 +76,7 @@ Item {
         color: "#a3a3a3"
         ListView {
 		    id: tabsList
+            model: UserApplication.applicationModel().docModel()
             anchors.fill: parent
 		    clip: true
 		    delegate:  Button {

@@ -3,29 +3,13 @@
 ApplicationModel::ApplicationModel(QObject* parent)
 	: QObject(parent)
 	, m_meListModel(new MeListModel(this))
+	, m_docModel(new DocumentsModel(this))
 {
 }
 
-void ApplicationModel::addMathDoc(const std::wstring& file_path, std::unique_ptr<TryAlgebraCore::MathDocument>&& math_doc)
+DocumentsModel* ApplicationModel::docModel()
 {
-	auto new_doc = m_documents.emplace(file_path, std::move(math_doc));
-	if(new_doc.second)
-	{
-		m_curr_doc = file_path;
-		emit onNewDoc();
-		emit onCurrentDocChanged();
-	}
-}
-
-bool ApplicationModel::isDocOpened(const std::wstring& file_path)
-{
-	return m_documents.contains(file_path);
-}
-
-TryAlgebraCore::MathDocument* ApplicationModel::getCurrentDoc()
-{
-	auto found_doc = m_documents.find(m_curr_doc);
-	return found_doc != m_documents.end() ? found_doc->second.get() : nullptr;
+	return m_docModel;
 }
 
 MeListModel* ApplicationModel::meListModel()

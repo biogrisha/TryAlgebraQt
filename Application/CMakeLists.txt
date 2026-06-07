@@ -26,8 +26,8 @@ qt_add_qml_module(Application
         Controls/FilesControl.cpp
         Models/MeListModel.h
         Models/MeListModel.cpp
-        Models/DocumentTabModel.h
-        Models/DocumentTabModel.cpp
+        Models/DocumentsModel.h
+        Models/DocumentsModel.cpp
         Models/ApplicationModel.h
         Models/ApplicationModel.cpp
         Modules/MeInfoGenerator.h

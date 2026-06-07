@@ -1,6 +1,7 @@
 #include "MeInfoGenerator.h"
 #include <Me/include/MeAtlas.h>
 #include <Me/include/MeParser.h>
+#include <Me/include/MeGlobals.h>
 #include <MathEditor/include/TextBuffer.h>
 #include <Application.h>
 #include <AppGlobal.h>
@@ -13,17 +14,10 @@ void MeInfoGenerator::gen(MeListModel* model)
 {
 	using namespace TryAlgebraCore;
 	auto atlas = MyRTTI::MakeTypedUnique<TryAlgebraCore::MeAtlas>(500);
-	std::vector<std::pair<QString, std::wstring>> meDefinitions = 
-	{ 
-		{"Integral", L"\\ft\\∫\\{\\,\\}"},
-		{"Double integral", L"\\ft\\∬\\{\\,\\}"},
-		{"Triple integral", L"\\ft\\∭\\{\\,\\}"},
-		{"For all", L"∀"},
-		{"Exists", L"∃"},
-	};	
+	auto& meTable = TryAlgebraCore::MeNames::getMeTable();
 
 	TextBuffer tb;
-	for(auto& def : meDefinitions)
+	for(auto& def : meTable)
 	{
 		tb.insert(def.second, tb.getSize());
 	}
@@ -70,12 +64,12 @@ void MeInfoGenerator::gen(MeListModel* model)
 	RenderedDocBuffer->UnmapData();
 
 	auto& children = atlas->getChildren();
-	assert(children.size() == meDefinitions.size());
+	assert(children.size() == meTable.size());
 	for (int i = 0; i < children.size(); ++i)
 	{
 		QPoint pos{ int(children[i]->getPos().x), int(children[i]->getPos().y) };
 		QSize size{ int(children[i]->getSize().x), int(children[i]->getSize().y) };
-		model->addMathElementInfo({ meDefinitions[i].first, pos, size });
+		model->addMathElementInfo({ QString(meTable[i].first), pos, size });
 	}
 	image.save("C:/Users/biogr/OneDrive/Desktop/test.png");
 	model->setImage(std::move(image));

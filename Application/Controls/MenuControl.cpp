@@ -14,6 +14,23 @@ MenuControl::MenuControl(QObject* parent)
 {
 }
 
+void MenuControl::saveDocument()
+{
+    DocumentsModel* docModel = AppGlobal::appMod->docModel();
+    auto currDocPath = docModel->curDocPath();
+    if (!currDocPath)
+    {
+        return;
+    }
+    auto currDocInfo = docModel->docInfo(currDocPath.value());
+    QFile file(currDocPath.value());
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QTextStream out(&file);
+        out << currDocInfo->meDoc()->getText();
+    }
+}
+
 void MenuControl::openDocument(const QUrl& url)
 {	
     QFile file(url.toLocalFile());
@@ -26,13 +43,13 @@ void MenuControl::openDocument(const QUrl& url)
 
     QTextStream stream(&file);
 
-    // optional: force UTF-8
     stream.setEncoding(QStringConverter::Utf8);
 
     QString text = stream.readAll();
-
-    auto new_doc = std::make_unique<TryAlgebraCore::MathDocument>();
-    new_doc->setText(text.toStdWString());
-    AppGlobal::app_mod->addMathDoc(url.toLocalFile().toStdWString(), std::move(new_doc));
+    auto docModel = AppGlobal::appMod->docModel();
+    DocumentInfo docInfo(url.toLocalFile(), std::make_unique<TryAlgebraCore::MathDocument>());
+    docInfo.meDoc()->setText(text.toStdWString());
+    docModel->addDocInfo(std::move(docInfo));
+    docModel->setCurrentDocument(url.toLocalFile());
 }
 

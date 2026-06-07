@@ -16,4 +16,6 @@ public:
 public slots:
 	//Opens document by url
 	void openDocument(const QUrl& url);
+
+	void saveDocument();
 };

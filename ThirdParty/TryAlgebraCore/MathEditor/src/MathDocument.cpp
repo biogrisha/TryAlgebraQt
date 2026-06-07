@@ -48,6 +48,19 @@ namespace TryAlgebraCore
 		markDirty(DirtyState::Text | DirtyState::Selection);
 	}
 
+	void MathDocument::typeByName(const std::wstring& str)
+	{
+		auto& meTable = MeNames::getMeTable();
+		for (auto& me : meTable)
+		{
+			if (me.first == str)
+			{
+				type(me.second);
+				return;
+			}
+		}
+	}
+
 	void MathDocument::delBackward()
 	{
 		if (hasSelection())
@@ -237,6 +250,10 @@ namespace TryAlgebraCore
 		m_line_from = std::clamp<int>(m_line_from, 0, m_text_buffer.getLinesCount() - 1);
 		m_snap_to_end = false;
 		markDirty(DirtyState::Selection | DirtyState::Text);
+	}
+	std::wstring MathDocument::getText()
+	{
+		return m_text_buffer.getBuff();
 	}
 	void MathDocument::markDirty(DirtyState flags)
 	{

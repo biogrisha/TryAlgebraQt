@@ -23,6 +23,7 @@ namespace TryAlgebraCore
 		void setDocSize(const glm::vec2& size) { m_doc_size = size; }
 		void setText(const std::wstring& str);
 		void type(const std::wstring& str);
+		void typeByName(const std::wstring& str);
 		void delBackward();
 		void delForward();
 		void step(StepDir dir, bool with_selection = false);
@@ -31,6 +32,7 @@ namespace TryAlgebraCore
 		void draw();
 		bool restoreCaretPos(MeBase* me);
 		void scroll(bool delta);
+		std::wstring getText();
 	private:
 		void markDirty(DirtyState flags);
 		void clearDirty();

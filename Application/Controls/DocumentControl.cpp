@@ -5,12 +5,14 @@
 #include <ApplicationModel.h>
 #include <AppGlobal.h>
 #include <FilesControl.h>
-
+#include <Models/DocumentsModel.h>
 
 DocumentControl::DocumentControl(QObject *parent)
 	: QObject(parent)
 {
-	QObject::connect(AppGlobal::app_mod, &ApplicationModel::onCurrentDocChanged, this, &DocumentControl::onCurrentDocChanged);
+	DocumentsModel* docModel = AppGlobal::appMod->docModel();
+	QObject::connect(docModel, &DocumentsModel::onCurrentDocChanged, this, &DocumentControl::onCurrentDocChanged);
+	QObject::connect(docModel, &DocumentsModel::onBeforeDocRemoved, this, &DocumentControl::onBeforeDocRemoved);
 }
 
 void DocumentControl::bindMathDocumentItem(MathDocumentCanvas* mathDocument)
@@ -30,35 +32,35 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 	bool bCtrl = modifiers == Qt::Modifier::CTRL;
 	switch (key) {
 	case Qt::Key_Left:
-		m_current_doc->step(TryAlgebraCore::StepDir::left, bShift);
-		m_current_doc->draw();
+		m_currDoc->step(TryAlgebraCore::StepDir::left, bShift);
+		m_currDoc->draw();
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Right:
-		m_current_doc->step(TryAlgebraCore::StepDir::right, bShift);
-		m_current_doc->draw();
+		m_currDoc->step(TryAlgebraCore::StepDir::right, bShift);
+		m_currDoc->draw();
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Up:
-		m_current_doc->step(TryAlgebraCore::StepDir::up, bShift);
-		m_current_doc->draw();
+		m_currDoc->step(TryAlgebraCore::StepDir::up, bShift);
+		m_currDoc->draw();
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Down:
-		m_current_doc->step(TryAlgebraCore::StepDir::down, bShift);
-		m_current_doc->draw();
+		m_currDoc->step(TryAlgebraCore::StepDir::down, bShift);
+		m_currDoc->draw();
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Backspace:
 		m_visual_state.Clear(true, true);
-		m_current_doc->delBackward();
-		m_current_doc->draw();
+		m_currDoc->delBackward();
+		m_currDoc->draw();
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Delete:
 		m_visual_state.Clear(true, true);
-		m_current_doc->delForward();
-		m_current_doc->draw();
+		m_currDoc->delForward();
+		m_currDoc->draw();
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Z:
@@ -108,8 +110,8 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 				text = "\n";
 			}
 			m_visual_state.Clear(true, true);
-			m_current_doc->type(text.toStdWString());
-			m_current_doc->draw();
+			m_currDoc->type(text.toStdWString());
+			m_currDoc->draw();
 			updateElements(true, true, true);
 		}
 		break;
@@ -123,24 +125,40 @@ void DocumentControl::canvasReady()
 	//disconnecting from "renderer ready"
 	QObject::disconnect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady);
 	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
-	m_is_canvas_ready = true;
+	m_isCanvasReady = true;
 }
 
 void DocumentControl::addMeByName(const QString& meName)
 {
-	
+	if (m_currDoc)
+	{
+		m_currDoc->typeByName(meName.toStdWString());
+		m_currDoc->draw();
+		updateElements(true, true, true);
+	}
 }
 
-void DocumentControl::onCurrentDocChanged()
+void DocumentControl::onCurrentDocChanged(const QString& docPath)
 {
-	m_current_doc = AppGlobal::app_mod->getCurrentDoc();
+	DocumentsModel* docModel = AppGlobal::appMod->docModel();
+	DocumentInfo* docInfo = docModel->docInfo(docPath);
+	m_currDoc = docInfo->meDoc();
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdoc_state = &m_visual_state;
-	m_current_doc->setVisualToolkit(vt);
-	if (m_is_canvas_ready)
+	m_currDoc->setVisualToolkit(vt);
+	if (m_isCanvasReady)
 	{
-		m_current_doc->draw();
+		m_currDoc->draw();
+	}
+}
+
+void DocumentControl::onBeforeDocRemoved(DocumentInfo* docInfo)
+{
+	if (m_currDoc == docInfo->meDoc())
+	{
+		m_currDoc = nullptr;
+		clearDocument();
 	}
 }
 
@@ -149,8 +167,8 @@ void DocumentControl::onResized(const QSize& new_size)
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdoc_state = &m_visual_state;
-	m_current_doc->setDocSize({ new_size.width(), new_size.height()});
-	m_current_doc->draw();
+	m_currDoc->setDocSize({ new_size.width(), new_size.height()});
+	m_currDoc->draw();
 	m_doc_canvas->update();
 }
 
@@ -164,8 +182,8 @@ void DocumentControl::scrollY(bool Up)
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdoc_state = &m_visual_state;
-	m_current_doc->scroll(Up);
-	m_current_doc->draw();
+	m_currDoc->scroll(Up);
+	m_currDoc->draw();
 	m_doc_canvas->update();
 }
 
@@ -176,13 +194,13 @@ void DocumentControl::moveScrollHandle(float newPos)
 
 void DocumentControl::mouseBtnDown(float x, float y)
 {
-	m_current_doc->stopSelection();
+	m_currDoc->stopSelection();
 	m_bLmbDown = true;
-	m_current_doc->updateSelection({ x,y });
+	m_currDoc->updateSelection({ x,y });
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdoc_state = &m_visual_state;
-	m_current_doc->draw();
+	m_currDoc->draw();
 	updateElements(true, false, true);
 }
 
@@ -193,11 +211,11 @@ void DocumentControl::mouseBtnUp(float x, float y)
 
 void DocumentControl::mousePosUpdated(float x, float y)
 {
-	m_current_doc->updateSelection({ x,y });
+	m_currDoc->updateSelection({ x,y });
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdoc_state = &m_visual_state;
-	m_current_doc->draw();
+	m_currDoc->draw();
 	updateElements(true, false, true);
 }
 

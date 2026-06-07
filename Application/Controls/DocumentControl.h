@@ -9,11 +9,11 @@
 
 #include <MathDocumentCanvas.h>
 #include <Models/MeListModel.h>
+#include <Models/DocumentsModel.h>
 
 #include <MathEditor/include/MathDocument.h>
 
 class FTAMathDocumentInfo;
-
 /*
 * Control used to interact with selected math document
 */
@@ -40,7 +40,9 @@ public slots:
 	void addMeByName(const QString& meName);
 
 	//Called when new math document is selected
-	void onCurrentDocChanged();
+	void onCurrentDocChanged(const QString& docPath);
+
+	void onBeforeDocRemoved(DocumentInfo* docInfo);
 
 	//Handles item size update
 	void onResized(const QSize& new_size);
@@ -70,9 +72,9 @@ private:
 	//Render state of math document
 	FMathDocumentState m_visual_state;
 	//Indicates that MathDocument Item is ready to render
-	bool m_is_canvas_ready = false;
+	bool m_isCanvasReady = false;
 	bool m_bLmbDown = false;
 
-	TryAlgebraCore::MathDocument* m_current_doc;
+	TryAlgebraCore::MathDocument* m_currDoc;
 };
 

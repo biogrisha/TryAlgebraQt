@@ -18,7 +18,7 @@
 Application::~Application()
 {
 	AppGlobal::application = nullptr;
-	AppGlobal::app_mod = nullptr;
+	AppGlobal::appMod = nullptr;
 }
 
 Application::Application(QQmlEngine* engine, QObject *parent)
@@ -32,12 +32,11 @@ Application::Application(QQmlEngine* engine, QObject *parent)
 
 	//creating model
 	m_app_model = new ApplicationModel(this);
-	AppGlobal::app_mod = m_app_model;
+	AppGlobal::appMod = m_app_model;
 
 	//creating controls
 	m_files_control = new FilesControl(this);
 	m_menu_control = new MenuControl(this);
-	m_tabs_control = new TabsControl(this);
 	m_document_control = new DocumentControl(this);
 	//caching dpi
 	QScreen* screen = QGuiApplication::primaryScreen(); 
@@ -74,11 +73,6 @@ FFreeTypeWrap* Application::getFreeTypeWrap()
 FilesControl* Application::getFilesControl()
 {
 	return m_files_control;
-}
-
-TabsControl* Application::getTabs()
-{
-	return m_tabs_control;
 }
 
 MenuControl* Application::getMenu()
