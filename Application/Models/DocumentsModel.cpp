@@ -114,6 +114,18 @@ std::optional<QString> DocumentsModel::curDocPath()
 	return m_curDocPath;
 }
 
+bool DocumentsModel::isDocumentOpened(const QString& filePath)
+{
+	for (auto& doc : m_documents)
+	{
+		if (doc.filePath() == filePath)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 QHash<int, QByteArray> DocumentsModel::roleNames() const
 {
 	QHash<int, QByteArray> roles;

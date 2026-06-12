@@ -28,7 +28,7 @@ namespace TryAlgebraCore
 		if(m_ch != L' ')
 		{
 			m_glyph.Pos = m_pos;
-			visual_toolkit->mdoc_state->AddGlyph(m_glyph);
+			visual_toolkit->mdocState->AddGlyph(m_glyph);
 		}
 	}
 

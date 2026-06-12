@@ -185,7 +185,7 @@ namespace TryAlgebraCore
 		{
 			float line_before_h = 0;
 			float cont_visible_y = 0;
-			m_visual_toolkit.mdoc_state->Clear(true, false);
+			m_visual_toolkit.mdocState->Clear(true, false);
 			m_container = MyRTTI::MakeTypedUnique<MeContainer>();
 			m_container->setScalingFactor(1);
 			if (m_line_from > 0)
@@ -229,10 +229,10 @@ namespace TryAlgebraCore
 		}
 		if(hasFlag(getDirtyState(), DirtyState::Selection))
 		{
-			m_visual_toolkit.mdoc_state->Clear(false, true);
+			m_visual_toolkit.mdocState->Clear(false, true);
 			//draw caret
 			auto caret_data = MeHelpers::getCaretData(m_container.get(), m_selection_end);
-			m_visual_toolkit.mdoc_state->SetCaret(caret_data);
+			m_visual_toolkit.mdocState->SetCaret(caret_data);
 			if(!m_container->getChildren().empty())
 			{
 				MeHelpers::highlightSelected(m_container.get(), m_selection_start, m_selection_end, &m_visual_toolkit);

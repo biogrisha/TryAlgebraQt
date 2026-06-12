@@ -27,10 +27,10 @@ void MeInfoGenerator::gen(MeListModel* model)
 	FMathDocumentState me_doc_state;
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &me_doc_state;
+	vt.mdocState = &me_doc_state;
 	atlas->calculate(&vt);
 	atlas->draw(&vt);
-	vt.mdoc_state->SetCaret({ .Pos = { -100, -100},.Size = {0,0} });
+	vt.mdocState->SetCaret({ .Pos = { -100, -100},.Size = {0,0} });
 	uint32_t width = static_cast<uint32_t>(atlas->getSize().x);
 	uint32_t height = static_cast<uint32_t>(atlas->getSize().y);
 

@@ -30,6 +30,6 @@ private:
 
 struct VisualToolkit
 {
-	FMathDocumentState* mdoc_state = nullptr;
+	FMathDocumentState* mdocState = nullptr;
 	FFreeTypeWrap* ft = nullptr;
 };

@@ -33,6 +33,11 @@ void MenuControl::saveDocument()
 
 void MenuControl::openDocument(const QUrl& url)
 {	
+    auto docModel = AppGlobal::appMod->docModel();
+    if (docModel->isDocumentOpened(url.toLocalFile()))
+    {
+        return;
+    }
     QFile file(url.toLocalFile());
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -46,7 +51,6 @@ void MenuControl::openDocument(const QUrl& url)
     stream.setEncoding(QStringConverter::Utf8);
 
     QString text = stream.readAll();
-    auto docModel = AppGlobal::appMod->docModel();
     DocumentInfo docInfo(url.toLocalFile(), std::make_unique<TryAlgebraCore::MathDocument>());
     docInfo.meDoc()->setText(text.toStdWString());
     docModel->addDocInfo(std::move(docInfo));

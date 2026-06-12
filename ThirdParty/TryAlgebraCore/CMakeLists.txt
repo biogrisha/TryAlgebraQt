@@ -34,7 +34,10 @@ add_library(TryAlgebraCore STATIC
 	Helpers/include/MeHelpers.h
 	Helpers/include/EnumFlags.h
 	Helpers/src/MeHelpers.cpp 
- )
+
+	TRS/Trs.h
+	TRS/Trs.cpp
+)
 
 # Set include directories
 target_include_directories(TryAlgebraCore

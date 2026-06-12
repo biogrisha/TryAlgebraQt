@@ -18,15 +18,19 @@ DocumentControl::DocumentControl(QObject *parent)
 void DocumentControl::bindMathDocumentItem(MathDocumentCanvas* mathDocument)
 {
 	//cache math document and wait until it's ready
-	m_doc_canvas = mathDocument;
-	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady, Qt::ConnectionType::DirectConnection);
+	m_docCanvas = mathDocument;
+	QObject::connect(m_docCanvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady, Qt::ConnectionType::DirectConnection);
 }
 
 void DocumentControl::keyInput(int key, QString text, int modifiers)
 {	
+	if (!m_currDoc)
+	{
+		return;
+	}
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_visual_state;
+	vt.mdocState = &m_visual_state;
 
 	bool bShift = modifiers == Qt::Modifier::SHIFT;
 	bool bCtrl = modifiers == Qt::Modifier::CTRL;
@@ -121,10 +125,10 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 void DocumentControl::canvasReady()
 {
 	//caching doc state ptr in MathDocument
-	m_doc_canvas->setMeDocState(&m_visual_state);
+	m_docCanvas->setMeDocState(&m_visual_state);
 	//disconnecting from "renderer ready"
-	QObject::disconnect(m_doc_canvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady);
-	QObject::connect(m_doc_canvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
+	QObject::disconnect(m_docCanvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady);
+	QObject::connect(m_docCanvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
 	m_isCanvasReady = true;
 }
 
@@ -145,11 +149,14 @@ void DocumentControl::onCurrentDocChanged(const QString& docPath)
 	m_currDoc = docInfo->meDoc();
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_visual_state;
+	vt.mdocState = &m_visual_state;
 	m_currDoc->setVisualToolkit(vt);
 	if (m_isCanvasReady)
 	{
+		const QSize size = m_docCanvas->getSize();
+		m_currDoc->setDocSize({ size.width(), size.height()});
 		m_currDoc->draw();
+		updateElements(true, true, true);
 	}
 }
 
@@ -164,12 +171,16 @@ void DocumentControl::onBeforeDocRemoved(DocumentInfo* docInfo)
 
 void DocumentControl::onResized(const QSize& new_size)
 {
+	if (!m_currDoc)
+	{
+		return;
+	}
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_visual_state;
+	vt.mdocState = &m_visual_state;
 	m_currDoc->setDocSize({ new_size.width(), new_size.height()});
 	m_currDoc->draw();
-	m_doc_canvas->update();
+	m_docCanvas->update();
 }
 
 float DocumentControl::getScrollHandleSize()
@@ -179,27 +190,38 @@ float DocumentControl::getScrollHandleSize()
 
 void DocumentControl::scrollY(bool Up)
 {
+	if (!m_currDoc)
+	{
+		return;
+	}
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_visual_state;
+	vt.mdocState = &m_visual_state;
 	m_currDoc->scroll(Up);
 	m_currDoc->draw();
-	m_doc_canvas->update();
+	m_docCanvas->update();
 }
 
 void DocumentControl::moveScrollHandle(float newPos)
 {
-	
+	if (!m_currDoc)
+	{
+		return;
+	}
 }
 
 void DocumentControl::mouseBtnDown(float x, float y)
 {
+	if (!m_currDoc)
+	{
+		return;
+	}
 	m_currDoc->stopSelection();
 	m_bLmbDown = true;
 	m_currDoc->updateSelection({ x,y });
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_visual_state;
+	vt.mdocState = &m_visual_state;
 	m_currDoc->draw();
 	updateElements(true, false, true);
 }
@@ -211,17 +233,21 @@ void DocumentControl::mouseBtnUp(float x, float y)
 
 void DocumentControl::mousePosUpdated(float x, float y)
 {
+	if (!m_currDoc)
+	{
+		return;
+	}
 	m_currDoc->updateSelection({ x,y });
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdoc_state = &m_visual_state;
+	vt.mdocState = &m_visual_state;
 	m_currDoc->draw();
 	updateElements(true, false, true);
 }
 
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)
 {
-	m_doc_canvas->update();
+	m_docCanvas->update();
 }
 
 void DocumentControl::clearDocument()
@@ -230,7 +256,7 @@ void DocumentControl::clearDocument()
 	m_visual_state.Clear(true, true);
 	//move caret outside visible area
 	m_visual_state.SetCaret({ {-100, -100}, {1,1} });
-	m_doc_canvas->update();
+	m_docCanvas->update();
 }
 
 

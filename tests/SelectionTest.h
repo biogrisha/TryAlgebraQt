@@ -19,7 +19,7 @@ struct SelectionFixture
 	{
 		ft.Init(xDpi, yDpi);
 		vt.ft = &ft;
-		vt.mdoc_state = &md;
+		vt.mdocState = &md;
 
 		cont = parse(str);
 		cont->calculate(&vt);

@@ -411,7 +411,7 @@ namespace TryAlgebraCore
 				rect.Color = { 0,0,0.3,1 };
 				rect.Pos = siblings[i]->getPos();
 				rect.Size = siblings[i]->getSize();
-				vt->mdoc_state->AddRect(rect);
+				vt->mdocState->AddRect(rect);
 				++i;
 			}
 

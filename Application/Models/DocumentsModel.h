@@ -45,6 +45,8 @@ public:
     void setCurrentDocument(const QString& filePath);
 
     std::optional<QString> curDocPath();
+
+    bool isDocumentOpened(const QString& filePath);
 signals:
     void onCurrentDocChanged(const QString& docPath);
     void onDocumentAdded(DocumentInfo* docInfo);

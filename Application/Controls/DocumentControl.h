@@ -66,7 +66,7 @@ private:
 	void clearDocument();
 
 	//Math document used to render content
-	MathDocumentCanvas* m_doc_canvas = nullptr;
+	MathDocumentCanvas* m_docCanvas = nullptr;
 	//Model for math elements selector
 	MeListModel* m_meInfoModel = nullptr;
 	//Render state of math document

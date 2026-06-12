@@ -13,7 +13,7 @@ namespace TestGlobals
 		{
 			ft.Init(XDpi, XDpi);
 			vt.ft = &ft;
-			vt.mdoc_state = &md;
+			vt.mdocState = &md;
 
 			cont = TestHelpers::parse(str);
 			cont->calculate(&vt);
