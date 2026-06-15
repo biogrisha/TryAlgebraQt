@@ -136,7 +136,10 @@ FImageBuffer* FMathDocumentRendering::Render()
 {
 	if (State.IsRectsUpdated())
 	{
-		UpdateRects(State.GetRects());
+		auto rects = State.GetCosmeticRects();
+		const auto& selection = State.GetSelectionRects();
+		rects.insert(rects.end(), selection.begin(), selection.end());
+		UpdateRects(rects);
 	}
 	if(State.IsTextUpdated())
 	{

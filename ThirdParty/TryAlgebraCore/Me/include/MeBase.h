@@ -36,6 +36,7 @@ namespace TryAlgebraCore
 		//1)if step_from == inside -> path points to element in child container
 		//2)if step_from == outside -> path ends with LeafPos and points at element
 		virtual void step(StepDir dir, StepFrom step_from, MePath& path) {}
+		virtual std::wstring getName() { return L""; };
 		void calculatePos();
 		void addChild(std::unique_ptr<MeBase>&& child);
 		const glm::vec2& getSize() { return m_size; }

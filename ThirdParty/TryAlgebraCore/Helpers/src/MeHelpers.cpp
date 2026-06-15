@@ -408,10 +408,10 @@ namespace TryAlgebraCore
 			while (i < siblings.size() && siblings[i]->getChFrom() < to)
 			{
 				FRectInst rect;
-				rect.Color = { 0,0,0.3,1 };
+				rect.Color = { 0.5,0.5,0.8,0.5 };
 				rect.Pos = siblings[i]->getPos();
 				rect.Size = siblings[i]->getSize();
-				vt->mdocState->AddRect(rect);
+				vt->mdocState->AddSelection(rect);
 				++i;
 			}
 

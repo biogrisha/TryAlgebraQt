@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include <vector>
@@ -23,6 +24,7 @@ namespace TryAlgebraCore::Trs
         std::vector<int> comp_order;
         bool pending_cong = false;
         bool del = false;
+        bool variable = false;
     };
 
     struct TermsStorage

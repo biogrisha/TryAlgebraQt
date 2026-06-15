@@ -20,6 +20,7 @@ add_library(TryAlgebraCore STATIC
 	Me/include/MeGlobals.h
 	Me/include/MeFromTo.h
 	Me/include/MeAtlas.h
+	Me/include/MeVariable.h
 	
 
 	Me/src/MeBase.cpp
@@ -29,6 +30,7 @@ add_library(TryAlgebraCore STATIC
 	Me/src/MeContainer.cpp
 	Me/src/MeFromTo.cpp
 	Me/src/MeAtlas.cpp
+	Me/src/MeVariable.cpp
 	
 
 	Helpers/include/MeHelpers.h
@@ -37,6 +39,8 @@ add_library(TryAlgebraCore STATIC
 
 	TRS/Trs.h
 	TRS/Trs.cpp
+	TRS/PatternMatching.h
+	TRS/PatternMatching.cpp
 )
 
 # Set include directories

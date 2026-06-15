@@ -4,7 +4,9 @@ void FMathDocumentState::CopyChanged(const FMathDocumentState& Other)
 {
 	bTextUpdated = Other.bTextUpdated;
 	bCaretUpdated = Other.bCaretUpdated;
-	bRectsUpdated = Other.bRectsUpdated;
+	bSelectionUpdated = Other.bSelectionUpdated;
+	bCosmeticRectsUpdated = Other.bCosmeticRectsUpdated;
+
 	if (Other.bTextUpdated)
 	{
 		Text = Other.Text;
@@ -13,29 +15,54 @@ void FMathDocumentState::CopyChanged(const FMathDocumentState& Other)
 	{
 		CaretData = Other.CaretData;
 	}
-	if (Other.bRectsUpdated)
+	if (Other.bSelectionUpdated)
 	{
-		Rects = Other.Rects;
+		Selection = Other.Selection;
 	}
+	if (Other.bCosmeticRectsUpdated)
+	{
+		Cosmetic = Other.Cosmetic;
+	}
+
 }
 
-void FMathDocumentState::Clear(bool bText, bool bRects)
+FMathDocumentState& FMathDocumentState::ClearText()
 {
-	if (bText)
+	if(!Text.empty())
 	{
 		Text.clear();
 		bTextUpdated = true;
 	}
-	if (bRects)
+	return *this;
+}
+
+FMathDocumentState& FMathDocumentState::ClearSelection()
+{
+	if(!Selection.empty())
 	{
-		Rects.clear();
-		bRectsUpdated = true;
+		Selection.clear();
+		bSelectionUpdated = true;
 	}
+	return *this;
+}
+
+FMathDocumentState& FMathDocumentState::ClearCosmeticRects()
+{
+	if(!Cosmetic.empty())
+	{
+		Cosmetic.clear();
+		bCosmeticRectsUpdated = true;
+	}
+	return *this;
 }
 
 void FMathDocumentState::Invalidate()
 {
-	bTextUpdated = bRectsUpdated = bCaretUpdated = true;
+	bTextUpdated 
+	= bSelectionUpdated 
+	= bCaretUpdated 
+	= bCosmeticRectsUpdated 
+	= true;
 }
 
 void FMathDocumentState::AddGlyph(const FGlyphData& Glyph)
@@ -56,17 +83,25 @@ void FMathDocumentState::SetCaret(const FCaretData& InCaretData)
 	CaretData = InCaretData;
 }
 
-void FMathDocumentState::AddRect(const FRectInst& Rect)
+void FMathDocumentState::AddSelection(const FRectInst& Rect)
 {
-	bRectsUpdated = true;
-	Rects.push_back(Rect);
+	Selection.push_back(Rect);
+	bSelectionUpdated = true;
+}
+
+void FMathDocumentState::AddCosmeticRect(const FRectInst& Rect)
+{
+	Cosmetic.push_back(Rect);
+	bCosmeticRectsUpdated = true;
 }
 
 void FMathDocumentState::Update()
 {
-	bTextUpdated = false;
-	bCaretUpdated = false;
-	bRectsUpdated = false;
+	bTextUpdated 
+	= bSelectionUpdated 
+	= bCaretUpdated 
+	= bCosmeticRectsUpdated 
+	= false;
 }
 
 bool FMathDocumentState::IsTextUpdated()
@@ -81,7 +116,7 @@ bool FMathDocumentState::IsCaretUpdated()
 
 bool FMathDocumentState::IsRectsUpdated()
 {
-	return bRectsUpdated;
+	return bSelectionUpdated || bCosmeticRectsUpdated;
 }
 
 const std::vector<FGlyphData>& FMathDocumentState::GetText()
@@ -94,7 +129,12 @@ const FCaretData& FMathDocumentState::GetCaretData()
 	return CaretData;
 }
 
-const std::vector<FRectInst>& FMathDocumentState::GetRects()
+const std::vector<FRectInst>& FMathDocumentState::GetSelectionRects()
 {
-	return Rects;
+	return Selection;
+}
+
+const std::vector<FRectInst>& FMathDocumentState::GetCosmeticRects()
+{
+	return Cosmetic;
 }

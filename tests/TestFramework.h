@@ -89,20 +89,15 @@ namespace TestFramework
 				}
 			}
 		}
-		Cases(const std::vector<T>& cases, const std::function<void(const TestData& tst, const T& data)>& func)
+		Cases(std::vector<T>&& cases, const std::function<void(const TestData& tst, const T& data)>& func)
 		{
 			m_func = func;
-			m_cases = cases;
+			m_cases = std::forward<std::vector<T>>(cases);
 		}
 
-		void operator+=(const T& cs)
+		void operator+=(T&& cs)
 		{
-			m_cases.push_back(cs);
-		}
-
-		void operator+=(const std::vector<T>& cases)
-		{
-			m_cases.insert(m_cases.end(), cases.begin(), cases.end());
+			m_cases.push_back(std::forward<T>(cs));
 		}
 
 		std::vector<T> m_cases;

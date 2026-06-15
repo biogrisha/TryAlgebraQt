@@ -234,7 +234,7 @@ void markPatternNodes(Term* t)
         t->pat = true;
         return;
     }
-    if (t->label[0] == '`')
+    if (t->variable)
     {
         t->pat = true;
     }

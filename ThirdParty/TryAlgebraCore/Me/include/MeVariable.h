@@ -4,16 +4,15 @@
 
 namespace TryAlgebraCore
 {
-	class MeCharacter : public MeBase
+	class MeVariable : public MeBase
 	{
 		TYPED_CLASS1(MeBase)
 	public:
-		MeCharacter(wchar_t ch);
 		virtual void calculate(VisualToolkit* visual_toolkit) override;
 		virtual void draw(VisualToolkit* visual_toolkit) override;
+		virtual void step(StepDir dir, StepFrom step_from, MePath& path) override;
 		virtual std::wstring getName() override;
 	private:
-		wchar_t m_ch;
 		FGlyphData m_glyph;
 	};
 }

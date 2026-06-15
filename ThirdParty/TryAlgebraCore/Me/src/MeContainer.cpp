@@ -203,4 +203,8 @@ namespace TryAlgebraCore
 		setSizeX(std::max(getSize().x, m_scaling_factor * 10));
 		setSizeY(std::max(getSize().y, m_scaling_factor * g_caret_def_size.y));
 	}
+	std::wstring MeContainer::getName()
+	{
+		return MeNames::cont;
+	}
 }

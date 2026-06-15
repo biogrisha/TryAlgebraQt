@@ -119,4 +119,9 @@ namespace TryAlgebraCore
 			}
 		}
 	}
+
+	std::wstring MeFromTo::getName()
+	{
+		return MeNames::from_to + L"_" + m_glyph.GlyphId.Glyph;
+	}
 }

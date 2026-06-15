@@ -12,6 +12,7 @@ namespace TryAlgebraCore
 		virtual void draw(VisualToolkit* vt);
 		virtual void step(StepDir dir, StepFrom step_from, MePath& path) override;
 		virtual void calculate(VisualToolkit* visual_toolkit) override;
+		virtual std::wstring getName() override;
 
 		void calcLine(VisualToolkit* visual_toolkit, size_t end = UINT64_MAX);
 		void addEmptyLine();

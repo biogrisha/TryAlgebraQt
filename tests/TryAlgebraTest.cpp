@@ -7,8 +7,9 @@
 //#include "TextBufferTest.h"
 //#include "ParseTest.h"
 //#include "TextPosToMePathTest.h"
-#include "StepTest.h"
+//#include "StepTest.h"
 //#include "IsLastLineTest.h"
+#include "ConvertMeToTermsTest.h"
 int main(int argc, char* argv[])
 {
 	TestFramework::runAllTests();

@@ -17,9 +17,21 @@ namespace TryAlgebraCore
 
 		inline std::wstring new_line = L"nl";
 
+		inline std::wstring cont = L"ct";
+
+		inline std::wstring variable = L"vr";
+
 		inline std::wstring makeMe(const std::wstring& name, const std::wstring& meta, const size_t cont_num)
 		{
-			std::wstring res = L"\\" + name + L"\\" + meta + L"\\{";
+			std::wstring res;
+			if (meta.empty())
+			{
+				res = L"\\" + name + L"\\{";
+			}
+			else
+			{
+				res = L"\\" + name + L"\\" + meta + L"\\{";
+			}
 			for (size_t i = 0; i < cont_num - 1; ++i)
 			{
 				res += L"\\,";
@@ -36,6 +48,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Integral", makeMe(from_to, integral, 2));
 				res.emplace_back(L"Double integral", makeMe(from_to, integral2, 2));
 				res.emplace_back(L"Triple integral", makeMe(from_to, integral3, 2));
+				res.emplace_back(L"Variable", makeMe(variable, L"", 1));
 				res.emplace_back(L"For all", L"∀");
 				res.emplace_back(L"Exists", L"∃");
 			}

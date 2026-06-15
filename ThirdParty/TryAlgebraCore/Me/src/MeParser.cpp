@@ -4,6 +4,7 @@
 #include <Me/include/MeNewLine.h>
 #include <Me/include/MeGlobals.h>
 #include <Me/include/MeFromTo.h>
+#include <Me/include/MeVariable.h>
 
 namespace TryAlgebraCore
 {
@@ -19,6 +20,11 @@ namespace TryAlgebraCore
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeNewLine>();
+			});
+		m_factory.emplace(MeNames::variable,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeVariable>();
 			});
 	}
 

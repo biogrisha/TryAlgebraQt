@@ -13,6 +13,7 @@ namespace TryAlgebraCore
 		virtual void calculate(VisualToolkit* visual_toolkit) override;
 		virtual void draw(VisualToolkit* visual_toolkit) override;
 		virtual void step(StepDir dir, StepFrom step_from, MePath& path) override;
+		virtual std::wstring getName() override;
 	private:
 		FGlyphData m_glyph;
 		float m_symbol_height_factor = 2;

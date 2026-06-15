@@ -56,13 +56,11 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 		updateElements(true, false, true);
 		break;
 	case Qt::Key_Backspace:
-		m_visual_state.Clear(true, true);
 		m_currDoc->delBackward();
 		m_currDoc->draw();
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Delete:
-		m_visual_state.Clear(true, true);
 		m_currDoc->delForward();
 		m_currDoc->draw();
 		updateElements(true, true, true);
@@ -113,7 +111,6 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 			{
 				text = "\n";
 			}
-			m_visual_state.Clear(true, true);
 			m_currDoc->type(text.toStdWString());
 			m_currDoc->draw();
 			updateElements(true, true, true);
@@ -253,7 +250,7 @@ void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)
 void DocumentControl::clearDocument()
 {
 	//clearing render data
-	m_visual_state.Clear(true, true);
+	m_visual_state.ClearCosmeticRects().ClearSelection().ClearText();
 	//move caret outside visible area
 	m_visual_state.SetCaret({ {-100, -100}, {1,1} });
 	m_docCanvas->update();

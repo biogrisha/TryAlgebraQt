@@ -32,4 +32,9 @@ namespace TryAlgebraCore
 		}
 	}
 
+	std::wstring MeCharacter::getName()
+	{
+		return std::wstring(1, m_ch);
+	}
+
 }
