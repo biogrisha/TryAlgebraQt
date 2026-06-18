@@ -2,8 +2,27 @@
 #include <span>
 #include "Trs.h"
 #include <Me/include/MeBase.h>
+
 namespace TryAlgebraCore::Trs
 {
+    using TermRawSh = std::shared_ptr<struct TermRaw>;
+    struct TermRaw
+    {
+        bool variable = false;
+        std::wstring label;
+        std::vector<TermRawSh> children;
+        std::vector<TermRawSh> captured;
+        std::vector<int> compOrder;
+    };
+
+    struct Variator
+    {
+        Variator(int size, int sum);
+        int step();
+        std::vector<int> m_offsets;
+        std::vector<int> m_sizes;
+        int m_sum = 0;
+    };
 
 	class PatternMatcher
 	{
@@ -15,13 +34,12 @@ namespace TryAlgebraCore::Trs
 
         struct State
         {
-            std::vector<Term*>& pat;
-            std::vector<Term*>& terms;
-            std::vector<int> sizePerVar;
+            std::vector<TermRawSh>& pat;
+            std::vector<TermRawSh>& terms;
+
             int groundStartNum = 0;
             int groundEndNum = 0;
             bool compBoundaries();
-
             bool compIntermediate();
         };
 
@@ -35,14 +53,15 @@ namespace TryAlgebraCore::Trs
         bool in();
 
         std::vector<BStackEl> bstack;
-        std::map<Term*, Arg> args;
         bool first_call = true;
 	};
 
-    bool compare(Term* lhs, Term* rhs);
+    
+    bool compareWithVariable(TermRaw* var, const std::span<TermRawSh>& terms);
+    bool compare(TermRaw* lhs, TermRaw* rhs);
 	bool match(const std::span<Term*>& terms, const std::vector<Term*>& pattern, int from);
-	void recognizeVariables(std::vector<Term*>& pattern);
-	void convertMeToTerms(const std::span<std::unique_ptr<MeBase>>& meList, std::vector<Term*>& result, Term* parent);
-    void unifyVariables(std::vector<Term*>& terms, std::vector<Term*>& variables);
-    void clearReps(std::vector<Term*>& terms);
+	void recognizeVariables(std::vector<TermRawSh>& pattern);
+	void convertMeToTerms(const std::span<std::unique_ptr<MeBase>>& meList, std::vector<TermRawSh>& result, TermRaw* parent);
+    void unifyVariables(std::vector<TermRawSh>& terms, std::vector<TermRaw*>& variables);
+    
 }

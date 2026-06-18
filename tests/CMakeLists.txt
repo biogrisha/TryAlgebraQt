@@ -14,6 +14,7 @@ add_executable(TryAlgebraTest
     TestFramework.h
     IsLastLineTest.h
     ConvertMeToTermsTest.h
+    VariatorTest.h
 )
 
 target_link_libraries(TryAlgebraTest 

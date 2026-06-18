@@ -10,6 +10,7 @@
 //#include "StepTest.h"
 //#include "IsLastLineTest.h"
 #include "ConvertMeToTermsTest.h"
+#include "VariatorTest.h"
 int main(int argc, char* argv[])
 {
 	TestFramework::runAllTests();

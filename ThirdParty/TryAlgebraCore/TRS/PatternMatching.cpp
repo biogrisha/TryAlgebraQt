@@ -20,7 +20,7 @@ namespace TryAlgebraCore::Trs
 		return true;
 	}
 
-	void recognizeVariables(std::vector<Term*>& pattern)
+	void recognizeVariables(std::vector<TermRawSh>& pattern)
 	{
 		for (auto tr : pattern)
 		{
@@ -36,22 +36,18 @@ namespace TryAlgebraCore::Trs
 
 	}
 
-	void convertMeToTerms(const std::span<std::unique_ptr<MeBase>>& meList, std::vector<Term*>& result, Term* parent)
+	void convertMeToTerms(const std::span<std::unique_ptr<MeBase>>& meList, std::vector<TermRawSh>& result, TermRaw* parent)
 	{
 		for (auto& me : meList)
 		{
-			Term* newTerm = new Term;
+			TermRawSh newTerm = std::make_shared<TermRaw>();
 			newTerm->label = me->getName();
-			if(parent)
-			{
-				newTerm->parents.insert(parent);
-			}
 			result.push_back(newTerm);
-			convertMeToTerms(me->getChildren(), newTerm->children, newTerm);
+			convertMeToTerms(me->getChildren(), newTerm->children, newTerm.get());
 		}
 	}
 
-	void unifyVariables(std::vector<Term*>& terms, std::vector<Term*>& variables)
+	void unifyVariables(std::vector<TermRawSh>& terms, std::vector<TermRaw*>& variables)
 	{
 		for (auto& tr : terms)
 		{
@@ -59,10 +55,9 @@ namespace TryAlgebraCore::Trs
 			{
 				for (auto vr : variables)
 				{
-					if (compare(tr, vr))
+					if (compare(tr.get(), vr))
 					{
-						deleteRecursive(tr);
-						tr = vr;
+						tr.reset(vr);
 					}
 				}
 			}
@@ -70,15 +65,6 @@ namespace TryAlgebraCore::Trs
 			{
 				unifyVariables(tr->children, variables);
 			}
-		}
-	}
-
-	void clearReps(std::vector<Term*>& terms)
-	{
-		for (auto tr : terms)
-		{
-			clearReps(tr->children);
-			tr->e_reps.clear();
 		}
 	}
 
@@ -90,7 +76,23 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	bool compare(Term* lhs, Term* rhs)
+	bool compareWithVariable(TermRaw* var, const std::span<TermRawSh>& terms)
+	{
+		if (var->captured.size() != terms.size())
+		{
+			return false;
+		}
+		for (int i = 0; i < terms.size(); ++i)
+		{
+			if (!compare(var->captured[i].get(), terms[i].get()))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool compare(TermRaw* lhs, TermRaw* rhs)
 	{
 		if (lhs->label != rhs->label)
 		{
@@ -102,7 +104,7 @@ namespace TryAlgebraCore::Trs
 		}
 		for (int i = 0; i < lhs->children.size(); ++i)
 		{
-			if (!compare(lhs->children[i], rhs->children[i]))
+			if (!compare(lhs->children[i].get(), rhs->children[i].get()))
 			{
 				return false;
 			}
@@ -112,32 +114,147 @@ namespace TryAlgebraCore::Trs
 
 	bool PatternMatcher::State::compBoundaries()
 	{
-		for (int i = 0; i < groundStartNum; ++i)
+		std::optional<int> variableStart;
 		{
-			if (pat[i]->variable)
+			int termsId = 0;
+			for (int patId = 0; patId < pat.size(); ++patId)
 			{
-
-			}
-			if (!compare(terms[i], pat[i]))
-			{
-				return false;
+				if (pat[patId]->variable)
+				{
+					if (!pat[patId]->captured.empty())
+					{
+						//reached empty variable
+						variableStart = patId;
+						break;
+					}
+					else
+					{
+						//variable captured something
+						if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured.size())))
+						{
+							//captured sequence not equal to the one in terms
+							return false;
+						}
+						//compared sequences are equal -> make step to the number of captured elements
+						termsId += pat[patId]->captured.size();
+					}
+					continue;
+				}
+				else if (pat[patId]->pattern && pat[patId]->label != terms[patId]->label)
+				{
+					//pattern and labels are not equal -> fail
+					return false;
+				}
+				else if (!pat[patId]->pattern && compare(pat[patId].get(), terms[patId].get()))
+				{
+					//ground terms and not equal -> fail
+					return false;
+				}
+				++termsId;
 			}
 		}
 
-		for (int i = 0; i < groundEndNum; ++i)
+		if(!variableStart.has_value())
 		{
-			if (!compare(terms[terms.size() - 1 - i], pat[pat.size() - 1 - i]))
+			return true;
+		}
+
+		std::optional<int> variableEnd;
+		{
+			int termsId = terms.size() - 1;
+			for (int patId = pat.size() - 1; patId >= 0; -- patId)
 			{
-				return false;
+				if (pat[patId]->variable)
+				{
+					if (!pat[patId]->captured.empty())
+					{
+						//reached empty variable
+						variableStart = patId;
+						break;
+					}
+					else
+					{
+						//variable captured something
+						if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured.size())))
+						{
+							//captured sequence not equal to the one in terms
+							return false;
+						}
+						//compared sequences are equal -> make step to the number of captured elements
+						termsId += pat[patId]->captured.size();
+					}
+					continue;
+				}
+				else if (pat[patId]->pattern && pat[patId]->label != terms[patId]->label)
+				{
+					//pattern and labels are not equal -> fail
+					return false;
+				}
+				else if (!pat[patId]->pattern && compare(pat[patId].get(), terms[patId].get()))
+				{
+					//ground terms and not equal -> fail
+					return false;
+				}
+				++termsId;
 			}
 		}
-		return true;
 	}
 
 	bool PatternMatcher::State::compIntermediate()
 	{
 
 		return false;
+	}	
+
+	Variator::Variator(int size, int sum)
+	{
+		m_sum = sum + size - 2;
+		m_offsets = std::vector<int>(size - 1);
+		for (int i = 0; i < m_offsets.size(); ++i)
+		{
+			m_offsets[i] = i;
+		}
+		m_sizes = std::vector<int>(size, 0);
+		m_sizes[0] = sum;
+	}
+
+	int Variator::step()
+	{
+		bool needReset = false;
+		for (int i = 0; i < m_offsets.size(); ++i)
+		{
+			int pos = m_offsets.size() - 1 - i;
+			if(m_offsets[pos] == m_sum - i)
+			{
+				needReset = true;
+				continue;
+			}
+			
+			if (m_offsets[pos] != m_sum - i)
+			{
+				m_offsets[pos] += 1;
+				int size = m_offsets[pos];
+				for (int j = 1; j + pos < m_offsets.size(); ++j)
+				{
+					m_offsets[j + pos] = size + j;
+				}
+				break;
+			}
+		}
+		m_sizes.clear();
+		
+		int lastEnd = m_sum;
+		for (int i = m_offsets.size() - 1; i >= 0; --i)
+		{
+			m_sizes.push_back(lastEnd - m_offsets[i]);
+			lastEnd = m_offsets[i] - (i == 0 ? 0 : 1);
+		}
+		m_sizes.push_back(lastEnd);
+		if (m_sizes.back() == m_sum - m_sizes.size() + 2)
+		{
+			return 1;
+		}
+		return 0;
 	}
 
 }

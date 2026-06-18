@@ -71,6 +71,5 @@ void MeInfoGenerator::gen(MeListModel* model)
 		QSize size{ int(children[i]->getSize().x), int(children[i]->getSize().y) };
 		model->addMathElementInfo({ QString(meTable[i].first), pos, size });
 	}
-	image.save("C:/Users/biogr/OneDrive/Desktop/test.png");
 	model->setImage(std::move(image));
 }
