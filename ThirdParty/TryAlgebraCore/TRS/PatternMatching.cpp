@@ -162,26 +162,28 @@ namespace TryAlgebraCore::Trs
 		std::optional<int> variableEnd;
 		{
 			int termsId = terms.size() - 1;
-			for (int patId = pat.size() - 1; patId >= 0; -- patId)
+			for (int patId = pat.size() - 1; patId >= 0; --patId)
 			{
 				if (pat[patId]->variable)
 				{
-					if (!pat[patId]->captured.empty())
+					int captureSize = pat[patId]->captured.size();
+					if (captureSize == 0)
 					{
 						//reached empty variable
-						variableStart = patId;
+						variableEnd = patId;
 						break;
 					}
 					else
 					{
 						//variable captured something
-						if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured.size())))
+						if (!compareWithVariable(pat[patId].get()
+							, std::span(terms).subspan(termsId - captureSize + 1, captureSize)))
 						{
 							//captured sequence not equal to the one in terms
 							return false;
 						}
 						//compared sequences are equal -> make step to the number of captured elements
-						termsId += pat[patId]->captured.size();
+						termsId -= captureSize;
 					}
 					continue;
 				}
@@ -195,7 +197,7 @@ namespace TryAlgebraCore::Trs
 					//ground terms and not equal -> fail
 					return false;
 				}
-				++termsId;
+				--termsId;
 			}
 		}
 	}

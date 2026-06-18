@@ -9,10 +9,10 @@ namespace TryAlgebraCore::Trs
     struct TermRaw
     {
         bool variable = false;
+        bool pattern = false;
         std::wstring label;
         std::vector<TermRawSh> children;
         std::vector<TermRawSh> captured;
-        std::vector<int> compOrder;
     };
 
     struct Variator
@@ -32,18 +32,18 @@ namespace TryAlgebraCore::Trs
             int child_i = 0;
         };
 
+    public:
         struct State
         {
             std::vector<TermRawSh>& pat;
             std::vector<TermRawSh>& terms;
-
+            Variator variator;
             int groundStartNum = 0;
             int groundEndNum = 0;
             bool compBoundaries();
             bool compIntermediate();
         };
 
-    public:
         bool match(const std::vector<Term*>& pattern, const std::span<Term*>& terms);
 
         bool next();

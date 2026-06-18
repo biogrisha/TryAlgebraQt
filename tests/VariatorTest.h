@@ -6,7 +6,7 @@
 
 namespace VariatorTest
 {
-
+	using namespace TryAlgebraCore::Trs;
 	struct VariatorTestCase
 	{
 		TestFramework::TestData tst;
@@ -14,6 +14,13 @@ namespace VariatorTest
 		uint64_t test_child_pos = 0;
 		bool exp_val = true;
 	};
+	inline TermRawSh makeTermRaw(TermRaw* parent, const std::wstring& label, bool variable = false)
+	{
+		auto res = std::make_shared<TermRaw>();
+		res->label = label;
+		res->variable 
+	}
+
 	inline void print(TryAlgebraCore::Trs::Variator& var)
 	{
 		for (auto i : var.m_sizes)
@@ -36,6 +43,16 @@ namespace VariatorTest
 			}
 		}
 		print(var);
+	}
+
+	struct StateCompareBoundariesCase
+	{
+		TestFramework::TestData tst;
+	};
+
+	inline void stateCompareBoundariesTest(const TestFramework::TestData& tst, const StateCompareBoundariesCase& data)
+	{
+
 	}
 
 	MYTEST(VariatorTest)
