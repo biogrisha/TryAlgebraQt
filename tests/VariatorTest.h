@@ -18,7 +18,7 @@ namespace VariatorTest
 	{
 		auto res = std::make_shared<TermRaw>();
 		res->label = label;
-		res->variable 
+		res->variable = variable;
 	}
 
 	inline void print(TryAlgebraCore::Trs::Variator& var)
@@ -33,10 +33,10 @@ namespace VariatorTest
 	inline void variatorTest(const TestFramework::TestData& tst, const VariatorTestCase& data)
 	{
 		TryAlgebraCore::Trs::Variator var(5, 6);
-		while(true)
+		while (true)
 		{
 			print(var);
-			
+
 			if (var.step() == 1)
 			{
 				break;
@@ -48,6 +48,7 @@ namespace VariatorTest
 	struct StateCompareBoundariesCase
 	{
 		TestFramework::TestData tst;
+		std::vector<TermRawSh> terms;
 	};
 
 	inline void stateCompareBoundariesTest(const TestFramework::TestData& tst, const StateCompareBoundariesCase& data)
@@ -61,5 +62,11 @@ namespace VariatorTest
 			{
 				VariatorTestCase{{"VariatorTest", "case1"}},
 			}, &variatorTest);
+
+		StateCompareBoundariesCase st1;
+		st1.tst = { "CompBoundaries", "case1" };
+
+
+		st1.terms.push_back(makeTermRaw(nullptr, L"a", ));
 	}
 }
