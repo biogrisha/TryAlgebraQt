@@ -242,44 +242,7 @@ namespace TryAlgebraCore::Trs
 			return 0;
 		}
 
-		bool needReset = false;
-		for (int i = 0; i < m_offsets.size(); ++i)
-		{
-			int pos = m_offsets.size() - 1 - i;
-			if(m_offsets[pos] == m_sum - i)
-			{
-				needReset = true;
-				continue;
-			}
-			
-			if (m_offsets[pos] != m_sum - i)
-			{
-				m_offsets[pos] += 1;
-				int size = m_offsets[pos];
-				for (int j = 1; j + pos < m_offsets.size(); ++j)
-				{
-					m_offsets[j + pos] = size + j;
-				}
-				break;
-			}
-		}
-		m_sizes.clear();
 		
-		int lastEnd = m_sum;
-		for (int i = m_offsets.size() - 1; i >= 0; --i)
-		{
-			m_sizes.push_back(lastEnd - m_offsets[i]);
-			lastEnd = m_offsets[i] - (i == 0 ? 0 : 1);
-		}
-		m_sizes.push_back(lastEnd);
-		for (auto& size : m_sizes)
-		{
-			size++;
-		}
-		if (m_sizes.back() == m_sum - m_sizes.size() + 2)
-		{
-			return 1;
-		}
 		return 0;
 	}
 
