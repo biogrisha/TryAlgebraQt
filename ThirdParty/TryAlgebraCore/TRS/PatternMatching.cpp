@@ -124,6 +124,7 @@ namespace TryAlgebraCore::Trs
 	void PatternMatcher::State::variatorStep()
 	{
 		variator.step();
+
 	}
 
 	bool PatternMatcher::State::compBoundaries()
@@ -227,23 +228,40 @@ namespace TryAlgebraCore::Trs
 		{
 			m_offsets[i] = i + 1;
 		}
-		m_sizes = generateSizes(m_offsets, m_sum);
 	}
 
 	int Variator::step()
 	{
-		if (isFirstStep)
+		if (m_isFirstStep)
 		{
-			if (m_offsets.empty())
-			{
-				return 1;
-			}
-
+			m_isFirstStep = true;
 			return 0;
 		}
 
-		
+		for (int i = m_offsets.size() - 1; i >= 0; --i)
+		{
+			if (!isLastPos(m_offsets, m_sum, i))
+			{
+				int changedFrom = i;
+				++m_offsets[i];
+				int baseOffset = m_offsets[i];
+				++i;
+				int j = 1;
+				for (; i < m_offsets.size(); ++i)
+				{
+					m_offsets[i] = j + baseOffset;
+					++j;
+				}
+				return changedFrom;
+			}
+		}
 		return 0;
+	}
+
+	bool Variator::isLastPos(const std::vector<int>& offsets, const int sum, const int i)
+	{
+		//size 4, sum 10, i 3, exp 9 -> 10 - 1 - (4 - 1 - 3)
+		return offsets[i] == sum - 1 - (offsets.size() -  1 - i);
 	}
 
 	std::vector<int> Variator::generateSizes(const std::vector<int>& offsets, const int sum)

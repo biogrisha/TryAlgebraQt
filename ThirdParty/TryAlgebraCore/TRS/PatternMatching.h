@@ -20,11 +20,11 @@ namespace TryAlgebraCore::Trs
 	{
 		Variator(int size, int sum);
 		int step();
+		static bool isLastPos(const std::vector<int>& offsets, const int sum, const int i);
 		static std::vector<int> generateSizes(const std::vector<int>& offsets, const int sum);
 		std::vector<int> m_offsets;
-		std::vector<int> m_sizes;
 		int m_sum = 0;
-		bool isFirstStep = true;
+		bool m_isFirstStep = true;
 	};
 
 	class PatternMatcher
@@ -42,7 +42,7 @@ namespace TryAlgebraCore::Trs
 			std::vector<TermRawSh>& pat;
 			std::vector<TermRawSh>& terms;
 			Variator variator;
-			
+
 			int variablesStartPat = 0;
 			int variablesEndPat = 0;
 			int variablesStartTerms = 0;
@@ -58,12 +58,12 @@ namespace TryAlgebraCore::Trs
 		bool first_call = true;
 	};
 
-		
+
 	bool compareWithVariable(TermRaw* var, const std::span<TermRawSh>& terms);
 	bool compare(TermRaw* lhs, TermRaw* rhs);
 	bool match(const std::span<Term*>& terms, const std::vector<Term*>& pattern, int from);
 	void recognizeVariables(std::vector<TermRawSh>& pattern);
 	void convertMeToTerms(const std::span<std::unique_ptr<MeBase>>& meList, std::vector<TermRawSh>& result, TermRaw* parent);
 	void unifyVariables(std::vector<TermRawSh>& terms, std::vector<TermRaw*>& variables);
-	
+
 }
