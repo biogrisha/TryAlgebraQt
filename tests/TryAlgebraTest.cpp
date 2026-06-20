@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include "Prints.h"
 #include "TestFramework.h"
 //#include "Navigation.h"
 //#include "MathDocumentTest.h"

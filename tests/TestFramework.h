@@ -23,14 +23,14 @@ if (!tst.eq(lhs, rhs)) \
 	return;			   \
 
 
+template<typename T>
+concept Streamable =
+	requires(std::ostream & os, const T & value)
+{
+	{ os << value } -> std::same_as<std::ostream&>;
+};
 namespace TestFramework
 {
-	template<typename T>
-	concept Streamable =
-		requires(std::ostream & os, const T & value)
-	{
-		{ os << value } -> std::same_as<std::ostream&>;
-	};
 
 	constexpr const char* RESET = "\033[0m";
 	constexpr const char* RED = "\033[31m";
@@ -46,13 +46,19 @@ namespace TestFramework
 	std::vector<std::function<void()>> tests;
 	std::vector<struct TestData> failed;
 
-	template<typename T, bool OnlyLastTest = false>
+	enum class CasesBehavior
+	{
+		All,
+		Last,
+		None
+	};
+	template<typename T, CasesBehavior behavior = CasesBehavior::All>
 	struct Cases
 	{
 		~Cases()
 		{
 			size_t failed_num = ::TestFramework::failed.size();
-			if constexpr (OnlyLastTest)
+			if constexpr (behavior == CasesBehavior::Last)
 			{
 				auto cs = m_cases.back();
 				m_func(cs.tst, cs);
@@ -69,7 +75,7 @@ namespace TestFramework
 					std::cout << cs.tst.name << "  " << cs.tst.case_test << "\n";
 				}
 			}
-			else
+			else if constexpr (behavior == CasesBehavior::All)
 			{
 				for (auto& cs : m_cases)
 				{

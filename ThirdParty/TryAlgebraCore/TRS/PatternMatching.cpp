@@ -42,6 +42,7 @@ namespace TryAlgebraCore::Trs
 		{
 			TermRawSh newTerm = std::make_shared<TermRaw>();
 			newTerm->label = me->getName();
+			newTerm->parent = parent;
 			result.push_back(newTerm);
 			convertMeToTerms(me->getChildren(), newTerm->children, newTerm.get());
 		}
@@ -74,6 +75,7 @@ namespace TryAlgebraCore::Trs
 		{
 			
 		}
+		return true;
 	}
 
 	bool compareWithVariable(TermRaw* var, const std::span<TermRawSh>& terms)
@@ -112,19 +114,31 @@ namespace TryAlgebraCore::Trs
 		return true;
 	}
 
+	PatternMatcher::State::State(std::vector<TermRawSh>& pat, std::vector<TermRawSh>& terms)
+		: pat(pat)
+		, terms(terms)
+		, variator(1,1)
+	{
+	}
+
+	void PatternMatcher::State::variatorStep()
+	{
+		variator.step();
+	}
+
 	bool PatternMatcher::State::compBoundaries()
 	{
-		std::optional<int> variableStart;
 		{
 			int termsId = 0;
 			for (int patId = 0; patId < pat.size(); ++patId)
 			{
 				if (pat[patId]->variable)
 				{
-					if (!pat[patId]->captured.empty())
+					if (pat[patId]->captured.empty())
 					{
 						//reached empty variable
-						variableStart = patId;
+						variablesStartPat = patId;
+						variablesStartTerms = termsId;
 						break;
 					}
 					else
@@ -145,7 +159,7 @@ namespace TryAlgebraCore::Trs
 					//pattern and labels are not equal -> fail
 					return false;
 				}
-				else if (!pat[patId]->pattern && compare(pat[patId].get(), terms[patId].get()))
+				else if (!pat[patId]->pattern && !compare(pat[patId].get(), terms[patId].get()))
 				{
 					//ground terms and not equal -> fail
 					return false;
@@ -154,12 +168,6 @@ namespace TryAlgebraCore::Trs
 			}
 		}
 
-		if(!variableStart.has_value())
-		{
-			return true;
-		}
-
-		std::optional<int> variableEnd;
 		{
 			int termsId = terms.size() - 1;
 			for (int patId = pat.size() - 1; patId >= 0; --patId)
@@ -170,7 +178,8 @@ namespace TryAlgebraCore::Trs
 					if (captureSize == 0)
 					{
 						//reached empty variable
-						variableEnd = patId;
+						variablesEndPat = patId + 1;
+						variablesEndTerms = termsId + 1;
 						break;
 					}
 					else
@@ -200,6 +209,7 @@ namespace TryAlgebraCore::Trs
 				--termsId;
 			}
 		}
+		return true;
 	}
 
 	bool PatternMatcher::State::compIntermediate()
@@ -210,18 +220,28 @@ namespace TryAlgebraCore::Trs
 
 	Variator::Variator(int size, int sum)
 	{
-		m_sum = sum + size - 2;
-		m_offsets = std::vector<int>(size - 1);
+		m_sum = sum;
+		m_offsets = std::vector<int>(size - 1, 0);
+		//first set offsets to 1,3,5...
 		for (int i = 0; i < m_offsets.size(); ++i)
 		{
-			m_offsets[i] = i;
+			m_offsets[i] = i + 1;
 		}
-		m_sizes = std::vector<int>(size, 0);
-		m_sizes[0] = sum;
+		m_sizes = generateSizes(m_offsets, m_sum);
 	}
 
 	int Variator::step()
 	{
+		if (isFirstStep)
+		{
+			if (m_offsets.empty())
+			{
+				return 1;
+			}
+
+			return 0;
+		}
+
 		bool needReset = false;
 		for (int i = 0; i < m_offsets.size(); ++i)
 		{
@@ -252,11 +272,33 @@ namespace TryAlgebraCore::Trs
 			lastEnd = m_offsets[i] - (i == 0 ? 0 : 1);
 		}
 		m_sizes.push_back(lastEnd);
+		for (auto& size : m_sizes)
+		{
+			size++;
+		}
 		if (m_sizes.back() == m_sum - m_sizes.size() + 2)
 		{
 			return 1;
 		}
 		return 0;
+	}
+
+	std::vector<int> Variator::generateSizes(const std::vector<int>& offsets, const int sum)
+	{
+		std::vector<int> sizes;
+		if (offsets.empty())
+		{
+			sizes.push_back(sum);
+			return sizes;
+		}
+		int lastVal = 0;
+		for (auto offset : offsets)
+		{
+			sizes.push_back(offset - lastVal);
+			lastVal = offset;
+		}
+		sizes.push_back(sum - offsets.back());
+		return sizes;
 	}
 
 }
