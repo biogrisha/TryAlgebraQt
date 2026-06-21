@@ -54,12 +54,19 @@ namespace TryAlgebraCore::Trs
 		{
 			if (tr->variable)
 			{
+				bool found = false;
 				for (auto vr : variables)
 				{
 					if (compare(tr.get(), vr))
 					{
-						tr.reset(vr);
+						tr->captured = vr->captured;
+						found = true;
+						break;
 					}
+				}
+				if (!found)
+				{
+					variables.push_back(tr.get());
 				}
 			}
 			else
@@ -69,13 +76,55 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	bool PatternMatcher::match(const std::vector<Term*>& pattern, const std::span<Term*>& terms)
+	bool PatternMatcher::match(std::vector<TermRawSh>& pat, const std::span<TermRawSh>& terms)
 	{
-		while (true)
+		if (hasVariable(pat))
 		{
-			
+			State st(pat, terms);
+			if (!st.compBoundaries())
+			{
+				return false;
+			}
+			st.setVariablesTime();
+			if (!st.nextVariation())
+			{
+				return false;
+			}
+			if (!st.compIntermediate())
+			{
+
+			}
 		}
+
 		return true;
+	}
+
+	bool PatternMatcher::back()
+	{
+		auto& lastState = stack.back();
+		if (lastState->backId == -1)
+		{
+			return false;
+		}
+		stack.resize(lastState->backId + 1);
+		if (!stack.back()->handleVariatorStep())
+		{
+			return false;
+		}
+
+		return false;
+	}
+
+	bool hasVariable(const std::vector<TermRawSh>& pat)
+	{
+		for (auto& term : pat)
+		{
+			if (term->variable && term->captured.empty())
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	bool compareWithVariable(TermRaw* var, const std::span<TermRawSh>& terms)
@@ -90,6 +139,45 @@ namespace TryAlgebraCore::Trs
 			{
 				return false;
 			}
+		}
+		return true;
+	}
+
+	bool topLevelComp(const std::span<TermRawSh>& pat, const std::span<TermRawSh>& terms)
+	{
+		int termsId = 0;
+		for (int patId = 0; patId < pat.size(); ++patId)
+		{
+			if (pat[patId]->variable)
+			{
+				if (pat[patId]->captured.empty())
+				{
+					assert(false);
+				}
+				else
+				{
+					//variable captured something
+					if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured.size())))
+					{
+						//captured sequence not equal to the one in terms
+						return false;
+					}
+					//compared sequences are equal -> make step to the number of captured elements
+					termsId += pat[patId]->captured.size();
+				}
+				continue;
+			}
+			else if (pat[patId]->pattern && pat[patId]->label != terms[termsId]->label)
+			{
+				//pattern and labels are not equal -> fail
+				return false;
+			}
+			else if (!pat[patId]->pattern && !compare(pat[patId].get(), terms[termsId].get()))
+			{
+				//ground terms and not equal -> fail
+				return false;
+			}
+			++termsId;
 		}
 		return true;
 	}
@@ -114,17 +202,82 @@ namespace TryAlgebraCore::Trs
 		return true;
 	}
 
-	PatternMatcher::State::State(std::vector<TermRawSh>& pat, std::vector<TermRawSh>& terms)
+	PatternMatcher::State::State(const std::span<TermRawSh>& pat, const std::span<TermRawSh>& terms)
 		: pat(pat)
 		, terms(terms)
-		, variator(1,1)
 	{
+		time = staticTime;
+		++staticTime;
 	}
 
-	void PatternMatcher::State::variatorStep()
+	bool PatternMatcher::State::handleVariatorStep()
 	{
-		variator.step();
+		auto sizes = variator->getSizes();
+		int termsId = variablesStartTerms;
+		int sizeId = 0;
+		for (int patId = variablesStartPat; patId < variablesEndPat; ++patId)
+		{
+			if (pat[patId]->variable)
+			{
+				if (pat[patId]->time == time)
+				{
+					auto span = std::span(terms).subspan(termsId, sizes[sizeId]);
+					if (pat[patId]->captured.empty())
+					{
+						pat[patId]->captured = span;
+					}
+					else if (!compareWithVariable(pat[patId].get(), span))
+					{
+						return false;
+					}
+					++sizeId;
+				}
+				else if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured.size())))
+				{
+					return false;
+				}
+				termsId += pat[patId]->captured.size();
+				continue;
+			}
+			else if (pat[patId]->pattern)
+			{
+				if (pat[patId]->label != terms[termsId]->label)
+				{
+					//pattern and labels are not equal -> fail
+					return false;
+				}
+				pat[patId]->patMatch = terms[termsId].get();
+			}
+			else if (!pat[patId]->pattern && !compare(pat[patId].get(), terms[termsId].get()))
+			{
+				return false;
+			}
+			++termsId;
+		}
+		return true;
+	}
 
+	bool PatternMatcher::State::nextVariation()
+	{
+		while (variator->step())
+		{
+			if (handleVariatorStep());
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void PatternMatcher::State::setVariablesTime()
+	{
+		for (int i = variablesStartPat; i < variablesEndPat; ++i)
+		{
+			if (pat[i]->variable && pat[i]->captured.empty())
+			{
+				pat[i]->time = time;
+			}
+		}
 	}
 
 	bool PatternMatcher::State::compBoundaries()
@@ -155,12 +308,16 @@ namespace TryAlgebraCore::Trs
 					}
 					continue;
 				}
-				else if (pat[patId]->pattern && pat[patId]->label != terms[patId]->label)
+				else if (pat[patId]->pattern)
 				{
-					//pattern and labels are not equal -> fail
-					return false;
+					if(pat[patId]->label != terms[termsId]->label)
+					{
+						//pattern and labels are not equal -> fail
+						return false;
+					}
+					pat[patId]->patMatch = terms[termsId].get();
 				}
-				else if (!pat[patId]->pattern && !compare(pat[patId].get(), terms[patId].get()))
+				else if (!pat[patId]->pattern && !compare(pat[patId].get(), terms[termsId].get()))
 				{
 					//ground terms and not equal -> fail
 					return false;
@@ -197,12 +354,16 @@ namespace TryAlgebraCore::Trs
 					}
 					continue;
 				}
-				else if (pat[patId]->pattern && pat[patId]->label != terms[patId]->label)
+				else if (pat[patId]->pattern)
 				{
-					//pattern and labels are not equal -> fail
-					return false;
+					if (pat[patId]->label != terms[termsId]->label)
+					{
+						//pattern and labels are not equal -> fail
+						return false;
+					}
+					pat[patId]->patMatch = terms[termsId].get();
 				}
-				else if (!pat[patId]->pattern && compare(pat[patId].get(), terms[patId].get()))
+				else if (!pat[patId]->pattern && !compare(pat[patId].get(), terms[termsId].get()))
 				{
 					//ground terms and not equal -> fail
 					return false;
@@ -215,9 +376,16 @@ namespace TryAlgebraCore::Trs
 
 	bool PatternMatcher::State::compIntermediate()
 	{
+		int termsId = variablesStartTerms;
+		for (int patId = 0; patId < pat.size(); ++patId)
+		{
+			if (pat[patId]->pattern)
+			{
 
+			}
+		}
 		return false;
-	}	
+	}
 
 	Variator::Variator(int size, int sum)
 	{
@@ -230,12 +398,17 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	int Variator::step()
+	bool Variator::step()
 	{
+		if (m_lastStep)
+		{
+			return false;
+		}
 		if (m_isFirstStep)
 		{
 			m_isFirstStep = true;
-			return 0;
+			m_lastStep = finished(m_offsets, m_sum);
+			return true;
 		}
 
 		for (int i = m_offsets.size() - 1; i >= 0; --i)
@@ -252,16 +425,31 @@ namespace TryAlgebraCore::Trs
 					m_offsets[i] = j + baseOffset;
 					++j;
 				}
-				return changedFrom;
+				break;
 			}
 		}
-		return 0;
+		m_lastStep = finished(m_offsets, m_sum);
+		return true;
+	}
+
+	bool Variator::finished(const std::vector<int>& offsets, const int sum)
+	{
+		if (offsets.empty())
+		{
+			return true;
+		}
+		return isLastPos(offsets, sum, 0);
+	}
+
+	std::vector<int> Variator::getSizes()
+	{
+		return generateSizes(m_offsets, m_sum);
 	}
 
 	bool Variator::isLastPos(const std::vector<int>& offsets, const int sum, const int i)
 	{
 		//size 4, sum 10, i 3, exp 9 -> 10 - 1 - (4 - 1 - 3)
-		return offsets[i] == sum - 1 - (offsets.size() -  1 - i);
+		return offsets[i] == sum - 1 - (offsets.size() - 1 - i);
 	}
 
 	std::vector<int> Variator::generateSizes(const std::vector<int>& offsets, const int sum)
