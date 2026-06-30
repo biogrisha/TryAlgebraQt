@@ -9,7 +9,6 @@ namespace TryAlgebraCore::Trs
 	struct TermRaw
 	{
 		bool variable = false;
-		bool hasVariableChild = false;
 		bool pattern = false;
 		std::wstring label;
 		std::vector<TermRawSh> children;
@@ -17,6 +16,7 @@ namespace TryAlgebraCore::Trs
 		TermRaw* parent = nullptr;
 		TermRaw* patMatch = nullptr;
 		int time = 0;
+		int posInParent = 0;
 	};
 
 	struct Variator
@@ -49,17 +49,13 @@ namespace TryAlgebraCore::Trs
 			std::span<TermRawSh> terms;
 			std::span<TermRawSh> pat;
 			std::unique_ptr<Variator> variator;
-			
+			std::vector<TermRaw*> cachedPatterns;
+			int cachedPatternsId = 0;
 			int variablesStartPat = 0;
 			int variablesEndPat = 0;
 			int variablesStartTerms = 0;
 			int variablesEndTerms = 0;
-			int compTermsId = 0;
-			int compPatId = 0;
 			int time = 0;
-
-			int backId = -1;
-			int parentId = -1;
 			inline static int staticTime = 0;
 		};
 		bool match(std::vector<TermRawSh>& pat, const std::span<TermRawSh>& terms);
@@ -70,11 +66,20 @@ namespace TryAlgebraCore::Trs
 
 	bool hasVariable(const std::vector<TermRawSh>& pat);
 	bool compareWithVariable(TermRaw* var, const std::span<TermRawSh>& terms);
-	bool topLevelComp(const std::span<TermRawSh>& pat, const std::span<TermRawSh>& terms);
+	struct CompUntilCheckpoint
+	{
+		bool checkPoint = false;
+		bool failed = false;
+		std::unique_ptr<PatternMatcher::State> state;
+	};
+	CompUntilCheckpoint compUntilCheckpoint(TermRaw* pat, TermRaw* term);
 	bool compare(TermRaw* lhs, TermRaw* rhs);
 	bool match(const std::span<Term*>& terms, const std::vector<Term*>& pattern, int from);
 	void recognizeVariables(std::vector<TermRawSh>& pattern);
 	void convertMeToTerms(const std::span<std::unique_ptr<MeBase>>& meList, std::vector<TermRawSh>& result, TermRaw* parent);
 	void unifyVariables(std::vector<TermRawSh>& terms, std::vector<TermRaw*>& variables);
-	bool compare(const std::span<TermRawSh>& pat, const std::span<TermRawSh>& terms);
+	bool compareUntilCheckpoint(PatternMatcher::State* state
+		, TermRaw* topParent
+		, const std::span<TermRawSh>& topLevelPat
+		, const std::span<TermRawSh>& topLevelTerms);
 }

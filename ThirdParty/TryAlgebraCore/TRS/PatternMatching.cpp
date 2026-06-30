@@ -76,6 +76,18 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
+	bool compareUntilCheckpoint(PatternMatcher::State* state
+		, TermRaw* topParent
+		, const std::span<TermRawSh>& topLevelPat
+		, const std::span<TermRawSh>& topLevelTerms)
+	{
+		for (int i = state->cachedPatternsId; i < state->cachedPatterns.size(); ++i)
+		{
+
+		}
+		return false;
+	}
+
 	bool PatternMatcher::match(std::vector<TermRawSh>& pat, const std::span<TermRawSh>& terms)
 	{
 		if (hasVariable(pat))
@@ -90,28 +102,13 @@ namespace TryAlgebraCore::Trs
 			{
 				return false;
 			}
-			if (!st.compIntermediate())
-			{
 
-			}
 		}
-
 		return true;
 	}
 
 	bool PatternMatcher::back()
 	{
-		auto& lastState = stack.back();
-		if (lastState->backId == -1)
-		{
-			return false;
-		}
-		stack.resize(lastState->backId + 1);
-		if (!stack.back()->handleVariatorStep())
-		{
-			return false;
-		}
-
 		return false;
 	}
 
@@ -119,7 +116,7 @@ namespace TryAlgebraCore::Trs
 	{
 		for (auto& term : pat)
 		{
-			if (term->variable && term->captured.empty())
+			if (term->variable && term->captured->empty())
 			{
 				return true;
 			}
@@ -129,13 +126,13 @@ namespace TryAlgebraCore::Trs
 
 	bool compareWithVariable(TermRaw* var, const std::span<TermRawSh>& terms)
 	{
-		if (var->captured.size() != terms.size())
+		if (var->captured->size() != terms.size())
 		{
 			return false;
 		}
 		for (int i = 0; i < terms.size(); ++i)
 		{
-			if (!compare(var->captured[i].get(), terms[i].get()))
+			if (!compare(var->captured->operator[](i).get(), terms[i].get()))
 			{
 				return false;
 			}
@@ -143,43 +140,57 @@ namespace TryAlgebraCore::Trs
 		return true;
 	}
 
-	bool topLevelComp(const std::span<TermRawSh>& pat, const std::span<TermRawSh>& terms)
+	CompUntilCheckpoint compUntilCheckpoint(TermRaw* pat, TermRaw* term)
 	{
+		auto& patChildren = pat->children;
+		auto& termChildren = term->children;
 		int termsId = 0;
-		for (int patId = 0; patId < pat.size(); ++patId)
+		for (int patId = 0; patId < patChildren.size(); ++patId)
 		{
-			if (pat[patId]->variable)
+			if (patChildren[patId]->variable)
 			{
-				if (pat[patId]->captured.empty())
+				if (patChildren[patId]->captured->empty())
 				{
 					assert(false);
 				}
 				else
 				{
 					//variable captured something
-					if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured.size())))
+					if (!compareWithVariable(patChildren[patId].get()
+						, std::span(termChildren).subspan(termsId, patChildren[patId]->captured->size())))
 					{
 						//captured sequence not equal to the one in terms
-						return false;
+						CompUntilCheckpoint res;
+						res.failed = true;
+						return res;
 					}
 					//compared sequences are equal -> make step to the number of captured elements
-					termsId += pat[patId]->captured.size();
+					termsId += patChildren[patId]->captured->size();
 				}
 				continue;
 			}
-			else if (pat[patId]->pattern && pat[patId]->label != terms[termsId]->label)
+			else if (patChildren[patId]->pattern)
 			{
+				//if (!compUntilCheckpoint(patChildren[patId].get(), termChildren[termsId].get()))
+				//{
+				//	CompUntilCheckpoint res;
+				//	res.failed = true;
+				//	return res;
+
+				//}
+
 				//pattern and labels are not equal -> fail
-				return false;
 			}
-			else if (!pat[patId]->pattern && !compare(pat[patId].get(), terms[termsId].get()))
+			else if (!patChildren[patId]->pattern && !compare(patChildren[patId].get(), termChildren[termsId].get()))
 			{
-				//ground terms and not equal -> fail
-				return false;
+				CompUntilCheckpoint res;
+				res.failed = true;
+				return res;
 			}
 			++termsId;
 		}
-		return true;
+		CompUntilCheckpoint res;
+		return res;
 	}
 
 	bool compare(TermRaw* lhs, TermRaw* rhs)
@@ -222,9 +233,9 @@ namespace TryAlgebraCore::Trs
 				if (pat[patId]->time == time)
 				{
 					auto span = std::span(terms).subspan(termsId, sizes[sizeId]);
-					if (pat[patId]->captured.empty())
+					if (pat[patId]->captured->empty())
 					{
-						pat[patId]->captured = span;
+						*(pat[patId]->captured) = span;
 					}
 					else if (!compareWithVariable(pat[patId].get(), span))
 					{
@@ -232,11 +243,11 @@ namespace TryAlgebraCore::Trs
 					}
 					++sizeId;
 				}
-				else if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured.size())))
+				else if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured->size())))
 				{
 					return false;
 				}
-				termsId += pat[patId]->captured.size();
+				termsId += pat[patId]->captured->size();
 				continue;
 			}
 			else if (pat[patId]->pattern)
@@ -273,7 +284,7 @@ namespace TryAlgebraCore::Trs
 	{
 		for (int i = variablesStartPat; i < variablesEndPat; ++i)
 		{
-			if (pat[i]->variable && pat[i]->captured.empty())
+			if (pat[i]->variable && pat[i]->captured->empty())
 			{
 				pat[i]->time = time;
 			}
@@ -288,7 +299,7 @@ namespace TryAlgebraCore::Trs
 			{
 				if (pat[patId]->variable)
 				{
-					if (pat[patId]->captured.empty())
+					if (pat[patId]->captured->empty())
 					{
 						//reached empty variable
 						variablesStartPat = patId;
@@ -298,19 +309,19 @@ namespace TryAlgebraCore::Trs
 					else
 					{
 						//variable captured something
-						if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured.size())))
+						if (!compareWithVariable(pat[patId].get(), std::span(terms).subspan(termsId, pat[patId]->captured->size())))
 						{
 							//captured sequence not equal to the one in terms
 							return false;
 						}
 						//compared sequences are equal -> make step to the number of captured elements
-						termsId += pat[patId]->captured.size();
+						termsId += pat[patId]->captured->size();
 					}
 					continue;
 				}
 				else if (pat[patId]->pattern)
 				{
-					if(pat[patId]->label != terms[termsId]->label)
+					if (pat[patId]->label != terms[termsId]->label)
 					{
 						//pattern and labels are not equal -> fail
 						return false;
@@ -332,7 +343,7 @@ namespace TryAlgebraCore::Trs
 			{
 				if (pat[patId]->variable)
 				{
-					int captureSize = pat[patId]->captured.size();
+					int captureSize = pat[patId]->captured->size();
 					if (captureSize == 0)
 					{
 						//reached empty variable

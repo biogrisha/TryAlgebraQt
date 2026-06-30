@@ -16,6 +16,7 @@ add_executable(TryAlgebraTest
     ConvertMeToTermsTest.h
     VariatorTest.h
     Prints.h
+    PatternMatchingTest.h
 )
 
 target_link_libraries(TryAlgebraTest 

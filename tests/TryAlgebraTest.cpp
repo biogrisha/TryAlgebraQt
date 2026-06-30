@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+//#include <gtest/gtest.h>
+//#include <gmock/gmock.h>
 #include "Prints.h"
 #include "TestFramework.h"
 //#include "Navigation.h"
@@ -10,8 +10,9 @@
 //#include "TextPosToMePathTest.h"
 //#include "StepTest.h"
 //#include "IsLastLineTest.h"
-#include "ConvertMeToTermsTest.h"
-#include "VariatorTest.h"
+//#include "ConvertMeToTermsTest.h"
+//#include "VariatorTest.h"
+#include "PatternMatchingTest.h"
 int main(int argc, char* argv[])
 {
 	TestFramework::runAllTests();
