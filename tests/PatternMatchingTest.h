@@ -230,14 +230,32 @@ namespace PatternMatchingTest
 	void func(std::vector<std::unique_ptr<TermTest>>& pat)
 	{
 		std::vector<std::vector<Block>> levels;
-		std::vector<Block> blocks;
-		collectBlocks(pat, blocks);
-		while (removeDetermined(blocks));
-		levels.push_back(std::move(blocks));
+		{
+			std::vector<Block> blocks;
+			collectBlocks(pat, blocks);
+			while (removeDetermined(blocks));
+			levels.push_back(std::move(blocks));
+		}
 
 		while (true)
 		{
-
+			std::vector<Block> blocks;
+			for (auto& bl : levels.back())
+			{
+				for (auto& el : bl.terms)
+				{
+					if (el->isPattern)
+					{
+						collectBlocks(el->children, blocks);
+					}
+				}
+			}
+			while (removeDetermined(blocks));
+			if (blocks.empty())
+			{
+				break;
+			}
+			levels.push_back(std::move(blocks));
 		}
 
 	}
