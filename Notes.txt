@@ -1,22 +1,11 @@
-caret in visible area
-step left -> path logig
-step down below screen -> redraw layout
+var single in container
+multiple var in container, but this remained undetermined
+(Vpg)* = a
 
-line path
-get ch id by path - fast
-get path by ch id - slow
-get path by line and ch - 
-caret outside visible area, caret inside visible area
-caret pos corresponds to the last elements
+a v(av)*v a
 
+ad1ad2ad3a
 
+adad1ada
 
-
-
-
-
-
-
-
-
-
+adapada

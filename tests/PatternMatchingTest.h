@@ -12,20 +12,98 @@ namespace PatternMatchingTest
 	{
 		std::span<std::unique_ptr<TermTest>> captured;
 		bool isDetermined = false;
+		bool isCaptured = false;
+		std::vector<int> path;
 	};
 
 	struct TermTest
 	{
 		std::wstring label;
 		std::vector<std::unique_ptr<TermTest>> children;
+		TermTest* parent = nullptr;
 		bool isVariable = false;
 		bool isPattern = false;
 		std::shared_ptr<VariableMeta> variableMeta;
+		int num = 0;
 	};
 
 	struct Block
 	{
 		std::span<std::unique_ptr<TermTest>> terms;
+	};
+
+	struct Level
+	{
+		std::vector<Block> blocks;
+		std::vector<std::vector<int>> determinedVars;
+	};
+
+	class Parser
+	{
+	public:
+		Parser(const std::wstring& str)
+			: m_str(str)
+		{
+
+		}
+
+		void parse()
+		{
+			while (m_pos != m_str.size())
+			{
+				int term_start = m_pos;
+				consumeTermName();
+				int label_end = m_pos;
+				auto t = new TermTest();
+				m_current_term = t;
+				if (m_parent_term)
+				{
+					m_current_term->parent = m_parent_term;
+					m_parent_term->children.push_back(std::unique_ptr<TermTest>(m_current_term));
+				}
+				if (m_pos > m_str.size())
+				{
+					return;
+				}
+				if (m_str[m_pos] == '(')
+				{
+					++m_pos;
+					m_parent_term = m_current_term;
+					parse();
+					m_current_term = m_parent_term;
+					m_parent_term = m_current_term->parent;
+				}
+				m_current_term->label = m_str.substr(term_start, label_end - term_start);
+				if (m_pos >= m_str.size())
+				{
+					return;
+				}
+				if (m_str[m_pos] == ')')
+				{
+					++m_pos;
+					return;
+				}
+				++m_pos;
+			}
+		}
+
+		void consumeTermName()
+		{
+			int i = m_pos;
+			for (; i < m_str.size(); ++i)
+			{
+				if (m_str[i] == '(' || m_str[i] == ')' || m_str[i] == ',')
+				{
+					break;
+				}
+			}
+			m_pos = i;
+		}
+
+		TermTest* m_current_term = nullptr;
+		TermTest* m_parent_term = nullptr;
+		std::wstring m_str;
+		int m_pos = 0;
 	};
 
 	inline bool compare(TermTest* lhs, TermTest* rhs)
@@ -48,7 +126,7 @@ namespace PatternMatchingTest
 		return true;
 	}
 
-	void unifyVariables(std::vector<std::unique_ptr<TermTest>>& terms, std::vector<TermTest*>& variables)
+	inline void unifyVariables(std::vector<std::unique_ptr<TermTest>>& terms, std::vector<TermTest*>& variables)
 	{
 		for (auto& tr : terms)
 		{
@@ -76,14 +154,40 @@ namespace PatternMatchingTest
 		}
 	}
 
-	void collectBlocks(std::vector<std::unique_ptr<TermTest>>& pat, std::vector<Block>& blocks)
+	inline void enumerate(std::vector<std::unique_ptr<TermTest>>& pat)
+	{
+		for (int i = 0; i < pat.size(); ++i)
+		{
+			pat[i]->num = i;
+			enumerate(pat[i]->children);
+		}
+	}
+
+	inline std::vector<int> inversePath(TermTest* term)
+	{
+		std::vector<int> path;
+
+		while (true)
+		{
+			path.push_back(term->num);
+			term = term->parent;
+			if (!term)
+			{
+				break;
+			}
+		}
+		return path;
+	}
+
+	inline void collectBlocks(std::vector<std::unique_ptr<TermTest>>& pat, std::vector<Block>& blocks
+		, std::vector<std::vector<int>>& determinedVars)
 	{
 		int varStart = -1;
 		int varEnd = -1;
 		//find varStart
 		for (int i = 0; i < pat.size(); ++i)
 		{
-			if (pat[i]->isVariable && !pat[i]->variableMeta->isDetermined)
+			if (pat[i]->isVariable && !pat[i]->variableMeta->isDetermined && !pat[i]->variableMeta->isCaptured)
 			{
 				varStart = i;
 				break;
@@ -97,15 +201,15 @@ namespace PatternMatchingTest
 			{
 				if (el->isPattern)
 				{
-					collectBlocks(el->children, blocks);
+					collectBlocks(el->children, blocks, determinedVars);
 				}
 			}
 			return;
 		}
-		// find var end (last var pos + i)
+		// find var end (last var pos + 1)
 		for (int i = pat.size() - 1; i >= varStart; --i)
 		{
-			if (pat[i]->isVariable && !pat[i]->variableMeta->isDetermined)
+			if (pat[i]->isVariable && !pat[i]->variableMeta->isDetermined && !pat[i]->variableMeta->isCaptured)
 			{
 				varEnd = i + 1;
 				break;
@@ -117,11 +221,12 @@ namespace PatternMatchingTest
 			//single variable on the level - it is determined(no variation needed)
 			//mark as determined and call recursion on all patterns
 			pat[varStart]->variableMeta->isDetermined = true;
+			determinedVars.push_back(inversePath(pat[varStart].get()));
 			for (auto& el : pat)
 			{
 				if (el->isPattern)
 				{
-					collectBlocks(el->children, blocks);
+					collectBlocks(el->children, blocks, determinedVars);
 				}
 			}
 		}
@@ -137,19 +242,19 @@ namespace PatternMatchingTest
 		{
 			if (pat[i]->isPattern)
 			{
-				collectBlocks(pat[i]->children, blocks);
+				collectBlocks(pat[i]->children, blocks, determinedVars);
 			}
 		}
 		for (int i = varEnd; i < pat.size(); ++i)
 		{
 			if (pat[i]->isPattern)
 			{
-				collectBlocks(pat[i]->children, blocks);
+				collectBlocks(pat[i]->children, blocks, determinedVars);
 			}
 		}
 	}
 
-	bool removeDetermined(std::vector<Block>& blocks)
+	inline bool removeDetermined(std::vector<Block>& blocks, std::vector<std::vector<int>>& determinedVars)
 	{
 		bool res = false;
 		for (int blI = blocks.size() - 1; blI >= 0; --blI)
@@ -160,7 +265,7 @@ namespace PatternMatchingTest
 			for (int i = 0; i < block.terms.size(); ++i)
 			{
 				auto& el = block.terms[i];
-				if (el->isVariable && !el->variableMeta->isDetermined)
+				if (el->isVariable && !el->variableMeta->isDetermined && !el->variableMeta->isCaptured)
 				{
 					varStart = i;
 				}
@@ -173,7 +278,7 @@ namespace PatternMatchingTest
 				{
 					if (el->isPattern)
 					{
-						collectBlocks(el->children, blocks);
+						collectBlocks(el->children, blocks, determinedVars);
 					}
 				}
 				std::swap(blocks[blI], blocks.back());
@@ -183,7 +288,7 @@ namespace PatternMatchingTest
 			for (int i = block.terms.size() - 1; i >= varStart; --i)
 			{
 				auto& el = block.terms[i];
-				if (el->isVariable && !el->variableMeta->isDetermined)
+				if (el->isVariable && !el->variableMeta->isDetermined && !el->variableMeta->isCaptured)
 				{
 					varEnd = i + 1;
 				}
@@ -195,7 +300,7 @@ namespace PatternMatchingTest
 				{
 					if (el->isPattern)
 					{
-						collectBlocks(el->children, blocks);
+						collectBlocks(el->children, blocks, determinedVars);
 					}
 				}
 				block.terms[varStart]->variableMeta->isDetermined;
@@ -210,65 +315,83 @@ namespace PatternMatchingTest
 				{
 					if (block.terms[i]->isPattern)
 					{
-						collectBlocks(block.terms[i]->children, blocks);
+						collectBlocks(block.terms[i]->children, blocks, determinedVars);
 					}
 				}
 				for (int i = varEnd; i < block.terms.size(); ++i)
 				{
 					if (block.terms[i]->isPattern)
 					{
-						collectBlocks(block.terms[i]->children, blocks);
+						collectBlocks(block.terms[i]->children, blocks, determinedVars);
 					}
 				}
-				block.terms.subspan(varStart, varEnd - varStart);
+				block.terms = block.terms.subspan(varStart, varEnd - varStart);
 			}
 
 		}
 		return res;
 	}
 
-	void func(std::vector<std::unique_ptr<TermTest>>& pat)
+	inline void func(std::vector<std::unique_ptr<TermTest>>& pat)
 	{
-		std::vector<std::vector<Block>> levels;
+		std::vector<Level> levels;
 		{
 			std::vector<Block> blocks;
-			collectBlocks(pat, blocks);
-			while (removeDetermined(blocks));
-			levels.push_back(std::move(blocks));
+			std::vector<std::vector<int>> determinedVars;
+			collectBlocks(pat, blocks, determinedVars);
+			while (removeDetermined(blocks, determinedVars));
+			for (auto& bl : blocks)
+			{
+				for (auto& el : bl.terms)
+				{
+					if (el->isVariable)
+					{
+						el->variableMeta->isCaptured = true;
+					}
+				}
+			}
+			levels.emplace_back(std::move(blocks), std::move(determinedVars));
 		}
 
 		while (true)
 		{
 			std::vector<Block> blocks;
-			for (auto& bl : levels.back())
+			std::vector<std::vector<int>> determinedVars;
+			for (auto& bl : levels.back().blocks)
 			{
 				for (auto& el : bl.terms)
 				{
 					if (el->isPattern)
 					{
-						collectBlocks(el->children, blocks);
+						collectBlocks(el->children, blocks, determinedVars);
 					}
 				}
 			}
-			while (removeDetermined(blocks));
+			while (removeDetermined(blocks, determinedVars));
+			for (auto& bl : blocks)
+			{
+				for (auto& el : bl.terms)
+				{
+					if (el->isVariable)
+					{
+						el->variableMeta->isCaptured = true;
+					}
+				}
+			}
 			if (blocks.empty())
 			{
 				break;
 			}
-			levels.push_back(std::move(blocks));
+			levels.emplace_back(std::move(blocks), std::move(determinedVars));
 		}
 
 	}
 
 	MYTEST(VariatorTest)
 	{
-		std::vector<int> ints = { 1,2,3,4,5,6 };
-		std::span sp(ints);
-		auto ssp = sp.subspan(2);
-		auto sssp = ssp.subspan(0, 1);
-		for (auto el : sssp)
-		{
-			std::cout << el;
-		}
+		Parser parser(L"f(a,b)");
+		parser.parse();
+		std::unique_ptr<TermTest> mainTerm = std::unique_ptr<TermTest>(parser.m_current_term);
+
 	}
 }
