@@ -1,11 +1,7 @@
 var single in container
 multiple var in container, but this remained undetermined
-(Vpg)* = a
 
-a v(av)*v a
+aaav...vapaa
 
-ad1ad2ad3a
 
-adad1ada
-
-adapada
+block

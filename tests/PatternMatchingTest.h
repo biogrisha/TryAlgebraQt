@@ -13,7 +13,6 @@ namespace PatternMatchingTest
 		std::span<std::unique_ptr<TermTest>> captured;
 		bool isDetermined = false;
 		bool isCaptured = false;
-		std::vector<int> path;
 	};
 
 	struct TermTest
@@ -21,6 +20,7 @@ namespace PatternMatchingTest
 		std::wstring label;
 		std::vector<std::unique_ptr<TermTest>> children;
 		TermTest* parent = nullptr;
+		TermTest* subj = nullptr;
 		bool isVariable = false;
 		bool isPattern = false;
 		std::shared_ptr<VariableMeta> variableMeta;
@@ -32,12 +32,20 @@ namespace PatternMatchingTest
 		std::span<std::unique_ptr<TermTest>> terms;
 	};
 
+	struct PathEl
+	{
+		int pos = 0;
+		bool fromLeft = true;
+	};
+
 	struct Level
 	{
 		std::vector<Block> blocks;
-		std::vector<std::vector<int>> determinedVars;
+		std::vector<std::vector<PathEl>> determinedVars;
 	};
 
+
+	inline std::vector<std::unique_ptr<TermTest>> topPat;
 	class Parser
 	{
 	public:
@@ -163,13 +171,43 @@ namespace PatternMatchingTest
 		}
 	}
 
-	inline std::vector<int> inversePath(TermTest* term)
+	void markPatternNodes(TermTest* t)
 	{
-		std::vector<int> path;
+		bool pat_temp = false;
+		for (auto ch : t->children)
+		{
+			markPatternNodes(ch);
+			pat_temp |= ch->pat;
+		}
+		if (pat_temp)
+		{
+			t->pat = true;
+			return;
+		}
+		if (t->variable)
+		{
+			t->pat = true;
+		}
+	}
+
+	inline std::vector<PathEl> inversePath(TermTest* term)
+	{
+		std::vector<PathEl> path;
 
 		while (true)
 		{
-			path.push_back(term->num);
+			PathEl el;
+			el.pos = term->num;
+			auto& pat = (term->parent == nullptr ? topPat : term->parent->children);
+			for (int i = 0; i < el.pos; ++i)
+			{
+				if (pat[i]->isVariable && !pat[i]->variableMeta->isCaptured && !pat[i]->variableMeta->isDetermined)
+				{
+					el.fromLeft = false;
+					break;
+				}
+			}
+			path.push_back(el);
 			term = term->parent;
 			if (!term)
 			{
@@ -180,7 +218,7 @@ namespace PatternMatchingTest
 	}
 
 	inline void collectBlocks(std::vector<std::unique_ptr<TermTest>>& pat, std::vector<Block>& blocks
-		, std::vector<std::vector<int>>& determinedVars)
+		, std::vector<std::vector<PathEl>>& determinedVars)
 	{
 		int varStart = -1;
 		int varEnd = -1;
@@ -254,7 +292,7 @@ namespace PatternMatchingTest
 		}
 	}
 
-	inline bool removeDetermined(std::vector<Block>& blocks, std::vector<std::vector<int>>& determinedVars)
+	inline bool removeDetermined(std::vector<Block>& blocks, std::vector<std::vector<PathEl>>& determinedVars)
 	{
 		bool res = false;
 		for (int blI = blocks.size() - 1; blI >= 0; --blI)
@@ -337,7 +375,7 @@ namespace PatternMatchingTest
 		std::vector<Level> levels;
 		{
 			std::vector<Block> blocks;
-			std::vector<std::vector<int>> determinedVars;
+			std::vector<std::vector<PathEl>> determinedVars;
 			collectBlocks(pat, blocks, determinedVars);
 			while (removeDetermined(blocks, determinedVars));
 			for (auto& bl : blocks)
@@ -356,7 +394,7 @@ namespace PatternMatchingTest
 		while (true)
 		{
 			std::vector<Block> blocks;
-			std::vector<std::vector<int>> determinedVars;
+			std::vector<std::vector<PathEl>> determinedVars;
 			for (auto& bl : levels.back().blocks)
 			{
 				for (auto& el : bl.terms)
@@ -387,11 +425,64 @@ namespace PatternMatchingTest
 
 	}
 
+	void determineVar(const std::vector<int>& path, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int i = 0)
+	{
+		if (i = path.size() - 1)
+		{
+			//find capture from
+			int from = 0;
+			for (int patI = 0; patI < pat.size(); ++patI)
+			{
+				if (pat[patI]->isVariable)
+				{
+					from += pat[patI]->variableMeta->captured.size();
+				}
+			}
+		}
+		if (pat[i]->subj)
+		{
+
+		}
+
+	}
+	void func2(const std::vector<Level>& levels, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj)
+	{
+		for (const auto& level : levels)
+		{
+			for (const auto& path : level.determinedVars)
+			{
+
+			}
+		}
+
+	}
+
+
+	void markVariables(const std::unique_ptr<TermTest>& term)
+	{
+		if (term->label[0] == L'`')
+		{
+			term->isVariable = true;
+			term->variableMeta = std::make_shared<VariableMeta>();
+			return;
+		}
+		for (const auto& child : term->children)
+		{
+			markVariables(child);
+		}
+	}
+
 	MYTEST(VariatorTest)
 	{
-		Parser parser(L"f(a,b)");
+		Parser parser(L"f(a(k,`d,g),`b)");
 		parser.parse();
 		std::unique_ptr<TermTest> mainTerm = std::unique_ptr<TermTest>(parser.m_current_term);
+		std::vector<std::unique_ptr<TermTest>> str;
+		markVariables(mainTerm);
+		str.push_back(std::move(mainTerm));
+		enumerate(str);
+		std::vector<TermTest*> vars;
+		unifyVariables(str, vars);
 
 	}
 }
