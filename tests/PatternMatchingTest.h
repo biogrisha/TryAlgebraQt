@@ -25,11 +25,20 @@ namespace PatternMatchingTest
 		bool isPattern = false;
 		std::shared_ptr<VariableMeta> variableMeta;
 		int num = 0;
+
+		bool isPureVar()
+		{
+			return isVariable
+				&& variableMeta.get() != nullptr
+				&& !variableMeta->isCaptured
+				&& !variableMeta->isDetermined;
+		}
 	};
 
 	struct Block
 	{
 		std::span<std::unique_ptr<TermTest>> terms;
+		std::vector<TermTest*> vars;
 	};
 
 	struct PathEl
@@ -40,6 +49,7 @@ namespace PatternMatchingTest
 
 	struct Level
 	{
+		std::vector<std::vector<Block*>> bundles;
 		std::vector<Block> blocks;
 		std::vector<std::vector<PathEl>> determinedVars;
 	};
@@ -171,23 +181,22 @@ namespace PatternMatchingTest
 		}
 	}
 
-	void markPatternNodes(TermTest* t)
+	bool markPatternNodes(std::vector<std::unique_ptr<TermTest>>& t)
 	{
-		bool pat_temp = false;
-		for (auto ch : t->children)
+		bool res = false;
+		for (const auto& el : t)
 		{
-			markPatternNodes(ch);
-			pat_temp |= ch->pat;
+			if (el->isVariable)
+			{
+				res = true;
+			}
+			else if (markPatternNodes(el->children))
+			{
+				res = true;
+				el->isPattern = true;
+			}
 		}
-		if (pat_temp)
-		{
-			t->pat = true;
-			return;
-		}
-		if (t->variable)
-		{
-			t->pat = true;
-		}
+		return res;
 	}
 
 	inline std::vector<PathEl> inversePath(TermTest* term)
@@ -267,6 +276,7 @@ namespace PatternMatchingTest
 					collectBlocks(el->children, blocks, determinedVars);
 				}
 			}
+			return;
 		}
 
 		//this level has multiple yet not determined variables
@@ -306,6 +316,7 @@ namespace PatternMatchingTest
 				if (el->isVariable && !el->variableMeta->isDetermined && !el->variableMeta->isCaptured)
 				{
 					varStart = i;
+					break;
 				}
 			}
 			if (varStart == -1)
@@ -329,11 +340,14 @@ namespace PatternMatchingTest
 				if (el->isVariable && !el->variableMeta->isDetermined && !el->variableMeta->isCaptured)
 				{
 					varEnd = i + 1;
+					break;
 				}
 			}
 			if (varEnd - varStart == 1)
 			{
 				res = true;
+				block.terms[varStart]->variableMeta->isDetermined = true;
+				determinedVars.push_back(inversePath(block.terms[varStart].get()));
 				for (auto& el : block.terms)
 				{
 					if (el->isPattern)
@@ -341,7 +355,7 @@ namespace PatternMatchingTest
 						collectBlocks(el->children, blocks, determinedVars);
 					}
 				}
-				block.terms[varStart]->variableMeta->isDetermined;
+				//iterating in decreasing order -> can safely swap-pop
 				std::swap(blocks[blI], blocks.back());
 				blocks.pop_back();
 				continue;
@@ -370,7 +384,22 @@ namespace PatternMatchingTest
 		return res;
 	}
 
-	inline void func(std::vector<std::unique_ptr<TermTest>>& pat)
+	void collectVariables(const std::span<std::unique_ptr<TermTest>>& block, std::vector<TermTest*>& vars)
+	{
+		for (const auto& t : block)
+		{
+			if (t->isPattern)
+			{
+				collectVariables(t->children, vars);
+			}
+			else if (t->isPureVar())
+			{
+				vars.push_back(t.get());
+			}
+		}
+	}
+
+	inline std::vector<Level> func(std::vector<std::unique_ptr<TermTest>>& pat)
 	{
 		std::vector<Level> levels;
 		{
@@ -378,6 +407,10 @@ namespace PatternMatchingTest
 			std::vector<std::vector<PathEl>> determinedVars;
 			collectBlocks(pat, blocks, determinedVars);
 			while (removeDetermined(blocks, determinedVars));
+			for (auto& bl : blocks)
+			{
+				collectVariables(bl.terms, bl.vars);
+			}
 			for (auto& bl : blocks)
 			{
 				for (auto& el : bl.terms)
@@ -408,6 +441,10 @@ namespace PatternMatchingTest
 			while (removeDetermined(blocks, determinedVars));
 			for (auto& bl : blocks)
 			{
+				collectVariables(bl.terms, bl.vars);
+			}
+			for (auto& bl : blocks)
+			{
 				for (auto& el : bl.terms)
 				{
 					if (el->isVariable)
@@ -418,11 +455,12 @@ namespace PatternMatchingTest
 			}
 			if (blocks.empty())
 			{
+				levels.emplace_back(std::move(blocks), std::move(determinedVars));
 				break;
 			}
 			levels.emplace_back(std::move(blocks), std::move(determinedVars));
 		}
-
+		return levels;
 	}
 
 	void determineVar(const std::vector<int>& path, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int i = 0)
@@ -472,9 +510,30 @@ namespace PatternMatchingTest
 		}
 	}
 
+
+	void print(const std::span<std::unique_ptr<TermTest>>& terms)
+	{
+		for (int i = 0; i < terms.size(); ++i)
+		{
+			std::wcout << terms[i]->label;
+			if (!terms[i]->children.empty())
+			{
+				std::wcout << L"(";
+				print(terms[i]->children);
+				std::wcout << L")";
+			}
+			if (i < terms.size() - 1)
+			{
+				std::wcout << L",";
+			}
+		}
+	}
+
+
 	MYTEST(VariatorTest)
 	{
-		Parser parser(L"f(a(k,`d,g),`b)");
+		auto s = L"t(f(a,b,`x,k(`d),`x,t),f1(a,b,`x1,k(`x),`x1,t))";
+		Parser parser(s);
 		parser.parse();
 		std::unique_ptr<TermTest> mainTerm = std::unique_ptr<TermTest>(parser.m_current_term);
 		std::vector<std::unique_ptr<TermTest>> str;
@@ -483,6 +542,39 @@ namespace PatternMatchingTest
 		enumerate(str);
 		std::vector<TermTest*> vars;
 		unifyVariables(str, vars);
+		markPatternNodes(str);
+		auto levels = func(str);
+
+
+		std::wcout << s << "\n";
+		for (auto& lev : levels)
+		{
+			std::cout << "\n=========level========\n";
+			for (auto& bl : lev.blocks)
+			{
+				std::cout << "======block\n";
+				std::cout << "vars\n";
+				for (auto var : bl.vars)
+				{
+					std::wcout << var->label << ",";
+				}
+				std::cout << "\n";
+				std::cout << "block \n";
+				print(bl.terms);
+				std::cout << "\n";
+			}
+			std::cout << "\n=========determined========\n";
+			for (auto& path : lev.determinedVars)
+			{
+				std::cout << "[";
+				for (auto& pos : path)
+				{
+					std::cout << pos.pos << "(" << (pos.fromLeft ? "L" : "R") << ")";
+				}
+				std::cout << "]\n";
+			}
+		}
+
 
 	}
 }
