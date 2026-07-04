@@ -3,5 +3,13 @@ multiple var in container, but this remained undetermined
 
 aaav...vapaa
 
-a
+xy k-P1-z
+
+a -P2- c
+
+x->  block
+	 border
+
+
+
 

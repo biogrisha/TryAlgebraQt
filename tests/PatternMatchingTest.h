@@ -25,7 +25,6 @@ namespace PatternMatchingTest
 		bool isPattern = false;
 		std::shared_ptr<VariableMeta> variableMeta;
 		int num = 0;
-
 		bool isPureVar()
 		{
 			return isVariable
@@ -49,7 +48,17 @@ namespace PatternMatchingTest
 
 	struct Level
 	{
-		std::vector<std::vector<Block*>> bundles;
+		Block* findBlock(const TermTest* parent)
+		{
+			for (auto& block : blocks)
+			{
+				if (block.terms.back()->parent == parent)
+				{
+					return &block;
+				}
+			}
+			return nullptr;
+		}
 		std::vector<Block> blocks;
 		std::vector<std::vector<PathEl>> determinedVars;
 	};
@@ -234,7 +243,7 @@ namespace PatternMatchingTest
 		//find varStart
 		for (int i = 0; i < pat.size(); ++i)
 		{
-			if (pat[i]->isVariable && !pat[i]->variableMeta->isDetermined && !pat[i]->variableMeta->isCaptured)
+			if (pat[i]->isPureVar())
 			{
 				varStart = i;
 				break;
@@ -256,7 +265,7 @@ namespace PatternMatchingTest
 		// find var end (last var pos + 1)
 		for (int i = pat.size() - 1; i >= varStart; --i)
 		{
-			if (pat[i]->isVariable && !pat[i]->variableMeta->isDetermined && !pat[i]->variableMeta->isCaptured)
+			if (pat[i]->isPureVar())
 			{
 				varEnd = i + 1;
 				break;
@@ -313,7 +322,7 @@ namespace PatternMatchingTest
 			for (int i = 0; i < block.terms.size(); ++i)
 			{
 				auto& el = block.terms[i];
-				if (el->isVariable && !el->variableMeta->isDetermined && !el->variableMeta->isCaptured)
+				if (el->isPureVar())
 				{
 					varStart = i;
 					break;
@@ -337,7 +346,7 @@ namespace PatternMatchingTest
 			for (int i = block.terms.size() - 1; i >= varStart; --i)
 			{
 				auto& el = block.terms[i];
-				if (el->isVariable && !el->variableMeta->isDetermined && !el->variableMeta->isCaptured)
+				if (el->isPureVar())
 				{
 					varEnd = i + 1;
 					break;
@@ -360,6 +369,45 @@ namespace PatternMatchingTest
 				blocks.pop_back();
 				continue;
 			}
+			{
+				//check that variables are different
+				TermTest* firstVar = nullptr;
+				bool sameVariable = true;
+				for (int i = varStart; i < varEnd; ++i)
+				{
+					if (block.terms[i]->isPureVar())
+					{
+						if (!firstVar)
+						{
+							firstVar = block.terms[i].get();
+						}
+						else if (!compare(firstVar, block.terms[i].get()))
+						{
+							sameVariable = false;
+							break;
+						}
+					}
+				}
+
+				if (sameVariable)
+				{
+					res = true;
+					block.terms[varStart]->variableMeta->isDetermined = true;
+					determinedVars.push_back(inversePath(block.terms[varStart].get()));
+					for (auto& el : block.terms)
+					{
+						if (el->isPattern)
+						{
+							collectBlocks(el->children, blocks, determinedVars);
+						}
+					}
+					//iterating in decreasing order -> can safely swap-pop
+					std::swap(blocks[blI], blocks.back());
+					blocks.pop_back();
+					continue;
+				}
+			}
+
 			if (varEnd - varStart != block.terms.size())
 			{
 				res = true;
@@ -463,35 +511,258 @@ namespace PatternMatchingTest
 		return levels;
 	}
 
-	void determineVar(const std::vector<int>& path, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int i = 0)
+	bool determineVar(const std::vector<PathEl>& path, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int i = 0)
 	{
-		if (i = path.size() - 1)
+		if (i < path.size() - 1)
 		{
-			//find capture from
-			int from = 0;
-			for (int patI = 0; patI < pat.size(); ++patI)
+			//i is not pointing at variable - intermediate index
+			if (pat[path[i].pos]->subj)
 			{
-				if (pat[patI]->isVariable)
+				//pat already has assigned subj -> dive right in
+				return determineVar(path, pat[path[i].pos]->children, pat[path[i].pos]->subj->children, i + 1);
+			}
+			//find capture from
+			int subjPos = path[i].fromLeft ? 0 : subj.size();
+			if (path[i].fromLeft)
+			{
+				//path from left -> accumulate left to right
+				for (int patI = 0; patI < path[i].pos; ++patI)
 				{
-					from += pat[patI]->variableMeta->captured.size();
+					if (pat[patI]->isVariable)
+					{
+						subjPos += pat[patI]->variableMeta->captured.size();
+					}
+					else
+					{
+						++subjPos;
+					}
 				}
 			}
+			else
+			{
+				//path from right -> accumulate right to left
+				for (int patI = pat.size() - 1; patI >= path[i].pos; --patI)
+				{
+					if (pat[patI]->isVariable)
+					{
+						subjPos -= pat[patI]->variableMeta->captured.size();
+					}
+					else
+					{
+						--subjPos;
+					}
+				}
+			}
+			if (subjPos >= subj.size() || subjPos < 0)
+			{
+				//subj pos is outside subj range
+				return false;
+			}
+			//successfuly found subjPos
+			//assign subj to pat
+			pat[path[i].pos]->subj = subj[subjPos].get();
+			//recursive step
+			return determineVar(path, pat[path[i].pos]->children, subj[subjPos]->children, i + 1);
 		}
-		if (pat[i]->subj)
+		else
 		{
+			//final pos pointing at variable
+			int subjFrom = 0;
+			int patFrom = 0;
+			int subjTo = subj.size();
+			int patTo = 0;
 
+			//there could be one or multiple same variables
+			//find first occurance of variable in pat and corresponding start in subj
+			for (int i = 0; i < pat.size(); ++i)
+			{
+				if (pat[i]->isVariable)
+				{
+					if (pat[i]->variableMeta->captured.empty())
+					{
+						//found not initialized variable
+						//cache position
+						patFrom = i;
+						break;
+					}
+					else
+					{
+						//found initialized variable -> skip n terms in subj
+						subjFrom += pat[i]->variableMeta->captured.size();
+					}
+				}
+				else
+				{
+					//skip 1 term in subj
+					++subjFrom;
+				}
+			}
+			if (subjFrom >= subjTo)
+			{
+				//subj start goes over subj size
+				return false;
+			}
+			//find last variable and subj arguments end
+			for (int i = pat.size() - 1; i >= patFrom; ++i)
+			{
+				if (pat[i]->isVariable)
+				{
+					if (pat[i]->variableMeta->captured.empty())
+					{
+						patTo = i + 1;
+						break;
+					}
+					else
+					{
+						subjTo -= pat[i]->variableMeta->captured.size();
+					}
+				}
+				else
+				{
+					--subjFrom;
+				}
+			}
+			if (subjFrom <= subjTo)
+			{
+				//invalid subj end
+				return false;
+			}
+			//calculate number of variables
+			int varNum = 0;
+			for (int i = patFrom; i < patTo; ++i)
+			{
+				if (pat[i]->isVariable && pat[i]->variableMeta->captured.empty())
+				{
+					++varNum;
+				}
+			}
+			//calc free args number
+			int freeArgsNum = (subjTo - subjFrom) - (patTo - patFrom - varNum);
+
+			if (freeArgsNum % varNum != 0)
+			{
+				//number of free arguments is not divided by the number of variables
+				return false;
+			}
+			//number of arguments captured by variable
+			int argsPerVarNum = freeArgsNum / varNum;
+			//assign variables to the first variable
+			pat[patFrom]->variableMeta->captured = std::span(subj).subspan(subjFrom, argsPerVarNum);
+		}
+		return true;
+	}
+
+	bool compare1(Level& level, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj)
+	{
+		int start = -1;
+		int end = -1;
+		int subjI = 0;
+		if (pat.size() > subj.size())
+		{
+			return false;
+		}
+
+		//compare left border
+		for (int patI = 0; patI < pat.size(); ++patI)
+		{
+			if (pat[patI]->isPattern)
+			{
+				if (pat[patI]->label != subj[subjI]->label)
+				{
+					return false;
+				}
+				if (!compare1(level, pat[patI]->children, subj[subjI]->children))
+				{
+					return false;
+				}
+			}
+			else if (pat[patI]->isVariable)
+			{
+				if (!pat[patI]->variableMeta->captured.empty())
+				{
+					for (auto& cap : pat[patI]->variableMeta->captured)
+					{
+						if (!compare(cap.get(), subj[subjI].get()))
+						{
+							return false;
+						}
+						++subjI;
+					}
+					//continue to avoid subjI incrementation
+					continue;
+				}
+				else
+				{
+					//found block start
+					start = subjI;
+					break;
+				}
+			}
+			else if (!compare(pat[patI].get(), subj[subjI].get()))
+			{
+				return false;
+			}
+			++subjI;
+		}
+		if (start == -1)
+		{
+			return true;
+		}
+		//compare right border
+		for (int patI = pat.size() - 1; patI >= start; --patI)
+		{
+			if (pat[patI]->isPattern)
+			{
+				if (pat[patI]->label != subj[subjI]->label)
+				{
+					return false;
+				}
+				if (!compare1(level, pat[patI]->children, subj[subjI]->children))
+				{
+					return false;
+				}
+			}
+			else if (pat[patI]->isVariable)
+			{
+				if (!pat[patI]->variableMeta->captured.empty())
+				{
+					for (auto& cap : pat[patI]->variableMeta->captured)
+					{
+						if (!compare(cap.get(), subj[subjI].get()))
+						{
+							return false;
+						}
+						--subjI;
+					}
+				}
+				else
+				{
+					//found block start
+					end = subjI + 1;
+					break;
+				}
+			}
+			else if (!compare(pat[patI].get(), subj[subjI].get()))
+			{
+				return false;
+			}
+			--subjI;
 		}
 
 	}
-	void func2(const std::vector<Level>& levels, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj)
-	{
-		for (const auto& level : levels)
-		{
-			for (const auto& path : level.determinedVars)
-			{
 
+	bool func2(std::vector<Level>& levels, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int levelI = 0)
+	{
+		auto& level = levels[levelI];
+		//first determine variables
+		for (const auto& path : level.determinedVars)
+		{
+			if (!determineVar(path, pat, subj))
+			{
+				return false;
 			}
 		}
+
 
 	}
 
@@ -532,7 +803,7 @@ namespace PatternMatchingTest
 
 	MYTEST(VariatorTest)
 	{
-		auto s = L"t(f(a,b,`x,k(`d),`x,t),f1(a,b,`x1,k(`x),`x1,t))";
+		auto s = L"t(f(a,b,`x,k(`d,`k),`x,t),f1(t))";
 		Parser parser(s);
 		parser.parse();
 		std::unique_ptr<TermTest> mainTerm = std::unique_ptr<TermTest>(parser.m_current_term);
