@@ -36,8 +36,9 @@ namespace PatternMatchingTest
 
 	struct Block
 	{
-		std::span<std::unique_ptr<TermTest>> terms;
+		std::span<std::unique_ptr<TermTest>> pat;
 		std::vector<TermTest*> vars;
+		std::span<std::unique_ptr<TermTest>> subj;
 	};
 
 	struct PathEl
@@ -52,7 +53,7 @@ namespace PatternMatchingTest
 		{
 			for (auto& block : blocks)
 			{
-				if (block.terms.back()->parent == parent)
+				if (block.pat.back()->parent == parent)
 				{
 					return &block;
 				}
@@ -291,7 +292,7 @@ namespace PatternMatchingTest
 		//this level has multiple yet not determined variables
 		//create block for them
 		Block block;
-		block.terms = std::span(pat).subspan(varStart, varEnd - varStart);
+		block.pat = std::span(pat).subspan(varStart, varEnd - varStart);
 		blocks.push_back(block);
 
 		//recursive call for all patterns on the left and on the right
@@ -319,9 +320,9 @@ namespace PatternMatchingTest
 			auto& block = blocks[blI];
 			int varStart = -1;
 			int varEnd = -1;
-			for (int i = 0; i < block.terms.size(); ++i)
+			for (int i = 0; i < block.pat.size(); ++i)
 			{
-				auto& el = block.terms[i];
+				auto& el = block.pat[i];
 				if (el->isPureVar())
 				{
 					varStart = i;
@@ -332,7 +333,7 @@ namespace PatternMatchingTest
 			{
 				res = true;
 				//block is determined, call collect blocks on pats in it
-				for (auto& el : block.terms)
+				for (auto& el : block.pat)
 				{
 					if (el->isPattern)
 					{
@@ -343,9 +344,9 @@ namespace PatternMatchingTest
 				blocks.pop_back();
 				continue;
 			}
-			for (int i = block.terms.size() - 1; i >= varStart; --i)
+			for (int i = block.pat.size() - 1; i >= varStart; --i)
 			{
-				auto& el = block.terms[i];
+				auto& el = block.pat[i];
 				if (el->isPureVar())
 				{
 					varEnd = i + 1;
@@ -355,9 +356,9 @@ namespace PatternMatchingTest
 			if (varEnd - varStart == 1)
 			{
 				res = true;
-				block.terms[varStart]->variableMeta->isDetermined = true;
-				determinedVars.push_back(inversePath(block.terms[varStart].get()));
-				for (auto& el : block.terms)
+				block.pat[varStart]->variableMeta->isDetermined = true;
+				determinedVars.push_back(inversePath(block.pat[varStart].get()));
+				for (auto& el : block.pat)
 				{
 					if (el->isPattern)
 					{
@@ -375,13 +376,13 @@ namespace PatternMatchingTest
 				bool sameVariable = true;
 				for (int i = varStart; i < varEnd; ++i)
 				{
-					if (block.terms[i]->isPureVar())
+					if (block.pat[i]->isPureVar())
 					{
 						if (!firstVar)
 						{
-							firstVar = block.terms[i].get();
+							firstVar = block.pat[i].get();
 						}
-						else if (!compare(firstVar, block.terms[i].get()))
+						else if (!compare(firstVar, block.pat[i].get()))
 						{
 							sameVariable = false;
 							break;
@@ -392,9 +393,9 @@ namespace PatternMatchingTest
 				if (sameVariable)
 				{
 					res = true;
-					block.terms[varStart]->variableMeta->isDetermined = true;
-					determinedVars.push_back(inversePath(block.terms[varStart].get()));
-					for (auto& el : block.terms)
+					block.pat[varStart]->variableMeta->isDetermined = true;
+					determinedVars.push_back(inversePath(block.pat[varStart].get()));
+					for (auto& el : block.pat)
 					{
 						if (el->isPattern)
 						{
@@ -408,24 +409,24 @@ namespace PatternMatchingTest
 				}
 			}
 
-			if (varEnd - varStart != block.terms.size())
+			if (varEnd - varStart != block.pat.size())
 			{
 				res = true;
 				for (int i = 0; i < varStart; ++i)
 				{
-					if (block.terms[i]->isPattern)
+					if (block.pat[i]->isPattern)
 					{
-						collectBlocks(block.terms[i]->children, blocks, determinedVars);
+						collectBlocks(block.pat[i]->children, blocks, determinedVars);
 					}
 				}
-				for (int i = varEnd; i < block.terms.size(); ++i)
+				for (int i = varEnd; i < block.pat.size(); ++i)
 				{
-					if (block.terms[i]->isPattern)
+					if (block.pat[i]->isPattern)
 					{
-						collectBlocks(block.terms[i]->children, blocks, determinedVars);
+						collectBlocks(block.pat[i]->children, blocks, determinedVars);
 					}
 				}
-				block.terms = block.terms.subspan(varStart, varEnd - varStart);
+				block.pat = block.pat.subspan(varStart, varEnd - varStart);
 			}
 
 		}
@@ -457,11 +458,11 @@ namespace PatternMatchingTest
 			while (removeDetermined(blocks, determinedVars));
 			for (auto& bl : blocks)
 			{
-				collectVariables(bl.terms, bl.vars);
+				collectVariables(bl.pat, bl.vars);
 			}
 			for (auto& bl : blocks)
 			{
-				for (auto& el : bl.terms)
+				for (auto& el : bl.pat)
 				{
 					if (el->isVariable)
 					{
@@ -478,7 +479,7 @@ namespace PatternMatchingTest
 			std::vector<std::vector<PathEl>> determinedVars;
 			for (auto& bl : levels.back().blocks)
 			{
-				for (auto& el : bl.terms)
+				for (auto& el : bl.pat)
 				{
 					if (el->isPattern)
 					{
@@ -489,11 +490,11 @@ namespace PatternMatchingTest
 			while (removeDetermined(blocks, determinedVars));
 			for (auto& bl : blocks)
 			{
-				collectVariables(bl.terms, bl.vars);
+				collectVariables(bl.pat, bl.vars);
 			}
 			for (auto& bl : blocks)
 			{
-				for (auto& el : bl.terms)
+				for (auto& el : bl.pat)
 				{
 					if (el->isVariable)
 					{
@@ -654,101 +655,117 @@ namespace PatternMatchingTest
 
 	bool compare1(Level& level, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj)
 	{
-		int start = -1;
-		int end = -1;
-		int subjI = 0;
+		int subjStart = -1;
+		int subjEnd = -1;
 		if (pat.size() > subj.size())
 		{
 			return false;
 		}
-
-		//compare left border
-		for (int patI = 0; patI < pat.size(); ++patI)
 		{
-			if (pat[patI]->isPattern)
+			//compare left border
+			int subjI = 0;
+			for (int patI = 0; patI < pat.size(); ++patI)
 			{
-				if (pat[patI]->label != subj[subjI]->label)
+				if (pat[patI]->isPattern)
 				{
-					return false;
-				}
-				if (!compare1(level, pat[patI]->children, subj[subjI]->children))
-				{
-					return false;
-				}
-			}
-			else if (pat[patI]->isVariable)
-			{
-				if (!pat[patI]->variableMeta->captured.empty())
-				{
-					for (auto& cap : pat[patI]->variableMeta->captured)
+					if (pat[patI]->label != subj[subjI]->label)
 					{
-						if (!compare(cap.get(), subj[subjI].get()))
-						{
-							return false;
-						}
-						++subjI;
+						return false;
 					}
-					//continue to avoid subjI incrementation
-					continue;
+					if (!compare1(level, pat[patI]->children, subj[subjI]->children))
+					{
+						return false;
+					}
 				}
-				else
+				else if (pat[patI]->isVariable)
 				{
-					//found block start
-					start = subjI;
-					break;
+					if (!pat[patI]->variableMeta->captured.empty())
+					{
+						for (auto& cap : pat[patI]->variableMeta->captured)
+						{
+							if (!compare(cap.get(), subj[subjI].get()))
+							{
+								return false;
+							}
+							++subjI;
+						}
+						//continue to avoid subjI incrementation
+						continue;
+					}
+					else
+					{
+						//found block start
+						subjStart = subjI;
+						break;
+					}
 				}
+				else if (!compare(pat[patI].get(), subj[subjI].get()))
+				{
+					return false;
+				}
+				++subjI;
 			}
-			else if (!compare(pat[patI].get(), subj[subjI].get()))
+			if (subjStart == -1)
+			{
+				return true;
+			}
+		}
+		{
+			//compare right border
+			int subjI = subj.size() - 1;
+			for (int patI = pat.size() - 1; patI >= 0; --patI)
+			{
+				if (pat[patI]->isPattern)
+				{
+					if (pat[patI]->label != subj[subjI]->label)
+					{
+						return false;
+					}
+					if (!compare1(level, pat[patI]->children, subj[subjI]->children))
+					{
+						return false;
+					}
+				}
+				else if (pat[patI]->isVariable)
+				{
+					const auto& captured = pat[patI]->variableMeta->captured;
+					if (!captured.empty())
+					{
+						for (int capI = captured.size() - 1; capI >= 0; --capI)
+						{
+							if (!compare(captured[capI].get(), subj[subjI].get()))
+							{
+								return false;
+							}
+							--subjI;
+						}
+					}
+					else
+					{
+						//found block start
+						subjEnd = subjI + 1;
+						break;
+					}
+				}
+				else if (!compare(pat[patI].get(), subj[subjI].get()))
+				{
+					return false;
+				}
+				--subjI;
+			}
+			if (subjEnd <= subjStart)
 			{
 				return false;
 			}
-			++subjI;
 		}
-		if (start == -1)
+		Block* block = level.findBlock(pat.back()->parent);
+		assert(block);
+		if (block->pat.size() > subjEnd - subjStart)
 		{
-			return true;
+			return false;
 		}
-		//compare right border
-		for (int patI = pat.size() - 1; patI >= start; --patI)
-		{
-			if (pat[patI]->isPattern)
-			{
-				if (pat[patI]->label != subj[subjI]->label)
-				{
-					return false;
-				}
-				if (!compare1(level, pat[patI]->children, subj[subjI]->children))
-				{
-					return false;
-				}
-			}
-			else if (pat[patI]->isVariable)
-			{
-				if (!pat[patI]->variableMeta->captured.empty())
-				{
-					for (auto& cap : pat[patI]->variableMeta->captured)
-					{
-						if (!compare(cap.get(), subj[subjI].get()))
-						{
-							return false;
-						}
-						--subjI;
-					}
-				}
-				else
-				{
-					//found block start
-					end = subjI + 1;
-					break;
-				}
-			}
-			else if (!compare(pat[patI].get(), subj[subjI].get()))
-			{
-				return false;
-			}
-			--subjI;
-		}
-
+		block->subj = std::span(subj).subspan(subjStart, subjEnd - subjStart);
+		return true;
 	}
 
 	bool func2(std::vector<Level>& levels, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int levelI = 0)
@@ -762,6 +779,7 @@ namespace PatternMatchingTest
 				return false;
 			}
 		}
+		compare1()
 
 
 	}
@@ -831,7 +849,7 @@ namespace PatternMatchingTest
 				}
 				std::cout << "\n";
 				std::cout << "block \n";
-				print(bl.terms);
+				print(bl.pat);
 				std::cout << "\n";
 			}
 			std::cout << "\n=========determined========\n";
