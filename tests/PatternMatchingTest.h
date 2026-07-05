@@ -62,6 +62,7 @@ namespace PatternMatchingTest
 		}
 		std::vector<Block> blocks;
 		std::vector<std::vector<PathEl>> determinedVars;
+		std::vector<std::vector<Block>> bundles;
 	};
 
 
@@ -448,6 +449,63 @@ namespace PatternMatchingTest
 		}
 	}
 
+	void collectBundles(std::vector<Level>& levels)
+	{
+		for (auto& level : levels)
+		{
+			std::vector<Block> blocksCopy = level.blocks;
+			while (!blocksCopy.empty())
+			{
+				//start bundle
+				auto& bundle = level.bundles.emplace_back();
+				bundle.push_back(std::move(blocksCopy.back()));
+				blocksCopy.pop_back();
+
+				//try to find a block among the remaining ones
+				for (int candidateI = blocksCopy.size() - 1; candidateI >= 0; --candidateI)
+				{
+					bool hasSameVar = false;
+					//iterate over blocks in last bundle
+					for (const auto& bundleBl : bundle)
+					{
+						//iterate over variables in all blocks of bundle
+						for (const auto& bundleVar : bundleBl.vars)
+						{
+							//iterate over variables in candidate block
+							for (const auto& candidateVar : blocksCopy[candidateI].vars)
+							{
+								if (bundleVar->variableMeta == candidateVar->variableMeta)
+								{
+									//found same variable
+									hasSameVar = true;
+									break;
+								}
+							}
+							if (hasSameVar)
+							{
+								break;
+							}
+						}
+						if (hasSameVar)
+						{
+							break;
+						}
+					}
+					if (hasSameVar)
+					{
+						//add block into bundle
+						bundle.push_back(std::move(blocksCopy[candidateI]));
+						std::swap(blocksCopy.back(), blocksCopy[candidateI]);
+						blocksCopy.pop_back();
+						//start process from the first candidate 
+						//since the newly added candidate can connect to the one before it
+						candidateI = blocksCopy.size();
+					}
+				}
+			}
+		}
+	}
+
 	inline std::vector<Level> func(std::vector<std::unique_ptr<TermTest>>& pat)
 	{
 		std::vector<Level> levels;
@@ -509,6 +567,8 @@ namespace PatternMatchingTest
 			}
 			levels.emplace_back(std::move(blocks), std::move(determinedVars));
 		}
+
+		collectBundles(levels);
 		return levels;
 	}
 
@@ -779,9 +839,8 @@ namespace PatternMatchingTest
 				return false;
 			}
 		}
-		compare1()
-
-
+		compare1(level, pat, subj);
+		//chose variation
 	}
 
 
@@ -821,7 +880,7 @@ namespace PatternMatchingTest
 
 	MYTEST(VariatorTest)
 	{
-		auto s = L"t(f(a,b,`x,k(`d,`k),`x,t),f1(t))";
+		auto s = L"t(f(a,b,`x1,k(`d,`k),`x,t),f1(`t,`k),d(`b,d(a,`t,`k1,`k2),`f))";
 		Parser parser(s);
 		parser.parse();
 		std::unique_ptr<TermTest> mainTerm = std::unique_ptr<TermTest>(parser.m_current_term);
@@ -839,20 +898,31 @@ namespace PatternMatchingTest
 		for (auto& lev : levels)
 		{
 			std::cout << "\n=========level========\n";
-			for (auto& bl : lev.blocks)
+			std::cout << "===bundles\n";
+			for (auto& bundle : lev.bundles)
 			{
-				std::cout << "======block\n";
-				std::cout << "vars\n";
-				for (auto var : bl.vars)
 				{
-					std::wcout << var->label << ",";
+					TestFramework::ColorGuard green(TestFramework::GREEN);
+					std::cout << "[";
 				}
-				std::cout << "\n";
-				std::cout << "block \n";
-				print(bl.pat);
-				std::cout << "\n";
+				for (auto& block : bundle)
+				{
+					{
+						TestFramework::ColorGuard red(TestFramework::RED);
+						std::cout << "{";
+					}
+					print(block.pat);
+					{
+						TestFramework::ColorGuard red(TestFramework::RED);
+						std::cout << "} ";
+					}
+				}
+				{
+					TestFramework::ColorGuard green(TestFramework::GREEN);
+					std::cout << "] ";
+				}
 			}
-			std::cout << "\n=========determined========\n";
+			std::cout << "\n===determined\n";
 			for (auto& path : lev.determinedVars)
 			{
 				std::cout << "[";
