@@ -664,7 +664,7 @@ namespace PatternMatchingTest
 				return false;
 			}
 			//find last variable and subj arguments end
-			for (int i = pat.size() - 1; i >= patFrom; ++i)
+			for (int i = pat.size() - 1; i >= patFrom; --i)
 			{
 				if (pat[i]->isVariable)
 				{
@@ -680,10 +680,10 @@ namespace PatternMatchingTest
 				}
 				else
 				{
-					--subjFrom;
+					--subjTo;
 				}
 			}
-			if (subjFrom <= subjTo)
+			if (subjFrom >= subjTo)
 			{
 				//invalid subj end
 				return false;
@@ -841,6 +841,7 @@ namespace PatternMatchingTest
 		}
 		compare1(level, pat, subj);
 		//chose variation
+
 	}
 
 
