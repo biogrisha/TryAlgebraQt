@@ -17,6 +17,7 @@ add_executable(TryAlgebraTest
     VariatorTest.h
     Prints.h
     PatternMatchingTest.h
+    DiophantineSolver.h
 )
 
 target_link_libraries(TryAlgebraTest 
