@@ -46,40 +46,32 @@ namespace DiophantineSolver
 		{
 			return true;
 		}
-		bool res = false;
 		for (auto& testP : among)
 		{
 			for (int i = 0; i < testP.positiveVars.size(); ++i)
 			{
-				if (p.positiveVars[i] > testP.positiveVars[i])
+				if (p.positiveVars[i] < testP.positiveVars[i])
 				{
-					return false;
-				}
-				else if (p.positiveVars[i] < testP.positiveVars[i])
-				{
-					res = true;
+					return true;
 				}
 			}
 			for (int i = 0; i < testP.negativeVars.size(); ++i)
 			{
-				if (p.negativeVars[i] > testP.negativeVars[i])
+				if (p.negativeVars[i] < testP.negativeVars[i])
 				{
-					return false;
-				}
-				else if (p.negativeVars[i] < testP.negativeVars[i])
-				{
-					res = true;
+					return true;
 				}
 			}
 		}
-		return res;
+		return false;
 	}
 	MYTEST(DiophantineSolver)
 	{
-		equation = { {1,1},{10} };
+		equation = { {1,3,5},{10} };
 		P = {
-			Probe{{1,0}, {0}},
-			Probe{{0,1}, {0}},
+			Probe{{1,0,0}, {0}},
+			Probe{{0,1,0}, {0}},
+			Probe{{0,0,1}, {0}},
 		};
 
 		while (!P.empty())
