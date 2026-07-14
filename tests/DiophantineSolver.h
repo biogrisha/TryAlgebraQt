@@ -5,152 +5,127 @@
 #include <TRS/PatternMatching.h>
 #include <iostream>
 #include <span>
+
 namespace DiophantineSolver
 {
+	struct Var
+	{
+		int value = 0;
+	};
+
+	struct EqVar
+	{
+		Var* var = nullptr;
+		int coef = 0;
+	};
+
 	struct Equation
 	{
-		std::vector<int> positiveCoefs;
-		std::vector<int> negativeCoefs;
+		std::vector<EqVar> prevVars;
+		std::vector<EqVar> initVars;
+		int rhs = 0;
+
+		std::unique_ptr<Equation> next;
 	};
 
-	struct Probe
+	enum class Status
 	{
-		std::vector<int> positiveVars;
-		std::vector<int> negativeVars;
+		finished,
+		exceeded,
+		succeeded
 	};
 
-	inline Equation equation;
-	inline std::vector<Probe> P;
-	inline std::vector<Probe> M;
-	inline std::vector<Probe> Q;
-
-	inline int d(const Probe& p)
+	Status solve(int pos, Equation& eq, int remainder)
 	{
-		int Sum = 0;
-		for (int i = 0; i < equation.positiveCoefs.size(); ++i)
+		if (pos == eq.initVars.size())
 		{
-			Sum += equation.positiveCoefs[i] * p.positiveVars[i];
-		}
-
-
-		for (int i = 0; i < equation.negativeCoefs.size(); ++i)
-		{
-			Sum -= equation.negativeCoefs[i] * p.negativeVars[i];
-		}
-		return Sum;
-	}
-
-	inline bool minimal(const std::vector<Probe>& among, const Probe& p)
-	{
-		if (among.empty())
-		{
-			return true;
-		}
-		for (auto& testP : among)
-		{
-			for (int i = 0; i < testP.positiveVars.size(); ++i)
+			if (remainder == 0)
 			{
-				if (p.positiveVars[i] < testP.positiveVars[i])
+				//add variables were subtracted from rhs and it became zero
+				//means that we found a solution
 				{
-					return true;
+					//print solution
+					int sum = 0;
+					for (auto val : eq.initVars)
+					{
+						sum += val.var->value * val.coef;
+						std::cout << val.var->value << " ";
+					}
+					std::cout << "    " << sum;
+					std::cout << "\n";
+
+					std::cout << "next eq \n";
 				}
+				if (eq.next)
+				{
+					//has next equation
+					//subtract variables initialized by previous equations
+					int sum = 0;
+					for (auto& var : eq.next->prevVars)
+					{
+						sum += var.var->value * var.coef;
+					}
+					solve(0, *eq.next.get(), eq.next->rhs - sum);
+				}
+				return Status::succeeded;
 			}
-			for (int i = 0; i < testP.negativeVars.size(); ++i)
+			else if (remainder > 0)
 			{
-				if (p.negativeVars[i] < testP.negativeVars[i])
-				{
-					return true;
-				}
+				// haven't found solution yet, try next iteration
+				return Status::succeeded;
 			}
 		}
-		return false;
+
+		if (remainder <= 0)
+		{
+			return Status::exceeded;
+		}
+
+		for (int i = 1; ; ++i)
+		{
+			eq.initVars[pos].var->value = i;
+			auto status = solve(pos + 1, eq, remainder - (i * eq.initVars[pos].coef));
+			if (status == Status::finished)
+			{
+				return Status::finished;
+			}
+			else if (status == Status::exceeded)
+			{
+				break;
+			}
+		}
+		return Status::succeeded;
 	}
+
+
 	MYTEST(DiophantineSolver)
 	{
-		equation = { {1,3,5},{10} };
-		P = {
-			Probe{{1,0,0}, {0}},
-			Probe{{0,1,0}, {0}},
-			Probe{{0,0,1}, {0}},
+		Equation eq;
+		std::unique_ptr<Var> v1 = std::make_unique<Var>();
+		std::unique_ptr<Var> v2 = std::make_unique<Var>();
+		std::unique_ptr<Var> v3 = std::make_unique<Var>();
+		std::unique_ptr<Var> v4 = std::make_unique<Var>();
+		std::unique_ptr<Var> v5 = std::make_unique<Var>();
+		std::unique_ptr<Var> v6 = std::make_unique<Var>();
+		eq.initVars = {
+			{v1.get(), 1},
+			{v2.get(), 2},
+			{v3.get(), 2},
+			{v4.get(), 1},
 		};
-
-		while (!P.empty())
+		eq.rhs = 9;
+		eq.next = std::make_unique<Equation>();
+		auto next = eq.next.get();
+		next->prevVars =
 		{
-			for (auto& p : P)
-			{
-				int posMax = p.positiveVars.size() - 1;
-				for (; posMax >= 0; --posMax)
-				{
-					if (p.positiveVars[posMax] > 0)
-					{
-						break;
-					}
-				}
-				posMax = std::max(0, posMax);
-				int negMax = p.negativeVars.size() - 1;
-				for (; negMax >= 0; --negMax)
-				{
-					if (p.negativeVars[negMax] > 0)
-					{
-						negMax++;
-						break;
-					}
-				}
-				negMax = std::max(0, negMax);
-
-				int dRes = d(p);
-				if (dRes < 0)
-				{
-					for (int i = posMax; i < equation.positiveCoefs.size(); ++i)
-					{
-						Probe pCopy = p;
-						pCopy.positiveVars[i] += 1;
-						Q.push_back(pCopy);
-					}
-				}
-				else if (dRes > 0)
-				{
-					for (int i = negMax; i < equation.negativeCoefs.size(); ++i)
-					{
-						Probe pCopy = p;
-						pCopy.negativeVars[i] += 1;
-						Q.push_back(pCopy);
-					}
-				}
-			}
-
-			P.clear();
-			for (auto& q : Q)
-			{
-				if (d(q) != 0 && minimal(M, q))
-				{
-					P.push_back(q);
-				}
-			}
-			for (auto& q : Q)
-			{
-				if (d(q) == 0)
-				{
-					M.push_back(q);
-				}
-			}
-			Q.clear();
-
-		}
-
-		for (auto m : M)
-		{
-			std::cout << "\n[";
-			for (auto pos : m.positiveVars)
-			{
-				std::cout << pos << " ";
-			}
-			std::cout << "|";
-			for (auto neg : m.negativeVars)
-			{
-				std::cout << neg << " ";
-			}
-			std::cout << "]";
-		}
+			{v1.get(), 1},
+			{v3.get(), 1}
+		};
+		next->initVars = {
+			{v5.get(), 2},
+			{v6.get(), 3}
+		};
+		next->rhs = 12;
+		solve(0, eq, eq.rhs);
 	}
 }
