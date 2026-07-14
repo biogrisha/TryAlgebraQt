@@ -12,8 +12,8 @@
 //#include "IsLastLineTest.h"
 //#include "ConvertMeToTermsTest.h"
 //#include "VariatorTest.h"
-//#include "PatternMatchingTest.h"
-#include "DiophantineSolver.h"
+#include "PatternMatchingTest.h"
+//#include "DiophantineSolver.h"
 int main(int argc, char* argv[])
 {
 	TestFramework::runAllTests();

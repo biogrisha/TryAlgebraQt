@@ -5,6 +5,7 @@
 #include <TRS/PatternMatching.h>
 #include <iostream>
 #include <span>
+
 namespace PatternMatchingTest
 {
 	struct TermTest;
@@ -13,7 +14,31 @@ namespace PatternMatchingTest
 		std::span<std::unique_ptr<TermTest>> captured;
 		bool isDetermined = false;
 		bool isCaptured = false;
+		int captureSizeNondet = 0;
 	};
+
+	struct EqVar
+	{
+		VariableMeta* var = nullptr;
+		int coef = 0;
+	};
+
+	struct Equation
+	{
+		std::vector<EqVar> prevVars;
+		std::vector<EqVar> initVars;
+		int rhs = 0;
+
+		std::unique_ptr<Equation> next;
+	};
+
+	enum class Status
+	{
+		finished,
+		exceeded,
+		succeeded
+	};
+
 
 	struct TermTest
 	{
@@ -767,6 +792,8 @@ namespace PatternMatchingTest
 			}
 			if (subjStart == -1)
 			{
+				//there are no variables in pat
+				//comparisson succeded at that level
 				return true;
 			}
 		}
@@ -828,7 +855,7 @@ namespace PatternMatchingTest
 		return true;
 	}
 
-	bool func2(std::vector<Level>& levels, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int levelI = 0)
+	bool comparissonTest(std::vector<Level>& levels, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int levelI = 0)
 	{
 		auto& level = levels[levelI];
 		//first determine variables
@@ -844,6 +871,76 @@ namespace PatternMatchingTest
 
 	}
 
+	void initVariables(Equation& eq, Level& level)
+	{
+
+	}
+	Status solve(int pos, Equation& eq, int remainder)
+	{
+		if (pos == eq.initVars.size())
+		{
+			if (remainder == 0)
+			{
+				//add variables were subtracted from rhs and it became zero
+				//means that we found a solution
+				{
+					//print solution
+					int sum = 0;
+					for (auto val : eq.initVars)
+					{
+						sum += val.var->captureSizeNondet * val.coef;
+						std::cout << val.var->captureSizeNondet << " ";
+					}
+					std::cout << "    " << sum;
+					std::cout << "\n";
+
+					std::cout << "next eq \n";
+				}
+				if (eq.next)
+				{
+					//has next equation
+					//subtract variables initialized by previous equations
+					int sum = 0;
+					for (auto& var : eq.next->prevVars)
+					{
+						sum += var.var->captureSizeNondet * var.coef;
+					}
+					solve(0, *eq.next.get(), eq.next->rhs - sum);
+				}
+				else
+				{
+					//continue comparison
+
+				}
+				return Status::succeeded;
+			}
+			else if (remainder > 0)
+			{
+				// haven't found solution yet, try next iteration
+				return Status::succeeded;
+			}
+		}
+
+		if (remainder <= 0)
+		{
+			return Status::exceeded;
+		}
+
+		for (int i = 1; ; ++i)
+		{
+			eq.initVars[pos].var->captureSizeNondet = i;
+			auto status = solve(pos + 1, eq, remainder - (i * eq.initVars[pos].coef));
+			if (status == Status::finished)
+			{
+				return Status::finished;
+			}
+			else if (status == Status::exceeded)
+			{
+				break;
+			}
+		}
+		return Status::succeeded;
+	}
 
 	void markVariables(const std::unique_ptr<TermTest>& term)
 	{
@@ -881,59 +978,67 @@ namespace PatternMatchingTest
 
 	MYTEST(VariatorTest)
 	{
-		auto s = L"t(f(a,b,`x1,k(`d,`k),`x,t),f1(`t,`k),d(`b,d(a,`t,`k1,`k2),`f))";
-		Parser parser(s);
-		parser.parse();
-		std::unique_ptr<TermTest> mainTerm = std::unique_ptr<TermTest>(parser.m_current_term);
-		std::vector<std::unique_ptr<TermTest>> str;
-		markVariables(mainTerm);
-		str.push_back(std::move(mainTerm));
-		enumerate(str);
+		auto subjStr = L"t(f(a,b,x11,x12,x13,k(d1,d2,k1,k2,k3),x1,x2,t),f1(t1,t2,k1,k2,k3),d(b1,d(a,t1,t2,k11,k12,k21,k22,k23),f1,f2))";
+		Parser subjParser(subjStr);
+		subjParser.parse();
+		std::unique_ptr<TermTest> subjTerm = std::unique_ptr<TermTest>(subjParser.m_current_term);
+		std::vector<std::unique_ptr<TermTest>> subj;
+		markVariables(subjTerm);
+		subj.push_back(std::move(subjTerm));
+
+		auto patStr = L"t(f(a,b,`x1,k(`d,`k),`x,t),f1(`t,`k),d(`b,d(a,`t,`k1,`k2),`f))";
+		Parser patParser(patStr);
+		patParser.parse();
+		std::unique_ptr<TermTest> patTerm = std::unique_ptr<TermTest>(patParser.m_current_term);
+		std::vector<std::unique_ptr<TermTest>> pat;
+		markVariables(patTerm);
+		pat.push_back(std::move(patTerm));
+		enumerate(pat);
 		std::vector<TermTest*> vars;
-		unifyVariables(str, vars);
-		markPatternNodes(str);
-		auto levels = func(str);
+		unifyVariables(pat, vars);
+		markPatternNodes(pat);
+		auto levels = func(pat);
 
-
-		std::wcout << s << "\n";
-		for (auto& lev : levels)
-		{
-			std::cout << "\n=========level========\n";
-			std::cout << "===bundles\n";
-			for (auto& bundle : lev.bundles)
-			{
-				{
-					TestFramework::ColorGuard green(TestFramework::GREEN);
-					std::cout << "[";
-				}
-				for (auto& block : bundle)
-				{
-					{
-						TestFramework::ColorGuard red(TestFramework::RED);
-						std::cout << "{";
-					}
-					print(block.pat);
-					{
-						TestFramework::ColorGuard red(TestFramework::RED);
-						std::cout << "} ";
-					}
-				}
-				{
-					TestFramework::ColorGuard green(TestFramework::GREEN);
-					std::cout << "] ";
-				}
-			}
-			std::cout << "\n===determined\n";
-			for (auto& path : lev.determinedVars)
-			{
-				std::cout << "[";
-				for (auto& pos : path)
-				{
-					std::cout << pos.pos << "(" << (pos.fromLeft ? "L" : "R") << ")";
-				}
-				std::cout << "]\n";
-			}
-		}
+		comparissonTest(levels, pat, subj);
+		//std::wcout << s << "\n";
+		//for (auto& lev : levels)
+		//{
+		//	std::cout << "\n=========level========\n";
+		//	std::cout << "===bundles\n";
+		//	for (auto& bundle : lev.bundles)
+		//	{
+		//		{
+		//			TestFramework::ColorGuard green(TestFramework::GREEN);
+		//			std::cout << "[";
+		//		}
+		//		for (auto& block : bundle)
+		//		{
+		//			{
+		//				TestFramework::ColorGuard red(TestFramework::RED);
+		//				std::cout << "{";
+		//			}
+		//			print(block.pat);
+		//			{
+		//				TestFramework::ColorGuard red(TestFramework::RED);
+		//				std::cout << "} ";
+		//			}
+		//		}
+		//		{
+		//			TestFramework::ColorGuard green(TestFramework::GREEN);
+		//			std::cout << "] ";
+		//		}
+		//	}
+		//	std::cout << "\n===determined\n";
+		//	for (auto& path : lev.determinedVars)
+		//	{
+		//		std::cout << "[";
+		//		for (auto& pos : path)
+		//		{
+		//			std::cout << pos.pos << "(" << (pos.fromLeft ? "L" : "R") << ")";
+		//		}
+		//		std::cout << "]\n";
+		//	}
+		//}
 
 
 	}
