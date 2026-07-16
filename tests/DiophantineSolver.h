@@ -67,6 +67,10 @@ namespace DiophantineSolver
 					}
 					solve(0, *eq.next.get(), eq.next->rhs - sum);
 				}
+				else
+				{
+					std::cout << "found";
+				}
 				return Status::succeeded;
 			}
 			else if (remainder > 0)
@@ -119,13 +123,13 @@ namespace DiophantineSolver
 		next->prevVars =
 		{
 			{v1.get(), 1},
-			{v3.get(), 1}
+			{v2.get(), 1}
 		};
-		next->initVars = {
+		/*next->initVars = {
 			{v5.get(), 2},
 			{v6.get(), 3}
-		};
-		next->rhs = 12;
+		};*/
+		next->rhs = 4;
 		solve(0, eq, eq.rhs);
 	}
 }

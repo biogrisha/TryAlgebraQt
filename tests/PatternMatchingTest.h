@@ -76,7 +76,7 @@ namespace PatternMatchingTest
 
 	struct Bundle
 	{
-		std::vector<Block> blocks;
+		std::vector<Block*> blocks;
 		Equation eq;
 	};
 
@@ -497,7 +497,11 @@ namespace PatternMatchingTest
 		for (auto& level : levels)
 		{
 			Bundle bundle;
-			std::vector<Block> blocksCopy = level.blocks;
+			std::vector<Block*> blocksCopy;
+			for (auto& block : level.blocks)
+			{
+				blocksCopy.push_back(&block);
+			}
 			while (!blocksCopy.empty())
 			{
 				//start bundle
@@ -510,13 +514,13 @@ namespace PatternMatchingTest
 				{
 					bool hasSameVar = false;
 					//iterate over blocks in last bundle
-					for (const auto& bundleBl : bundle.blocks)
+					for (const auto* bundleBl : bundle.blocks)
 					{
 						//iterate over variables in all blocks of bundle
-						for (const auto& bundleVar : bundleBl.varsRec)
+						for (const auto& bundleVar : bundleBl->varsRec)
 						{
 							//iterate over variables in candidate block
-							for (const auto& candidateVar : blocksCopy[candidateI].varsRec)
+							for (const auto& candidateVar : blocksCopy[candidateI]->varsRec)
 							{
 								if (bundleVar->variableMeta == candidateVar->variableMeta)
 								{
@@ -554,11 +558,12 @@ namespace PatternMatchingTest
 	{
 		std::unordered_set<VariableMeta*> vars;
 		Equation* eq = &bundle.eq;
-		for (auto& block : bundle.blocks)
+		for (int i = 0; i < bundle.blocks.size(); ++i)
 		{
+			auto* block = bundle.blocks[i];
 			std::unordered_map<VariableMeta*, int> initVars;
 			std::unordered_map<VariableMeta*, int> prevVars;
-			for (auto& var : block.vars)
+			for (auto& var : block->vars)
 			{
 				if (vars.contains(var->variableMeta.get()))
 				{
@@ -569,7 +574,7 @@ namespace PatternMatchingTest
 					initVars[var->variableMeta.get()]++;
 				}
 			}
-			for (auto& var : block.vars)
+			for (auto& var : block->vars)
 			{
 				vars.insert(var->variableMeta.get());
 			}
@@ -582,8 +587,11 @@ namespace PatternMatchingTest
 			{
 				eq->prevVars.emplace_back(prevVar.first, prevVar.second);
 			}
-			eq->next = std::make_unique<Equation>();
-			eq = eq->next.get();
+			if (i < bundle.blocks.size() - 1)
+			{
+				eq->next = std::make_unique<Equation>();
+				eq = eq->next.get();
+			}
 		}
 	}
 
@@ -920,24 +928,71 @@ namespace PatternMatchingTest
 		return true;
 	}
 
-	bool comparissonTest(std::vector<Level>& levels, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int levelI = 0)
+	void setupDiophantineRhs(Bundle& bundle)
 	{
-		auto& level = levels[levelI];
-		//first determine variables
-		for (const auto& path : level.determinedVars)
+		Equation* eq = &bundle.eq;
+		for (auto* block : bundle.blocks)
 		{
-			if (!determineVar(path, pat, subj))
-			{
-				return false;
-			}
+			eq->rhs = block->subj.size() - (block->pat.size() - block->vars.size());
+			eq = eq->next.get();
 		}
-		compare1(level, pat, subj);
-		//chose variation
-
 	}
 
-	void initVariables(Level& level)
+	bool initVariables(Bundle& bundle)
 	{
+		for (auto& block : bundle.blocks)
+		{
+			auto& pat = block->pat;
+			auto& subj = block->subj;
+			int subjI = 0;
+			for (int patI = 0; patI < block->pat.size(); ++patI)
+			{
+				if (pat[patI]->isPattern)
+				{
+					if (pat[patI]->label == subj[subjI]->label)
+					{
+						pat[patI]->subj = subj[subjI].get();
+					}
+					else
+					{
+						return false;
+					}
+					++subjI;
+				}
+				else if (pat[patI]->isVariable)
+				{
+					if (pat[patI]->variableMeta->captured.empty())
+					{
+						int varSize = pat[patI]->variableMeta->captureSizeNondet;
+						pat[patI]->variableMeta->captured =
+							std::span(subj).subspan(subjI, varSize);
+						subjI += varSize;
+					}
+					else
+					{
+						auto& captured = pat[patI]->variableMeta->captured;
+						for (int varI = 0; varI < captured.size();++varI)
+						{
+							if (!compare(captured[varI].get(), subj[subjI].get()))
+							{
+								return false;
+							}
+							++subjI;
+						}
+					}
+				}
+				else
+				{
+					if (!compare(pat[patI].get(), subj[subjI].get()))
+					{
+						return false;
+					}
+					++subjI;
+				}
+
+			}
+		}
+		return true;
 	}
 
 	Status solve(int pos, Equation& eq, int remainder)
@@ -959,7 +1014,6 @@ namespace PatternMatchingTest
 					std::cout << "    " << sum;
 					std::cout << "\n";
 
-					std::cout << "next eq \n";
 				}
 				if (eq.next)
 				{
@@ -1007,6 +1061,32 @@ namespace PatternMatchingTest
 		return Status::succeeded;
 	}
 
+	bool comparissonTest(std::vector<Level>& levels, std::vector<std::unique_ptr<TermTest>>& pat, std::vector<std::unique_ptr<TermTest>>& subj, int levelI = 0)
+	{
+		auto& level = levels[levelI];
+		//first determine variables
+		for (const auto& path : level.determinedVars)
+		{
+			if (!determineVar(path, pat, subj))
+			{
+				return false;
+			}
+		}
+		if (!compare1(level, pat, subj))
+		{
+			return false;
+		}
+		//chose variation
+		for (auto& bundle : level.bundles)
+		{
+			if (!bundle.blocks.empty())
+			{
+				setupDiophantineRhs(bundle);
+				solve(0, bundle.eq, bundle.eq.rhs);
+			}
+		}
+	}
+
 	void markVariables(const std::unique_ptr<TermTest>& term)
 	{
 		if (term->label[0] == L'`')
@@ -1043,7 +1123,7 @@ namespace PatternMatchingTest
 
 	MYTEST(VariatorTest)
 	{
-		auto subjStr = L"t(f(a,b,x11,x12,x13,k(d1,d2,k1,k2,k3),x1,x2,t),f1(t1,t2,k1,k2,k3),d(b1,d(a,t1,t2,k11,k12,k21,k22,k23),f1,f2))";
+		auto subjStr = L"t(f(a,b,`x11,`x12,k(`d1,`d2,`d3,`k1),`x1,`x2,`x3,`x4,t),f1(`t1,`t2,`k1),d(`b1,d(a,`t1,`t2,`k11,`k21),`x11,`x12))";
 		Parser subjParser(subjStr);
 		subjParser.parse();
 		std::unique_ptr<TermTest> subjTerm = std::unique_ptr<TermTest>(subjParser.m_current_term);
@@ -1065,7 +1145,7 @@ namespace PatternMatchingTest
 		auto levels = generateLevels(pat);
 
 		comparissonTest(levels, pat, subj);
-		std::wcout << patStr << "\n";
+		/*std::wcout << patStr << "\n";
 		for (auto& lev : levels)
 		{
 			std::cout << "\n=========level========\n";
@@ -1082,7 +1162,7 @@ namespace PatternMatchingTest
 						TestFramework::ColorGuard red(TestFramework::RED);
 						std::cout << "{";
 					}
-					print(block.pat);
+					print(block->pat);
 					{
 						TestFramework::ColorGuard red(TestFramework::RED);
 						std::cout << "} ";
@@ -1103,7 +1183,7 @@ namespace PatternMatchingTest
 				}
 				std::cout << "]\n";
 			}
-		}
+		}*/
 
 
 	}
