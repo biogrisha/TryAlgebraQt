@@ -78,6 +78,7 @@ namespace PatternMatchingTest
 	{
 		std::vector<Block*> blocks;
 		Equation eq;
+		std::vector<Bundle*> children;
 	};
 
 	struct Level
@@ -551,6 +552,8 @@ namespace PatternMatchingTest
 					}
 				}
 			}
+
+
 		}
 	}
 
