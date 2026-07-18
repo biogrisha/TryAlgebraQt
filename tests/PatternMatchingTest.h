@@ -927,6 +927,7 @@ namespace PatternMatchingTest
 							}
 							--subjI;
 						}
+						continue;
 					}
 					else
 					{
@@ -1239,7 +1240,7 @@ namespace PatternMatchingTest
 	}
 	MYTEST(VariatorTest)
 	{
-		auto subjStr = L"t(f(a,b,`1,`1,`1,k(`1,`1,`1,`1,`1,`1,`1,`1,`1),`1,`1,`1,t),f1(`1,`1,`1,`1,`1,`1),d(`1,`1,`1,d(a,`1,`1,`1,`1,`1,`1,`10),`1,`1,`1,`12))";
+		auto subjStr = L"t(f(1,1,1,1,1,1,1,1,1,1,1),1,1,1,1,1,1,1,1,1,1,g(`z,1,1,1,1,1,f(1,1,1,1,1,1,1,1,1,1),1,1,1,1,1,1,1,1))";
 		Parser subjParser(subjStr);
 		subjParser.parse();
 		std::unique_ptr<TermTest> subjTerm = std::unique_ptr<TermTest>(subjParser.m_current_term);
@@ -1247,7 +1248,7 @@ namespace PatternMatchingTest
 		markVariables(subjTerm);
 		subj.push_back(std::move(subjTerm));
 
-		auto patStr = L"t(f(a,b,`1,k(`1,`1,`1),`1,t),f1(`1,`1),d(`1,d(a,`1,`1,`10),`1,`12))";
+		auto patStr = L"t(f(`x,`y,`x),1,1,`x,`y,g(`z,1,`x,1,f(`k,1,1,`y),`x,1,1,`x))";
 		Parser patParser(patStr);
 		patParser.parse();
 		std::unique_ptr<TermTest> patTerm = std::unique_ptr<TermTest>(patParser.m_current_term);
