@@ -14,6 +14,7 @@ add_library(MathDocumentRendering STATIC
 	include/MathDocumentRenderingStructs.h
 	include/SpriteRendering.h
 	include/RectanglesRendering.h
+	include/LinesRendering.h
 	include/MathDocumentState.h
 	include/FileSystemUtilities.h
 	src/MathDocumentRendering.cpp
@@ -22,8 +23,8 @@ add_library(MathDocumentRendering STATIC
 	src/FreeTypeWrap.cpp
 	src/SpriteRendering.cpp
 	src/RectanglesRendering.cpp
+	src/LinesRendering.cpp
 	src/MathDocumentState.cpp
-
 )
 
 if(INSTALL_BUILD)

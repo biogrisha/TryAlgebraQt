@@ -6,7 +6,7 @@
 
 struct FOutlineCurvePoints
 {
-	glm::vec2 points[3] = {glm::vec2(),glm::vec2(),glm::vec2()};
+	glm::vec2 points[3] = { glm::vec2(),glm::vec2(),glm::vec2() };
 	float a = 0;
 	float b = 0;
 };
@@ -53,6 +53,12 @@ struct FVert
 	glm::vec2 Pos;
 };
 
+struct FVertColored
+{
+	glm::vec2 Pos;
+	glm::vec4 Color;
+};
+
 struct FGlyphSpriteInst
 {
 	glm::vec2 Pos;
@@ -96,3 +102,5 @@ struct FRectInst
 	glm::ivec2 Size;
 	glm::vec4 Color;
 };
+
+

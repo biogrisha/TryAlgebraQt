@@ -24,13 +24,14 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 	SpriteRendering.SetInput(TextFromAtlasRendering.GetResultImage());
 	SpriteRendering.Init(Rendering.get());
 
+	m_linesRendering.Init(Rendering.get(), SpriteRendering.GetResult());
 	Rendering->GetDescriptorManager().Init();
 
 	AtlasRendering.InitPLine();
 	RectRendering.InitPLine();
 	TextFromAtlasRendering.InitPLine();
 	SpriteRendering.InitPLine();
-	
+
 }
 
 void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& InExtent)
@@ -54,7 +55,7 @@ void FMathDocumentRendering::UpdateText(const std::vector<FGlyphData>& InDocumen
 
 	//for each glyph on the page
 	for (auto& GlyphData : DocumentContent)
-	{		
+	{
 		GlyphData.RenderData = FreeTypeWrap->GetGlyphRenderData(GlyphData.GlyphId);
 		//Add unique glyph/size into atlas
 		Atlas.emplace(GlyphData.GlyphId, GlyphData);
@@ -71,10 +72,10 @@ void FMathDocumentRendering::UpdateText(const std::vector<FGlyphData>& InDocumen
 
 	int GlyphId = 0;
 	int CurveId = 0;
-	
+
 	for (auto& GlyphData : Atlas)
 	{
-		
+
 		if (CurrX + GlyphData.second.RenderData->WidthInPixels > MaxX)
 		{
 			CurrX = 0;
@@ -85,7 +86,7 @@ void FMathDocumentRendering::UpdateText(const std::vector<FGlyphData>& InDocumen
 
 		AtlasInstanceData[GlyphId].Offset = glm::vec2(CurrX, CurrY);
 		AtlasInstanceData[GlyphId].Size = glm::vec2(GlyphData.second.RenderData->WidthInPixels, GlyphData.second.RenderData->HeightInPixels);
-		
+
 		CurrX += GlyphData.second.RenderData->WidthInPixels;
 		MaxGlyphY = std::max(MaxGlyphY, GlyphData.second.RenderData->HeightInPixels);
 		auto& Outline = GlyphData.second.RenderData->Outline;
@@ -100,7 +101,7 @@ void FMathDocumentRendering::UpdateText(const std::vector<FGlyphData>& InDocumen
 	//Set rendering data in atlas renderer
 	AtlasRendering.SetInstances(AtlasInstanceData);
 	AtlasRendering.SetOutlineCurves(OutlineData);
-	
+
 	//Set instance data for text renderer
 	std::vector<FGlyphSpriteInst> TextInstanceData;
 	for (auto& GlyphData : DocumentContent)
@@ -141,7 +142,7 @@ FImageBuffer* FMathDocumentRendering::Render()
 		rects.insert(rects.end(), selection.begin(), selection.end());
 		UpdateRects(rects);
 	}
-	if(State.IsTextUpdated())
+	if (State.IsTextUpdated())
 	{
 		UpdateText(State.GetText());
 	}
@@ -156,7 +157,7 @@ FImageBuffer* FMathDocumentRendering::Render()
 	else if (State.IsRectsUpdated())
 	{
 		RectRendering.Render();
-		if(State.IsTextUpdated())
+		if (State.IsTextUpdated())
 		{
 			AtlasRendering.Render();
 		}
@@ -168,7 +169,7 @@ FImageBuffer* FMathDocumentRendering::Render()
 		AtlasRendering.Render();
 		TextFromAtlasRendering.Render(!RectRendering.HasInstances());
 	}
-	
+
 	if (State.IsCaretUpdated())
 	{
 		UpdateCaret(State.GetCaretData());

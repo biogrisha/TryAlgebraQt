@@ -11,7 +11,8 @@
 #include <SpriteRendering.h>
 #include "RectanglesRendering.h"
 #include "MathDocumentState.h"
-	
+#include "LinesRendering.h"
+
 class FMathDocumentRendering
 {
 public:
@@ -30,7 +31,7 @@ private:
 	FGlyphAtlasRendering AtlasRendering;
 	FTextFromAtlasRendering TextFromAtlasRendering;
 	FSpriteRendering SpriteRendering;
-
+	LinesRendering m_linesRendering;
 	VkExtent3D Extent = { 0, 0, 1 };
 	std::unique_ptr<FRendering> Rendering;
 	FFreeTypeWrap* FreeTypeWrap = nullptr;

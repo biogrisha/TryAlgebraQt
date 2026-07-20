@@ -9,33 +9,33 @@
 
 int main(int argc, char* argv[])
 {
-    //system("cmd /c \"cd /d D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/MathDocumentRendering/MdRenderingAssets/Shader/ && compile.bat\"");
+	system("cmd /c \"cd /d C:/dev/TryAlgebraQt/ThirdParty/MathDocumentRendering/MdRenderingAssets/Shader/ && compile.bat\"");
 
-    //Initialize vulkan context
-    FVulkanStatic::InitContext();
+	//Initialize vulkan context
+	FVulkanStatic::InitContext();
 
-    QGuiApplication app(argc, argv);
-    QVulkanInstance inst;
-    inst.setVkInstance(static_cast<VkInstance>(*FVulkanStatic::Context->Instance));
+	QGuiApplication app(argc, argv);
+	QVulkanInstance inst;
+	inst.setVkInstance(static_cast<VkInstance>(*FVulkanStatic::Context->Instance));
 
-    bool ok = inst.create();
-    if (!ok) {
-        return 1;
-    }
-    qDebug() << "vulkan created";
+	bool ok = inst.create();
+	if (!ok) {
+		return 1;
+	}
+	qDebug() << "vulkan created";
 
-    // This example needs Vulkan. It will not run otherwise.
-    QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
+	// This example needs Vulkan. It will not run otherwise.
+	QQuickWindow::setGraphicsApi(QSGRendererInterface::Vulkan);
 
-    QQuickView view;
+	QQuickView view;
 
-    Application* userApplication = new Application(view.engine(), &app);
-    qmlRegisterSingletonInstance("com.Application", 1, 0, "UserApplication", userApplication);
+	Application* userApplication = new Application(view.engine(), &app);
+	qmlRegisterSingletonInstance("com.Application", 1, 0, "UserApplication", userApplication);
 
-    view.setResizeMode(QQuickView::SizeRootObjectToView);
-    view.setSource(QUrl("qrc:/qt/qml/TryAlgebra/main.qml"));
-    view.setVulkanInstance(&inst);
+	view.setResizeMode(QQuickView::SizeRootObjectToView);
+	view.setSource(QUrl("qrc:/qt/qml/TryAlgebra/main.qml"));
+	view.setVulkanInstance(&inst);
 
-    view.showMaximized();
-    return app.exec();
+	view.showMaximized();
+	return app.exec();
 }
