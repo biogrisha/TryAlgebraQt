@@ -1,11 +1,13 @@
 #include "LinesRendering.h"
 #include <FileSystemUtilities.h>
 namespace {
-	int PLineLayoutHndl;
-	int PLineHndl;
+	uint16_t DSetHndl;
+	uint16_t PLineLayoutHndl;
+	uint16_t PLineHndl;
 }
 void LinesRendering::Init(FRendering* InRendering, FImageBuffer* InOutput)
 {
+	m_initialized = true;
 	m_rendering = InRendering;
 	//Create resources
 	{
@@ -28,37 +30,50 @@ void LinesRendering::Init(FRendering* InRendering, FImageBuffer* InOutput)
 		m_uniformBuffer->SetData(sizeof(m_extent), &m_extent);
 	}
 	m_output = InOutput;
-	PLineLayoutHndl = m_rendering->GetDescriptorManager().MakePipelineLayout({ });
+
+	DSetHndl = m_rendering->GetDescriptorManager().MakeDescriptorSet({
+			{m_uniformBuffer.get(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment},
+		});
+	PLineLayoutHndl = m_rendering->GetDescriptorManager().MakePipelineLayout({ DSetHndl });
 }
 
 void LinesRendering::InitPLine()
 {
 	auto assetsPath = FSUtils::getAssetsPath();
-	PLineHndl = m_rendering->AddPipeline(PLineLayoutHndl, &m_lineLayout, assetsPath + "/Shader/DrawRectangles.spv");
+	PLineHndl = m_rendering->AddPipeline(PLineLayoutHndl, &m_lineLayout, assetsPath + "/Shader/DrawPolygons.spv");
 }
 
 void LinesRendering::SetExtent(const VkExtent3D& InExtent)
 {
-	m_uniformBuffer->SetData(sizeof(InExtent), &InExtent);
+	if (m_initialized)
+	{
+		m_uniformBuffer->SetData(sizeof(InExtent), &InExtent);
+	}
 	m_extent = InExtent;
 }
 
 void LinesRendering::Render()
 {
-	FRunPipelineInfo Run;
-	Run.PipelineId = PLineHndl;
-	Run.OutputExtent = m_extent;
-	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
-	Run.IndexBuffer = IndexBuffer.get();
-	Run.DescriptorSets = { S_1 };
-	Run.ColorAttachment = Output.get();
-	Run.IndicesCount = RectIndices.size();
-	Run.InstancesCount = InstancesCount;
-	Rendering->AddRunPipelineInfo(Run);
-	Rendering->Render();
+	if (m_chains.empty())
+	{
+		return;
+	}
+	flushIntoBuffer();
+	FRunPipelineInfo run;
+	run.PipelineId = PLineHndl;
+	run.OutputExtent = m_extent;
+	run.VertexBuffers = { m_vertexBuffer.get() };
+	run.IndexBuffer = m_indexBuffer.get();
+	run.DescriptorSets = { DSetHndl };
+	run.ColorAttachment = m_output;
+	run.IndicesCount = m_indCount;
+	run.InstancesCount = 1;
+	run.bClearAttachment = false;
+	m_rendering->AddRunPipelineInfo(run);
+	m_rendering->Render();
 }
 
-void LinesRendering::addChain(LinesChain chain)
+void LinesRendering::addChain(LineChain chain)
 {
 	m_chains.push_back(std::move(chain));
 }
@@ -66,48 +81,24 @@ void LinesRendering::addChain(LinesChain chain)
 void LinesRendering::flushIntoBuffer()
 {
 	std::vector<FVertColored> vertices;
-	std::vector<int> indices;
+	std::vector<uint16_t> indices;
 	for (auto& chain : m_chains)
 	{
 		float halfWidth = chain.width / 2;
 		auto& points = chain.points;
-		//initialize first line segment
+		for (int i = 0; i < points.size() - 1; ++i)
 		{
-			int startIndex = 0;
-			auto& from = points[0];
-			auto& to = points[1];
+			auto& from = points[i];
+			auto& to = points[i + 1];
 			auto dir = to - from;
 			auto perp = glm::normalize(glm::vec2(dir.y, -dir.x)) * halfWidth;
 
-			vertices.emplace_back(from + perp, chain.color);
-			vertices.emplace_back(from - perp, chain.color);
-			vertices.emplace_back(to + perp, chain.color);
-			vertices.emplace_back(to - perp, chain.color);
-			indices.push_back(startIndex);
-			indices.push_back(startIndex + 1);
-			indices.push_back(startIndex + 3);
-			indices.push_back(startIndex);
-			indices.push_back(startIndex + 3);
-			indices.push_back(startIndex + 2);
-		}
-		for (int i = 1; i < points.size() - 1; ++i)
-		{
-			int startIndex = indices.size();
-			auto& from = points[0];
-			auto& to = points[1];
-			auto dir = to - from;
-			auto perp = glm::normalize(glm::vec2(dir.y, -dir.x)) * halfWidth;
-
+			int startIndex = vertices.size();
 			vertices.emplace_back(from + perp, chain.color);
 			vertices.emplace_back(from - perp, chain.color);
 			vertices.emplace_back(to + perp, chain.color);
 			vertices.emplace_back(to - perp, chain.color);
 
-			//wedge on the bend
-			indices.push_back(startIndex);
-			indices.push_back(startIndex - 1);
-			indices.push_back(startIndex + 1);
-			//line segment
 			indices.push_back(startIndex);
 			indices.push_back(startIndex + 1);
 			indices.push_back(startIndex + 3);
@@ -116,6 +107,7 @@ void LinesRendering::flushIntoBuffer()
 			indices.push_back(startIndex + 2);
 		}
 	}
+	m_indCount = indices.size();
 	m_chains.clear();
 	m_vertexBuffer->SetData(vertices);
 	m_indexBuffer->SetData(indices);

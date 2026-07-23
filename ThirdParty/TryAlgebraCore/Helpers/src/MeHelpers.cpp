@@ -29,7 +29,7 @@ namespace TryAlgebraCore
 			return MePath{ LeafPos{outer_children.back()->getChTo()} };
 		}
 		MePath res;
-		while(true)
+		while (true)
 		{
 			auto& children = from->getChildren();
 			if (children.empty())
@@ -108,7 +108,7 @@ namespace TryAlgebraCore
 				return me->getChFrom() < value;
 			}
 		);
-		if(it != children.end())
+		if (it != children.end())
 		{
 			if (it->get()->getChFrom() != pos)
 			{
@@ -123,7 +123,7 @@ namespace TryAlgebraCore
 	{
 		GetByPathRes res;
 		res.me = from;
-		for(int i = 0; i < path.size() - 1; ++i)
+		for (int i = 0; i < path.size() - 1; ++i)
 		{
 			size_t pos = getPosOrFrom(path[i]);
 			auto child_pos = absToChildPos(from, pos);
@@ -253,7 +253,7 @@ namespace TryAlgebraCore
 				}
 				path1.resize(path1.size() - 2);
 				path2.resize(path2.size() - 2);
-			}		
+			}
 		}
 		path1.back() = LeafPos(getPosOrFrom(path1.back()));
 		path2.back() = LeafPos(getPosOrTo(path2.back()));
@@ -321,24 +321,24 @@ namespace TryAlgebraCore
 				{
 					path.push_back(MePos(children[i]->getChFrom(), children[i]->getChTo()));
 				}
-				
+
 				if (getPathAtPos(children[i].get(), pos, path))
 				{
 					return true;
 				}
-				path.pop_back();				
+				path.pop_back();
 			}
 			if (MyRTTI::Is<MeContainer>(from))
 			{
 				// if pos not pointing at child, but points inside container
 				// find me on the same line or last
-				if(children.empty())
+				if (children.empty())
 				{
 					path.push_back(LeafPos{ from->getChFrom() });
 				}
 				else
 				{
-					path.push_back(LeafPos{ children.back()->getChTo()});
+					path.push_back(LeafPos{ children.back()->getChTo() });
 				}
 				for (int i = 0; i < children.size(); ++i)
 				{
@@ -348,7 +348,7 @@ namespace TryAlgebraCore
 						{
 							if (MyRTTI::Is<MeNewLine>(children[i].get()))
 							{
-								path.back() = LeafPos{children[i]->getChFrom()};
+								path.back() = LeafPos{ children[i]->getChFrom() };
 								break;
 							}
 						}
@@ -411,7 +411,7 @@ namespace TryAlgebraCore
 				rect.Color = { 0.5,0.5,0.8,0.5 };
 				rect.Pos = siblings[i]->getPos();
 				rect.Size = siblings[i]->getSize();
-				vt->mdocState->AddSelection(rect);
+				vt->mdocState->at(0).addRectangle(rect);
 				++i;
 			}
 

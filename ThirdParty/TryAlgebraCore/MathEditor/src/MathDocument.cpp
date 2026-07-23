@@ -12,7 +12,7 @@ namespace TryAlgebraCore
 	MathDocument::MathDocument()
 	{
 		m_doc_size = { 0, 0 };
-		m_selection_start = { 
+		m_selection_start = {
 			LeafPos(0)
 		};
 		m_selection_end = {
@@ -183,14 +183,13 @@ namespace TryAlgebraCore
 	{
 		if (hasFlag(getDirtyState(), DirtyState::Text))
 		{
-			m_visual_toolkit.mdocState->ClearText();
-			m_visual_toolkit.mdocState->ClearCosmeticRects();
+			m_visual_toolkit.mdocState->at(1).clear();
 		}
 		if (hasFlag(getDirtyState(), DirtyState::Selection))
 		{
-			m_visual_toolkit.mdocState->ClearSelection();
+			m_visual_toolkit.mdocState->at(0).clear();
 		}
-		if(hasFlag(getDirtyState(), DirtyState::Text))
+		if (hasFlag(getDirtyState(), DirtyState::Text))
 		{
 			float line_before_h = 0;
 			float cont_visible_y = 0;
@@ -220,7 +219,7 @@ namespace TryAlgebraCore
 				{
 					//exceeded document size
 					//calculate one more line
-					if(parser.parseLine(m_container.get()))
+					if (parser.parseLine(m_container.get()))
 					{
 						m_container->calcLine(&m_visual_toolkit);
 					}
@@ -235,22 +234,24 @@ namespace TryAlgebraCore
 			restoreCaretPos(m_container.get());
 			m_container->draw(&m_visual_toolkit);
 		}
-		if(hasFlag(getDirtyState(), DirtyState::Selection))
+		if (hasFlag(getDirtyState(), DirtyState::Selection))
 		{
 			//draw caret
 			auto caret_data = MeHelpers::getCaretData(m_container.get(), m_selection_end);
-			m_visual_toolkit.mdocState->SetCaret(caret_data);
-			if(!m_container->getChildren().empty())
+			//m_visual_toolkit.mdocState->SetCaret(caret_data);
+			if (!m_container->getChildren().empty())
 			{
 				MeHelpers::highlightSelected(m_container.get(), m_selection_start, m_selection_end, &m_visual_toolkit);
 			}
 		}
 		clearDirty();
 	}
+
 	bool MathDocument::restoreCaretPos(MeBase* me)
 	{
 		return false;
 	}
+
 	void MathDocument::scroll(bool up)
 	{
 		m_line_from += -up + !up;
@@ -258,18 +259,22 @@ namespace TryAlgebraCore
 		m_snap_to_end = false;
 		markDirty(DirtyState::Selection | DirtyState::Text);
 	}
+
 	std::wstring MathDocument::getText()
 	{
 		return m_text_buffer.getBuff();
 	}
+
 	void MathDocument::markDirty(DirtyState flags)
 	{
 		m_dirty_states |= flags;
 	}
+
 	void MathDocument::clearDirty()
 	{
 		m_dirty_states = DirtyState::None;
 	}
+
 	void MathDocument::deleteSelected()
 	{
 		MeHelpers::orderPaths(m_selection_start, m_selection_end);
@@ -279,29 +284,32 @@ namespace TryAlgebraCore
 		m_text_buffer.del(from, to);
 		MeHelpers::propagateMeChange(m_selection_start, from - to);
 	}
+
 	bool MathDocument::hasSelection()
 	{
 		return m_selection_end != m_selection_start;
 	}
+
 	void MathDocument::adjustLineFrom()
 	{
 		std::optional<uint64_t> line_num = m_text_buffer.getLineNumber(std::get<LeafPos>(m_selection_end.back()).pos);
 		if (line_num.has_value())
 		{
-			if(line_num >= m_line_to || line_num < m_line_from)
+			if (line_num >= m_line_to || line_num < m_line_from)
 			{
 				m_line_from = line_num.value();
 			}
 		}
-		
+
 	}
+
 	void MathDocument::calcLinesAboveBelow(int center_line)
 	{
 		m_line_from = std::max(0, center_line - 1);
 		size_t to = std::min<size_t>(m_text_buffer.getLinesCount(), center_line + 2);
 		m_container = MyRTTI::MakeTypedUnique<MeContainer>();
 		MeParser parser(m_text_buffer, m_line_from);
-		
+
 		for (size_t i = m_line_from; i < to; ++i)
 		{
 			parser.parseLine(m_container.get());
@@ -310,10 +318,12 @@ namespace TryAlgebraCore
 		m_container->calculatePos();
 		markDirty(DirtyState::Selection | DirtyState::Text);
 	}
+
 	bool MathDocument::isLineOutside(int line_num)
 	{
 		return line_num > m_line_to || line_num < m_line_from - 1;
 	}
+
 	void MathDocument::filterInput(std::wstring& str)
 	{
 		if (m_selection_start.size() > 1)

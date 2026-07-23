@@ -7,30 +7,29 @@ class CustomTextureNodePrivate;
 
 class MathDocumentCanvas : public QQuickItem
 {
-    Q_OBJECT
-    QML_ELEMENT
+	Q_OBJECT
+		QML_ELEMENT
 
 public:
-    MathDocumentCanvas();
-    
-    //Set new state to update rendering
-    void setMeDocState(FMathDocumentState* meDocState);
+	MathDocumentCanvas();
 
-    //Is underlying node created
-    bool isNodeCreated();
+	//Is underlying node created
+	bool isNodeCreated();
 
-    QSize getSize();
+	QSize getSize();
+
+	FMathDocumentState* getCanvasState();
 protected:
-    QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) override;
-    void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
+	QSGNode* updatePaintNode(QSGNode*, UpdatePaintNodeData*) override;
+	void geometryChange(const QRectF& newGeometry, const QRectF& oldGeometry) override;
 
 private slots:
-    void invalidateSceneGraph();
+	void invalidateSceneGraph();
 signals:
-    void onNodeCreated();
-    void onResized(const QSize& newSize);
+	void onNodeCreated();
+	void onResized(const QSize& newSize);
 private:
-    void releaseResources() override;
-    CustomTextureNodePrivate* m_node = nullptr;
+	void releaseResources() override;
+	CustomTextureNodePrivate* m_node = nullptr;
 };
 

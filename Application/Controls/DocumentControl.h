@@ -17,12 +17,12 @@ class FTAMathDocumentInfo;
 /*
 * Control used to interact with selected math document
 */
-class DocumentControl  : public QObject
+class DocumentControl : public QObject
 {
 	Q_OBJECT
-	QML_ELEMENT
+		QML_ELEMENT
 public:
-	DocumentControl(QObject *parent);
+	DocumentControl(QObject* parent);
 	DocumentControl() = default;
 
 public slots:
@@ -46,7 +46,7 @@ public slots:
 
 	//Handles item size update
 	void onResized(const QSize& new_size);
-	
+
 	float getScrollHandleSize();
 
 	void scrollY(bool Up);
@@ -70,7 +70,7 @@ private:
 	//Model for math elements selector
 	MeListModel* m_meInfoModel = nullptr;
 	//Render state of math document
-	FMathDocumentState m_visual_state;
+	FMathDocumentState* m_canvasState;
 	//Indicates that MathDocument Item is ready to render
 	bool m_isCanvasReady = false;
 	bool m_bLmbDown = false;

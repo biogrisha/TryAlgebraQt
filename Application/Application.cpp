@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Application.h"
 #include <qqmlengine.h>
 #include <QQuickWindow>
 #include <QVulkanInstance>
@@ -21,7 +22,7 @@ Application::~Application()
 	AppGlobal::appMod = nullptr;
 }
 
-Application::Application(QQmlEngine* engine, QObject *parent)
+Application::Application(QObject* parent)
 	: QObject(parent)
 {
 	//initializing application components
@@ -39,20 +40,12 @@ Application::Application(QQmlEngine* engine, QObject *parent)
 	m_menu_control = new MenuControl(this);
 	m_document_control = new DocumentControl(this);
 	//caching dpi
-	QScreen* screen = QGuiApplication::primaryScreen(); 
-	qreal logicalDpiX = screen->logicalDotsPerInchX(); 
+	QScreen* screen = QGuiApplication::primaryScreen();
+	qreal logicalDpiX = screen->logicalDotsPerInchX();
 	qreal logicalDpiY = screen->logicalDotsPerInchY();
 
 	//initializing freetype
 	m_ft_wrap.Init(logicalDpiX, logicalDpiY);
-
-	MeInfoGenerator atlas_gen;
-	MeListModel* meListModel = m_app_model->meListModel();
-	atlas_gen.gen(meListModel);
-	auto imageProvider = new ImageProvider;
-	imageProvider->setImage(meListModel->image());
-	engine->addImageProvider(QLatin1String("MeAtlas"), imageProvider);
-
 }
 
 DocumentControl* Application::getDocumentControl()
@@ -73,6 +66,16 @@ FFreeTypeWrap* Application::getFreeTypeWrap()
 FilesControl* Application::getFilesControl()
 {
 	return m_files_control;
+}
+
+void Application::generateMeAtlas(QQmlEngine* engine)
+{
+	MeInfoGenerator atlas_gen;
+	MeListModel* meListModel = m_app_model->meListModel();
+	atlas_gen.gen(meListModel);
+	auto imageProvider = new ImageProvider;
+	imageProvider->setImage(meListModel->image());
+	engine->addImageProvider(QLatin1String("MeAtlas"), imageProvider);
 }
 
 MenuControl* Application::getMenu()

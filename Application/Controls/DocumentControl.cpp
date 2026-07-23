@@ -7,7 +7,7 @@
 #include <FilesControl.h>
 #include <Models/DocumentsModel.h>
 
-DocumentControl::DocumentControl(QObject *parent)
+DocumentControl::DocumentControl(QObject* parent)
 	: QObject(parent)
 {
 	DocumentsModel* docModel = AppGlobal::appMod->docModel();
@@ -23,14 +23,14 @@ void DocumentControl::bindMathDocumentItem(MathDocumentCanvas* mathDocument)
 }
 
 void DocumentControl::keyInput(int key, QString text, int modifiers)
-{	
+{
 	if (!m_currDoc)
 	{
 		return;
 	}
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = &m_visual_state;
+	vt.mdocState = m_canvasState;
 
 	bool bShift = modifiers == Qt::Modifier::SHIFT;
 	bool bCtrl = modifiers == Qt::Modifier::CTRL;
@@ -122,11 +122,11 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 void DocumentControl::canvasReady()
 {
 	//caching doc state ptr in MathDocument
-	m_docCanvas->setMeDocState(&m_visual_state);
 	//disconnecting from "renderer ready"
 	QObject::disconnect(m_docCanvas, &MathDocumentCanvas::onNodeCreated, this, &DocumentControl::canvasReady);
 	QObject::connect(m_docCanvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
 	m_isCanvasReady = true;
+	m_canvasState = m_docCanvas->getCanvasState();
 }
 
 void DocumentControl::addMeByName(const QString& meName)
@@ -146,12 +146,12 @@ void DocumentControl::onCurrentDocChanged(const QString& docPath)
 	m_currDoc = docInfo->meDoc();
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = &m_visual_state;
+	vt.mdocState = m_canvasState;
 	m_currDoc->setVisualToolkit(vt);
 	if (m_isCanvasReady)
 	{
 		const QSize size = m_docCanvas->getSize();
-		m_currDoc->setDocSize({ size.width(), size.height()});
+		m_currDoc->setDocSize({ size.width(), size.height() });
 		m_currDoc->draw();
 		updateElements(true, true, true);
 	}
@@ -174,8 +174,8 @@ void DocumentControl::onResized(const QSize& new_size)
 	}
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = &m_visual_state;
-	m_currDoc->setDocSize({ new_size.width(), new_size.height()});
+	vt.mdocState = m_canvasState;
+	m_currDoc->setDocSize({ new_size.width(), new_size.height() });
 	m_currDoc->draw();
 	m_docCanvas->update();
 }
@@ -193,7 +193,7 @@ void DocumentControl::scrollY(bool Up)
 	}
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = &m_visual_state;
+	vt.mdocState = m_canvasState;
 	m_currDoc->scroll(Up);
 	m_currDoc->draw();
 	m_docCanvas->update();
@@ -218,14 +218,14 @@ void DocumentControl::mouseBtnDown(float x, float y)
 	m_currDoc->updateSelection({ x,y });
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = &m_visual_state;
+	vt.mdocState = m_canvasState;
 	m_currDoc->draw();
 	updateElements(true, false, true);
 }
 
 void DocumentControl::mouseBtnUp(float x, float y)
 {
-	
+
 }
 
 void DocumentControl::mousePosUpdated(float x, float y)
@@ -237,7 +237,7 @@ void DocumentControl::mousePosUpdated(float x, float y)
 	m_currDoc->updateSelection({ x,y });
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = &m_visual_state;
+	vt.mdocState = m_canvasState;
 	m_currDoc->draw();
 	updateElements(true, false, true);
 }
@@ -249,10 +249,6 @@ void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)
 
 void DocumentControl::clearDocument()
 {
-	//clearing render data
-	m_visual_state.ClearCosmeticRects().ClearSelection().ClearText();
-	//move caret outside visible area
-	m_visual_state.SetCaret({ {-100, -100}, {1,1} });
 	m_docCanvas->update();
 }
 

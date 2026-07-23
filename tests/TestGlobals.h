@@ -10,6 +10,7 @@ namespace TestGlobals
 	struct ContCalculated
 	{
 		ContCalculated(const std::wstring& str)
+			:md(FMathDocumentState(2))
 		{
 			ft.Init(XDpi, XDpi);
 			vt.ft = &ft;

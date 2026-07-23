@@ -1,140 +1,46 @@
 #include "MathDocumentState.h"
 
-void FMathDocumentState::CopyChanged(const FMathDocumentState& Other)
+void Layer::clear()
 {
-	bTextUpdated = Other.bTextUpdated;
-	bCaretUpdated = Other.bCaretUpdated;
-	bSelectionUpdated = Other.bSelectionUpdated;
-	bCosmeticRectsUpdated = Other.bCosmeticRectsUpdated;
-
-	if (Other.bTextUpdated)
-	{
-		Text = Other.Text;
-	}
-	if (Other.bCaretUpdated)
-	{
-		CaretData = Other.CaretData;
-	}
-	if (Other.bSelectionUpdated)
-	{
-		Selection = Other.Selection;
-	}
-	if (Other.bCosmeticRectsUpdated)
-	{
-		Cosmetic = Other.Cosmetic;
-	}
-
+	*this = Layer();
+	m_dirty = true;
 }
 
-FMathDocumentState& FMathDocumentState::ClearText()
+void Layer::addGlyph(const FGlyphData& glyph)
 {
-	if(!Text.empty())
-	{
-		Text.clear();
-		bTextUpdated = true;
-	}
-	return *this;
+	m_text.push_back(glyph);
+	m_dirty = true;
 }
 
-FMathDocumentState& FMathDocumentState::ClearSelection()
+void Layer::addSprite(const FSpriteInstByName& sprite)
 {
-	if(!Selection.empty())
-	{
-		Selection.clear();
-		bSelectionUpdated = true;
-	}
-	return *this;
+	m_sprites.push_back(sprite);
+	m_dirty = true;
 }
 
-FMathDocumentState& FMathDocumentState::ClearCosmeticRects()
+void Layer::addRectangle(const FRectInst& rect)
 {
-	if(!Cosmetic.empty())
-	{
-		Cosmetic.clear();
-		bCosmeticRectsUpdated = true;
-	}
-	return *this;
+	m_rectangles.push_back(rect);
+	m_dirty = true;
 }
 
-void FMathDocumentState::Invalidate()
+void Layer::addLine(const LineChain& lineChain)
 {
-	bTextUpdated 
-	= bSelectionUpdated 
-	= bCaretUpdated 
-	= bCosmeticRectsUpdated 
-	= true;
+	m_lines.push_back(lineChain);
+	m_dirty = true;
 }
 
-void FMathDocumentState::AddGlyph(const FGlyphData& Glyph)
+void Layer::markClean()
 {
-	bTextUpdated = true;
-	Text.push_back(Glyph);
+	m_dirty = false;
 }
 
-void FMathDocumentState::appendGlyphs(const std::vector<FGlyphData>& glyphs)
+FMathDocumentState::FMathDocumentState(int layersCount)
 {
-	bTextUpdated = true;
-	Text.insert(Text.end(), glyphs.begin(), glyphs.end());
+	m_layers.resize(layersCount);
 }
 
-void FMathDocumentState::SetCaret(const FCaretData& InCaretData)
+Layer& FMathDocumentState::at(int i)
 {
-	bCaretUpdated = true;
-	CaretData = InCaretData;
-}
-
-void FMathDocumentState::AddSelection(const FRectInst& Rect)
-{
-	Selection.push_back(Rect);
-	bSelectionUpdated = true;
-}
-
-void FMathDocumentState::AddCosmeticRect(const FRectInst& Rect)
-{
-	Cosmetic.push_back(Rect);
-	bCosmeticRectsUpdated = true;
-}
-
-void FMathDocumentState::Update()
-{
-	bTextUpdated 
-	= bSelectionUpdated 
-	= bCaretUpdated 
-	= bCosmeticRectsUpdated 
-	= false;
-}
-
-bool FMathDocumentState::IsTextUpdated()
-{
-	return bTextUpdated;
-}
-
-bool FMathDocumentState::IsCaretUpdated()
-{
-	return bCaretUpdated;
-}
-
-bool FMathDocumentState::IsRectsUpdated()
-{
-	return bSelectionUpdated || bCosmeticRectsUpdated;
-}
-
-const std::vector<FGlyphData>& FMathDocumentState::GetText()
-{
-	return Text;
-}
-
-const FCaretData& FMathDocumentState::GetCaretData()
-{
-	return CaretData;
-}
-
-const std::vector<FRectInst>& FMathDocumentState::GetSelectionRects()
-{
-	return Selection;
-}
-
-const std::vector<FRectInst>& FMathDocumentState::GetCosmeticRects()
-{
-	return Cosmetic;
+	return m_layers[i];
 }

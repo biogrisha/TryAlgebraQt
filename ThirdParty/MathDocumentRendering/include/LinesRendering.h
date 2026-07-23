@@ -20,13 +20,6 @@ class FLineLayout : public FVertexInputLayout {
 	}
 };
 
-struct LinesChain
-{
-	float width = 1;
-	std::vector<glm::vec2> points;
-	glm::vec4 color;
-};
-
 class LinesRendering
 {
 public:
@@ -36,7 +29,7 @@ public:
 
 	void Render();
 	FImageBuffer* GetResult();
-	void addChain(LinesChain chain);
+	void addChain(LineChain chain);
 	void flushIntoBuffer();
 
 	std::unique_ptr<FBuffer> m_vertexBuffer;
@@ -47,5 +40,7 @@ public:
 
 	VkExtent3D m_extent = { 300,300,1 };
 	FRendering* m_rendering = nullptr;
-	std::vector<LinesChain> m_chains;
+	std::vector<LineChain> m_chains;
+	uint16_t m_indCount = 0;
+	bool m_initialized = false;
 };

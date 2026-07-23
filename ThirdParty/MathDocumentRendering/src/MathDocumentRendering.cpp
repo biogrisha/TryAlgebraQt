@@ -7,6 +7,11 @@
 #include <algorithm>
 #include "VulkanHelpers.h"
 
+FMathDocumentRendering::FMathDocumentRendering()
+	:State(FMathDocumentState(2))
+{
+}
+
 void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 {
 	FreeTypeWrap = InFreeTypeWrap;
@@ -31,6 +36,7 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
 	RectRendering.InitPLine();
 	TextFromAtlasRendering.InitPLine();
 	SpriteRendering.InitPLine();
+	m_linesRendering.InitPLine();
 
 }
 
@@ -40,6 +46,7 @@ void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& InExtent)
 	AtlasRendering.SetExtent(InExtent);
 	TextFromAtlasRendering.SetExtent(InExtent);
 	SpriteRendering.SetExtent(InExtent);
+	m_linesRendering.SetExtent(InExtent);
 	Extent = InExtent;
 }
 
@@ -130,12 +137,12 @@ void FMathDocumentRendering::UpdateCaret(const FCaretData& CaretData)
 
 void FMathDocumentRendering::UpdateState(const FMathDocumentState& NewState)
 {
-	State.CopyChanged(NewState);
+	//State.CopyChanged(NewState);
 }
 
 FImageBuffer* FMathDocumentRendering::Render()
 {
-	if (State.IsRectsUpdated())
+	/*if (State.IsRectsUpdated())
 	{
 		auto rects = State.GetCosmeticRects();
 		const auto& selection = State.GetSelectionRects();
@@ -175,10 +182,16 @@ FImageBuffer* FMathDocumentRendering::Render()
 		UpdateCaret(State.GetCaretData());
 	}
 	SpriteRendering.Render();
+	m_linesRendering.Render();*/
 	return SpriteRendering.GetResult();
 }
 
 bool FMathDocumentRendering::HasContent()
 {
 	return !DocumentContent.empty();
+}
+
+FMathDocumentState* FMathDocumentRendering::getState()
+{
+	return &State;
 }

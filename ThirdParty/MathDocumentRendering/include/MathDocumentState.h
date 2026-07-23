@@ -1,37 +1,31 @@
 #pragma once
 #include "MathDocumentRenderingStructs.h"
 class FFreeTypeWrap;
+
+class Layer
+{
+public:
+	void clear();
+	void addGlyph(const FGlyphData& glyph);
+	void addSprite(const FSpriteInstByName& sprite);
+	void addRectangle(const FRectInst& rect);
+	void addLine(const LineChain& lineChain);
+	void markClean();
+private:
+	std::vector<FGlyphData> m_text;
+	std::vector<FSpriteInstByName> m_sprites;
+	std::vector<FRectInst> m_rectangles;
+	std::vector<LineChain> m_lines;
+	bool m_dirty = true;
+};
+
 class FMathDocumentState
 {
 public:
-	void CopyChanged(const FMathDocumentState& From);
-	FMathDocumentState& ClearText();
-	FMathDocumentState& ClearSelection();
-	FMathDocumentState& ClearCosmeticRects();
-	void Invalidate();
-	void AddGlyph(const FGlyphData& Glyph);
-	void appendGlyphs(const std::vector<FGlyphData>& glyphs);
-	void SetCaret(const FCaretData& InCaretData);
-	void AddSelection(const FRectInst& Rect);
-	void AddCosmeticRect(const FRectInst& Rect);
-	void Update();
-	bool IsTextUpdated();
-	bool IsCaretUpdated();
-	bool IsRectsUpdated();
-	const std::vector<FGlyphData>& GetText();
-	const FCaretData& GetCaretData();
-	const std::vector<FRectInst>& GetSelectionRects();
-	const std::vector<FRectInst>& GetCosmeticRects();
+	FMathDocumentState(int layersCount);
+	Layer& at(int i);
 private:
-	std::vector<FGlyphData> Text;
-	FCaretData CaretData;
-	std::vector<FRectInst> Selection;
-	std::vector<FRectInst> Cosmetic;
-
-	bool bTextUpdated = false;
-	bool bCaretUpdated = false;
-	bool bSelectionUpdated = false;
-	bool bCosmeticRectsUpdated = false;
+	std::vector<Layer> m_layers;
 };
 
 struct VisualToolkit

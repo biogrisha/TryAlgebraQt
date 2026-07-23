@@ -31,10 +31,10 @@ namespace TryAlgebraCore
 			m_children[1]->setPosY(m_children[0]->getSize().y + render_data->HeightInPixels);
 			setSizeY(m_children[1]->getPos().y + m_children[1]->getSize().y);
 			setSizeX(center * 2.f);
-			m_glyph.Pos.x = center - m_symbol_width/2;
+			m_glyph.Pos.x = center - m_symbol_width / 2;
 			m_glyph.Pos.y = m_children[0]->getSize().y;
 			setBearing(m_children[0]->getSize().y + render_data->HeightInPixels / 2.f);
-		}		
+		}
 	}
 	void MeFromTo::draw(VisualToolkit* visual_toolkit)
 	{
@@ -43,7 +43,7 @@ namespace TryAlgebraCore
 			ch->draw(visual_toolkit);
 		}
 		m_glyph.Pos += getPos();
-		visual_toolkit->mdocState->AddGlyph(m_glyph);
+		visual_toolkit->mdocState->at(1).addGlyph(m_glyph);
 	}
 	void MeFromTo::step(StepDir dir, StepFrom step_from, MePath& path)
 	{
@@ -68,7 +68,7 @@ namespace TryAlgebraCore
 					path.back() = LeafPos(me_pos.from);
 				}
 			}
-			else if(child_pos == 1)
+			else if (child_pos == 1)
 			{
 				if (dir == StepDir::left || dir == StepDir::up)
 				{
@@ -76,7 +76,7 @@ namespace TryAlgebraCore
 					cont_pos.pos = first_cont->getChFrom();
 
 					auto& cont_children = first_cont->getChildren();
-					if(cont_children.empty())
+					if (cont_children.empty())
 					{
 						path.push_back(LeafPos(first_cont->getChFrom()));
 					}
@@ -92,7 +92,7 @@ namespace TryAlgebraCore
 					path.back() = LeafPos(me_pos.to);
 				}
 			}
-			
+
 		}
 		else if (step_from == StepFrom::outside)
 		{

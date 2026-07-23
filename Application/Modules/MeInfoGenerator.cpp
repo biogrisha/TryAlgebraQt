@@ -17,27 +17,28 @@ void MeInfoGenerator::gen(MeListModel* model)
 	auto& meTable = TryAlgebraCore::MeNames::getMeTable();
 
 	TextBuffer tb;
-	for(auto& def : meTable)
+	for (auto& def : meTable)
 	{
 		tb.insert(def.second, tb.getSize());
 	}
 	MeParser pr(tb, 0);
 	while (pr.parseLine(atlas.get()));
 
-	FMathDocumentState me_doc_state;
+	FMathDocumentRendering md_rendering;
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = &me_doc_state;
+	vt.mdocState = md_rendering.getState();
+
 	atlas->calculate(&vt);
 	atlas->draw(&vt);
-	vt.mdocState->SetCaret({ .Pos = { -100, -100},.Size = {0,0} });
+
 	uint32_t width = static_cast<uint32_t>(atlas->getSize().x);
 	uint32_t height = static_cast<uint32_t>(atlas->getSize().y);
 
-	FMathDocumentRendering md_rendering;
 	md_rendering.SetDocumentExtent({ width, height, 1 });
 	md_rendering.Init(vt.ft);
-	md_rendering.UpdateState(me_doc_state);
+
+	//md_rendering.UpdateState(me_doc_state);
 	auto RenderedDocument = md_rendering.Render();
 	auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
 

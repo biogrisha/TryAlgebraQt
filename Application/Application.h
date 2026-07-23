@@ -11,13 +11,13 @@ class FilesControl;
 class FFreeTypeWrap;
 class ApplicationModel;
 class QQmlEngine;
-class Application  : public QObject
+class Application : public QObject
 {
 	Q_OBJECT
-	
+
 public:
 	~Application();
-	Application(QQmlEngine* engine, QObject *parent = nullptr);
+	Application(QObject* parent = nullptr);
 
 	//Returns freetype module
 	FFreeTypeWrap* getFreeTypeWrap();
@@ -25,6 +25,7 @@ public:
 	//Returns control to manipulate files
 	FilesControl* getFilesControl();
 
+	void generateMeAtlas(QQmlEngine* engine);
 public slots:
 	//Returns menu control
 	MenuControl* getMenu();

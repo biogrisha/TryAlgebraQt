@@ -66,13 +66,6 @@ struct FGlyphSpriteInst
 	glm::vec2 TextureOffset;
 };
 
-struct FSpriteInstNamed
-{
-	std::string Name;
-	glm::vec2 Pos;
-	glm::vec2 Size;
-};
-
 struct FSpriteInstByName
 {
 	glm::ivec2 Pos;
@@ -103,4 +96,9 @@ struct FRectInst
 	glm::vec4 Color;
 };
 
-
+struct LineChain
+{
+	float width = 1;
+	std::vector<glm::vec2> points;
+	glm::vec4 color;
+};

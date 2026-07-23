@@ -22,7 +22,7 @@ VSOutput vertMain() {
     float2 VertPos = Vert.Pos;
     float2 NormVertPos = (VertPos / Ubo.Extent.xy) * 2.0 - 1.0;
     Output.pos = float4(NormVertPos,0 ,1);
-    Output.Color = Inst.Color;
+    Output.Color = Vert.Color;
     return Output;
 }
 

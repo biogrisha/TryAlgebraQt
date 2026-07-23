@@ -16,15 +16,17 @@
 class FMathDocumentRendering
 {
 public:
+	FMathDocumentRendering();
 	void Init(FFreeTypeWrap* InFreeTypeWrap);
 	void SetDocumentExtent(const VkExtent3D& InExtent);
-	void UpdateText(const std::vector<FGlyphData>& InDocumentContent);
-	void UpdateRects(const std::vector<FRectInst>& InRects);
-	void UpdateCaret(const FCaretData& caretData);
 	void UpdateState(const FMathDocumentState& NewState);
 	FImageBuffer* Render();
 	bool HasContent();
+	FMathDocumentState* getState();
 private:
+	void UpdateText(const std::vector<FGlyphData>& InDocumentContent);
+	void UpdateRects(const std::vector<FRectInst>& InRects);
+	void UpdateCaret(const FCaretData& caretData);
 	std::vector<FGlyphData> DocumentContent;
 	std::map<FGlyphId, FGlyphData> Atlas;
 	FRectRendering RectRendering;
