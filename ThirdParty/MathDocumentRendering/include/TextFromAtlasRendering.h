@@ -36,7 +36,7 @@ public:
 	void SetInstances(const std::vector<FGlyphSpriteInst>& InInstances);
 	FImageBuffer* GetResultImage();
 	void SetOutputImage(FImageBuffer* Image);
-	void Render(bool bClearAttachment);
+	void Render();
 
 	std::unique_ptr<FBuffer> VertexBuffer;
 	std::unique_ptr<FBuffer> InstanceBuffer;
@@ -57,7 +57,8 @@ public:
 	const std::vector<uint16_t> RectIndices = {
 		0,3,2,2,1,0
 	};
-	VkExtent3D Extent = {300,300,1};
+	VkExtent3D Extent = { 300,300,1 };
 
 	FRendering* Rendering;
+	uint16_t S_1, P_1, PLine = UINT16_MAX;
 };

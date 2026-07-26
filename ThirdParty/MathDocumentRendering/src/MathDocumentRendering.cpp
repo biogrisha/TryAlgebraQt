@@ -8,190 +8,106 @@
 #include "VulkanHelpers.h"
 
 FMathDocumentRendering::FMathDocumentRendering()
-	:State(FMathDocumentState(2))
+	:m_state(FMathDocumentState(2))
 {
 }
 
-void FMathDocumentRendering::Init(FFreeTypeWrap* InFreeTypeWrap)
+void FMathDocumentRendering::Init(FFreeTypeWrap* ft)
 {
-	FreeTypeWrap = InFreeTypeWrap;
-	Rendering = std::make_unique<FRendering>();
+	m_rendering = std::make_unique<FRendering>();
 
-
-	AtlasRendering.Init(Rendering.get());
-
-	RectRendering.Init(Rendering.get());
-
-	TextFromAtlasRendering.SetAtlas(AtlasRendering.GetAtlas());
-	TextFromAtlasRendering.SetOutputImage(RectRendering.GetResult());
-	TextFromAtlasRendering.Init(Rendering.get());
-
-	SpriteRendering.SetInput(TextFromAtlasRendering.GetResultImage());
-	SpriteRendering.Init(Rendering.get());
-
-	m_linesRendering.Init(Rendering.get(), SpriteRendering.GetResult());
-	Rendering->GetDescriptorManager().Init();
-
-	AtlasRendering.InitPLine();
-	RectRendering.InitPLine();
-	TextFromAtlasRendering.InitPLine();
-	SpriteRendering.InitPLine();
-	m_linesRendering.InitPLine();
-
-}
-
-void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& InExtent)
-{
-	RectRendering.SetExtent(InExtent);
-	AtlasRendering.SetExtent(InExtent);
-	TextFromAtlasRendering.SetExtent(InExtent);
-	SpriteRendering.SetExtent(InExtent);
-	m_linesRendering.SetExtent(InExtent);
-	Extent = InExtent;
-}
-
-
-void FMathDocumentRendering::UpdateText(const std::vector<FGlyphData>& InDocumentContent)
-{
-	Atlas.clear();
-	DocumentContent = InDocumentContent;
-	if (InDocumentContent.empty())
 	{
-		return;
+		FImageBufferInfo layerInfo;
+		layerInfo.Extent = m_extent;
+		layerInfo.UsageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc;
+		m_output = MyRTTI::MakeTypedUnique<FImageBuffer>(layerInfo);
 	}
 
-	//for each glyph on the page
-	for (auto& GlyphData : DocumentContent)
 	{
-		GlyphData.RenderData = FreeTypeWrap->GetGlyphRenderData(GlyphData.GlyphId);
-		//Add unique glyph/size into atlas
-		Atlas.emplace(GlyphData.GlyphId, GlyphData);
-	}
-	//create instance data and outline array to pass into shader
-	std::vector<FOutlineCurvePoints> OutlineData;
-	std::vector<FGlyphInstance> AtlasInstanceData(Atlas.size());
-
-	uint32_t MaxX = Extent.width;
-	uint32_t MaxY = Extent.height;
-	uint32_t CurrX = 0;
-	uint32_t CurrY = 0;
-	uint32_t MaxGlyphY = 0;
-
-	int GlyphId = 0;
-	int CurveId = 0;
-
-	for (auto& GlyphData : Atlas)
-	{
-
-		if (CurrX + GlyphData.second.RenderData->WidthInPixels > MaxX)
-		{
-			CurrX = 0;
-			CurrY += MaxGlyphY;
-		}
-		GlyphData.second.RenderData->TextureOffset.x = CurrX;
-		GlyphData.second.RenderData->TextureOffset.y = CurrY;
-
-		AtlasInstanceData[GlyphId].Offset = glm::vec2(CurrX, CurrY);
-		AtlasInstanceData[GlyphId].Size = glm::vec2(GlyphData.second.RenderData->WidthInPixels, GlyphData.second.RenderData->HeightInPixels);
-
-		CurrX += GlyphData.second.RenderData->WidthInPixels;
-		MaxGlyphY = std::max(MaxGlyphY, GlyphData.second.RenderData->HeightInPixels);
-		auto& Outline = GlyphData.second.RenderData->Outline;
-		AtlasInstanceData[GlyphId].StartIndex = CurveId;
-		AtlasInstanceData[GlyphId].CurvesCount = Outline.size();
-		OutlineData.insert(OutlineData.end(), Outline.begin(), Outline.end());
-
-		CurveId += Outline.size();
-		GlyphId++;
+		FImageBufferInfo layerInfo;
+		layerInfo.Extent = m_extent;
+		layerInfo.UsageFlags = vk::ImageUsageFlagBits::eColorAttachment
+			| vk::ImageUsageFlagBits::eSampled
+			| vk::ImageUsageFlagBits::eTransferDst
+			| vk::ImageUsageFlagBits::eTransferSrc;
+		m_layer1 = MyRTTI::MakeTypedUnique<FImageBuffer>(layerInfo);
+		m_layer2 = MyRTTI::MakeTypedUnique<FImageBuffer>(layerInfo);
 	}
 
-	//Set rendering data in atlas renderer
-	AtlasRendering.SetInstances(AtlasInstanceData);
-	AtlasRendering.SetOutlineCurves(OutlineData);
+	//layer 1
+	m_rectRendering1.Init(m_rendering.get(), m_layer1.get());
 
-	//Set instance data for text renderer
-	std::vector<FGlyphSpriteInst> TextInstanceData;
-	for (auto& GlyphData : DocumentContent)
+	//layer 2 
+	m_spriteRendering2.Init(m_rendering.get(), m_layer2.get());
+	m_rectRendering2.Init(m_rendering.get(), m_layer2.get());
+	m_linesRendering2.Init(m_rendering.get(), m_layer2.get());
+	m_textRendering2.init(m_rendering.get(), m_layer2.get(), ft);
+
+	m_layer1ToOutput.Init(m_rendering.get(), m_layer1.get(), m_output.get());
+	m_layer2ToOutput.Init(m_rendering.get(), m_layer2.get(), m_output.get());
+
+	m_rendering->GetDescriptorManager().Init();
+
+	//layer 1
+	m_rectRendering1.InitPLine();
+
+	//layer 2 
+	m_spriteRendering2.InitPLine();
+	m_rectRendering2.InitPLine();
+	m_linesRendering2.InitPLine();
+	m_textRendering2.initPLine();
+
+	m_layer1ToOutput.InitPLine();
+	m_layer2ToOutput.InitPLine();
+}
+
+void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& extent)
+{
+	m_extent = extent;
+	if (m_layer1)
 	{
-		auto& SpriteInstance = TextInstanceData.emplace_back();
-		SpriteInstance.Pos = GlyphData.Pos;
-		SpriteInstance.Size = glm::vec2{ GlyphData.RenderData->WidthInPixels, GlyphData.RenderData->HeightInPixels };
-		SpriteInstance.TextureOffset = GlyphData.RenderData->TextureOffset;
+		m_layer1->SetExtent(extent);
 	}
-	TextFromAtlasRendering.SetInstances(TextInstanceData);
+	if (m_layer2)
+	{
+		m_layer2->SetExtent(extent);
+	}
+	m_rectRendering1.setExtent(extent);
+	m_spriteRendering2.setExtent(extent);
+	m_rectRendering2.setExtent(extent);
+	m_linesRendering2.setExtent(extent);
+	m_textRendering2.setExtent(extent);
+	m_layer1ToOutput.setExtent(extent);
+	m_layer2ToOutput.setExtent(extent);
 }
 
-void FMathDocumentRendering::UpdateRects(const std::vector<FRectInst>& InRects)
-{
-	RectRendering.SetInstances(InRects);
-}
-void FMathDocumentRendering::UpdateCaret(const FCaretData& CaretData)
-{
-	FSpriteInstByName Caret;
-	Caret.Alpha = 1;
-	Caret.Pos = CaretData.Pos;
-	Caret.Size = CaretData.Size;
-	Caret.SpriteName = "Caret.png";
-	SpriteRendering.SetInstances({ Caret });
-}
-
-void FMathDocumentRendering::UpdateState(const FMathDocumentState& NewState)
-{
-	//State.CopyChanged(NewState);
-}
 
 FImageBuffer* FMathDocumentRendering::Render()
 {
-	/*if (State.IsRectsUpdated())
+	if (m_state.at(0).dirty())
 	{
-		auto rects = State.GetCosmeticRects();
-		const auto& selection = State.GetSelectionRects();
-		rects.insert(rects.end(), selection.begin(), selection.end());
-		UpdateRects(rects);
-	}
-	if (State.IsTextUpdated())
-	{
-		UpdateText(State.GetText());
-	}
-	if (!HasContent())
-	{
-		auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
-		VkHelpers::ImageTransition_ToTransferDst(TextFromAtlasRendering.GetResultImage(), CommandBuffer, vk::PipelineStageFlagBits::eFragmentShader);
-		VkHelpers::ClearImage(TextFromAtlasRendering.GetResultImage(), CommandBuffer);
-		VkHelpers::ImageTransition_ToShaderRead(TextFromAtlasRendering.GetResultImage(), CommandBuffer, vk::PipelineStageFlagBits::eTransfer);
-		VkHelpers::EndSingleTimeCommands(CommandBuffer);
-	}
-	else if (State.IsRectsUpdated())
-	{
-		RectRendering.Render();
-		if (State.IsTextUpdated())
-		{
-			AtlasRendering.Render();
-		}
-		TextFromAtlasRendering.Render(!RectRendering.HasInstances());
-	}
-	else if (State.IsTextUpdated())
-	{
-		RectRendering.Render();
-		AtlasRendering.Render();
-		TextFromAtlasRendering.Render(!RectRendering.HasInstances());
-	}
+		auto cmdBuffer = VkHelpers::BeginSingleTimeCommands();
+		VkHelpers::ImageTransition_ToTransferDst(m_layer1.get(), cmdBuffer);
+		VkHelpers::ClearImage(m_layer1.get(), cmdBuffer);
+		VkHelpers::EndSingleTimeCommands(cmdBuffer);
+		
+		m_rectRendering1.SetInstances(m_state.at(0).rectangles());
 
-	if (State.IsCaretUpdated())
-	{
-		UpdateCaret(State.GetCaretData());
+		m_rectRendering1.Render();
+		m_layer1ToOutput.Render(true);
 	}
-	SpriteRendering.Render();
-	m_linesRendering.Render();*/
-	return SpriteRendering.GetResult();
-}
-
-bool FMathDocumentRendering::HasContent()
-{
-	return !DocumentContent.empty();
+	if (m_state.at(1).dirty())
+	{
+		m_spriteRendering2.Render();
+		m_rectRendering2.Render();
+		m_linesRendering2.Render();
+		m_textRendering2.render();
+		m_layer2ToOutput.Render(false);
+	}
+	return m_output.get();
 }
 
 FMathDocumentState* FMathDocumentRendering::getState()
 {
-	return &State;
+	return &m_state;
 }

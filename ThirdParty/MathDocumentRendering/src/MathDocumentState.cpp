@@ -35,6 +35,31 @@ void Layer::markClean()
 	m_dirty = false;
 }
 
+bool Layer::dirty()
+{
+	return m_dirty;
+}
+
+const std::vector<FGlyphData>& Layer::text() const
+{
+	return m_text;
+}
+
+const std::vector<FSpriteInstByName>& Layer::sprites() const
+{
+	return m_sprites;
+}
+
+const std::vector<FRectInst>& Layer::rectangles() const
+{
+	return m_rectangles;
+}
+
+const std::vector<LineChain>& Layer::lines() const
+{
+	return m_lines;
+}
+
 FMathDocumentState::FMathDocumentState(int layersCount)
 {
 	m_layers.resize(layersCount);

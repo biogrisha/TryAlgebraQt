@@ -2,10 +2,6 @@
 #include <VulkanHelpers.h>
 #include <VulkanContext.h>
 #include "FileSystemUtilities.h"
-namespace 
-{
-	uint16_t S_1,P_1,PLine;
-}
 
 void FGlyphAtlasRendering::Init(FRendering* InRendering)
 {
@@ -31,9 +27,8 @@ void FGlyphAtlasRendering::Init(FRendering* InRendering)
 
 	FImageBufferInfo image_info;
 	image_info.Extent = Extent;
-	image_info.UsageFlags  |= vk::ImageUsageFlagBits::eTransferSrc;
+	image_info.UsageFlags |= vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eSampled;
 	Atlas = MyRTTI::MakeTypedUnique<FImageBuffer>(image_info);
-	Atlas->Init();
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet(
 		{

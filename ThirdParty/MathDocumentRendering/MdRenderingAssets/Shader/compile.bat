@@ -1,7 +1,8 @@
-C:/VulkanSDK/1.4.350.0/Bin/slangc.exe shader.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o slang.spv
-C:/VulkanSDK/1.4.350.0/Bin/slangc.exe DrawEditorLayout.slang -target spirv -profile spirv_1_3 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawEditorLayout.spv
-C:/VulkanSDK/1.4.350.0/Bin/slangc.exe DrawAtlas.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawAtlas.spv
-C:/VulkanSDK/1.4.350.0/Bin/slangc.exe TextFromAtlas.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o TextFromAtlas.spv
-C:/VulkanSDK/1.4.350.0/Bin/slangc.exe DrawSprites.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawSprites.spv
-C:/VulkanSDK/1.4.350.0/Bin/slangc.exe DrawRectangles.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawRectangles.spv
-C:/VulkanSDK/1.4.350.0/Bin/slangc.exe DrawPolygons.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawPolygons.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe shader.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o slang.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawEditorLayout.slang -target spirv -profile spirv_1_3 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawEditorLayout.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawAtlas.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawAtlas.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe TextFromAtlas.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o TextFromAtlas.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawSprites.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawSprites.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawRectangles.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawRectangles.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawPolygons.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawPolygons.spv
+D:/Projects/ThirdParty/VulkanSDK/Bin/slangc.exe DrawImage.slang -target spirv -profile spirv_1_4 -emit-spirv-directly -fvk-use-entrypoint-name -entry vertMain -entry fragMain -o DrawImage.spv

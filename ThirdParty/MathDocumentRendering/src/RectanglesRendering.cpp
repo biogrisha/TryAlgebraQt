@@ -3,15 +3,10 @@
 #include "VulkanHelpers.h"
 #include "FileSystemUtilities.h"
 
-namespace {
-	uint16_t S_1;
-	uint16_t P_1;
-	uint16_t PLine;
-}
-
-void FRectRendering::Init(FRendering* InRendering)
+void FRectRendering::Init(FRendering* InRendering, FImageBuffer* output)
 {
 	Rendering = InRendering;
+	m_output = output;
 	//Create resources
 	{
 		VertexBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
@@ -41,13 +36,6 @@ void FRectRendering::Init(FRendering* InRendering)
 		UniformBuffer->SetProperties({ VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT , false });
 		UniformBuffer->SetData(sizeof(Extent), &Extent);
 	}
-	{
-		FImageBufferInfo image_info;
-		image_info.Extent = Extent;
-		image_info.UsageFlags |= vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc;
-		Output = MyRTTI::MakeTypedUnique<FImageBuffer>(image_info);
-		Output->Init();
-	}
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet({
 				{UniformBuffer.get(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment},
@@ -62,11 +50,10 @@ void FRectRendering::InitPLine()
 	PLine = Rendering->AddPipeline(P_1, &RectLayout, AssetsPath + "/Shader/DrawRectangles.spv");
 }
 
-void FRectRendering::SetExtent(const VkExtent3D& InExtent)
+void FRectRendering::setExtent(const VkExtent3D& InExtent)
 {
-	if (Output)
+	if (UniformBuffer)
 	{
-		Output->SetExtent(InExtent);
 		UniformBuffer->SetData(sizeof(InExtent), &InExtent);
 	}
 	Extent = InExtent;
@@ -84,7 +71,7 @@ void FRectRendering::Render()
 	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
 	Run.IndexBuffer = IndexBuffer.get();
 	Run.DescriptorSets = { S_1 };
-	Run.ColorAttachment = Output.get();
+	Run.ColorAttachment = m_output;
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = InstancesCount;
 	Rendering->AddRunPipelineInfo(Run);
@@ -100,14 +87,3 @@ void FRectRendering::SetInstances(const std::vector<FRectInst>& Rects)
 	}
 	InstanceBuffer->SetData(Rects);
 }
-
-FImageBuffer* FRectRendering::GetResult()
-{
-	return Output.get();
-}
-
-bool FRectRendering::HasInstances()
-{
-	return InstancesCount > 0;
-}
-

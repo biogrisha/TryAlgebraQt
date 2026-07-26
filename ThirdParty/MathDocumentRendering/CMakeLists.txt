@@ -17,6 +17,8 @@ add_library(MathDocumentRendering STATIC
 	include/LinesRendering.h
 	include/MathDocumentState.h
 	include/FileSystemUtilities.h
+	include/TextRendering.h
+	include/DrawImageRendering.h
 	src/MathDocumentRendering.cpp
 	src/GlyphAtlasRendering.cpp
 	src/TextFromAtlasRendering.cpp
@@ -25,6 +27,8 @@ add_library(MathDocumentRendering STATIC
 	src/RectanglesRendering.cpp
 	src/LinesRendering.cpp
 	src/MathDocumentState.cpp
+	src/DrawImageRendering.cpp
+	src/TextRendering.cpp
 )
 
 if(INSTALL_BUILD)

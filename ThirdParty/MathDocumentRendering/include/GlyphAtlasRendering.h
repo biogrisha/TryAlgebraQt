@@ -74,4 +74,5 @@ private:
 	VkExtent3D Extent = { 0, 0, 1 };
 
 	FRendering* Rendering = nullptr;
+	uint16_t S_1, P_1, PLine = UINT16_MAX;
 };

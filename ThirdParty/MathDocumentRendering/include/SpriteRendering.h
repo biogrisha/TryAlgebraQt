@@ -30,24 +30,20 @@ class FSpriteLayout : public FVertexInputLayout {
 class FSpriteRendering
 {
 public:
-	void Init(FRendering* InRendering);
+	void Init(FRendering* InRendering, FImageBuffer* output);
 	void InitPLine();
-	void SetExtent(const VkExtent3D& InExtent);
-	void SetInput(FImageBuffer* InInput);
+	void setExtent(const VkExtent3D& InExtent);
 	void Render();
 	void SetInstances(const std::vector<FSpriteInstByName>& Sprites);
-	FImageBuffer* GetResult();
 
 	std::unique_ptr<FBuffer> VertexBuffer;
 	std::unique_ptr<FBuffer> InstanceBuffer;
 	std::unique_ptr<FBuffer> IndexBuffer;
 	std::unique_ptr<FBuffer> UniformBuffer;
-	std::unique_ptr<FImageBuffer> Output;
 	FAtlas Atlas;
-	FImageBuffer* Input;
 	FSpriteLayout SpriteLayout;
 	uint16_t InstancesCount = 0;
-
+	FImageBuffer* m_output = nullptr;
 	std::vector<FVertTex> RectVertices = {
 		{{0, 0},{0.0f, 0.0f}},
 		{{1, 0},{1.0f, 0.0f}},
@@ -61,4 +57,5 @@ public:
 	VkExtent3D Extent = { 300,300,1 };
 
 	FRendering* Rendering;
+	uint16_t S_1, P_1, PLine = UINT16_MAX;
 };

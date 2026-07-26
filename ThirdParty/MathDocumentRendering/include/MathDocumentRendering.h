@@ -12,31 +12,36 @@
 #include "RectanglesRendering.h"
 #include "MathDocumentState.h"
 #include "LinesRendering.h"
+#include "TextRendering.h"
+#include "DrawImageRendering.h"
 
 class FMathDocumentRendering
 {
 public:
 	FMathDocumentRendering();
-	void Init(FFreeTypeWrap* InFreeTypeWrap);
-	void SetDocumentExtent(const VkExtent3D& InExtent);
-	void UpdateState(const FMathDocumentState& NewState);
+	void Init(FFreeTypeWrap* ft);
+	void SetDocumentExtent(const VkExtent3D& extent);
 	FImageBuffer* Render();
-	bool HasContent();
 	FMathDocumentState* getState();
 private:
-	void UpdateText(const std::vector<FGlyphData>& InDocumentContent);
-	void UpdateRects(const std::vector<FRectInst>& InRects);
-	void UpdateCaret(const FCaretData& caretData);
-	std::vector<FGlyphData> DocumentContent;
-	std::map<FGlyphId, FGlyphData> Atlas;
-	FRectRendering RectRendering;
-	FGlyphAtlasRendering AtlasRendering;
-	FTextFromAtlasRendering TextFromAtlasRendering;
-	FSpriteRendering SpriteRendering;
-	LinesRendering m_linesRendering;
-	VkExtent3D Extent = { 0, 0, 1 };
-	std::unique_ptr<FRendering> Rendering;
-	FFreeTypeWrap* FreeTypeWrap = nullptr;
 
-	FMathDocumentState State;
+
+	VkExtent3D m_extent = { 0, 0, 1 };
+	std::unique_ptr<FRendering> m_rendering;
+	FMathDocumentState m_state;
+
+	std::unique_ptr<FImageBuffer> m_output;
+	//layer1
+	std::unique_ptr<FImageBuffer> m_layer1;
+	FRectRendering m_rectRendering1;
+
+	//layer2
+	std::unique_ptr<FImageBuffer> m_layer2;
+	FSpriteRendering m_spriteRendering2;
+	FRectRendering m_rectRendering2;
+	LinesRendering m_linesRendering2;
+	TextRendering m_textRendering2;
+
+	DrawImageRendering m_layer1ToOutput;
+	DrawImageRendering m_layer2ToOutput;
 };

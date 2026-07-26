@@ -4,7 +4,6 @@
 #include "Pipeline.h"
 #include "DescriptorManager.h"
 #include "Rendering.h"
-#include "Atlas.h"
 
 class FLineLayout : public FVertexInputLayout {
 	virtual std::vector<vk::VertexInputBindingDescription> getBindingDescription() override {
@@ -25,13 +24,13 @@ class LinesRendering
 public:
 	void Init(FRendering* InRendering, FImageBuffer* InOutput);
 	void InitPLine();
-	void SetExtent(const VkExtent3D& InExtent);
+	void setExtent(const VkExtent3D& InExtent);
 
 	void Render();
-	FImageBuffer* GetResult();
 	void addChain(LineChain chain);
 	void flushIntoBuffer();
 
+private:
 	std::unique_ptr<FBuffer> m_vertexBuffer;
 	std::unique_ptr<FBuffer> m_indexBuffer;
 	std::unique_ptr<FBuffer> m_uniformBuffer;
@@ -43,4 +42,5 @@ public:
 	std::vector<LineChain> m_chains;
 	uint16_t m_indCount = 0;
 	bool m_initialized = false;
+	uint16_t DSetHndl, PLineLayoutHndl, PLineHndl = UINT16_MAX;
 };

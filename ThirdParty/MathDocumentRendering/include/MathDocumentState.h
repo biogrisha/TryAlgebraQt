@@ -11,6 +11,12 @@ public:
 	void addRectangle(const FRectInst& rect);
 	void addLine(const LineChain& lineChain);
 	void markClean();
+	bool dirty();
+
+	const std::vector<FGlyphData>& text() const;
+	const std::vector<FSpriteInstByName>& sprites() const;
+	const std::vector<FRectInst>& rectangles() const;
+	const std::vector<LineChain>& lines() const;
 private:
 	std::vector<FGlyphData> m_text;
 	std::vector<FSpriteInstByName> m_sprites;

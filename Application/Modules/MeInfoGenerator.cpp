@@ -38,10 +38,11 @@ void MeInfoGenerator::gen(MeListModel* model)
 	md_rendering.SetDocumentExtent({ width, height, 1 });
 	md_rendering.Init(vt.ft);
 
-	//md_rendering.UpdateState(me_doc_state);
 	auto RenderedDocument = md_rendering.Render();
-	auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
-
+	auto cb = VkHelpers::BeginSingleTimeCommands();
+	VkHelpers::ImageTransition_ToTransferSrc(RenderedDocument, cb);
+	auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument, cb);
+	VkHelpers::EndSingleTimeCommands(cb);
 	void* RenderedDocData = RenderedDocBuffer->MapData();
 
 	QImage image(
@@ -62,6 +63,7 @@ void MeInfoGenerator::gen(MeListModel* model)
 			srcBytesPerLine
 		);
 	}
+	image.save("D:/Projects/TryAlgebraQt/misc/atlas.png");
 	RenderedDocBuffer->UnmapData();
 
 	auto& children = atlas->getChildren();

@@ -1,11 +1,6 @@
 #include "TextFromAtlasRendering.h"
 #include <VulkanHelpers.h>
 #include "FileSystemUtilities.h"
-namespace {
-	uint16_t S_1;
-	uint16_t P_1;
-	uint16_t PLine;
-}
 
 void FTextFromAtlasRendering::Init(FRendering* InRendering)
 {
@@ -43,7 +38,7 @@ void FTextFromAtlasRendering::Init(FRendering* InRendering)
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet({
 				{AtlasBuffer, vk::ShaderStageFlagBits::eFragment},
 				{UniformBuffer.get(), vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment},
-			});
+		});
 
 	P_1 = Rendering->GetDescriptorManager().MakePipelineLayout({ S_1 });
 }
@@ -73,19 +68,19 @@ void FTextFromAtlasRendering::SetInstances(const std::vector<FGlyphSpriteInst>& 
 	InstancesCount = InInstances.size();
 }
 
-void FTextFromAtlasRendering::Render(bool bClearAttachment)
+void FTextFromAtlasRendering::Render()
 {
 	FRunPipelineInfo Run;
 
 	Run.PipelineId = PLine;
 	Run.OutputExtent = Extent;
-	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get()};
+	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
 	Run.IndexBuffer = IndexBuffer.get();
 	Run.DescriptorSets = { S_1 };
 	Run.ColorAttachment = Result;
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = InstancesCount;
-	Run.bClearAttachment = bClearAttachment;
+	Run.bClearAttachment = false;
 	Rendering->AddRunPipelineInfo(Run);
 	Rendering->Render();
 }

@@ -4,15 +4,10 @@
 #include "FileSystemUtilities.h"
 
 
-namespace {
-	uint16_t S_1;
-	uint16_t P_1;
-	uint16_t PLine;
-}
-
-void FSpriteRendering::Init(FRendering* InRendering)
+void FSpriteRendering::Init(FRendering* InRendering, FImageBuffer* output)
 {
 	Rendering = InRendering;
+	m_output = output;
 	//Create resources
 	{
 		VertexBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
@@ -47,13 +42,6 @@ void FSpriteRendering::Init(FRendering* InRendering)
 		UniformBuffer->SetProperties({ VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT , false });
 		UniformBuffer->SetData(sizeof(Extent), &Extent);
 	}
-	{
-		FImageBufferInfo image_info;
-		image_info.Extent = Extent;
-		image_info.UsageFlags |= vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;
-		Output = MyRTTI::MakeTypedUnique<FImageBuffer>(image_info);
-		Output->Init();
-	}
 
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet({
 				{Atlas.GetImage(), vk::ShaderStageFlagBits::eFragment},
@@ -69,37 +57,28 @@ void FSpriteRendering::InitPLine()
 	PLine = Rendering->AddPipeline(P_1, &SpriteLayout, AssetsPath + "/Shader/DrawSprites.spv");
 }
 
-void FSpriteRendering::SetExtent(const VkExtent3D& InExtent)
+void FSpriteRendering::setExtent(const VkExtent3D& InExtent)
 {
 	Extent = InExtent;
 	if (UniformBuffer)
 	{
 		UniformBuffer->SetData(sizeof(Extent), &Extent);
-		Output->SetExtent(InExtent);
 	}
-}
-
-void FSpriteRendering::SetInput(FImageBuffer* InInput)
-{
-	Input = InInput;
 }
 
 void FSpriteRendering::Render()
 {
-	auto CommandBuffer = VkHelpers::BeginSingleTimeCommands();
-	VkHelpers::ImageTransition_ToTransferSrc(Input, CommandBuffer, vk::PipelineStageFlagBits::eFragmentShader);
-	VkHelpers::ImageTransition_ToTransferDst(Output.get(), CommandBuffer, vk::PipelineStageFlagBits::eFragmentShader);
-	VkHelpers::CopyImageToImage(Input, Output.get(), CommandBuffer);
-	VkHelpers::ImageTransition_ToShaderRead(Input, CommandBuffer, vk::PipelineStageFlagBits::eTransfer);
-	VkHelpers::ImageTransition_ToShaderRead(Output.get(), CommandBuffer, vk::PipelineStageFlagBits::eTransfer);
-	VkHelpers::EndSingleTimeCommands(CommandBuffer);
+	if (InstancesCount == 0)
+	{
+		return;
+	}
 	FRunPipelineInfo Run;
 	Run.PipelineId = PLine;
 	Run.OutputExtent = Extent;
 	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
 	Run.IndexBuffer = IndexBuffer.get();
 	Run.DescriptorSets = { S_1 };
-	Run.ColorAttachment = Output.get();
+	Run.ColorAttachment = m_output;
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = InstancesCount;
 	Run.bClearAttachment = false;
@@ -124,7 +103,3 @@ void FSpriteRendering::SetInstances(const std::vector<FSpriteInstByName>& Sprite
 	InstancesCount = Sprites.size();
 }
 
-FImageBuffer* FSpriteRendering::GetResult()
-{
-	return Output.get();
-}

@@ -1,10 +1,6 @@
 #include "LinesRendering.h"
 #include <FileSystemUtilities.h>
-namespace {
-	uint16_t DSetHndl;
-	uint16_t PLineLayoutHndl;
-	uint16_t PLineHndl;
-}
+
 void LinesRendering::Init(FRendering* InRendering, FImageBuffer* InOutput)
 {
 	m_initialized = true;
@@ -43,7 +39,7 @@ void LinesRendering::InitPLine()
 	PLineHndl = m_rendering->AddPipeline(PLineLayoutHndl, &m_lineLayout, assetsPath + "/Shader/DrawPolygons.spv");
 }
 
-void LinesRendering::SetExtent(const VkExtent3D& InExtent)
+void LinesRendering::setExtent(const VkExtent3D& InExtent)
 {
 	if (m_initialized)
 	{
