@@ -68,7 +68,7 @@ void FSpriteRendering::setExtent(const VkExtent3D& InExtent)
 
 void FSpriteRendering::Render()
 {
-	if (InstancesCount == 0)
+	if (!m_hasContent)
 	{
 		return;
 	}
@@ -88,6 +88,12 @@ void FSpriteRendering::Render()
 
 void FSpriteRendering::SetInstances(const std::vector<FSpriteInstByName>& Sprites)
 {
+	m_hasContent = !Sprites.empty();
+	if (!m_hasContent)
+	{
+		return;
+	}
+
 	std::vector<FSpriteInst> Instances;
 	for (auto& Sprite : Sprites)
 	{

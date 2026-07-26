@@ -25,9 +25,8 @@ public:
 	void Init(FRendering* InRendering, FImageBuffer* InOutput);
 	void InitPLine();
 	void setExtent(const VkExtent3D& InExtent);
-
+	void setInstances(std::vector<LineChain> instances);
 	void Render();
-	void addChain(LineChain chain);
 	void flushIntoBuffer();
 
 private:

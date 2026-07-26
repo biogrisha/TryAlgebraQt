@@ -14,7 +14,7 @@ public:
 private:
 	FGlyphAtlasRendering m_atlasRendering;
 	FTextFromAtlasRendering m_textFromAtlasRendering;
-	FFreeTypeWrap* m_ft;
+	FFreeTypeWrap* m_ft = nullptr;
 	vk::Extent3D m_extent;
 	bool m_hasContent = false;
 };

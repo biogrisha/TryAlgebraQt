@@ -48,6 +48,11 @@ void LinesRendering::setExtent(const VkExtent3D& InExtent)
 	m_extent = InExtent;
 }
 
+void LinesRendering::setInstances(std::vector<LineChain> instances)
+{
+	m_chains = std::move(instances);
+}
+
 void LinesRendering::Render()
 {
 	if (m_chains.empty())
@@ -67,11 +72,6 @@ void LinesRendering::Render()
 	run.bClearAttachment = false;
 	m_rendering->AddRunPipelineInfo(run);
 	m_rendering->Render();
-}
-
-void LinesRendering::addChain(LineChain chain)
-{
-	m_chains.push_back(std::move(chain));
 }
 
 void LinesRendering::flushIntoBuffer()

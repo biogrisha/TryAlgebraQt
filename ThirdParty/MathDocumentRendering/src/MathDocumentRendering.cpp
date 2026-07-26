@@ -90,7 +90,7 @@ FImageBuffer* FMathDocumentRendering::Render()
 		VkHelpers::ImageTransition_ToTransferDst(m_layer1.get(), cmdBuffer);
 		VkHelpers::ClearImage(m_layer1.get(), cmdBuffer);
 		VkHelpers::EndSingleTimeCommands(cmdBuffer);
-		
+
 		m_rectRendering1.SetInstances(m_state.at(0).rectangles());
 
 		m_rectRendering1.Render();
@@ -98,6 +98,11 @@ FImageBuffer* FMathDocumentRendering::Render()
 	}
 	if (m_state.at(1).dirty())
 	{
+		m_spriteRendering2.SetInstances(m_state.at(1).sprites());
+		m_rectRendering2.SetInstances(m_state.at(1).rectangles());
+		m_linesRendering2.setInstances(m_state.at(1).lines());
+		m_textRendering2.updateText(m_state.at(1).text());
+
 		m_spriteRendering2.Render();
 		m_rectRendering2.Render();
 		m_linesRendering2.Render();

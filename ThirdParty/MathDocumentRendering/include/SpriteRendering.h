@@ -55,7 +55,7 @@ public:
 		0,3,2,2,1,0
 	};
 	VkExtent3D Extent = { 300,300,1 };
-
+	bool m_hasContent = false;
 	FRendering* Rendering;
 	uint16_t S_1, P_1, PLine = UINT16_MAX;
 };

@@ -16,7 +16,7 @@ void TextRendering::initPLine()
 	m_textFromAtlasRendering.InitPLine();
 }
 
-inline void TextRendering::updateText(std::vector<FGlyphData> documentContent)
+void TextRendering::updateText(std::vector<FGlyphData> documentContent)
 {
 	m_hasContent = !documentContent.empty();
 	if (!m_hasContent)
@@ -87,6 +87,10 @@ inline void TextRendering::updateText(std::vector<FGlyphData> documentContent)
 
 void TextRendering::render()
 {
+	if (!m_hasContent)
+	{
+		return;
+	}
 	m_atlasRendering.Render();
 	m_textFromAtlasRendering.Render();
 }
