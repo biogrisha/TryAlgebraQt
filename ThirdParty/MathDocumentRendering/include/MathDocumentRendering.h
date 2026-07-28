@@ -34,10 +34,10 @@ private:
 	//layer1
 	std::unique_ptr<FImageBuffer> m_layer1;
 	FRectRendering m_rectRendering1;
+	FSpriteRendering m_spriteRendering1;
 
 	//layer2
 	std::unique_ptr<FImageBuffer> m_layer2;
-	FSpriteRendering m_spriteRendering2;
 	FRectRendering m_rectRendering2;
 	LinesRendering m_linesRendering2;
 	TextRendering m_textRendering2;

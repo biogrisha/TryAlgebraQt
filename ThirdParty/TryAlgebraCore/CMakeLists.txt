@@ -55,3 +55,5 @@ target_link_libraries(TryAlgebraCore
 		glm::glm
 		MathDocumentRendering
 )
+target_compile_options(TryAlgebraCore PRIVATE /fsanitize=address)
+target_link_options(TryAlgebraCore PRIVATE /fsanitize=address)

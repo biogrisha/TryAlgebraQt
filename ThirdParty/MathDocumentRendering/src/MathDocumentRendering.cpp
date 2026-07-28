@@ -36,9 +36,9 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* ft)
 
 	//layer 1
 	m_rectRendering1.Init(m_rendering.get(), m_layer1.get());
+	m_spriteRendering1.Init(m_rendering.get(), m_layer1.get());
 
 	//layer 2 
-	m_spriteRendering2.Init(m_rendering.get(), m_layer2.get());
 	m_rectRendering2.Init(m_rendering.get(), m_layer2.get());
 	m_linesRendering2.Init(m_rendering.get(), m_layer2.get());
 	m_textRendering2.init(m_rendering.get(), m_layer2.get(), ft);
@@ -50,9 +50,9 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* ft)
 
 	//layer 1
 	m_rectRendering1.InitPLine();
+	m_spriteRendering1.InitPLine();
 
 	//layer 2 
-	m_spriteRendering2.InitPLine();
 	m_rectRendering2.InitPLine();
 	m_linesRendering2.InitPLine();
 	m_textRendering2.initPLine();
@@ -73,7 +73,8 @@ void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& extent)
 		m_layer2->SetExtent(extent);
 	}
 	m_rectRendering1.setExtent(extent);
-	m_spriteRendering2.setExtent(extent);
+	m_spriteRendering1.setExtent(extent);
+
 	m_rectRendering2.setExtent(extent);
 	m_linesRendering2.setExtent(extent);
 	m_textRendering2.setExtent(extent);
@@ -90,25 +91,29 @@ FImageBuffer* FMathDocumentRendering::Render()
 		VkHelpers::ImageTransition_ToTransferDst(m_layer1.get(), cmdBuffer);
 		VkHelpers::ClearImage(m_layer1.get(), cmdBuffer);
 		VkHelpers::EndSingleTimeCommands(cmdBuffer);
-
-		m_rectRendering1.SetInstances(m_state.at(0).rectangles());
+		for (int i = 0; i < 100; ++i)
+		{
+			m_rectRendering1.SetInstances(m_state.at(0).rectangles());
+		}
+		//m_spriteRendering1.SetInstances(m_state.at(0).sprites());
 
 		m_rectRendering1.Render();
-		m_layer1ToOutput.Render(true);
+		//m_spriteRendering1.Render();
 	}
-	if (m_state.at(1).dirty())
-	{
-		m_spriteRendering2.SetInstances(m_state.at(1).sprites());
-		m_rectRendering2.SetInstances(m_state.at(1).rectangles());
-		m_linesRendering2.setInstances(m_state.at(1).lines());
-		m_textRendering2.updateText(m_state.at(1).text());
-
-		m_spriteRendering2.Render();
-		m_rectRendering2.Render();
-		m_linesRendering2.Render();
-		m_textRendering2.render();
-		m_layer2ToOutput.Render(false);
-	}
+	//if (m_state.at(1).dirty())
+	//{
+	//	//m_rectRendering2.SetInstances(m_state.at(1).rectangles());
+	//	m_linesRendering2.setInstances(m_state.at(1).lines());
+	//	if (m_state.at(1).text().size() > 0)
+	//	{
+	//		m_textRendering2.updateText(m_state.at(1).text());
+	//	}
+	//	//m_rectRendering2.Render();
+	//	m_linesRendering2.Render();
+	//	m_textRendering2.render();
+	//}
+	m_layer1ToOutput.Render(true);
+	//m_layer2ToOutput.Render(false);
 	return m_output.get();
 }
 

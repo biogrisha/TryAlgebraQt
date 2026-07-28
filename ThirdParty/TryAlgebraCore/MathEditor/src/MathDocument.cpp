@@ -238,7 +238,13 @@ namespace TryAlgebraCore
 		{
 			//draw caret
 			auto caret_data = MeHelpers::getCaretData(m_container.get(), m_selection_end);
-			//m_visual_toolkit.mdocState->SetCaret(caret_data);
+
+			FSpriteInstByName sprite;
+			sprite.SpriteName = "Caret.png";
+			sprite.Pos = caret_data.Pos;
+			sprite.Size = caret_data.Size;
+			sprite.Alpha = 1;
+			m_visual_toolkit.mdocState->at(0).addSprite(sprite);
 			if (!m_container->getChildren().empty())
 			{
 				MeHelpers::highlightSelected(m_container.get(), m_selection_start, m_selection_end, &m_visual_toolkit);

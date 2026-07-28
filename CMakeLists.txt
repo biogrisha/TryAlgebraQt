@@ -46,6 +46,8 @@ target_link_libraries(TryAlgebra PRIVATE
     Applicationplugin
     Application
 )
+target_compile_options(TryAlgebra PRIVATE /fsanitize=address)
+target_link_options(TryAlgebra PRIVATE /fsanitize=address)
 
 include(GNUInstallDirs)
 install(TARGETS TryAlgebra

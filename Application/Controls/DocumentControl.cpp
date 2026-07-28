@@ -127,6 +127,10 @@ void DocumentControl::canvasReady()
 	QObject::connect(m_docCanvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
 	m_isCanvasReady = true;
 	m_canvasState = m_docCanvas->getCanvasState();
+		VisualToolkit vt;
+	vt.ft = AppGlobal::application->getFreeTypeWrap();
+	vt.mdocState = m_canvasState;
+	m_currDoc->setVisualToolkit(vt);
 }
 
 void DocumentControl::addMeByName(const QString& meName)

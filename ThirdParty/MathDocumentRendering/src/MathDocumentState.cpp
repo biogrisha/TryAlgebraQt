@@ -2,7 +2,11 @@
 
 void Layer::clear()
 {
-	*this = Layer();
+	m_text.clear();
+	m_sprites.clear();
+	m_rectangles.clear();
+	m_lines.clear();
+
 	m_dirty = true;
 }
 

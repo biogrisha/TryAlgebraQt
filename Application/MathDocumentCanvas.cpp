@@ -365,34 +365,37 @@ void CustomTextureNodePrivate::render()
 	if (!m_initialized)
 		return;
 
-	//VkResult err = VK_SUCCESS;
+	VkResult err = VK_SUCCESS;
 
-	////render math document
-	//auto RenderedDocument = m_documentRendering.Render();
-	//auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument);
-	//void* RenderedDocData = RenderedDocBuffer->MapData();
+	//render math document
+	auto RenderedDocument = m_documentRendering.Render();
+	auto cb = VkHelpers::BeginSingleTimeCommands();
+	VkHelpers::ImageTransition_ToTransferSrc(RenderedDocument, cb);
+	auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument, cb);
+	VkHelpers::EndSingleTimeCommands(cb);
+	void* RenderedDocData = RenderedDocBuffer->MapData();
 
-	////Copy buffer into image
-	//VkDeviceSize imageSize = m_size.width() * m_size.height() * 4;
-	//VkBuffer stagingBuffer;
-	//VkDeviceMemory stagingBufferMemory;
-	//CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+	//Copy buffer into image
+	VkDeviceSize imageSize = m_size.width() * m_size.height() * 4;
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-	////move result into staging buffer
-	//void* data;
-	//m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
-	//memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
-	//RenderedDocBuffer->UnmapData();
-	//m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
+	//move result into staging buffer
+	void* data;
+	m_devFuncs->vkMapMemory(m_dev, stagingBufferMemory, 0, imageSize, 0, &data);
+	memcpy(data, RenderedDocData, static_cast<size_t>(imageSize));
+	RenderedDocBuffer->UnmapData();
+	m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
 
-	////copy buffer into node texture
-	//TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	//copyBufferToImage(stagingBuffer, m_texture, static_cast<uint32_t>(m_size.width()), static_cast<uint32_t>(m_size.height()));
-	//TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//copy buffer into node texture
+	TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	copyBufferToImage(stagingBuffer, m_texture, static_cast<uint32_t>(m_size.width()), static_cast<uint32_t>(m_size.height()));
+	TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-	////destroy staging buffer
-	//m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
-	//m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
+	//destroy staging buffer
+	m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
+	m_devFuncs->vkFreeMemory(m_dev, stagingBufferMemory, nullptr);
 }
 
 uint32_t CustomTextureNodePrivate::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {

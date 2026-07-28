@@ -9,7 +9,7 @@
 
 namespace TryAlgebraCore
 {
-	
+
 	enum class StepDir
 	{
 		left,
@@ -28,6 +28,7 @@ namespace TryAlgebraCore
 	{
 		TYPED_CLASS
 	public:
+		virtual ~MeBase() = default;
 		virtual void setMeta(const std::wstring& meta) {}
 		virtual void draw(VisualToolkit* visual_toolkit);
 		virtual void calculate(VisualToolkit* visual_toolkit) {}

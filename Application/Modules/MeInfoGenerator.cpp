@@ -43,9 +43,9 @@ void MeInfoGenerator::gen(MeListModel* model)
 	VkHelpers::ImageTransition_ToTransferSrc(RenderedDocument, cb);
 	auto RenderedDocBuffer = VkHelpers::ConvertImageToBuffer(RenderedDocument, cb);
 	VkHelpers::EndSingleTimeCommands(cb);
-	void* RenderedDocData = RenderedDocBuffer->MapData();
+	//void* RenderedDocData = RenderedDocBuffer->MapData();
 
-	QImage image(
+	/*QImage image(
 		static_cast<int>(width),
 		static_cast<int>(height),
 		QImage::Format_RGBA8888
@@ -63,7 +63,7 @@ void MeInfoGenerator::gen(MeListModel* model)
 			srcBytesPerLine
 		);
 	}
-	image.save("D:/Projects/TryAlgebraQt/misc/atlas.png");
+	image.save("C:/dev/TryAlgebraMisc/atlas.png");
 	RenderedDocBuffer->UnmapData();
 
 	auto& children = atlas->getChildren();
@@ -74,5 +74,5 @@ void MeInfoGenerator::gen(MeListModel* model)
 		QSize size{ int(children[i]->getSize().x), int(children[i]->getSize().y) };
 		model->addMathElementInfo({ QString(meTable[i].first), pos, size });
 	}
-	model->setImage(std::move(image));
+	model->setImage(std::move(image));*/
 }
