@@ -85,7 +85,5 @@ void FRectRendering::SetInstances(const std::vector<FRectInst>& Rects)
 	{
 		return;
 	}
-	std::cout << "start " << Rects.data() << "\n";
-	std::cout << "end " << &Rects.back() << "\n";
 	InstanceBuffer->SetData(Rects);
 }

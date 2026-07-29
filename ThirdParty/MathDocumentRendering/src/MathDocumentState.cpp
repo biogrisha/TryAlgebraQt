@@ -73,3 +73,8 @@ Layer& FMathDocumentState::at(int i)
 {
 	return m_layers[i];
 }
+
+std::mutex& FMathDocumentState::mtx()
+{
+	return m_mtx;
+}

@@ -181,6 +181,7 @@ namespace TryAlgebraCore
 
 	void MathDocument::draw()
 	{
+		std::lock_guard<std::mutex> guard(m_visual_toolkit.mdocState->mtx());
 		if (hasFlag(getDirtyState(), DirtyState::Text))
 		{
 			m_visual_toolkit.mdocState->at(1).clear();
@@ -189,6 +190,7 @@ namespace TryAlgebraCore
 		{
 			m_visual_toolkit.mdocState->at(0).clear();
 		}
+
 		if (hasFlag(getDirtyState(), DirtyState::Text))
 		{
 			float line_before_h = 0;
@@ -250,6 +252,7 @@ namespace TryAlgebraCore
 				MeHelpers::highlightSelected(m_container.get(), m_selection_start, m_selection_end, &m_visual_toolkit);
 			}
 		}
+
 		clearDirty();
 	}
 

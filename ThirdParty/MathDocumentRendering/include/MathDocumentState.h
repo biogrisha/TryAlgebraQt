@@ -1,5 +1,7 @@
 #pragma once
 #include "MathDocumentRenderingStructs.h"
+#include <mutex>
+
 class FFreeTypeWrap;
 
 class Layer
@@ -12,7 +14,6 @@ public:
 	void addLine(const LineChain& lineChain);
 	void markClean();
 	bool dirty();
-
 	const std::vector<FGlyphData>& text() const;
 	const std::vector<FSpriteInstByName>& sprites() const;
 	const std::vector<FRectInst>& rectangles() const;
@@ -30,8 +31,10 @@ class FMathDocumentState
 public:
 	FMathDocumentState(int layersCount);
 	Layer& at(int i);
+	std::mutex& mtx();
 private:
 	std::vector<Layer> m_layers;
+	mutable std::mutex m_mtx;
 };
 
 struct VisualToolkit

@@ -85,35 +85,32 @@ void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& extent)
 
 FImageBuffer* FMathDocumentRendering::Render()
 {
+	std::lock_guard<std::mutex> guard(m_state.mtx());
 	if (m_state.at(0).dirty())
 	{
 		auto cmdBuffer = VkHelpers::BeginSingleTimeCommands();
 		VkHelpers::ImageTransition_ToTransferDst(m_layer1.get(), cmdBuffer);
 		VkHelpers::ClearImage(m_layer1.get(), cmdBuffer);
 		VkHelpers::EndSingleTimeCommands(cmdBuffer);
-		for (int i = 0; i < 100; ++i)
-		{
-			m_rectRendering1.SetInstances(m_state.at(0).rectangles());
-		}
-		//m_spriteRendering1.SetInstances(m_state.at(0).sprites());
-
+		m_rectRendering1.SetInstances(m_state.at(0).rectangles());
+		m_spriteRendering1.SetInstances(m_state.at(0).sprites());
 		m_rectRendering1.Render();
-		//m_spriteRendering1.Render();
+		m_spriteRendering1.Render();
 	}
-	//if (m_state.at(1).dirty())
-	//{
-	//	//m_rectRendering2.SetInstances(m_state.at(1).rectangles());
-	//	m_linesRendering2.setInstances(m_state.at(1).lines());
-	//	if (m_state.at(1).text().size() > 0)
-	//	{
-	//		m_textRendering2.updateText(m_state.at(1).text());
-	//	}
-	//	//m_rectRendering2.Render();
-	//	m_linesRendering2.Render();
-	//	m_textRendering2.render();
-	//}
+	if (m_state.at(1).dirty())
+	{
+		m_rectRendering2.SetInstances(m_state.at(1).rectangles());
+		m_linesRendering2.setInstances(m_state.at(1).lines());
+		if (m_state.at(1).text().size() > 0)
+		{
+			m_textRendering2.updateText(m_state.at(1).text());
+		}
+		m_rectRendering2.Render();
+		m_linesRendering2.Render();
+		m_textRendering2.render();
+	}
 	m_layer1ToOutput.Render(true);
-	//m_layer2ToOutput.Render(false);
+	m_layer2ToOutput.Render(false);
 	return m_output.get();
 }
 
