@@ -33,6 +33,7 @@ namespace TryAlgebraCore
 		bool restoreCaretPos(MeBase* me);
 		void scroll(bool delta);
 		std::wstring getText();
+		std::wstring getSelectedText();
 	private:
 		void markDirty(DirtyState flags);
 		void clearDirty();

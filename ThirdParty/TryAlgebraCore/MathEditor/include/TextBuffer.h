@@ -6,32 +6,33 @@
 namespace TryAlgebraCore
 {
 
-    class TextBuffer
-    {
-    public:
-        void insert(const std::wstring& str, int pos);
-        void del(int from, int to);
-        const std::wstring& getBuff() const;
-        bool isEmpty();
-        size_t getSize();
-        std::optional<uint64_t> getLineNumber(uint64_t char_num);
-        size_t getLinesCount();
-    private:
-        std::wstring m_buffer;
-    };
+	class TextBuffer
+	{
+	public:
+		void insert(const std::wstring& str, int pos);
+		void del(int from, int to);
+		const std::wstring& getBuff() const;
+		bool isEmpty();
+		size_t getSize();
+		std::optional<uint64_t> getLineNumber(uint64_t char_num);
+		size_t getLinesCount();
+		std::wstring getSubstring(uint64_t from, uint64_t to);
+	private:
+		std::wstring m_buffer;
+	};
 
-    class TextBufferIterator
-    {
-    public:
-        TextBufferIterator(const TextBuffer& text_buffer, int line_num);
-        bool isEnd();
-        const wchar_t& next();
-        std::optional<wchar_t> lookAhead(size_t num);
-        void back();
-        const wchar_t& current();
-        int getChId() { return m_ch_id; }
-    private:
-        const std::wstring& m_buffer;
-        size_t m_ch_id;
-    };
+	class TextBufferIterator
+	{
+	public:
+		TextBufferIterator(const TextBuffer& text_buffer, int line_num);
+		bool isEnd();
+		const wchar_t& next();
+		std::optional<wchar_t> lookAhead(size_t num);
+		void back();
+		const wchar_t& current();
+		int getChId() { return m_ch_id; }
+	private:
+		const std::wstring& m_buffer;
+		size_t m_ch_id;
+	};
 }

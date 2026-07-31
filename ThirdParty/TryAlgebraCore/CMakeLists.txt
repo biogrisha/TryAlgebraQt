@@ -6,11 +6,12 @@ add_library(TryAlgebraCore STATIC
 	MathEditor/include/TextBuffer.h
 	MathEditor/include/DocumentNavigation.h
 	MathEditor/include/Structs.h
+	MathEditor/include/TreeDisplay.h
 
 	MathEditor/src/MathDocument.cpp
 	MathEditor/src/TextBuffer.cpp
 	MathEditor/src/DocumentNavigation.cpp
-
+	MathEditor/src/TreeDisplay.cpp
 
 	Me/include/MeBase.h
 	Me/include/MeCharacter.h
@@ -41,7 +42,7 @@ add_library(TryAlgebraCore STATIC
 	TRS/Trs.cpp
 	TRS/PatternMatching.h
 	TRS/PatternMatching.cpp
-)
+ )
 
 # Set include directories
 target_include_directories(TryAlgebraCore

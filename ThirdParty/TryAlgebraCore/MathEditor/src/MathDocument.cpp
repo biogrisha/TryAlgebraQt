@@ -274,6 +274,17 @@ namespace TryAlgebraCore
 		return m_text_buffer.getBuff();
 	}
 
+	std::wstring MathDocument::getSelectedText()
+	{
+		auto selectionStart = m_selection_start;
+		auto selectionEnd = m_selection_end;
+		MeHelpers::orderPaths(selectionStart, selectionEnd);
+		MeHelpers::trimToCommonContainer(selectionStart, selectionEnd);
+		int from = std::get<LeafPos>(selectionStart.back()).pos;
+		int to = std::get<LeafPos>(selectionEnd.back()).pos;
+		return m_text_buffer.getSubstring(from, to);
+	}
+
 	void MathDocument::markDirty(DirtyState flags)
 	{
 		m_dirty_states |= flags;

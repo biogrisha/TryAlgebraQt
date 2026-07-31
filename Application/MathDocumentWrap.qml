@@ -122,23 +122,24 @@ Rectangle {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 		anchors.right: parent.right
-	
+
 		Keys.onPressed: (event) => {
 			m_docControl.keyInput(event.key, event.text, event.modifiers)
 		}
 		MouseArea { 
+			acceptedButtons: Qt.LeftButton | Qt.RightButton
 			anchors.fill: parent
 			onClicked: { 
 				mathDoc.focus = true 
 			} 
 			onPressed: (event) => {
-				m_docControl.mouseBtnDown(event.x, event.y)
+				m_docControl.mouseBtnDown(event.x, event.y, event.button)
 			}
 			onReleased: (event) => {
-				m_docControl.mouseBtnUp(event.x, event.y)
+				m_docControl.mouseBtnUp(event.x, event.y, event.button)
 			}
 			onPositionChanged: (event) => {
-				m_docControl.mousePosUpdated(event.x, event.y)
+				m_docControl.mousePosUpdated(event.x, event.y, event.button)
 			}
 			onWheel: (event) => {
 				m_docControl.scrollY(event.angleDelta.y > 0)

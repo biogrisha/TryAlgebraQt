@@ -127,7 +127,7 @@ void DocumentControl::canvasReady()
 	QObject::connect(m_docCanvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
 	m_isCanvasReady = true;
 	m_canvasState = m_docCanvas->getCanvasState();
-		VisualToolkit vt;
+	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdocState = m_canvasState;
 	m_currDoc->setVisualToolkit(vt);
@@ -211,28 +211,35 @@ void DocumentControl::moveScrollHandle(float newPos)
 	}
 }
 
-void DocumentControl::mouseBtnDown(float x, float y)
+void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
 {
 	if (!m_currDoc)
 	{
 		return;
 	}
-	m_currDoc->stopSelection();
-	m_bLmbDown = true;
-	m_currDoc->updateSelection({ x,y });
-	VisualToolkit vt;
-	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = m_canvasState;
-	m_currDoc->draw();
-	updateElements(true, false, true);
+	if (button == Qt::MouseButton::LeftButton)
+	{
+		m_currDoc->stopSelection();
+		m_bLmbDown = true;
+		m_currDoc->updateSelection({ x,y });
+		VisualToolkit vt;
+		vt.ft = AppGlobal::application->getFreeTypeWrap();
+		vt.mdocState = m_canvasState;
+		m_currDoc->draw();
+		updateElements(true, false, true);
+	}
+	else if (button == Qt::MouseButton::RightButton)
+	{
+		qDebug() << m_currDoc->getSelectedText();
+	}
 }
 
-void DocumentControl::mouseBtnUp(float x, float y)
+void DocumentControl::mouseBtnUp(float x, float y, Qt::MouseButton button)
 {
 
 }
 
-void DocumentControl::mousePosUpdated(float x, float y)
+void DocumentControl::mousePosUpdated(float x, float y, Qt::MouseButton button)
 {
 	if (!m_currDoc)
 	{

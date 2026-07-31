@@ -53,11 +53,11 @@ public slots:
 
 	void moveScrollHandle(float newPos);
 
-	void mouseBtnDown(float x, float y);
+	void mouseBtnDown(float x, float y, Qt::MouseButton button);
 
-	void mouseBtnUp(float x, float y);
+	void mouseBtnUp(float x, float y, Qt::MouseButton button);
 
-	void mousePosUpdated(float x, float y);
+	void mousePosUpdated(float x, float y, Qt::MouseButton button);
 private:
 	//Updates the rendering data of the selected elements
 	void updateElements(bool bRect, bool bText, bool bCaret);
