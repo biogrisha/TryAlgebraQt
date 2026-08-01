@@ -29,6 +29,12 @@ concept Streamable =
 {
 	{ os << value } -> std::same_as<std::ostream&>;
 };
+template<typename T>
+concept Wstreamable =
+	requires(std::wostream & os, const T & value)
+{
+	{ os << value } -> std::same_as<std::wostream&>;
+};
 namespace TestFramework
 {
 
@@ -124,11 +130,15 @@ namespace TestFramework
 				::TestFramework::failed.push_back(*this);
 			}
 
-			if(!res)
+			if (!res)
 			{
 				ColorGuard color(RED);
 				if constexpr (Streamable<L> && Streamable<R>) {
 					std::cout << "Comparisson failed \n" << l << " == " << r << "\n";
+				}
+				else if constexpr (Wstreamable<L> && Wstreamable<R>)
+				{
+					std::wcout << "Comparisson failed \n" << l << " == " << r << "\n";
 				}
 				else {
 					std::cout << "Comparisson failed "

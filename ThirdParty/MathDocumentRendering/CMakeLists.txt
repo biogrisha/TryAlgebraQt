@@ -53,8 +53,6 @@ target_link_libraries(MathDocumentRendering
 		MathLibrary
 )
 
-target_compile_options(MathDocumentRendering PRIVATE /fsanitize=address)
-target_link_options(MathDocumentRendering PRIVATE /fsanitize=address)
 
 set(ASSETS_LOCAL_PATH "MdRenderingAssets")
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/include/pathsConfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/pathsConfig.h )

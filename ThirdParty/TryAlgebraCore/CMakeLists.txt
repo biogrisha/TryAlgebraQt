@@ -42,6 +42,8 @@ add_library(TryAlgebraCore STATIC
 	TRS/Trs.cpp
 	TRS/PatternMatching.h
 	TRS/PatternMatching.cpp
+	TRS/Parser.h
+	TRS/Parser.cpp
  )
 
 # Set include directories
@@ -56,5 +58,3 @@ target_link_libraries(TryAlgebraCore
 		glm::glm
 		MathDocumentRendering
 )
-target_compile_options(TryAlgebraCore PRIVATE /fsanitize=address)
-target_link_options(TryAlgebraCore PRIVATE /fsanitize=address)

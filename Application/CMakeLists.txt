@@ -54,9 +54,3 @@ target_include_directories(Application BEFORE PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Controls
     ${CMAKE_CURRENT_SOURCE_DIR}/Models
 )
-
-target_compile_options(Application PRIVATE /fsanitize=address)
-target_link_options(Application PRIVATE /fsanitize=address)
-
-target_compile_options(Applicationplugin PRIVATE /fsanitize=address)
-target_link_options(Applicationplugin PRIVATE /fsanitize=address)
