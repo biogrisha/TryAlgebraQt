@@ -2,7 +2,7 @@
 #include "TestHelpers.h"
 #include "TestGlobals.h"
 #include "TestFramework.h"
-#include <TRS/Parser.h>
+#include <TRS/MeParserGeneric.h>
 namespace MeParserGenericTest
 {
 	using namespace TryAlgebraCore;
@@ -195,6 +195,13 @@ namespace MeParserGenericTest
 			endChildren(res);
 			addGlyphs(L"cd", res);
 			cases += MeParserGenericCase({ "MeParserGenericTest", "9" }, L"ab\\func1\\{\\,ab\\func2\\meta2\\\\func3\\meta3\\{ggg\\,gg\\}\\,\\,\\}cd", res);
+		}
+		{
+			std::vector<State> res;
+			addGlyphs(L"ab", res);
+			addMe(L"func1", L"meta1", res);
+			endChildren(res);
+			cases += MeParserGenericCase({ "MeParserGenericTest", "10" }, L"ab\\func1\\meta1\\{\\}", res);
 		}
 	}
 

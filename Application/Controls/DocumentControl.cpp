@@ -6,8 +6,8 @@
 #include <AppGlobal.h>
 #include <FilesControl.h>
 #include <Models/DocumentsModel.h>
-#include <TRS/Parser.h>
 #include <iostream>
+#include <TRS/ToProperTerm.h>
 
 DocumentControl::DocumentControl(QObject* parent)
 	: QObject(parent)
@@ -233,43 +233,8 @@ void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
 	else if (button == Qt::MouseButton::RightButton)
 	{
 		std::wstring str = m_currDoc->getSelectedText();
-		TryAlgebraCore::Trs::MeParserGeneric parser(str);
-		std::wstring res;
-		parser.createMe = [&res](const std::wstring_view& name)
-			{
-				res += L"create me ";
-				res += name;
-				res += L"\n";
-			};
-		parser.addMeta = [&res](const std::wstring_view& meta)
-			{
-				res += L"add meta ";
-				res += meta;
-				res += L"\n";
-			};
-		parser.addGlyph = [&res](wchar_t g)
-			{
-				res += L"add glyph ";
-				res += g;
-				res += L"\n";
-			};
-		parser.startChildren = [&res]()
-			{
-				res += L"start children";
-				res += L"\n";
-			};
-		parser.endChildren = [&res]()
-			{
-				res += L"end children";
-				res += L"\n";
-			};
-		parser.nextChild = [&res]()
-			{
-				res += L"next child";
-				res += L"\n";
-			};
-		parser.parse();
-		std::wcout << res;
+		TryAlgebraCore::To::ToProperTerm toProperTerm;
+		toProperTerm.run(str);
 	}
 }
 

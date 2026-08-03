@@ -1,4 +1,4 @@
-#include "Parser.h"
+#include "MeParserGeneric.h"
 
 namespace TryAlgebraCore::Trs {
 
@@ -13,8 +13,10 @@ namespace TryAlgebraCore::Trs {
 		State state = State::ReadGlyph;
 		std::wstring_view str;
 		int readStart = 0;
+		bool finishedWithEndChildren = false;
 		for (int i = 0; i < m_str.size() - 1; ++i)
 		{
+			finishedWithEndChildren = false;
 			if (m_str[i] == L'\\' && m_str[i + 1] == L'{')
 			{
 				if (state == State::ReadMeta)
@@ -36,6 +38,7 @@ namespace TryAlgebraCore::Trs {
 			}
 			else if (m_str[i] == L'\\' && m_str[i + 1] == L'}')
 			{
+				finishedWithEndChildren = true;
 				++i;
 				endChildren();
 			}
@@ -66,6 +69,10 @@ namespace TryAlgebraCore::Trs {
 				addGlyph(m_str[i]);
 			}
 
+		}
+		if (finishedWithEndChildren)
+		{
+			return;
 		}
 		//last glyph
 		str = std::wstring_view{ m_str }.substr(readStart, m_str.size());

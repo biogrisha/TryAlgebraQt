@@ -42,9 +42,11 @@ add_library(TryAlgebraCore STATIC
 	TRS/Trs.cpp
 	TRS/PatternMatching.h
 	TRS/PatternMatching.cpp
-	TRS/Parser.h
-	TRS/Parser.cpp
- )
+	TRS/MeParserGeneric.h
+	TRS/MeParserGeneric.cpp
+	TRS/ToProperTerm.h
+	TRS/ToProperTerm.cpp
+)
 
 # Set include directories
 target_include_directories(TryAlgebraCore
