@@ -1,41 +1,75 @@
 #include <MathEditor/include/TreeDisplay.h>
 #include <FreeTypeWrap.h>
 
-namespace
-{
-	void collectLevels(TryAlgebraCore::TreeDisplayItem* item, int depth, std::vector<std::vector<TryAlgebraCore::TreeDisplayItem*>>& levels)
-	{
-		if (levels.size() <= depth)
-		{
-			levels.emplace_back();
-		}
-		levels[depth].push_back(item);
-		for (auto& ch : item->children)
-		{
-			collectLevels(ch.get(), depth + 1, levels);
-		}
-	}
-}
-
 namespace TryAlgebraCore
 {
+	namespace
+	{
+		void collectBottom(TreeDisplayItem* item, std::vector<TreeDisplayItem*>& bottom)
+		{
+			if (item->children.empty())
+			{
+				bottom.push_back(item);
+				return;
+			}
+			for (auto& ch : item->children)
+			{
+				collectBottom(ch.get(), bottom);
+			}
+		}
+		void adjustPositions(std::vector<std::unique_ptr<TreeDisplayItem>>& items, int depth = 0)
+		{
+			for (auto& item : items)
+			{
+				if (!item->children.empty())
+				{
+					adjustPositions(item->children, depth + 1);
+					for (auto& ch : item->children)
+					{
+						item->pos.x += ch->pos.x;
+					}
+					item->pos /= item->children.size();
+				}
+				item->pos.y = depth * 100;
+			}
+		}
+
+		void moveRec(std::vector<std::unique_ptr<TreeDisplayItem>>& items, const glm::vec2& pos)
+		{
+			for (auto& item : items)
+			{
+				item->pos += pos;
+				moveRec(item->children, pos);
+			}
+		}
+
+	}
+
 
 	void TreeDisplayItem::draw(const VisualToolkit& vt)
 	{
 		glm::vec2 gPos = pos;
-		for (auto ch : string)
+		for (auto& ch : label)
 		{
 			FGlyphData g;
 			g.GlyphId.Glyph = ch;
-			g.GlyphId.Height = 12;
+			g.GlyphId.Height = 20;
 			g.Pos = gPos;
 
 			auto gSize = vt.ft->GetGlyphSize(g.GlyphId);
 			gPos.x += gSize.x;
 			vt.mdocState->at(1).addGlyph(g);
 		}
+		auto size = calculateSize(vt);
 		for (auto& ch : children)
 		{
+			LineChain lineChain;
+			lineChain.color = { 1,1,1,1 };
+			lineChain.width = 1;
+			lineChain.points.push_back(pos + glm::vec2{ size.x / 2, size.y });
+			auto chSize = ch->calculateSize(vt);
+			lineChain.points.push_back(ch->pos + glm::vec2{ chSize.x / 2, 0 });
+			vt.mdocState->at(1).addLine(lineChain);
 			ch->draw(vt);
 		}
 	}
@@ -43,11 +77,11 @@ namespace TryAlgebraCore
 	glm::vec2 TreeDisplayItem::calculateSize(const VisualToolkit& vt)
 	{
 		glm::vec2 res = { 0,0 };
-		for (auto ch : string)
+		for (auto& ch : label)
 		{
 			FGlyphId g;
 			g.Glyph = ch;
-			g.Height = 12;
+			g.Height = 20;
 			auto gSize = vt.ft->GetGlyphSize(g);
 			res.x += gSize.x;
 			res.y = std::max(res.y, gSize.y);
@@ -55,32 +89,44 @@ namespace TryAlgebraCore
 		return res;
 	}
 
-	void TreeDisplay::draw()
+	TreeDisplay::TreeDisplay(const VisualToolkit& vt)
+		: m_vt(vt)
 	{
-		m_root->draw(m_vt);
-		std::vector<std::vector<TreeDisplayItem*>> levels;
-		collectLevels(m_root.get(), 0, levels);
 
-		glm::vec2 pos = { 0,0 };
-		TreeDisplayItem* prevParent = levels.back().front()->parent;
-		for (auto* item : levels.back())
+	}
+
+	void TreeDisplay::move(const glm::vec2& pos)
+	{
+		moveRec(m_items, pos);
+	}
+
+	void TreeDisplay::calculate()
+	{
+		std::vector<TreeDisplayItem*> bottom;
+		for (const auto& item : m_items)
 		{
-			if (item->parent != prevParent)
-			{
-				pos.x += 100;
-				prevParent = item->parent;
-			}
-			item->pos = pos;
-			pos.x += item->calculateSize(m_vt).x;
+			collectBottom(item.get(), bottom);
 		}
 
-		for (int i = levels.size() - 1; i >= 0; --i)
+		glm::vec2 pos = { 0,0 };
+		TreeDisplayItem* prevParent = bottom.front()->parent;
+		for (auto* item : bottom)
 		{
-			for (auto item : levels[i])
-			{
-				item->pos /= item->children.size();
-				item->parent->pos += item->pos;
-			}
+			item->pos = pos;
+			pos.x += item->calculateSize(m_vt).x + 10;
+		}
+
+		adjustPositions(m_items);
+	}
+
+	void TreeDisplay::draw()
+	{
+		std::lock_guard<std::mutex> guard(m_vt.mdocState->mtx());
+		m_vt.mdocState->at(0).clear();
+		m_vt.mdocState->at(1).clear();
+		for (const auto& item : m_items)
+		{
+			item->draw(m_vt);
 		}
 	}
 }

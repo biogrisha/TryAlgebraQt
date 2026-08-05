@@ -6,8 +6,7 @@ namespace TryAlgebraCore::To
 	void ToProperTerm::run(const std::wstring& string)
 	{
 		Trs::MeParserGeneric parser(string);
-		std::vector<std::unique_ptr<GenericTerm>> terms;
-		auto* termsPtr = &terms;
+		auto* termsPtr = &m_terms;
 		GenericTerm* parent = nullptr;
 		GenericTerm* lastTerm = nullptr;
 		parser.createMe = [&termsPtr, &parent, &lastTerm](const std::wstring_view& str)
@@ -40,7 +39,7 @@ namespace TryAlgebraCore::To
 				lastTerm->children.push_back(std::move(t));
 				lastTerm = nullptr;
 			};
-		parser.endChildren = [&termsPtr, &parent, &lastTerm, &terms]()
+		parser.endChildren = [&termsPtr, &parent, &lastTerm, &terms = m_terms]()
 			{
 				lastTerm = nullptr;
 				parent = parent->parent->parent;
@@ -60,5 +59,9 @@ namespace TryAlgebraCore::To
 		parser.parse();
 
 
+	}
+	const std::vector<std::unique_ptr<GenericTerm>>& ToProperTerm::get() const
+	{
+		return m_terms;
 	}
 }

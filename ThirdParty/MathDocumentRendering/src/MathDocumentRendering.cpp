@@ -99,12 +99,14 @@ FImageBuffer* FMathDocumentRendering::Render()
 	}
 	if (m_state.at(1).dirty())
 	{
+		auto cmdBuffer = VkHelpers::BeginSingleTimeCommands();
+		VkHelpers::ImageTransition_ToTransferDst(m_layer2.get(), cmdBuffer);
+		VkHelpers::ClearImage(m_layer2.get(), cmdBuffer);
+		VkHelpers::EndSingleTimeCommands(cmdBuffer);
+
 		m_rectRendering2.SetInstances(m_state.at(1).rectangles());
 		m_linesRendering2.setInstances(m_state.at(1).lines());
-		if (m_state.at(1).text().size() > 0)
-		{
-			m_textRendering2.updateText(m_state.at(1).text());
-		}
+		m_textRendering2.updateText(m_state.at(1).text());
 		m_rectRendering2.Render();
 		m_linesRendering2.Render();
 		m_textRendering2.render();

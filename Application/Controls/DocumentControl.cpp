@@ -8,6 +8,7 @@
 #include <Models/DocumentsModel.h>
 #include <iostream>
 #include <TRS/ToProperTerm.h>
+#include <MathEditor/include/TreeDisplay.h>
 
 DocumentControl::DocumentControl(QObject* parent)
 	: QObject(parent)
@@ -219,14 +220,14 @@ void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
 	{
 		return;
 	}
+	VisualToolkit vt;
+	vt.ft = AppGlobal::application->getFreeTypeWrap();
+	vt.mdocState = m_canvasState;
 	if (button == Qt::MouseButton::LeftButton)
 	{
 		m_currDoc->stopSelection();
 		m_bLmbDown = true;
 		m_currDoc->updateSelection({ x,y });
-		VisualToolkit vt;
-		vt.ft = AppGlobal::application->getFreeTypeWrap();
-		vt.mdocState = m_canvasState;
 		m_currDoc->draw();
 		updateElements(true, false, true);
 	}
@@ -235,6 +236,11 @@ void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
 		std::wstring str = m_currDoc->getSelectedText();
 		TryAlgebraCore::To::ToProperTerm toProperTerm;
 		toProperTerm.run(str);
+		TryAlgebraCore::TreeDisplay treeDisplay(vt);
+		treeDisplay.setTree(toProperTerm.get());
+		treeDisplay.move({ 500,20 });
+		treeDisplay.draw();
+		updateElements(true, true, true);
 	}
 }
 

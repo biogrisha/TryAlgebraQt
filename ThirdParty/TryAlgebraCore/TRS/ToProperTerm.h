@@ -35,5 +35,8 @@ namespace TryAlgebraCore::To
 	{
 	public:
 		void run(const std::wstring& str);
+		const std::vector<std::unique_ptr<GenericTerm>>& get() const;
+	private:
+		std::vector<std::unique_ptr<GenericTerm>> m_terms;
 	};
 }
