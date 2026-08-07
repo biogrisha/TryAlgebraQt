@@ -5,6 +5,7 @@
 #include <Me/include/MeGlobals.h>
 #include <Me/include/MeFromTo.h>
 #include <Me/include/MeVariable.h>
+#include <Me/include/MeTerm.h>
 
 namespace TryAlgebraCore
 {
@@ -25,6 +26,11 @@ namespace TryAlgebraCore
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeVariable>();
+			});
+		m_factory.emplace(MeNames::term,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeTerm>();
 			});
 	}
 
@@ -159,7 +165,7 @@ namespace TryAlgebraCore
 	{
 		MeBase* parent = m_parent;
 		MeBase* current = m_current;
-		while(true)
+		while (true)
 		{
 			auto cont = MyRTTI::MakeTypedUnique<MeContainer>();
 			cont->setChFrom(m_it.getChId());
@@ -170,7 +176,7 @@ namespace TryAlgebraCore
 			{
 				break;
 			}
-			
+
 		}
 		m_current = current;
 		m_parent = parent;

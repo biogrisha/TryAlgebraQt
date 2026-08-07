@@ -21,6 +21,8 @@ namespace TryAlgebraCore
 
 		inline std::wstring variable = L"vr";
 
+		inline std::wstring term = L"trm";
+
 		inline std::wstring makeMe(const std::wstring& name, const std::wstring& meta, const size_t cont_num)
 		{
 			std::wstring res;
@@ -43,7 +45,7 @@ namespace TryAlgebraCore
 		inline std::vector<std::pair<std::wstring, std::wstring>>& getMeTable()
 		{
 			static std::vector<std::pair<std::wstring, std::wstring>> res;
-			if(res.empty())
+			if (res.empty())
 			{
 				res.emplace_back(L"Integral", makeMe(from_to, integral, 2));
 				res.emplace_back(L"Double integral", makeMe(from_to, integral2, 2));
@@ -51,6 +53,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Variable", makeMe(variable, L"", 1));
 				res.emplace_back(L"For all", L"∀");
 				res.emplace_back(L"Exists", L"∃");
+				res.emplace_back(L"Term", makeMe(term, L"", 3));
 			}
 			return res;
 		}

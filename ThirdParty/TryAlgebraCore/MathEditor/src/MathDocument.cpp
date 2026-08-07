@@ -27,7 +27,7 @@ namespace TryAlgebraCore
 
 	void MathDocument::setText(const std::wstring& str)
 	{
-		m_text_buffer.insert(str, 0);
+		m_textBuffer.insert(str, 0);
 		markDirty(DirtyState::Text);
 	}
 
@@ -40,7 +40,7 @@ namespace TryAlgebraCore
 			deleteSelected();
 		}
 		LeafPos& from = std::get<LeafPos>(m_selection_start.back());
-		m_text_buffer.insert(str_copy, from.pos);
+		m_textBuffer.insert(str_copy, from.pos);
 		from.pos += str_copy.size();
 		MeHelpers::propagateMeChange(m_selection_start, str_copy.size());
 		m_selection_end = m_selection_start;
@@ -105,7 +105,7 @@ namespace TryAlgebraCore
 		{
 			return;
 		}
-		std::optional<uint64_t> line_num = m_text_buffer.getLineNumber(MeHelpers::getPosOrFrom(m_selection_end.front()));
+		std::optional<uint64_t> line_num = m_textBuffer.getLineNumber(MeHelpers::getPosOrFrom(m_selection_end.front()));
 		if (!line_num.has_value())
 		{
 			return;
@@ -119,7 +119,7 @@ namespace TryAlgebraCore
 		{
 			m_selection_start = m_selection_end;
 		}
-		line_num = m_text_buffer.getLineNumber(MeHelpers::getPosOrFrom(m_selection_end.front()));
+		line_num = m_textBuffer.getLineNumber(MeHelpers::getPosOrFrom(m_selection_end.front()));
 		if (dir == StepDir::right || dir == StepDir::down)
 		{
 			if (m_line_to == line_num)
@@ -200,12 +200,12 @@ namespace TryAlgebraCore
 			if (m_line_from > 0)
 			{
 				//calculate one line above
-				MeParser parser(m_text_buffer, std::max(0, m_line_from - 1));
+				MeParser parser(m_textBuffer, std::max(0, m_line_from - 1));
 				parser.parseLine(m_container.get());
 				m_container->calcLine(&m_visual_toolkit);
 				line_before_h = m_container->getSize().y;
 			}
-			MeParser parser(m_text_buffer, std::max(0, m_line_from));
+			MeParser parser(m_textBuffer, std::max(0, m_line_from));
 			m_line_to = m_line_from;
 			while (true)
 			{
@@ -264,14 +264,14 @@ namespace TryAlgebraCore
 	void MathDocument::scroll(bool up)
 	{
 		m_line_from += -up + !up;
-		m_line_from = std::clamp<int>(m_line_from, 0, m_text_buffer.getLinesCount() - 1);
+		m_line_from = std::clamp<int>(m_line_from, 0, m_textBuffer.getLinesCount() - 1);
 		m_snap_to_end = false;
 		markDirty(DirtyState::Selection | DirtyState::Text);
 	}
 
 	std::wstring MathDocument::getText()
 	{
-		return m_text_buffer.getBuff();
+		return m_textBuffer.getBuff();
 	}
 
 	std::wstring MathDocument::getSelectedText()
@@ -282,7 +282,12 @@ namespace TryAlgebraCore
 		MeHelpers::trimToCommonContainer(selectionStart, selectionEnd);
 		int from = std::get<LeafPos>(selectionStart.back()).pos;
 		int to = std::get<LeafPos>(selectionEnd.back()).pos;
-		return m_text_buffer.getSubstring(from, to);
+		return m_textBuffer.getSubstring(from, to);
+	}
+
+	const TextBuffer& MathDocument::textBuffer() const
+	{
+		return m_textBuffer;
 	}
 
 	void MathDocument::markDirty(DirtyState flags)
@@ -301,7 +306,7 @@ namespace TryAlgebraCore
 		MeHelpers::trimToCommonContainer(m_selection_start, m_selection_end);
 		int from = std::get<LeafPos>(m_selection_start.back()).pos;
 		int to = std::get<LeafPos>(m_selection_end.back()).pos;
-		m_text_buffer.del(from, to);
+		m_textBuffer.del(from, to);
 		MeHelpers::propagateMeChange(m_selection_start, from - to);
 	}
 
@@ -312,7 +317,7 @@ namespace TryAlgebraCore
 
 	void MathDocument::adjustLineFrom()
 	{
-		std::optional<uint64_t> line_num = m_text_buffer.getLineNumber(std::get<LeafPos>(m_selection_end.back()).pos);
+		std::optional<uint64_t> line_num = m_textBuffer.getLineNumber(std::get<LeafPos>(m_selection_end.back()).pos);
 		if (line_num.has_value())
 		{
 			if (line_num >= m_line_to || line_num < m_line_from)
@@ -326,9 +331,9 @@ namespace TryAlgebraCore
 	void MathDocument::calcLinesAboveBelow(int center_line)
 	{
 		m_line_from = std::max(0, center_line - 1);
-		size_t to = std::min<size_t>(m_text_buffer.getLinesCount(), center_line + 2);
+		size_t to = std::min<size_t>(m_textBuffer.getLinesCount(), center_line + 2);
 		m_container = MyRTTI::MakeTypedUnique<MeContainer>();
-		MeParser parser(m_text_buffer, m_line_from);
+		MeParser parser(m_textBuffer, m_line_from);
 
 		for (size_t i = m_line_from; i < to; ++i)
 		{

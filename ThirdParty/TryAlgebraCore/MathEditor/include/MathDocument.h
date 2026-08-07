@@ -34,6 +34,7 @@ namespace TryAlgebraCore
 		void scroll(bool delta);
 		std::wstring getText();
 		std::wstring getSelectedText();
+		const TextBuffer& textBuffer() const;
 	private:
 		void markDirty(DirtyState flags);
 		void clearDirty();
@@ -44,7 +45,7 @@ namespace TryAlgebraCore
 		void calcLinesAboveBelow(int center_line);
 		bool isLineOutside(int line_num);
 		void filterInput(std::wstring& str);
-		TextBuffer m_text_buffer;
+		TextBuffer m_textBuffer;
 		std::unique_ptr<MeContainer> m_container;
 		glm::vec2 m_doc_size;
 

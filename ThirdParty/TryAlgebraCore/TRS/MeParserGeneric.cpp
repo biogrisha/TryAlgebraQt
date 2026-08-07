@@ -14,7 +14,7 @@ namespace TryAlgebraCore::Trs {
 		std::wstring_view str;
 		int readStart = 0;
 		bool finishedWithEndChildren = false;
-		for (int i = 0; i < m_str.size() - 1; ++i)
+		for (int i = 0; i < static_cast<int>(m_str.size()) - 1; ++i)
 		{
 			finishedWithEndChildren = false;
 			if (m_str[i] == L'\\' && m_str[i + 1] == L'{')

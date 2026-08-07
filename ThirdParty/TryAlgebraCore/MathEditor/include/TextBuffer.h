@@ -16,7 +16,7 @@ namespace TryAlgebraCore
 		size_t getSize();
 		std::optional<uint64_t> getLineNumber(uint64_t char_num);
 		size_t getLinesCount();
-		std::wstring getSubstring(uint64_t from, uint64_t to);
+		std::wstring getSubstring(uint64_t from, uint64_t to) const;
 	private:
 		std::wstring m_buffer;
 	};

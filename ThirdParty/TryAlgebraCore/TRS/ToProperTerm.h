@@ -3,40 +3,22 @@
 #include <span>
 #include <memory>
 #include <vector>
+#include "PatternMatchingHelpers.h"
+#include <MathEditor/include/TextBuffer.h>
+#include "BinaryOperatorParser.h"
 
-namespace TryAlgebraCore::To
+namespace TryAlgebraCore::Trs
 {
-	struct GenericTerm;
-	struct VariableMeta
-	{
-		std::span<std::unique_ptr<GenericTerm>> captured;
-		bool isCaptured = false;
-		int captureSizeNondet = 0;
-	};
-
-	struct GenericTerm
-	{
-		std::wstring label;
-		std::vector<std::unique_ptr<GenericTerm>> children;
-		GenericTerm* parent = nullptr;
-		GenericTerm* subj = nullptr;
-		bool isVariable = false;
-		bool isPattern = false;
-		std::shared_ptr<VariableMeta> variableMeta;
-		int num = 0;
-		bool isPureVar()
-		{
-			return isVariable
-				&& variableMeta.get() != nullptr
-				&& !variableMeta->isCaptured;
-		}
-	};
 	class ToProperTerm
 	{
 	public:
 		void run(const std::wstring& str);
-		const std::vector<std::unique_ptr<GenericTerm>>& get() const;
+		const std::vector<std::unique_ptr<TermIntermediate>>& get() const;
+		void setup(const TextBuffer& tb);
 	private:
-		std::vector<std::unique_ptr<GenericTerm>> m_terms;
+		std::optional<std::wstring> getSection(const TextBuffer& tb, const std::wstring& sectionName);
+		bool waitToken(TextBufferIterator& it, const std::wstring& token);
+		std::vector<std::unique_ptr<TermIntermediate>> m_terms;
+		BinaryOperatorParser binaryOperatorParser;
 	};
 }

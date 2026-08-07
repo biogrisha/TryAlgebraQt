@@ -67,7 +67,7 @@ namespace TryAlgebraCore
 		return line_num;
 	}
 
-	std::wstring TextBuffer::getSubstring(uint64_t from, uint64_t to)
+	std::wstring TextBuffer::getSubstring(uint64_t from, uint64_t to) const
 	{
 		return std::wstring(m_buffer.begin() + from, m_buffer.begin() + to);
 	}

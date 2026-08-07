@@ -234,7 +234,12 @@ void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
 	else if (button == Qt::MouseButton::RightButton)
 	{
 		std::wstring str = m_currDoc->getSelectedText();
-		TryAlgebraCore::To::ToProperTerm toProperTerm;
+		if (str.empty())
+		{
+			return;
+		}
+		TryAlgebraCore::Trs::ToProperTerm toProperTerm;
+		toProperTerm.setup(m_currDoc->textBuffer());
 		toProperTerm.run(str);
 		TryAlgebraCore::TreeDisplay treeDisplay(vt);
 		treeDisplay.setTree(toProperTerm.get());

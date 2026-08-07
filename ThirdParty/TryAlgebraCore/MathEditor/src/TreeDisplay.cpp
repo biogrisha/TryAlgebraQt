@@ -113,7 +113,14 @@ namespace TryAlgebraCore
 		for (auto* item : bottom)
 		{
 			item->pos = pos;
-			pos.x += item->calculateSize(m_vt).x + 10;
+			float maxWidth = item->calculateSize(m_vt).x;
+			TreeDisplayItem* parent = item->parent;
+			while (parent)
+			{
+				maxWidth = std::max(parent->calculateSize(m_vt).x, maxWidth);
+				parent = parent->parent;
+			}
+			pos.x += maxWidth + 10;
 		}
 
 		adjustPositions(m_items);
