@@ -5,6 +5,19 @@
 
 namespace TryAlgebraCore
 {
+	std::optional<int> MeHelpers::contIndByPos(int pos, MeBase* me)
+	{
+		auto& containers = me->getChildren();
+		for (int i = 0; i < containers.size(); ++i)
+		{
+			if (containers[i]->getChFrom() == pos)
+			{
+				return i;
+			}
+		}
+		return std::nullopt;
+	}
+
 	void MeHelpers::propagateMeChange(MePath& path, int text_added)
 	{
 		for (auto& pos : path)

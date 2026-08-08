@@ -2,80 +2,85 @@
 #include <ostream>
 #include <variant>
 
-namespace TryAlgebraCore{
+namespace TryAlgebraCore {
+
+	//from, to and pos point to the text buffer character position of the element
+	//from - points to where Me starts
+	//to - points to where where Me ends
+	//pos - position in the text buffer
 	struct MePos
 	{
 		uint64_t from = 0;
 		uint64_t to = 0;
-        bool operator==(const MePos&) const = default;
+		bool operator==(const MePos&) const = default;
 	};
 
-    struct ContPos
-    {
-        uint64_t pos = 0;
-        bool operator==(const ContPos&) const = default;
-    };
+	struct ContPos
+	{
+		uint64_t pos = 0;
+		bool operator==(const ContPos&) const = default;
+	};
 
-    struct LeafPos
-    {
-        uint64_t pos = 0;
-        bool operator==(const LeafPos&) const = default;
-    };
+	struct LeafPos
+	{
+		uint64_t pos = 0;
+		bool operator==(const LeafPos&) const = default;
+	};
 
 
-    class MePath : public std::vector<std::variant<MePos, ContPos, LeafPos>>
-    {
-    public:
-        using Base = std::vector<std::variant<MePos, ContPos, LeafPos>>;
-        using Base::Base;
-        using Base::operator=;
-        
-        bool operator==(const MePath& other) const
-        {
-            return static_cast<const Base&>(*this) == static_cast<const Base&>(other);
-        }
+	class MePath : public std::vector<std::variant<MePos, ContPos, LeafPos>>
+	{
+	public:
+		using Base = std::vector<std::variant<MePos, ContPos, LeafPos>>;
+		using Base::Base;
+		using Base::operator=;
 
-        bool operator!=(const MePath& other) const
-        {
-            return !(*this == other);
-        }
-    };
+		bool operator==(const MePath& other) const
+		{
+			return static_cast<const Base&>(*this) == static_cast<const Base&>(other);
+		}
 
-    inline std::ostream& operator<<(std::ostream& os, const MePos& p)
-    {
-        return os << "MePos{from=" << p.from << ", to=" << p.to << "}";
-    }
+		bool operator!=(const MePath& other) const
+		{
+			return !(*this == other);
+		}
+	};
 
-    inline std::ostream& operator<<(std::ostream& os, const ContPos& p)
-    {
-        return os << "ContPos{from=" << p.pos << "}";
-    }
+	inline std::ostream& operator<<(std::ostream& os, const MePos& p)
+	{
+		return os << "MePos{from=" << p.from << ", to=" << p.to << "}";
+	}
 
-    inline std::ostream& operator<<(std::ostream& os, const LeafPos& p)
-    {
-        return os << "LeafPos{pos=" << p.pos << "}";
-    }
+	inline std::ostream& operator<<(std::ostream& os, const ContPos& p)
+	{
+		return os << "ContPos{from=" << p.pos << "}";
+	}
 
-    inline std::ostream& operator<<(std::ostream& os, const MePath& path)
-    {
-        os << "[";
+	inline std::ostream& operator<<(std::ostream& os, const LeafPos& p)
+	{
+		return os << "LeafPos{pos=" << p.pos << "}";
+	}
 
-        bool first = true;
+	inline std::ostream& operator<<(std::ostream& os, const MePath& path)
+	{
+		os << "[";
 
-        for (const auto& item : path)
-        {
-            if (!first)
-                os << ",";
+		bool first = true;
 
-            std::visit([&](const auto& v)
-                {
-                    os << v;
-                }, item);
+		for (const auto& item : path)
+		{
+			if (!first)
+				os << ",";
 
-            first = false;
-        }
+			std::visit([&](const auto& v)
+				{
+					os << v;
+				}, item);
 
-        os << "]";
-        return os;
-    }
+			first = false;
+		}
+
+		os << "]";
+		return os;
+	}
 }

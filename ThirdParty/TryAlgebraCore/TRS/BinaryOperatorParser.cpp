@@ -10,6 +10,7 @@ namespace TryAlgebraCore::Trs
 			apply(subj, rule);
 		}
 	}
+
 	void BinaryOperatorParser::apply(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
 	{
 		if (subj.empty())

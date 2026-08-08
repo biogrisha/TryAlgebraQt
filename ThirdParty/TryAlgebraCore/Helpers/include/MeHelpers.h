@@ -27,6 +27,8 @@ namespace TryAlgebraCore
 			MeBase* me = nullptr;
 		};
 
+		//Returns container ind from ContPos.pos
+		static std::optional<int> contIndByPos(int pos, MeBase* me);
 		static void propagateMeChange(MePath& path, int text_added);
 		static std::optional<MePath> textPosToMePath(const MeBase* from, const uint64_t pos);
 		static std::optional<size_t> absToChildPos(const MeBase* from, size_t pos);

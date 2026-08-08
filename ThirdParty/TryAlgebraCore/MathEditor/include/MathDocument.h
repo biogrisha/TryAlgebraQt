@@ -29,6 +29,8 @@ namespace TryAlgebraCore
 		void step(StepDir dir, bool with_selection = false);
 		void updateSelection(const glm::vec2& pos);
 		void stopSelection();
+		void copy();
+		void paste();
 		void draw();
 		bool restoreCaretPos(MeBase* me);
 		void scroll(bool delta);
@@ -59,6 +61,7 @@ namespace TryAlgebraCore
 		int m_line_to = 0;
 		bool m_snap_to_end = false;
 		VisualToolkit m_visual_toolkit;
+		std::wstring m_copiedText;
 	};
 
 	template<>

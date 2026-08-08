@@ -87,7 +87,7 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 	case Qt::Key_C:
 		if (bCtrl)
 		{
-			//doc->CopySelected();
+			m_currDoc->copy();
 			break;
 		}
 		[[fallthrough]];
@@ -102,7 +102,8 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 	case Qt::Key_V:
 		if (bCtrl)
 		{
-			//doc->Paste();
+			m_currDoc->paste();
+			m_currDoc->draw();
 			updateElements(true, true, true);
 			break;
 		}

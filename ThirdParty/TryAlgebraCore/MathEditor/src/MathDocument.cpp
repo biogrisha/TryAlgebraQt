@@ -179,6 +179,16 @@ namespace TryAlgebraCore
 		m_selecting = false;
 	}
 
+	void MathDocument::copy()
+	{
+		m_copiedText = getSelectedText();
+	}
+
+	void MathDocument::paste()
+	{
+		type(m_copiedText);
+	}
+
 	void MathDocument::draw()
 	{
 		std::lock_guard<std::mutex> guard(m_visual_toolkit.mdocState->mtx());

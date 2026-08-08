@@ -25,7 +25,7 @@ namespace TryAlgebraCore
 	void MeTerm::draw(VisualToolkit* visual_toolkit)
 	{
 		FRectInst rect;
-		rect.Color = { 1,1,0,0.5 };
+		rect.Color = { 1,0,1,0.5 };
 
 		rect.Pos = getPos();
 		rect.Size = getSize();
@@ -39,19 +39,66 @@ namespace TryAlgebraCore
 		if (step_from == StepFrom::inside)
 		{
 			path.pop_back();
-			if (dir == StepDir::left || dir == StepDir::up)
+			auto* contPos = std::get_if<ContPos>(&path.back());
+			assert(contPos != nullptr);
+			int contI = MeHelpers::contIndByPos(contPos->pos, this).value();
+			if (dir == StepDir::left)
 			{
-				path.pop_back();
-				MePos& me_pos = std::get<MePos>(path.back());
-				path.back() = LeafPos(me_pos.from);
-
+				if (contI == 0)
+				{
+					path.pop_back();
+					auto* mePos = std::get_if<MePos>(&path.back());
+					assert(mePos != nullptr);
+					LeafPos leafPos;
+					leafPos.pos = mePos->from;
+					path.back() = leafPos;
+					return;
+				}
+				else
+				{
+					contPos->pos = getChildren()[contI - 1]->getChFrom();
+					path.push_back(LeafPos{ contPos->pos });
+					return;
+				}
 			}
-			else if (dir == StepDir::right || dir == StepDir::down)
+			else if (dir == StepDir::right)
+			{
+				if (contI == getChildren().size() - 1)
+				{
+					path.pop_back();
+					auto* mePos = std::get_if<MePos>(&path.back());
+					assert(mePos != nullptr);
+					LeafPos leafPos;
+					leafPos.pos = mePos->to;
+					path.back() = leafPos;
+					return;
+				}
+				else
+				{
+					contPos->pos = getChildren()[contI + 1]->getChFrom();
+					path.push_back(LeafPos{ contPos->pos });
+					return;
+				}
+			}
+			else if (dir == StepDir::up)
 			{
 				path.pop_back();
-				MePos& me_pos = std::get<MePos>(path.back());
-				path.back() = LeafPos(me_pos.to);
-
+				auto* mePos = std::get_if<MePos>(&path.back());
+				assert(mePos != nullptr);
+				LeafPos leafPos;
+				leafPos.pos = mePos->from;
+				path.back() = leafPos;
+				return;
+			}
+			else if (dir == StepDir::down)
+			{
+				path.pop_back();
+				auto* mePos = std::get_if<MePos>(&path.back());
+				assert(mePos != nullptr);
+				LeafPos leafPos;
+				leafPos.pos = mePos->to;
+				path.back() = leafPos;
+				return;
 			}
 		}
 		else if (step_from == StepFrom::outside)
@@ -60,7 +107,7 @@ namespace TryAlgebraCore
 			path.back() = MePos(getChFrom(), getChTo());
 			if (dir == StepDir::left)
 			{
-				auto& second_cont = getChildren()[0];
+				auto& second_cont = getChildren().back();
 				auto& cont_children = second_cont->getChildren();
 				path.push_back(ContPos(second_cont->getChFrom()));
 				if (cont_children.empty())

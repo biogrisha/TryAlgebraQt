@@ -30,7 +30,7 @@ namespace TryAlgebraCore
 					}
 					item->pos /= item->children.size();
 				}
-				item->pos.y = depth * 100;
+				item->pos.y = depth * 50;
 			}
 		}
 
