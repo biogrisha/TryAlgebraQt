@@ -5,7 +5,7 @@ namespace TryAlgebraCore::Trs
 	void ToProperTerm::run(const std::wstring& string)
 	{
 		m_terms = parseToTermIntermediate(string);
-		binaryOperatorParser.apply(m_terms);
+		binaryOperatorParser.applyAll(m_terms);
 	}
 
 	const std::vector<std::unique_ptr<TermIntermediate>>& ToProperTerm::get() const

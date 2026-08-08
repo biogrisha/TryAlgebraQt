@@ -805,7 +805,7 @@ namespace TryAlgebraCore::Trs
 		parser.startChildren = [&termsPtr, &parent, &lastTerm]()
 			{
 				auto t = std::make_unique<TermIntermediate>();
-				t->label = L"cont";
+				t->label = MeNames::cont;
 				t->parent = lastTerm;
 				termsPtr = &t->children;
 				parent = t.get();
@@ -822,7 +822,7 @@ namespace TryAlgebraCore::Trs
 		parser.nextChild = [&termsPtr, &parent, &lastTerm]()
 			{
 				auto t = std::make_unique<TermIntermediate>();
-				t->label = L"cont";
+				t->label = MeNames::cont;
 				t->parent = parent->parent;
 				termsPtr = &t->children;
 				parent = t.get();

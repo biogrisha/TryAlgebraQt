@@ -14,9 +14,10 @@ namespace TryAlgebraCore::Trs
 	class BinaryOperatorParser
 	{
 	public:
-		void apply(std::vector<std::unique_ptr<TermIntermediate>>& subj);
+		void applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj);
+		void apply(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
 		void addRules(const std::wstring& rawStr);
 	private:
-		RewritingRule m_rule;
+		std::vector<RewritingRule> m_rules;
 	};
 }
