@@ -54,7 +54,9 @@ add_library(TryAlgebraCore STATIC
 	TRS/ToProperTerm.cpp
 	TRS/BinaryOperatorParser.h
 	TRS/BinaryOperatorParser.cpp
-  )
+	TRS/TokenMatcher.h
+	TRS/TokenMatcher.cpp
+)
 
 # Set include directories
 target_include_directories(TryAlgebraCore

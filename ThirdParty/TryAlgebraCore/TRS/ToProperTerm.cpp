@@ -1,4 +1,7 @@
 #include "ToProperTerm.h"
+#include <vector>
+#include "TokenMatcher.h"
+#include <iostream>
 
 namespace TryAlgebraCore::Trs
 {
@@ -15,9 +18,28 @@ namespace TryAlgebraCore::Trs
 
 	void ToProperTerm::setup(const TextBuffer& tb)
 	{
-		if (auto binarySection = getSection(tb, L"binaryop"))
+		std::vector<std::wstring> tokens = {
+			L"-recursiveExhausting",
+			L"-simpleRecursive",
+		};
+
+		TokenMatcher matcher(tokens);
+
+		TextBufferIterator it(tb, 0);
+
+		while (!it.isEnd())
 		{
-			binaryOperatorParser.addRules(binarySection.value());
+			if (auto match = matcher.findNext(it))
+			{
+				const std::wstring& token = tokens[match->tokenIndex];
+				auto from = it.getChId();
+				if (waitToken(it, token))
+				{
+					auto to = it.getChId() - token.size();
+					binaryOperatorParser.addRules(tb.getSubstring(from, to)
+						, token == tokens.back() ? RuleType::SimpleRecursive : RuleType::RecursiveExhausting);
+				}
+			}
 		}
 	}
 

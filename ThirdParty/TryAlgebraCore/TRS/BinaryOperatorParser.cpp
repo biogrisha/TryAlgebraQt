@@ -7,13 +7,23 @@ namespace TryAlgebraCore::Trs
 	{
 		for (auto& rule : m_rules)
 		{
-			apply(subj, rule);
+			switch (rule.type)
+			{
+			case RuleType::RecursiveExhausting:
+				recursiveExhausting(subj, rule);
+				break;
+			case RuleType::SimpleRecursive:
+				simpleRecursive(subj, rule);
+				break;
+			default:
+				break;
+			}
 		}
 	}
 
-	void BinaryOperatorParser::apply(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
+	void BinaryOperatorParser::simpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
 	{
-		if (subj.empty() || subj.back()->label == MeNames::term + MeNames::termToken)
+		if (subj.empty())
 		{
 			return;
 		}
@@ -31,19 +41,66 @@ namespace TryAlgebraCore::Trs
 				var->variableMeta->captured = {};
 			}
 		}
+		if (subj.back()->parent && subj.back()->parent->label == MeNames::term + MeNames::termFunction)
+		{
+			for (int i = 1; i < subj.size(); ++i)
+			{
+				simpleRecursive(subj[i]->children, rule);
+			}
+			return;
+		}
 		for (auto& t : subj)
 		{
-			apply(t->children, rule);
+			simpleRecursive(t->children, rule);
 		}
 	}
 
-	void BinaryOperatorParser::addRules(const std::wstring& rawStr)
+	void BinaryOperatorParser::recursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
+	{
+		if (subj.empty() || subj.back()->label == MeNames::term + MeNames::termToken)
+		{
+			return;
+		}
+		if (subj.back()->label != MeNames::cont)
+		{
+			while (tryMatch(rule.bundles, rule.from, subj))
+			{
+				std::vector<std::unique_ptr<TermIntermediate>> tmp;
+				copyTermIntermediate(rule.to, tmp);
+				expandVars(tmp);
+				subj = std::move(tmp);
+				for (auto* var : rule.variables)
+				{
+					var->variableMeta->captured = {};
+				}
+			}
+			for (auto* var : rule.variables)
+			{
+				var->variableMeta->captured = {};
+			}
+		}
+		if (subj.back()->parent && subj.back()->parent->label == MeNames::term + MeNames::termFunction)
+		{
+			for (int i = 1; i < subj.size(); ++i)
+			{
+				recursiveExhausting(subj[i]->children, rule);
+			}
+			return;
+		}
+		for (auto& t : subj)
+		{
+			recursiveExhausting(t->children, rule);
+		}
+	}
+
+	void BinaryOperatorParser::addRules(const std::wstring& rawStr, RuleType type)
 	{
 		auto terms = parseToTermIntermediate(rawStr);
 		int i = 0;
 		while (i < terms.size())
 		{
 			RewritingRule rule;
+			rule.type = type;
 			for (; i < terms.size(); ++i)
 			{
 				if (terms[i]->label == L" " || terms[i]->label == L"\n")

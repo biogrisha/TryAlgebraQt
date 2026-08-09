@@ -729,6 +729,7 @@ namespace TryAlgebraCore::Trs
 			newItem->isPattern = term->isPattern;
 			newItem->isVariable = term->isVariable;
 			newItem->variableMeta = term->variableMeta;
+			newItem->parent = parent;
 			copyTermIntermediate(term->children, newItem->children, newItem.get());
 		}
 	}
