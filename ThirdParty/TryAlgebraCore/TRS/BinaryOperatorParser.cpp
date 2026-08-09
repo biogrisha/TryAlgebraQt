@@ -13,13 +13,12 @@ namespace TryAlgebraCore::Trs
 
 	void BinaryOperatorParser::apply(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
 	{
-		if (subj.empty())
+		if (subj.empty() || subj.back()->label == MeNames::term + MeNames::termToken)
 		{
 			return;
 		}
 		if (subj.back()->label != MeNames::cont)
 		{
-
 			if (tryMatch(rule.bundles, rule.from, subj))
 			{
 				std::vector<std::unique_ptr<TermIntermediate>> tmp;

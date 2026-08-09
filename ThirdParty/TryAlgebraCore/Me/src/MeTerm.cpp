@@ -4,6 +4,17 @@
 
 namespace TryAlgebraCore
 {
+	void MeTerm::setMeta(const std::wstring& meta)
+	{
+		if (meta == MeNames::termFunction)
+		{
+			m_type = Type::Function;
+		}
+		else if (meta == MeNames::termToken)
+		{
+			m_type = Type::Token;
+		}
+	}
 
 	void MeTerm::calculate(VisualToolkit* visual_toolkit)
 	{
@@ -25,7 +36,7 @@ namespace TryAlgebraCore
 	void MeTerm::draw(VisualToolkit* visual_toolkit)
 	{
 		FRectInst rect;
-		rect.Color = { 1,0,1,0.5 };
+		rect.Color = m_type == Type::Function ? glm::vec4{ 1, 0, 1, 0.5 } : glm::vec4{ 0, 1, 1, 0.5 };
 
 		rect.Pos = getPos();
 		rect.Size = getSize();

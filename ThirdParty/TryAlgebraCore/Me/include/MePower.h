@@ -4,23 +4,14 @@
 
 namespace TryAlgebraCore
 {
-	class MeTerm : public MeBase
+	class MePower : public MeBase
 	{
 		TYPED_CLASS1(MeBase)
-	private:
-		enum class Type
-		{
-			Function,
-			Token
-		};
 	public:
-		void setMeta(const std::wstring& meta) override;
 		void calculate(VisualToolkit* visual_toolkit) override;
-		void draw(VisualToolkit* visual_toolkit) override;
 		void step(StepDir dir, StepFrom step_from, MePath& path) override;
 		std::wstring getName() override;
 	private:
 		FGlyphData m_glyph;
-		Type m_type;
 	};
 }

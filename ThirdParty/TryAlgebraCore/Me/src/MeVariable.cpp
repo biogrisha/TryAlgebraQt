@@ -28,49 +28,7 @@ namespace TryAlgebraCore
 
 	void MeVariable::step(StepDir dir, StepFrom step_from, MePath& path)
 	{
-		//handling container selection
-		if (step_from == StepFrom::inside)
-		{
-			path.pop_back();
-			if (dir == StepDir::left || dir == StepDir::up)
-			{
-				path.pop_back();
-				MePos& me_pos = std::get<MePos>(path.back());
-				path.back() = LeafPos(me_pos.from);
-
-			}
-			else if (dir == StepDir::right || dir == StepDir::down)
-			{
-				path.pop_back();
-				MePos& me_pos = std::get<MePos>(path.back());
-				path.back() = LeafPos(me_pos.to);
-
-			}
-		}
-		else if (step_from == StepFrom::outside)
-		{
-			//path points at this
-			path.back() = MePos(getChFrom(), getChTo());
-			if (dir == StepDir::left)
-			{
-				auto& second_cont = getChildren()[0];
-				auto& cont_children = second_cont->getChildren();
-				path.push_back(ContPos(second_cont->getChFrom()));
-				if (cont_children.empty())
-				{
-					path.push_back(LeafPos(second_cont->getChFrom()));
-				}
-				else
-				{
-					path.push_back(LeafPos(cont_children.back()->getChTo()));
-				}
-			}
-			else if (dir == StepDir::right)
-			{
-				path.push_back(ContPos(getChildren()[0]->getChFrom()));
-				path.push_back(LeafPos(getChildren()[0]->getChFrom()));
-			}
-		}
+		MeHelpers::defaultStep(this, dir, step_from, path);
 	}
 
 	std::wstring MeVariable::getName()

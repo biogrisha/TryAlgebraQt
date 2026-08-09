@@ -41,11 +41,11 @@ namespace TryAlgebraCore
 
 	void MeContainer::draw(VisualToolkit* vt)
 	{
-		FRectInst rect;
-		rect.Color = { 1,1,1,0.5 };
-		rect.Pos = getPos();
-		rect.Size = getSize();
-		vt->mdocState->at(1).addRectangle(rect);
+		//FRectInst rect;
+		//rect.Color = { 1,1,1,0.5 };
+		//rect.Pos = getPos();
+		//rect.Size = getSize();
+		//vt->mdocState->at(1).addRectangle(rect);
 		MeBase::draw(vt);
 	}
 

@@ -6,6 +6,7 @@
 #include <Me/include/MeFromTo.h>
 #include <Me/include/MeVariable.h>
 #include <Me/include/MeTerm.h>
+#include <Me/include/MePower.h>
 
 namespace TryAlgebraCore
 {
@@ -31,6 +32,11 @@ namespace TryAlgebraCore
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeTerm>();
+			});
+		m_factory.emplace(MeNames::power,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MePower>();
 			});
 	}
 
