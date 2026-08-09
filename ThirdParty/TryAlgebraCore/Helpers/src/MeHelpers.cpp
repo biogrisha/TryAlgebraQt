@@ -432,6 +432,99 @@ namespace TryAlgebraCore
 		}
 	}
 
+	void MeHelpers::defaultStepHorizontal(MeBase* me, StepDir dir, StepFrom step_from, MePath& path)
+	{
+		if (step_from == StepFrom::inside)
+		{
+			path.pop_back();
+			auto* contPos = std::get_if<ContPos>(&path.back());
+			assert(contPos != nullptr);
+			int contI = MeHelpers::contIndByPos(contPos->pos, me).value();
+			if (dir == StepDir::left)
+			{
+				if (contI == 0)
+				{
+					path.pop_back();
+					auto* mePos = std::get_if<MePos>(&path.back());
+					assert(mePos != nullptr);
+					LeafPos leafPos;
+					leafPos.pos = mePos->from;
+					path.back() = leafPos;
+					return;
+				}
+				else
+				{
+					contPos->pos = me->getChildren()[contI - 1]->getChFrom();
+					path.push_back(LeafPos{ contPos->pos });
+					return;
+				}
+			}
+			else if (dir == StepDir::right)
+			{
+				if (contI == me->getChildren().size() - 1)
+				{
+					path.pop_back();
+					auto* mePos = std::get_if<MePos>(&path.back());
+					assert(mePos != nullptr);
+					LeafPos leafPos;
+					leafPos.pos = mePos->to;
+					path.back() = leafPos;
+					return;
+				}
+				else
+				{
+					contPos->pos = me->getChildren()[contI + 1]->getChFrom();
+					path.push_back(LeafPos{ contPos->pos });
+					return;
+				}
+			}
+			else if (dir == StepDir::up)
+			{
+				path.pop_back();
+				auto* mePos = std::get_if<MePos>(&path.back());
+				assert(mePos != nullptr);
+				LeafPos leafPos;
+				leafPos.pos = mePos->from;
+				path.back() = leafPos;
+				return;
+			}
+			else if (dir == StepDir::down)
+			{
+				path.pop_back();
+				auto* mePos = std::get_if<MePos>(&path.back());
+				assert(mePos != nullptr);
+				LeafPos leafPos;
+				leafPos.pos = mePos->to;
+				path.back() = leafPos;
+				return;
+			}
+		}
+		else if (step_from == StepFrom::outside)
+		{
+			//path points at this
+			path.back() = MePos(me->getChFrom(), me->getChTo());
+			if (dir == StepDir::left)
+			{
+				auto& second_cont = me->getChildren().back();
+				auto& cont_children = second_cont->getChildren();
+				path.push_back(ContPos(second_cont->getChFrom()));
+				if (cont_children.empty())
+				{
+					path.push_back(LeafPos(second_cont->getChFrom()));
+				}
+				else
+				{
+					path.push_back(LeafPos(cont_children.back()->getChTo()));
+				}
+			}
+			else if (dir == StepDir::right)
+			{
+				path.push_back(ContPos(me->getChildren()[0]->getChFrom()));
+				path.push_back(LeafPos(me->getChildren()[0]->getChFrom()));
+			}
+		}
+	}
+
 	void MeHelpers::alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x)
 	{
 		for (auto& me : mes)

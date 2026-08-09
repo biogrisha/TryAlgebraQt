@@ -46,7 +46,6 @@ namespace TryAlgebraCore
 
 	void MeTerm::step(StepDir dir, StepFrom step_from, MePath& path)
 	{
-		//handling container selection
 		if (step_from == StepFrom::inside)
 		{
 			path.pop_back();

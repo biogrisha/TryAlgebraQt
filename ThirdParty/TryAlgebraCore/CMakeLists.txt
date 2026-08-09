@@ -24,6 +24,7 @@ add_library(TryAlgebraCore STATIC
 	Me/include/MeVariable.h
 	Me/include/MeTerm.h
 	Me/include/MePower.h
+	Me/include/MeFraction.h
 	
 
 	Me/src/MeBase.cpp
@@ -36,6 +37,7 @@ add_library(TryAlgebraCore STATIC
 	Me/src/MeVariable.cpp
 	Me/src/MeTerm.cpp
 	Me/src/MePower.cpp
+	Me/src/MeFraction.cpp
 	
 
 	Helpers/include/MeHelpers.h
@@ -52,7 +54,7 @@ add_library(TryAlgebraCore STATIC
 	TRS/ToProperTerm.cpp
 	TRS/BinaryOperatorParser.h
 	TRS/BinaryOperatorParser.cpp
- )
+  )
 
 # Set include directories
 target_include_directories(TryAlgebraCore

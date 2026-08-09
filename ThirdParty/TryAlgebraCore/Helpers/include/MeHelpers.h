@@ -45,6 +45,7 @@ namespace TryAlgebraCore
 		static bool getPathAtPos(MeBase* from, const glm::vec2& pos, MePath& path);
 		static MeBase* getByTreePath(MeBase* from, const std::vector<size_t>& path);
 		static void defaultStep(MeBase* me, StepDir dir, StepFrom step_from, MePath& path);
+		static void defaultStepHorizontal(MeBase* me, StepDir dir, StepFrom step_from, MePath& path);
 		//me arrangement
 		static void alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x);
 

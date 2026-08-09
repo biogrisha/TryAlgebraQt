@@ -11,7 +11,7 @@ public:
 	void addGlyph(const FGlyphData& glyph);
 	void addSprite(const FSpriteInstByName& sprite);
 	void addRectangle(const FRectInst& rect);
-	void addLine(const LineChain& lineChain);
+	void addLine(LineChain lineChain);
 	void markClean();
 	bool dirty();
 	const std::vector<FGlyphData>& text() const;

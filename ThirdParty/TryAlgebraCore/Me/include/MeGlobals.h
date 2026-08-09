@@ -27,6 +27,9 @@ namespace TryAlgebraCore
 		inline std::wstring termToken = L"tok";
 
 		inline std::wstring power = L"pw";
+
+		inline std::wstring fraction = L"fr";
+
 		inline std::wstring makeMe(const std::wstring& name, const std::wstring& meta, const size_t cont_num)
 		{
 			std::wstring res;
@@ -61,6 +64,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Term1", makeMe(term, termFunction, 2));
 				res.emplace_back(L"Token", makeMe(term, termToken, 1));
 				res.emplace_back(L"Power", makeMe(power, L"", 1));
+				res.emplace_back(L"Fraction", makeMe(fraction, L"", 2));
 			}
 			return res;
 		}

@@ -28,9 +28,9 @@ void Layer::addRectangle(const FRectInst& rect)
 	m_dirty = true;
 }
 
-void Layer::addLine(const LineChain& lineChain)
+void Layer::addLine(LineChain lineChain)
 {
-	m_lines.push_back(lineChain);
+	m_lines.push_back(std::move(lineChain));
 	m_dirty = true;
 }
 
