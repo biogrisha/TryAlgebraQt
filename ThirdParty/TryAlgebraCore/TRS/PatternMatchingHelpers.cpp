@@ -622,7 +622,7 @@ namespace TryAlgebraCore::Trs
 			return DioStatus::exceeded;
 		}
 
-		for (int i = 1; ; ++i)
+		for (int i = 1; eq.initVars[pos].var->isMultiVariable || i < 2; ++i)
 		{
 			eq.initVars[pos].var->captureSizeNondet = i;
 			auto status = solve(pos + 1, eq, remainder - (i * eq.initVars[pos].coef), callback);
@@ -763,10 +763,16 @@ namespace TryAlgebraCore::Trs
 	{
 		for (auto& t : pat)
 		{
-			if (t->label == MeNames::variable)
+			if (t->label == MeNames::variable + MeNames::variableMulti)
 			{
 				t->isVariable = true;
 				t->variableMeta = std::make_shared<VariableMeta>();
+			}
+			else if (t->label == MeNames::variable + MeNames::variableUni)
+			{
+				t->isVariable = true;
+				t->variableMeta = std::make_shared<VariableMeta>();
+				t->variableMeta->isMultiVariable = false;
 			}
 			else
 			{

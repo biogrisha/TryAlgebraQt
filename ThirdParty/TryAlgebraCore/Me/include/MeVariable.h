@@ -8,11 +8,13 @@ namespace TryAlgebraCore
 	{
 		TYPED_CLASS1(MeBase)
 	public:
-		virtual void calculate(VisualToolkit* visual_toolkit) override;
-		virtual void draw(VisualToolkit* visual_toolkit) override;
-		virtual void step(StepDir dir, StepFrom step_from, MePath& path) override;
-		virtual std::wstring getName() override;
+		void setMeta(const std::wstring& meta) override;
+		void calculate(VisualToolkit* visual_toolkit) override;
+		void draw(VisualToolkit* visual_toolkit) override;
+		void step(StepDir dir, StepFrom step_from, MePath& path) override;
+		std::wstring getName() override;
 	private:
 		FGlyphData m_glyph;
+		bool m_isMultiVariable = true;
 	};
 }

@@ -14,6 +14,7 @@ namespace TryAlgebraCore::Trs
 		std::span<std::unique_ptr<TermIntermediate>> captured;
 		bool isCaptured = false;
 		int captureSizeNondet = 0;
+		bool isMultiVariable = true;
 	};
 
 	struct DioEqVar

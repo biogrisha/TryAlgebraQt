@@ -14,6 +14,7 @@ namespace PatternMatchingTest
 		std::span<std::unique_ptr<TermTest>> captured;
 		bool isCaptured = false;
 		int captureSizeNondet = 0;
+		bool isMultiVariable = true;
 	};
 
 	struct EqVar
@@ -33,7 +34,6 @@ namespace PatternMatchingTest
 
 	enum class Status
 	{
-		finished,
 		exceeded,
 		succeeded,
 		solutionFound
@@ -913,15 +913,11 @@ namespace PatternMatchingTest
 			return Status::exceeded;
 		}
 
-		for (int i = 1; ; ++i)
+		for (int i = 1; eq.initVars[pos].var->isMultiVariable || i < 2; ++i)
 		{
 			eq.initVars[pos].var->captureSizeNondet = i;
 			auto status = solve(pos + 1, eq, remainder - (i * eq.initVars[pos].coef), callback);
-			if (status == Status::finished)
-			{
-				return Status::finished;
-			}
-			else if (status == Status::exceeded)
+			if (status == Status::exceeded)
 			{
 				break;
 			}
@@ -1018,6 +1014,13 @@ namespace PatternMatchingTest
 			term->variableMeta = std::make_shared<VariableMeta>();
 			return;
 		}
+		else if (term->label[0] == L'~')
+		{
+			term->isVariable = true;
+			term->variableMeta = std::make_shared<VariableMeta>();
+			term->variableMeta->isMultiVariable = false;
+			return;
+		}
 		for (const auto& child : term->children)
 		{
 			markVariables(child);
@@ -1077,7 +1080,7 @@ namespace PatternMatchingTest
 	}
 	MYTEST(VariatorTest)
 	{
-		auto subjStr = L"t(f(1,1,1,1,1,1,1,1,1,1,1),1,1,1,1,1,1,1,1,1,1,g(`z,1,1,1,1,1,f(1,1,1,1,1,1,1,1,1,1),1,1,1,1,1,1,1,1))";
+		auto subjStr = L"t(~y,`x11,`x12,`x13,a,f(`x31,`x32,e,~y2,f,`x31,`x32),a,`x21,`x22,`x23,`x24,`x25)";
 		Parser subjParser(subjStr);
 		subjParser.parse();
 		std::unique_ptr<TermTest> subjTerm = std::unique_ptr<TermTest>(subjParser.m_current_term);
@@ -1085,7 +1088,7 @@ namespace PatternMatchingTest
 		markVariables(subjTerm);
 		subj.push_back(std::move(subjTerm));
 
-		auto patStr = L"t(f(`x,`y,`x),1,1,`x,`y,g(`z,1,`x,1,f(`k,1,1,`y),`x,1,1,`x))";
+		auto patStr = L"t(~y,`x1,a,f(`x3,e,~y2,f,`x3),a,`x2)";
 		Parser patParser(patStr);
 		patParser.parse();
 		std::unique_ptr<TermTest> patTerm = std::unique_ptr<TermTest>(patParser.m_current_term);

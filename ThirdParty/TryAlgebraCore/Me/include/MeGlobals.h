@@ -21,6 +21,9 @@ namespace TryAlgebraCore
 		inline std::wstring cont = L"ct";
 
 		inline std::wstring variable = L"vr";
+		inline std::wstring variableMulti = L"mlt";
+		inline std::wstring variableUni = L"uni";
+
 
 		inline std::wstring term = L"trm";
 		inline std::wstring termFunction = L"f";
@@ -57,7 +60,8 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Integral", makeMe(from_to, integral, 2));
 				res.emplace_back(L"Double integral", makeMe(from_to, integral2, 2));
 				res.emplace_back(L"Triple integral", makeMe(from_to, integral3, 2));
-				res.emplace_back(L"Variable", makeMe(variable, L"", 1));
+				res.emplace_back(L"Multi variable", makeMe(variable, variableMulti, 1));
+				res.emplace_back(L"Uni variable", makeMe(variable, variableUni, 1));
 				res.emplace_back(L"For all", L"∀");
 				res.emplace_back(L"Exists", L"∃");
 				res.emplace_back(L"Term2", makeMe(term, termFunction, 3));
