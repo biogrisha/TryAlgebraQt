@@ -125,6 +125,14 @@ namespace TryAlgebraCore::Trs
 		//create block for them
 		Block block;
 		block.pat = std::span(pat).subspan(varStart, varEnd - varStart);
+		for (auto& var : block.pat)
+		{
+			if (var->isVariable && var->variableMeta->type == VariableMeta::Type::ZeroMulti)
+			{
+				continue;
+			}
+			++block.minPatCapture;
+		}
 		blocks.push_back(block);
 
 		//recursive call for all patterns on the left and on the right
@@ -392,10 +400,6 @@ namespace TryAlgebraCore::Trs
 	{
 		int subjStart = -1;
 		int subjEnd = -1;
-		if (pat.size() > subj.size())
-		{
-			return false;
-		}
 		{
 			//compare left border
 			int subjI = 0;
@@ -491,13 +495,9 @@ namespace TryAlgebraCore::Trs
 				}
 				--subjI;
 			}
-			if (subjEnd <= subjStart)
-			{
-				return false;
-			}
 		}
 		Block* block = Bundle::findBlock(childBundles, pat.back()->parent);
-		if (block->pat.size() > subjEnd - subjStart)
+		if (block->minPatCapture > subjEnd - subjStart)
 		{
 			return false;
 		}
@@ -617,20 +617,17 @@ namespace TryAlgebraCore::Trs
 			}
 		}
 
-		if (remainder <= 0)
+		if (remainder < 0 || remainder == 0 && eq.initVars[pos].var->type != VariableMeta::Type::ZeroMulti)
 		{
 			return DioStatus::exceeded;
 		}
 
-		for (int i = 1; eq.initVars[pos].var->isMultiVariable || i < 2; ++i)
+		for (int i = eq.initVars[pos].var->type == VariableMeta::Type::ZeroMulti ? 0 : 1;
+			eq.initVars[pos].var->type != VariableMeta::Type::Uni || i < 2; ++i)
 		{
 			eq.initVars[pos].var->captureSizeNondet = i;
 			auto status = solve(pos + 1, eq, remainder - (i * eq.initVars[pos].coef), callback);
-			if (status == DioStatus::finished)
-			{
-				return DioStatus::finished;
-			}
-			else if (status == DioStatus::exceeded)
+			if (status == DioStatus::exceeded)
 			{
 				break;
 			}
@@ -764,16 +761,23 @@ namespace TryAlgebraCore::Trs
 	{
 		for (auto& t : pat)
 		{
-			if (t->label == MeNames::variable + MeNames::variableMulti)
+			if (t->label == MeNames::variable + MeNames::varZeroMulti)
 			{
 				t->isVariable = true;
 				t->variableMeta = std::make_shared<VariableMeta>();
+				t->variableMeta->type = VariableMeta::Type::ZeroMulti;
 			}
-			else if (t->label == MeNames::variable + MeNames::variableUni)
+			else if (t->label == MeNames::variable + MeNames::varOneMulti)
 			{
 				t->isVariable = true;
 				t->variableMeta = std::make_shared<VariableMeta>();
-				t->variableMeta->isMultiVariable = false;
+				t->variableMeta->type = VariableMeta::Type::OneMulti;
+			}
+			else if (t->label == MeNames::variable + MeNames::varUni)
+			{
+				t->isVariable = true;
+				t->variableMeta = std::make_shared<VariableMeta>();
+				t->variableMeta->type = VariableMeta::Type::Uni;
 			}
 			else
 			{

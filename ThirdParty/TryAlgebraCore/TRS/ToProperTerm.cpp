@@ -8,7 +8,8 @@ namespace TryAlgebraCore::Trs
 	void ToProperTerm::run(const std::wstring& string)
 	{
 		m_terms = parseToTermIntermediate(string);
-		binaryOperatorParser.applyAll(m_terms);
+		m_bracketsParser.apply(m_terms);
+		m_binaryOperatorParser.applyAll(m_terms);
 	}
 
 	const std::vector<std::unique_ptr<TermIntermediate>>& ToProperTerm::get() const
@@ -19,8 +20,8 @@ namespace TryAlgebraCore::Trs
 	void ToProperTerm::setup(const TextBuffer& tb)
 	{
 		std::vector<std::wstring> tokens = {
-			L"-recursiveExhausting",
-			L"-simpleRecursive",
+			L"-ex",
+			L"-rec",
 		};
 
 		TokenMatcher matcher(tokens);
@@ -36,7 +37,7 @@ namespace TryAlgebraCore::Trs
 				if (waitToken(it, token))
 				{
 					auto to = it.getChId() - token.size();
-					binaryOperatorParser.addRules(tb.getSubstring(from, to)
+					m_binaryOperatorParser.addRules(tb.getSubstring(from, to)
 						, token == tokens.back() ? RuleType::SimpleRecursive : RuleType::RecursiveExhausting);
 				}
 			}

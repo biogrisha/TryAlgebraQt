@@ -6,7 +6,18 @@ namespace TryAlgebraCore
 {
 	void MeVariable::setMeta(const std::wstring& meta)
 	{
-		m_isMultiVariable = meta == MeNames::variableMulti;
+		if (meta == MeNames::varUni)
+		{
+			m_type = Type::Uni;
+		}
+		else if (meta == MeNames::varZeroMulti)
+		{
+			m_type = Type::ZeroMulti;
+		}
+		else if (meta == MeNames::varOneMulti)
+		{
+			m_type = Type::OneMulti;
+		}
 	}
 	void MeVariable::calculate(VisualToolkit* visual_toolkit)
 	{
@@ -21,7 +32,20 @@ namespace TryAlgebraCore
 	void MeVariable::draw(VisualToolkit* visual_toolkit)
 	{
 		FRectInst rect;
-		rect.Color = m_isMultiVariable ? glm::vec4{ 1, 1, 0, 0.5 } : glm::vec4{ 0, 1, 1, 0.5 };
+		switch (m_type)
+		{
+		case Type::Uni:
+			rect.Color = { 1,1,0.5,0.8 };
+			break;
+		case Type::ZeroMulti:
+			rect.Color = { 1,0.5,1,0.8 };
+			break;
+		case Type::OneMulti:
+			rect.Color = { 0.5,1,1,0.8 };
+			break;
+		default:
+			break;
+		}
 
 		rect.Pos = getPos();
 		rect.Size = getSize();

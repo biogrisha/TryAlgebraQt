@@ -244,7 +244,7 @@ void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
 		toProperTerm.run(str);
 		TryAlgebraCore::TreeDisplay treeDisplay(vt);
 		treeDisplay.setTree(toProperTerm.get());
-		treeDisplay.move({ 500,20 });
+		treeDisplay.move({ 100,20 });
 		treeDisplay.draw();
 		updateElements(true, true, true);
 	}

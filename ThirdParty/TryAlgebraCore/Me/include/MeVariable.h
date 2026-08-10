@@ -6,6 +6,13 @@ namespace TryAlgebraCore
 {
 	class MeVariable : public MeBase
 	{
+		enum class Type
+		{
+			Uni,
+			ZeroMulti,
+			OneMulti,
+		};
+
 		TYPED_CLASS1(MeBase)
 	public:
 		void setMeta(const std::wstring& meta) override;
@@ -15,6 +22,6 @@ namespace TryAlgebraCore
 		std::wstring getName() override;
 	private:
 		FGlyphData m_glyph;
-		bool m_isMultiVariable = true;
+		Type m_type;
 	};
 }

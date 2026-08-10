@@ -64,6 +64,7 @@ namespace PatternMatchingTest
 
 	struct Block
 	{
+		int minPatCapture = 0;
 		std::span<std::unique_ptr<TermTest>> pat;
 		std::unordered_set<TermTest*> varsRec;
 		std::vector<TermTest*> vars;
@@ -277,6 +278,14 @@ namespace PatternMatchingTest
 		//create block for them
 		Block block;
 		block.pat = std::span(pat).subspan(varStart, varEnd - varStart);
+		for (auto& var : block.pat)
+		{
+			if (var->isVariable && var->variableMeta->type == VariableMeta::Type::ZeroMulti)
+			{
+				continue;
+			}
+			++block.minPatCapture;
+		}
 		blocks.push_back(block);
 
 		//recursive call for all patterns on the left and on the right
@@ -683,10 +692,10 @@ namespace PatternMatchingTest
 	{
 		int subjStart = -1;
 		int subjEnd = -1;
-		if (pat.size() > subj.size())
-		{
-			return false;
-		}
+		//if (pat.size() > subj.size())
+		//{
+		//	return false;
+		//}
 		{
 			//compare left border
 			int subjI = 0;
@@ -782,14 +791,10 @@ namespace PatternMatchingTest
 				}
 				--subjI;
 			}
-			if (subjEnd <= subjStart)
-			{
-				return false;
-			}
 		}
 		Block* block = Bundle::findBlock(childBundles, pat.back()->parent);
 		assert(block);
-		if (block->pat.size() > subjEnd - subjStart)
+		if (block->minPatCapture > subjEnd - subjStart)
 		{
 			return false;
 		}
@@ -913,7 +918,7 @@ namespace PatternMatchingTest
 			}
 		}
 
-		if (remainder <= 0)
+		if (remainder < 0 || remainder == 0 && eq.initVars[pos].var->type != VariableMeta::Type::ZeroMulti)
 		{
 			return Status::exceeded;
 		}
@@ -1094,7 +1099,7 @@ namespace PatternMatchingTest
 	}
 	MYTEST(VariatorTest)
 	{
-		auto subjStr = L"t(_y,_y1,`x11,`x12,`x13,a,f(`x31,`x32,e,~y2,f,`x31,`x32),a,`x11,`x12,`x13)";
+		auto subjStr = L"t(h,t,h,f,^(_y1),_y)";
 		Parser subjParser(subjStr);
 		subjParser.parse();
 		std::unique_ptr<TermTest> subjTerm = std::unique_ptr<TermTest>(subjParser.m_current_term);
@@ -1102,7 +1107,7 @@ namespace PatternMatchingTest
 		markVariables(subjTerm);
 		subj.push_back(std::move(subjTerm));
 
-		auto patStr = L"t(_y,`x1,a,f(`x3,e,~y2,f,`x3),a,`x1)";
+		auto patStr = L"t(_x,~z,^(_y1),_y)";
 		Parser patParser(patStr);
 		patParser.parse();
 		std::unique_ptr<TermTest> patTerm = std::unique_ptr<TermTest>(patParser.m_current_term);

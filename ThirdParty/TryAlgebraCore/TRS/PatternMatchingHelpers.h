@@ -14,7 +14,12 @@ namespace TryAlgebraCore::Trs
 		std::span<std::unique_ptr<TermIntermediate>> captured;
 		bool isCaptured = false;
 		int captureSizeNondet = 0;
-		bool isMultiVariable = true;
+		enum class Type
+		{
+			ZeroMulti,
+			OneMulti,
+			Uni,
+		} type = Type::OneMulti;
 	};
 
 	struct DioEqVar
@@ -34,7 +39,6 @@ namespace TryAlgebraCore::Trs
 
 	enum class DioStatus
 	{
-		finished,
 		exceeded,
 		succeeded,
 		solutionFound
@@ -60,6 +64,7 @@ namespace TryAlgebraCore::Trs
 
 	struct Block
 	{
+		int minPatCapture = 0;
 		std::span<std::unique_ptr<TermIntermediate>> pat;
 		std::unordered_set<TermIntermediate*> varsRec;
 		std::vector<TermIntermediate*> vars;
