@@ -1,15 +1,34 @@
 #include "ToProperTerm.h"
 #include <vector>
 #include "TokenMatcher.h"
-#include <iostream>
 
 namespace TryAlgebraCore::Trs
 {
 	void ToProperTerm::run(const std::wstring& string)
 	{
-		m_terms = parseToTermIntermediate(string);
-		m_bracketsParser.apply(m_terms);
-		m_binaryOperatorParser.applyAll(m_terms);
+		IdentityIntermediate equation = std::move(parseIdentities(string).back());
+		m_terms = std::move(equation.lhs);
+		markVariables(m_terms);
+		m_transformer.applyAll(m_terms);
+		m_transformer.applyAll(equation.rhs);
+
+		const auto& ids = m_trsIdentitiesParser.identities();
+
+		std::vector<Identity> trsIdentities;
+		for (const auto& id : ids)
+		{
+			auto& newId = trsIdentities.emplace_back();
+			Term* lhsTerm = nullptr;
+			toTerm(id.lhs.back(), newId.t_lhs);
+			toTerm(id.rhs.back(), newId.t_rhs);
+		}
+		Term* trsLhs = nullptr;
+		Term* trsRhs = nullptr;
+		toTerm(m_terms.back(), trsLhs);
+		toTerm(equation.rhs.back(), trsRhs);
+
+		Trs trs;
+		trs.func(trsIdentities, trsLhs, trsRhs);
 	}
 
 	const std::vector<std::unique_ptr<TermIntermediate>>& ToProperTerm::get() const
@@ -22,6 +41,7 @@ namespace TryAlgebraCore::Trs
 		std::vector<std::wstring> tokens = {
 			L"-ex",
 			L"-rec",
+			L"-rules"
 		};
 
 		TokenMatcher matcher(tokens);
@@ -37,10 +57,36 @@ namespace TryAlgebraCore::Trs
 				if (waitToken(it, token))
 				{
 					auto to = it.getChId() - token.size();
-					m_binaryOperatorParser.addRules(tb.getSubstring(from, to)
-						, token == tokens.back() ? RuleType::SimpleRecursive : RuleType::RecursiveExhausting);
+					if (token == L"-rules")
+					{
+						m_trsIdentitiesParser.setup(tb.getSubstring(from, to));
+					}
+					else
+					{
+						m_transformer.addRules(tb.getSubstring(from, to)
+							, token == tokens.back() ? RuleType::SimpleRecursive : RuleType::RecursiveExhausting);
+					}
 				}
 			}
+		}
+		m_trsIdentitiesParser.refine(m_transformer);
+	}
+
+	void ToProperTerm::toTerm(const std::unique_ptr<TermIntermediate>& from, Term*& to, Term* parent)
+	{
+		to = new Term;
+		to->variable = from->isVariable;
+		to->label = from->label;
+		to->e_rep = to;
+		to->e_reps.push_back(to);
+		if (parent)
+		{
+			to->parents.insert(parent);
+		}
+		for (auto& ch : from->children)
+		{
+			Term*& childTerm = to->children.emplace_back(nullptr);
+			toTerm(ch, childTerm, to);
 		}
 	}
 
@@ -82,4 +128,5 @@ namespace TryAlgebraCore::Trs
 		}
 		return progress = token.size();
 	}
+
 }

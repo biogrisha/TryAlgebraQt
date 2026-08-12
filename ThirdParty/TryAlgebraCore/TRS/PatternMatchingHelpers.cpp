@@ -761,19 +761,19 @@ namespace TryAlgebraCore::Trs
 	{
 		for (auto& t : pat)
 		{
-			if (t->label == MeNames::variable + MeNames::varZeroMulti)
+			if (t->label == MeNames::variable + L'_' + MeNames::varZeroMulti)
 			{
 				t->isVariable = true;
 				t->variableMeta = std::make_shared<VariableMeta>();
 				t->variableMeta->type = VariableMeta::Type::ZeroMulti;
 			}
-			else if (t->label == MeNames::variable + MeNames::varOneMulti)
+			else if (t->label == MeNames::variable + L'_' + MeNames::varOneMulti)
 			{
 				t->isVariable = true;
 				t->variableMeta = std::make_shared<VariableMeta>();
 				t->variableMeta->type = VariableMeta::Type::OneMulti;
 			}
-			else if (t->label == MeNames::variable + MeNames::varUni)
+			else if (t->label == MeNames::variable + L'_' + MeNames::varUni)
 			{
 				t->isVariable = true;
 				t->variableMeta = std::make_shared<VariableMeta>();
@@ -803,6 +803,7 @@ namespace TryAlgebraCore::Trs
 			};
 		parser.addMeta = [&lastTerm](const std::wstring_view& str)
 			{
+				lastTerm->label += L'_';
 				lastTerm->label += str;
 			};
 		parser.addGlyph = [&termsPtr, &parent, &lastTerm](wchar_t g)
@@ -844,4 +845,42 @@ namespace TryAlgebraCore::Trs
 		return res;
 	}
 
+	std::vector<IdentityIntermediate> parseIdentities(const std::wstring& str)
+	{
+		std::vector<IdentityIntermediate> res;
+		auto terms = parseToTermIntermediate(str);
+		int i = 0;
+		while (i < terms.size())
+		{
+			IdentityIntermediate& id = res.emplace_back();
+			for (; i < terms.size(); ++i)
+			{
+				if (terms[i]->label == L" " || terms[i]->label == L"\n")
+				{
+					continue;
+				}
+				if (terms[i]->label == L"=")
+				{
+					++i;
+					break;
+				}
+				id.lhs.push_back(std::move(terms[i]));
+			}
+			for (; i < terms.size(); ++i)
+			{
+				if (terms[i]->label == L" ")
+				{
+					continue;
+				}
+				if (terms[i]->label == L"\n")
+				{
+					++i;
+					break;
+				}
+
+				id.rhs.push_back(std::move(terms[i]));
+			}
+		}
+		return res;
+	}
 }

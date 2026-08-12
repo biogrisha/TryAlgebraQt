@@ -58,6 +58,8 @@ add_library(TryAlgebraCore STATIC
 	TRS/TokenMatcher.cpp
 	TRS/BracketsParser.h
 	TRS/BracketsParser.cpp
+	TRS/TrsParser.h
+	TRS/TrsParser.cpp
 )
 
 # Set include directories

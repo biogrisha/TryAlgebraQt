@@ -66,8 +66,8 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Uni variable", makeMe(variable, varUni, 1));
 				res.emplace_back(L"For all", L"∀");
 				res.emplace_back(L"Exists", L"∃");
-				res.emplace_back(L"Term2", makeMe(term, termFunction, 3));
-				res.emplace_back(L"Term1", makeMe(term, termFunction, 2));
+				res.emplace_back(L"Term2", makeMe(term, L"2", 3));
+				res.emplace_back(L"Term1", makeMe(term, L"1", 2));
 				res.emplace_back(L"Token", makeMe(term, termToken, 1));
 				res.emplace_back(L"Power", makeMe(power, L"", 1));
 				res.emplace_back(L"Fraction", makeMe(fraction, L"", 2));

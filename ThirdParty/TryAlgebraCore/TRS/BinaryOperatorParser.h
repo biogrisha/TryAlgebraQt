@@ -1,5 +1,6 @@
 #pragma once
 #include "PatternMatchingHelpers.h"
+#include "BracketsParser.h"
 
 namespace TryAlgebraCore::Trs
 {
@@ -19,14 +20,16 @@ namespace TryAlgebraCore::Trs
 		RuleType type;
 	};
 
-	class BinaryOperatorParser
+	class Transformer
 	{
 	public:
 		void applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 		void simpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
 		void recursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
 		void addRules(const std::wstring& rawStr, RuleType type);
+		void removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 	private:
 		std::vector<RewritingRule> m_rules;
+		BracketsParser bracketsParser;
 	};
 }

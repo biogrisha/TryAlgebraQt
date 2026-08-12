@@ -56,4 +56,21 @@ namespace TryAlgebraCore::Trs
 			}
 		}
 	}
+
+	void BracketsParser::removeBrackets(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	{
+		for (int i = 0; i < subj.size(); ++i)
+		{
+			removeBrackets(subj[i]->children);
+			if (subj[i]->label == L"br")
+			{
+				subj.insert(
+					subj.begin() + i + 1,
+					std::make_move_iterator(subj[i]->children.begin()),
+					std::make_move_iterator(subj[i]->children.end())
+				);
+				subj.erase(subj.begin() + i);
+			}
+		}
+	}
 }

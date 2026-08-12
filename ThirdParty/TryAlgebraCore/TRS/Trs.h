@@ -100,7 +100,7 @@ namespace TryAlgebraCore::Trs
 	class Trs
 	{
 	public:
-		void func(std::vector<Identity>& identities, const std::wstring& lhs, const std::wstring& rhs);
+		void func(std::vector<Identity>& identities, Term* t_lhs, Term* t_rhs);
 	private:
 		TermsStorage ts;
 	};
@@ -129,4 +129,5 @@ namespace TryAlgebraCore::Trs
 
 	void updateCongruence(Term* t, TermsStorage& storage);
 
+	void generateTermStr(Term* t);
 }

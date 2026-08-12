@@ -62,6 +62,12 @@ namespace TryAlgebraCore::Trs
 		}
 	};
 
+	struct IdentityIntermediate
+	{
+		std::vector<std::unique_ptr<TermIntermediate>> lhs;
+		std::vector<std::unique_ptr<TermIntermediate>> rhs;
+	};
+
 	struct Block
 	{
 		int minPatCapture = 0;
@@ -122,6 +128,7 @@ namespace TryAlgebraCore::Trs
 	void markVariables(std::vector<std::unique_ptr<TermIntermediate>>& pat);
 
 	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring& str);
+	std::vector<IdentityIntermediate> parseIdentities(const std::wstring& str);
 
 	bool tryMatch(std::vector<Bundle*>& childBundles
 		, std::vector<std::unique_ptr<TermIntermediate>>& pat

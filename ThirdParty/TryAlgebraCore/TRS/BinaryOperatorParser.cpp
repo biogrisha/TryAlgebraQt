@@ -3,8 +3,9 @@
 
 namespace TryAlgebraCore::Trs
 {
-	void BinaryOperatorParser::applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	void Transformer::applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj)
 	{
+		bracketsParser.apply(subj);
 		for (auto& rule : m_rules)
 		{
 			switch (rule.type)
@@ -19,9 +20,11 @@ namespace TryAlgebraCore::Trs
 				break;
 			}
 		}
+		bracketsParser.removeBrackets(subj);
+		removeContainers(subj);
 	}
 
-	void BinaryOperatorParser::simpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
+	void Transformer::simpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
 	{
 		if (subj.empty())
 		{
@@ -55,7 +58,7 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	void BinaryOperatorParser::recursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
+	void Transformer::recursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
 	{
 		if (subj.empty() || subj.back()->label == MeNames::term + MeNames::termToken)
 		{
@@ -93,40 +96,15 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	void BinaryOperatorParser::addRules(const std::wstring& rawStr, RuleType type)
+	void Transformer::addRules(const std::wstring& rawStr, RuleType type)
 	{
-		auto terms = parseToTermIntermediate(rawStr);
-		int i = 0;
-		while (i < terms.size())
+		auto identities = parseIdentities(rawStr);
+		for (auto& id : identities)
 		{
 			RewritingRule rule;
+			rule.from = std::move(id.lhs);
+			rule.to = std::move(id.rhs);
 			rule.type = type;
-			for (; i < terms.size(); ++i)
-			{
-				if (terms[i]->label == L" " || terms[i]->label == L"\n")
-				{
-					continue;
-				}
-				if (terms[i]->label == L"=")
-				{
-					++i;
-					break;
-				}
-				rule.from.push_back(std::move(terms[i]));
-			}
-			for (; i < terms.size(); ++i)
-			{
-				if (terms[i]->label == L" ")
-				{
-					continue;
-				}
-				if (terms[i]->label == L"\n")
-				{
-					break;
-				}
-
-				rule.to.push_back(std::move(terms[i]));
-			}
 			markVariables(rule.from);
 			markVariables(rule.to);
 			unifyVariables(rule.from, rule.variables);
@@ -138,6 +116,18 @@ namespace TryAlgebraCore::Trs
 				rule.bundles.push_back(&b);
 			}
 			m_rules.push_back(std::move(rule));
+		}
+	}
+
+	void Transformer::removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	{
+		for (int i = 0; i < subj.size(); ++i)
+		{
+			removeContainers(subj[i]->children);
+			if (subj[i]->label == MeNames::cont)
+			{
+				subj[i] = std::move(subj[i]->children.back());
+			}
 		}
 	}
 }
