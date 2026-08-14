@@ -647,9 +647,13 @@ namespace TryAlgebraCore::Trs
 					while (mc.match(id.t_lhs, t.second.get()))
 					{
 						std::wstring str;
+						//generate a string representing the rewritten expression
 						rewrite(id.t_rhs, mc.args, str);
+						//create new identity
 						auto& new_id = new_ids.emplace_back();
+						//cache lhs used in mathcing
 						new_id.t_lhs = t.second.get();
+						//assign str to the new identity
 						new_id.rhs = std::move(str);
 					}
 				}
@@ -658,18 +662,26 @@ namespace TryAlgebraCore::Trs
 			{
 				if (new_id.t_lhs->term_str == new_id.rhs)
 				{
+					//lhs equals rhs
 					continue;
 				}
+				//find term in map
 				auto found = ts.terms_map.find(new_id.rhs);
+				if (new_id.rhs == L"trm_2(*,2,trm_2(*,a,trm_2(*,a,b)))")
+				{
+					std::cout << "sdfsa";
+				}
 				if (found != ts.terms_map.end())
 				{
-					new_id.t_rhs = found->second.get();
 					//if rhs already exists
 					//if it congruent to lhs, then they are equal already
 					//since system is closed under congruence
+					new_id.t_rhs = found->second.get();
 				}
 				else
 				{
+
+					//parse string into new term
 					Parser pr(new_id.rhs);
 					pr.parse();
 					compact(pr.m_current_term, 0, ts.terms_map, false);
@@ -679,6 +691,7 @@ namespace TryAlgebraCore::Trs
 					//if still different with lhs -> merge
 					updateCongruence(new_id.t_rhs, ts);
 				}
+
 				if (find(new_id.t_lhs) == find(new_id.t_rhs))
 				{
 					continue;
