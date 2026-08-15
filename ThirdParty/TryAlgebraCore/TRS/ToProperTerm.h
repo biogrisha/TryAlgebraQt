@@ -18,11 +18,13 @@ namespace TryAlgebraCore::Trs
 		void setup(const TextBuffer& tb);
 
 	private:
-		void toTerm(const std::unique_ptr<TermIntermediate>& from, Term*& to, Term* parent = nullptr);
+		void toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent = nullptr);
 		std::optional<std::wstring> getSection(const TextBuffer& tb, const std::wstring& sectionName);
 		bool waitToken(TextBufferIterator& it, const std::wstring& token);
 		std::vector<std::unique_ptr<TermIntermediate>> m_terms;
 		Transformer m_transformer;
 		TrsIdentitiesParser m_trsIdentitiesParser;
+		char m_ch = 100;
+		std::unordered_map<std::wstring, char> m_symbols;
 	};
 }

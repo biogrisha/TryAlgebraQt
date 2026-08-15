@@ -734,7 +734,7 @@ namespace PatternMatchingTest
 						break;
 					}
 				}
-				else if (!compare(pat[patI].get(), subj[subjI].get()))
+				else if (patI >= pat.size() || subjI >= subj.size() || !compare(pat[patI].get(), subj[subjI].get()))
 				{
 					return false;
 				}
@@ -1099,7 +1099,7 @@ namespace PatternMatchingTest
 	}
 	MYTEST(VariatorTest)
 	{
-		auto subjStr = L"t(h,t,h,f,^(_y1),_y)";
+		auto subjStr = L"t(h)";
 		Parser subjParser(subjStr);
 		subjParser.parse();
 		std::unique_ptr<TermTest> subjTerm = std::unique_ptr<TermTest>(subjParser.m_current_term);
@@ -1107,7 +1107,7 @@ namespace PatternMatchingTest
 		markVariables(subjTerm);
 		subj.push_back(std::move(subjTerm));
 
-		auto patStr = L"t(_x,~z,^(_y1),_y)";
+		auto patStr = L"t(h,t,_h,f)";
 		Parser patParser(patStr);
 		patParser.parse();
 		std::unique_ptr<TermTest> patTerm = std::unique_ptr<TermTest>(patParser.m_current_term);

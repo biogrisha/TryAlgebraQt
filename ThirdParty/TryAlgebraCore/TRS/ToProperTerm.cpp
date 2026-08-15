@@ -14,21 +14,22 @@ namespace TryAlgebraCore::Trs
 
 		const auto& ids = m_trsIdentitiesParser.identities();
 
-		std::vector<Identity> trsIdentities;
+		std::vector<NewTrs::Identity> trsIdentities;
 		for (const auto& id : ids)
 		{
 			auto& newId = trsIdentities.emplace_back();
-			Term* lhsTerm = nullptr;
-			toTerm(id.lhs.back(), newId.t_lhs);
-			toTerm(id.rhs.back(), newId.t_rhs);
+			NewTrs::Term* lhsTerm = nullptr;
+			toTerm(id.lhs.back(), newId.lhs);
+			toTerm(id.rhs.back(), newId.rhs);
 		}
-		Term* trsLhs = nullptr;
-		Term* trsRhs = nullptr;
-		toTerm(m_terms.back(), trsLhs);
-		toTerm(equation.rhs.back(), trsRhs);
+		NewTrs::Identity id;
+		id.lhs = nullptr;
+		id.rhs = nullptr;
+		toTerm(m_terms.back(), id.lhs);
+		toTerm(equation.rhs.back(), id.rhs);
 
-		Trs trs;
-		trs.func(trsIdentities, trsLhs, trsRhs);
+		NewTrs::Trs trs;
+		trs.run(id, trsIdentities);
 	}
 
 	const std::vector<std::unique_ptr<TermIntermediate>>& ToProperTerm::get() const
@@ -64,7 +65,7 @@ namespace TryAlgebraCore::Trs
 					else
 					{
 						m_transformer.addRules(tb.getSubstring(from, to)
-							, token == tokens.back() ? RuleType::SimpleRecursive : RuleType::RecursiveExhausting);
+							, token == L"-rec" ? RuleType::SimpleRecursive : RuleType::RecursiveExhausting);
 					}
 				}
 			}
@@ -72,20 +73,26 @@ namespace TryAlgebraCore::Trs
 		m_trsIdentitiesParser.refine(m_transformer);
 	}
 
-	void ToProperTerm::toTerm(const std::unique_ptr<TermIntermediate>& from, Term*& to, Term* parent)
+	void ToProperTerm::toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent)
 	{
-		to = new Term;
-		to->variable = from->isVariable;
-		to->label = from->label;
-		to->e_rep = to;
-		to->e_reps.push_back(to);
+		to = new NewTrs::Term;
+		to->isVariable = from->isVariable;
+		const auto& [it, inserted] = m_symbols.emplace(from->label, m_ch);
+		if (inserted)
+		{
+			m_ch++;
+			it->second = m_ch;
+		}
+		to->label = std::string(1, it->second);
+		to->eRep = to;
+		to->eReps.push_back(to);
 		if (parent)
 		{
 			to->parents.insert(parent);
 		}
 		for (auto& ch : from->children)
 		{
-			Term*& childTerm = to->children.emplace_back(nullptr);
+			NewTrs::Term*& childTerm = to->children.emplace_back(nullptr);
 			toTerm(ch, childTerm, to);
 		}
 	}

@@ -1,7 +1,531 @@
 #include "Trs.h"
-
-namespace TryAlgebraCore::Trs
+#include <iostream>
+#include <chrono>
+namespace NewTrs
 {
+	void Trs::run(Identity id, std::vector<Identity> ids)
+	{
+
+		m_id = id;
+		m_ids = std::move(ids);
+
+		{
+			generateTermStr(m_id.lhs);
+			compact(m_id.lhs);
+			m_id.lhs->persistent = true;
+			markPatternNodes(m_id.lhs);
+			initCompOrder(m_id.lhs);
+			m_id.variablesOrder = setupVariablesOrder(m_id.lhs);
+		}
+
+		{
+			generateTermStr(m_id.rhs);
+			compact(m_id.rhs);
+			m_id.rhs->persistent = true;
+		}
+
+		for (auto& id : m_ids)
+		{
+			{
+				generateTermStr(id.lhs);
+				compact(id.lhs);
+				id.lhs->persistent = true;
+				markPatternNodes(id.lhs);
+				initCompOrder(id.lhs);
+				id.variablesOrder = setupVariablesOrder(id.lhs);
+			}
+
+			{
+				generateTermStr(id.rhs);
+				compact(id.rhs);
+				id.rhs->persistent = true;
+				markPatternNodes(id.rhs);
+			}
+		}
+		struct NewIdentity
+		{
+			Term* lhs = nullptr;
+			Term* rhs = nullptr;
+		};
+		auto start = std::chrono::high_resolution_clock::now();
+		for (int i = 0; i < 7; ++i)
+		{
+			std::vector<NewIdentity> newIdentities;
+			for (auto& id : m_ids)
+			{
+				for (auto& [str, trm] : m_storage)
+				{
+					if (trm->isPat)
+					{
+						continue;
+					}
+					if (trm->eRep != trm.get())
+					{
+						continue;
+					}
+					Matcher matcher(id.variablesOrder);
+					if (matcher.match(id.lhs, trm.get()))
+					{
+						matcher.genSub([this, &newIdentities, &id, &trm]()
+							{
+								Term* newTerm = nullptr;
+								Trs::rewrite(id.rhs, newTerm);
+								newIdentities.emplace_back(trm.get(), newTerm);
+							});
+					}
+				}
+
+			}
+			for (auto& newId : newIdentities)
+			{
+				generateTermStr(newId.rhs);
+				updateCongruence(newId.rhs);
+				setupParent(newId.rhs);
+				if (find(newId.lhs) != find(newId.rhs))
+				{
+					merge(newId.lhs, newId.rhs);
+				}
+			}
+			for (auto* t : m_cong)
+			{
+				if (find(t)->eReps.size() > 1)
+				{
+					remove(t);
+				}
+			}
+			m_cong.clear();
+			{
+				Matcher matcher(m_id.variablesOrder);
+				if (matcher.match(m_id.lhs, m_id.rhs))
+				{
+
+					std::cout << "SUCCEDED\n";
+					auto end = std::chrono::high_resolution_clock::now();
+
+					auto duration =
+						std::chrono::duration<double, std::milli>(end - start);
+
+					std::cout << duration.count() << " ms\n";
+					matcher.genSub([this]()
+						{
+							std::cout << "===";
+							std::cout << m_id.lhs->termString << "->" << m_id.rhs->termString << "\n";
+							Trs::printVars(m_id.lhs);
+
+							//Term* newTerm = nullptr;
+							//Trs::rewrite(id.rhs, newTerm);
+							//newIdentities.emplace_back(trm.get(), newTerm);
+						});
+
+					for (auto& el : m_storage)
+					{
+						if (el.second->eRep == el.second.get())
+						{
+							auto& reps = el.second->eReps;
+							for (int i = 0; i < reps.size(); ++i)
+							{
+								for (int j = i + 1; j < reps.size(); ++j)
+								{
+									if (cong(reps[i], reps[j]))
+									{
+										std::cout << reps[i]->termString << "=== " << reps[j]->termString << "\n";
+									}
+								}
+							}
+						}
+					}
+					return;
+				}
+			}
+
+		}
+		for (auto& el : m_storage)
+		{
+			if (el.second->eRep == el.second.get())
+			{
+				auto& reps = el.second->eReps;
+				for (int i = 0; i < reps.size(); ++i)
+				{
+					std::cout << el.second->termString << "=== " << reps[i]->termString << "\n";
+				}
+			}
+		}
+
+	}
+	bool Trs::cong(Term* t1, Term* t2)
+	{
+		if (t1->label != t2->label)
+		{
+			return false;
+		}
+		for (int i = 0; i < t1->children.size(); ++i)
+		{
+			if (find(t1->children[i]) != find(t2->children[i]))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	void Trs::unionTerms(Term* t1, Term* t2)
+	{
+		//move t1 into t2
+		auto* topT1 = find(t1);
+		auto* topT2 = find(t2);
+		topT1->eRep = topT2;
+		topT2->eReps.insert(topT2->eReps.end(), topT1->eReps.begin(), topT1->eReps.end());
+		topT2->parents.merge(topT1->parents);
+		topT1->parents.clear();
+		topT1->eReps.clear();
+	}
+
+	void Trs::remove(Term* tToRemove)
+	{
+		auto tTop = find(tToRemove);
+		//remove from reps
+		std::erase(tTop->eReps, tToRemove);
+
+		if (tTop == tToRemove)
+		{
+			//want to remove top
+			//find new top
+			Term* newTop = *tTop->eReps.begin();
+			for (Term* rep : tTop->eReps)
+			{
+				//set new top for reps
+				rep->eRep = newTop;
+			}
+			//move all information to the newTop
+			newTop->eReps = std::move(tTop->eReps);
+			newTop->parents = std::move(tTop->parents);
+			tTop = newTop;
+		}
+		else
+		{
+			for (Term* rep : tTop->eReps)
+			{
+				//set new top for reps
+				rep->eRep = tTop;
+			}
+		}
+
+		//replace itself in parents with the newTop
+		for (Term* parent : tTop->parents)
+		{
+			for (Term*& sibling : parent->children)
+			{
+				if (sibling == tToRemove)
+				{
+					sibling = tTop;
+				}
+			}
+		}
+		//replace remove itself from parents
+		for (Term* child : tToRemove->children)
+		{
+			find(child)->parents.erase(tToRemove);
+		}
+		m_storage.erase(tToRemove->termString);
+	}
+
+	void Trs::mergeCong(Term* t1, Term* t2)
+	{
+		//collect congruent
+		if (t1->persistent && !t2->persistent)
+		{
+			m_cong.insert(t2);
+		}
+		else if (!t1->persistent && t2->persistent)
+		{
+			m_cong.insert(t1);
+		}
+		else if (!t1->persistent)
+		{
+			m_cong.insert(t1);
+		}
+
+		//if they are congruent but in the same e-class
+		//all their parents already were congruent at this point
+		if (find(t1) == find(t2))
+		{
+			return;
+		}
+		auto parents1 = find(t1)->parents;
+		auto parents2 = find(t2)->parents;
+		unionTerms(t1, t2);
+		for (auto* parent1 : parents1)
+		{
+			for (auto* parent2 : parents2)
+			{
+				if (parent1 != parent2 && cong(parent1, parent2))
+				{
+					mergeCong(parent1, parent2);
+				}
+			}
+		}
+	}
+
+	void Trs::merge(Term* t1, Term* t2)
+	{
+		auto parents1 = find(t1)->parents;
+		auto parents2 = find(t2)->parents;
+		//t1.eReps !cong t2.eReps
+		unionTerms(t1, t2);
+
+		for (auto* parent1 : parents1)
+		{
+			for (auto* parent2 : parents2)
+			{
+				if (parent1 != parent2 && cong(parent1, parent2))
+				{
+					mergeCong(parent1, parent2);
+				}
+			}
+		}
+	}
+
+	void Trs::compact(Term*& t)
+	{
+		if (t->stored)
+		{
+			return;
+		}
+		auto [it, inserted] = m_storage.emplace(t->termString, t);
+		if (!inserted)
+		{
+			it->second->parents.merge(t->parents);
+			deleteRec(t);
+			t = it->second.get();
+			//element already in the map, therefore its children are as well
+			return;
+		}
+		else
+		{
+			it->second->stored = true;
+			for (auto*& ch : t->children)
+			{
+				compact(ch);
+			}
+		}
+	}
+
+	void Trs::setupParent(Term* t, Term* parent)
+	{
+		if (parent)
+		{
+			find(t)->parents.insert(parent);
+		}
+		for (Term* ch : t->children)
+		{
+			setupParent(ch, t);
+		}
+	}
+
+	Term* Trs::find(Term* t)
+	{
+		while (t->eRep != t)
+		{
+			t = t->eRep;
+		}
+		return t;
+	}
+
+	std::map<std::vector<int>, int> Trs::setupVariablesOrder(Term* t)
+	{
+		std::map<std::vector<int>, int> res;
+		std::vector<int> path = { 0 };
+		int id = 0;
+		setupVariablesOrder(t, path, id, res);
+		return res;
+	}
+
+	void Trs::setupVariablesOrder(Term* t, std::vector<int>& pos, int& id, std::map<std::vector<int>, int>& res)
+	{
+		if (t->isVariable)
+		{
+			res[pos] = id;
+			++id;
+			return;
+		}
+		for (int i = 0; i < t->compOrder.size(); ++i)
+		{
+			pos.push_back(t->compOrder[i]);
+			setupVariablesOrder(t->children[t->compOrder[i]], pos, id, res);
+			pos.pop_back();
+		}
+	}
+
+	void Trs::printVars(Term* t)
+	{
+		if (t->isVariable)
+		{
+			std::cout << t->termString << " = " << t->capture->termString << "\n";
+			return;
+		}
+		for (auto* ch : t->children)
+		{
+			printVars(ch);
+		}
+	}
+
+	void Trs::rewrite(Term* t, Term*& res)
+	{
+		if (t->isVariable)
+		{
+			res = t->capture;
+			return;
+		}
+		res = new Term;
+		res->label = t->label;
+		res->eRep = res;
+		res->eReps.push_back(res);
+
+		for (Term* ch : t->children)
+		{
+			Term*& newCh = res->children.emplace_back();
+			rewrite(ch, newCh);
+		}
+	}
+
+	void Trs::markPatternNodes(Term* t)
+	{
+		bool pat_temp = false;
+		for (auto ch : t->children)
+		{
+			markPatternNodes(ch);
+			pat_temp |= ch->isPat;
+		}
+		if (pat_temp)
+		{
+			t->isPat = true;
+			return;
+		}
+		if (t->isVariable)
+		{
+			t->isPat = true;
+		}
+	}
+
+	void Trs::deleteRec(Term* t)
+	{
+		if (t->stored)
+		{
+			return;
+		}
+		for (auto* ch : t->children)
+		{
+			deleteRec(ch);
+		}
+		delete t;
+	}
+
+	bool Trs::updateCongruence(Term*& t)
+	{
+		if (t->stored)
+		{
+			return false;
+		}
+		bool createdNewTerm = false;
+		for (Term*& ch : t->children)
+		{
+			if (updateCongruence(ch))
+			{
+				t->stored = true;
+				m_storage.emplace(t->termString, t);
+				createdNewTerm = true;
+			}
+		}
+		if (createdNewTerm)
+		{
+			return true;
+		}
+
+		auto found = m_storage.find(t->termString);
+		if (found != m_storage.end())
+		{
+			delete t;
+			t = found->second.get();
+			//element already in the map, therefore its children are as well
+			return false;
+		}
+		if (t->children.empty())
+		{
+			t->stored = true;
+			m_storage.emplace(t->termString, t);
+			return true;
+		}
+		auto* ch = t->children.back();
+		auto& siblings = find(ch)->parents;
+		for (Term* sib : siblings)
+		{
+			if (cong(sib, t))
+			{
+				delete t;
+				t = sib;
+				return false;
+			}
+		}
+		t->stored = true;
+		m_storage.emplace(t->termString, t);
+		return true;
+	}
+
+	inline void Trs::generateTermStr(Term* t)
+	{
+		if (!t->termString.empty())
+		{
+			return;
+		}
+		t->termString = t->label;
+		if (t->children.empty())
+		{
+			return;
+		}
+		t->termString += "(";
+		for (int i = 0; i < t->children.size(); ++i)
+		{
+			auto* ch = t->children[i];
+			generateTermStr(ch);
+			t->termString += ch->termString;
+			if (i != t->children.size() - 1)
+			{
+				t->termString += ',';
+			}
+		}
+		t->termString += ")";
+	}
+
+	void Trs::initCompOrder(Term* t)
+	{
+		for (Term* ch : t->children)
+		{
+			initCompOrder(ch);
+		}
+
+		t->compOrder.clear();
+
+		for (int i = 0; i < t->children.size(); ++i)
+		{
+			if (!t->children[i]->isPat)
+			{
+				t->compOrder.push_back(i);
+			}
+		}
+		for (int i = 0; i < t->children.size(); ++i)
+		{
+			if (t->children[i]->isVariable)
+			{
+				t->compOrder.push_back(i);
+			}
+		}
+		for (int i = 0; i < t->children.size(); ++i)
+		{
+			if (t->children[i]->isPat && !t->children[i]->isVariable)
+			{
+				t->compOrder.push_back(i);
+			}
+		}
+	}
 
 	void Parser::parse()
 	{
@@ -11,8 +535,8 @@ namespace TryAlgebraCore::Trs
 			consumeTermName();
 			int label_end = m_pos;
 			auto t = new Term();
-			t->e_reps.push_back(t);
-			t->e_rep = t;
+			t->eReps.push_back(t);
+			t->eRep = t;
 			m_current_term = t;
 			if (m_parent_term)
 			{
@@ -32,7 +556,11 @@ namespace TryAlgebraCore::Trs
 				m_parent_term = !m_current_term->parents.empty() ? *m_current_term->parents.begin() : nullptr;
 			}
 			m_current_term->label = m_str.substr(term_start, label_end - term_start);
-			m_current_term->term_str = m_str.substr(term_start, m_pos - term_start);
+			if (m_current_term->label[0] == '`')
+			{
+				m_current_term->isVariable = true;
+			}
+			m_current_term->termString = m_str.substr(term_start, m_pos - term_start);
 			if (m_pos >= m_str.size())
 			{
 				return;
@@ -58,664 +586,118 @@ namespace TryAlgebraCore::Trs
 		m_pos = i;
 	}
 
-	void deleteRecursive(Term* term)
+	bool Matcher::match(Term* pat, Term* subj, int pos)
 	{
-		for (auto ch : term->children)
+		m_path.posPath.push_back(pos);
+		m_path.repPath.push_back(0);
+		if (!pat->isPat)
 		{
-			deleteRecursive(ch);
+			bool res = Trs::find(pat) == Trs::find(subj);
+			m_path.posPath.pop_back();
+			m_path.repPath.pop_back();
+			return res;
 		}
-		delete term;
-	}
-
-	Term* find(Term* t)
-	{
-		while (t->e_rep != t)
+		if (pat->isVariable)
 		{
-			t = t->e_rep;
-		}
-		return t;
-	}
-	void compact(Term* term, int term_id, std::map<std::wstring, std::unique_ptr<Term>>& terms_map, bool before_merge)
-	{
-		auto found_term = terms_map.find(term->term_str);
-		if (found_term == terms_map.end())
-		{
-			//in this case this means that this term and its parents are not in terms_map
-			//therefor we just put it into map without changing its parents
-			term->pending_cong = !before_merge;
-			terms_map.emplace(term->term_str, std::unique_ptr<Term>(term));
-		}
-		else
-		{
-			//term already in map, this means, that it and its children are in terms_map
-			//its parent still added into terms_map only once
-			//but two identical terms could have same parent e.g. f(a,a)
-			// so we need to add parent uniquely here
-			// update this element in parent with found term
-			//->delete this term recursively
-			if (!term->parents.empty())
-			{
-				find(found_term->second.get())->parents.insert(*term->parents.begin());
-				(*term->parents.begin())->children[term_id] = found_term->second.get();
-			}
-
-			deleteRecursive(term);
-			return;
-		}
-		int i = 0;
-		for (auto ch : term->children)
-		{
-			compact(ch, i, terms_map, before_merge);
-			++i;
-		}
-	}
-	bool cong(Term* t1, Term* t2)
-	{
-		if (t1->label != t2->label)
-		{
-			return false;
-		}
-		for (int i = 0; i < t1->children.size(); ++i)
-		{
-			if (find(t1->children[i]) != find(t2->children[i]))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-	void unionTerms(Term* t1, Term* t2, TermsStorage& storage, bool congruent)
-	{
-		Term* main_t = find(t1);
-		Term* sub_t = find(t2);
-		if (t1 == t2)
-		{
-			return;
+			bool res = addSub(&m_subRoot, m_path, pat, subj, getVarId(m_path.posPath));
+			m_path.posPath.pop_back();
+			m_path.repPath.pop_back();
+			return res;
 		}
 
-		if (main_t != sub_t)
+		auto& reps = Trs::find(subj)->eReps;
+		bool repSucceded = false;
+		for (auto* rep : reps)
 		{
-			for (auto par : sub_t->parents)
-			{
-				main_t->parents.insert(par);
-			}
-			main_t->e_reps.insert(main_t->e_reps.end(), sub_t->e_reps.begin(), sub_t->e_reps.end());
-			for (auto rep : main_t->e_reps)
-			{
-				rep->e_rep = main_t;
-			}
-			sub_t->e_reps.clear();
-			sub_t->parents.clear();
-		}
-
-		if (congruent)
-		{
-			for (auto par : main_t->parents)
-			{
-				for (int i = 0; i < par->children.size(); ++i)
-				{
-					if (par->children[i] == t2)
-					{
-						par->children[i] = main_t;
-					}
-				}
-			}
-			for (auto ch : t2->children)
-			{
-				ch = find(ch);
-				ch->parents.erase(t2);
-				ch->parents.insert(t1);
-			}
-
-			//opt: can be moved before e_reps.insert
-			for (size_t i = 0; i < main_t->e_reps.size(); ++i)
-			{
-				if (main_t->e_reps[i] == t2)
-				{
-					std::swap(main_t->e_reps[i], main_t->e_reps.back());
-					main_t->e_reps.pop_back();
-					break;
-				}
-			}
-			auto it = storage.terms_map.find(t2->term_str);
-
-			if (it != storage.terms_map.end())
-			{
-				auto value = std::move(it->second);
-				value->del = true;
-				storage.terms_map.erase(it);
-				storage.bin.push_back(std::move(value));
-			}
-
-		}
-	}
-
-	void merge(Term* t1, Term* t2, TermsStorage& storage, bool rec)
-	{
-		auto t1_top = find(t1);
-		auto t2_top = find(t2);
-		if (t1 == t2)
-		{
-			return;
-		}
-		auto pars1 = t1_top->parents;
-		auto pars2 = t2_top->parents;
-		unionTerms(t1, t2, storage, rec);
-		for (auto par1 : pars1)
-		{
-			if (find(par1) == t1_top || par1->del)
+			if (pat->label != rep->label)
 			{
 				continue;
 			}
-			for (auto par2 : pars2)
+			bool result = true;
+			auto& compOrder = pat->compOrder;
+			for (int i = 0; i < compOrder.size(); ++i)
 			{
-				if (find(par2) == t1_top || par2->del)
+				if (!match(pat->children[compOrder[i]], rep->children[compOrder[i]], compOrder[i]))
 				{
-					continue;
-				}
-
-				if (cong(par1, par2))
-				{
-					merge(par1, par2, storage, true);
+					result = false;
 				}
 			}
+			repSucceded |= result;
+			m_path.repPath.back()++;
 		}
-	}
-	void markPatternNodes(Term* t)
-	{
-		bool pat_temp = false;
-		for (auto ch : t->children)
-		{
-			markPatternNodes(ch);
-			pat_temp |= ch->pat;
-		}
-		if (pat_temp)
-		{
-			t->pat = true;
-			return;
-		}
-		if (t->variable)
-		{
-			t->pat = true;
-		}
-	}
-	void setupOrder(Term* t)
-	{
-		for (int i = 0; i < t->children.size(); ++i)
-		{
-			if (!t->children[i]->pat)
-			{
-				t->comp_order.push_back(i);
-			}
-		}
-		for (int i = 0; i < t->children.size(); ++i)
-		{
-			if (t->children[i]->pat)
-			{
-				t->comp_order.push_back(i);
-			}
-		}
-		for (auto ch : t->children)
-		{
-			setupOrder(ch);
-		}
-	}
-	void rewrite(Term* pat, std::map<Term*, Arg>& args, std::wstring& res)
-	{
-		if (pat->variable)
-		{
-			auto arg = args.find(pat);
-			if (arg == args.end())
-			{
-				res += pat->label;
-			}
-			else
-			{
-				res += arg->second.term->term_str;
-			}
-			return;
-		}
-		res += pat->label;
-		if (!pat->children.empty())
-		{
-			res += '(';
-			for (auto& ch : pat->children)
-			{
-				rewrite(ch, args, res);
-				res += ',';
-			}
-			res.back() = ')';
-		}
-	}
-	Term* instantiate(Term* pat, std::map<Term*, Arg>& args, std::map<std::wstring, std::unique_ptr<Term>>& terms_map)
-	{
-		std::wstring str;
-		rewrite(pat, args, str);
-		auto found = terms_map.find(str);
-		if (found != terms_map.end())
-		{
-			return found->second.get();
-		}
-		Parser pr(str);
-		pr.parse();
-		compact(pr.m_current_term, 0, terms_map);
-
-		return terms_map.find(str)->second.get();
-	}
-	void updateCongruence(Term* t, TermsStorage& storage)
-	{
-		if (!t->pending_cong)
-		{
-			return;
-		}
-		t->pending_cong = false;
-		if (t->children.empty())
-		{
-			return;
-		}
-		for (auto ch : t->children)
-		{
-			updateCongruence(ch, storage);
-		}
-		auto pars = find(t->children.back())->parents;
-		for (auto par : pars)
-		{
-			if (find(t) != find(par) && cong(t, par))
-			{
-				//if found congruent parent, this means that this parent congruent to other parents and there is no need to continue
-				unionTerms(par, t, storage, true);
-				break;
-			}
-		}
-
+		m_path.posPath.pop_back();
+		m_path.repPath.pop_back();
+		return repSucceded;
 	}
 
-	void generateTermStr(Term* t)
+	bool Matcher::addSub(Sub* sub, const Path& path, Term* var, Term* subj, int id)
 	{
-		t->term_str = t->label;
-		if (t->children.empty())
+		if (id == 0)
 		{
-			return;
+			auto& newSub = sub->next.emplace_back();
+			newSub.path = path;
+			newSub.subj = subj;
+			newSub.var = var;
+			return true;
 		}
-		t->term_str += L"(";
-		for (auto* ch : t->children)
+		for (auto& next : sub->next)
 		{
-			generateTermStr(ch);
-			t->term_str += ch->term_str;
-			if (ch != t->children.back())
+			if (next.var == var && Trs::find(next.subj) != Trs::find(subj))
 			{
-				t->term_str += L',';
+				continue;
 			}
-		}
-		t->term_str += L")";
-	}
-
-	void Matcher::BStackEl::nextRhs()
-	{
-
-		++eq_i;
-		if (!lhs->pat)
-		{
-			// don't iterate over e-class for ground terms
-			return;
-		}
-		if (lhs->variable)
-		{
-			return;
-		}
-		for (; eq_i < rhs_main->e_reps.size(); ++eq_i)
-		{
-			if (rhs_main->e_reps[eq_i]->label == lhs->label)
+			if (!pathsCompatible(next.path, path))
 			{
-				return;
+				continue;
 			}
-		}
-	}
-	bool Matcher::BStackEl::updateEq()
-	{
-		nextRhs();
-		if ((eq_i > 0 && (!lhs->pat || lhs->variable)) || eq_i >= rhs_main->e_reps.size())
-		{
-			return false;
-		}
-		rhs = rhs_main->e_reps[eq_i];
-		child_i = 0;
-		return true;
-	}
-	bool Matcher::BStackEl::getChild(Term*& out_lhs, Term*& out_rhs)
-	{
-		if (rhs->children.empty())
-		{
-			return false;
-		}
-		if (child_i >= lhs->children.size())
-		{
-			return false;
-		}
-		out_lhs = lhs->children[lhs->comp_order[child_i]];
-		out_rhs = rhs->children[lhs->comp_order[child_i]];
-		return true;
-	}
-	bool Matcher::match(Term* lhs, Term* rhs)
-	{
-		if (first_call)
-		{
-			first_call = false;
-			BStackEl el;
-			el.lhs = lhs;
-			el.rhs_main = find(rhs);
-			if (!el.updateEq())
-			{
-				return false;
-			}
-			bstack.push_back(el);
-		}
-		else if (!back())
-		{
-			return false;
-		}
-		while (true)
-		{
-			BStackEl& top = bstack.back();
-			if (!top.lhs->pat)
-			{
-				if (find(top.lhs) == find(top.rhs))
-				{
-					if (!next())
-					{
-						return true;
-					}
-					BStackEl& new_top = bstack.back();
-					if (!new_top.updateEq())
-					{
-						if (!back())
-						{
-							return false;
-						}
-					}
-				}
-				else
-				{
-					if (!back())
-					{
-						return false;
-					}
-					continue;
-				}
-			}
-			else if (top.lhs->variable)
-			{
-				auto found_arg = args.find(top.lhs);
-				if (found_arg == args.end())
-				{
-					auto new_arg = args.emplace(top.lhs, Arg());
-					new_arg.first->second.node_id = bstack.size();
-					new_arg.first->second.term = top.rhs;
-					if (!next())
-					{
-						return true;
-					}
-					BStackEl& new_top = bstack.back();
-					if (!new_top.updateEq())
-					{
-						if (!back())
-						{
-							return false;
-						}
-					}
-				}
-				else if (find(found_arg->second.term) != find(top.rhs))
-				{
-					if (!back())
-					{
-						return false;
-					}
-				}
-				else
-				{
-					if (!next())
-					{
-						return true;
-					}
-					BStackEl& new_top = bstack.back();
-					if (!new_top.updateEq())
-					{
-						if (!back())
-						{
-							return false;
-						}
-					}
-				}
-			}
-			else
-			{
-				if (!in())
-				{
-					return true;
-				}
-				BStackEl& new_top = bstack.back();
-				if (!new_top.updateEq())
-				{
-					if (!back())
-					{
-						return false;
-					}
-				}
-
-			}
-
-		}
-
-	}
-
-	// false means we finished comparisson
-	bool Matcher::next()
-	{
-		auto& top = bstack.back();
-		int parent_i = top.parent_i;
-		while (parent_i >= 0)
-		{
-			auto& par_el = bstack[parent_i];
-			Term* lhs = nullptr;
-			Term* rhs = nullptr;
-			if (par_el.getChild(lhs, rhs))
-			{
-				++par_el.child_i;
-				BStackEl new_el;
-				new_el.lhs = lhs;
-				new_el.rhs_main = find(rhs);
-				new_el.parent_i = parent_i;
-				bstack.push_back(new_el);
-				return true;
-			}
-			else
-			{
-				parent_i = par_el.parent_i;
-			}
+			return addSub(&next, path, var, subj, id - 1);
 		}
 		return false;
 	}
-	bool Matcher::back()
+
+	bool Matcher::pathsCompatible(const Path& p1, const Path& p2)
 	{
-		for (int i = bstack.size() - 1; i >= 0; --i)
+		for (int i = 0; i < std::min(p1.posPath.size(), p2.posPath.size()); ++i)
 		{
-			auto& top = bstack.back();
-			if (top.updateEq())
+			if (p1.posPath[i] == p2.posPath[i])
 			{
-				// clear args
-				for (auto it = args.begin(); it != args.end();)
+				if (p1.repPath[i] != p2.repPath[i])
 				{
-					if (it->second.node_id > i)
-					{
-						it = args.erase(it); // returns next valid iterator
-					}
-					else
-					{
-						++it;
-					}
+					return false;
 				}
+			}
+			else
+			{
 				return true;
 			}
-			if (top.parent_i >= 0)
-			{
-				auto& par = bstack[top.parent_i];
-				--par.child_i;
-			}
-			bstack.pop_back();
 		}
-		return false;
-	}
-	bool Matcher::in()
-	{
-		auto& top = bstack.back();
-		Term* lhs = nullptr;
-		Term* rhs = nullptr;
-
-		if (!top.getChild(lhs, rhs))
-		{
-			return next();
-		}
-		++top.child_i;
-		BStackEl new_el;
-		new_el.lhs = lhs;
-		new_el.rhs_main = find(rhs);
-		new_el.parent_i = bstack.size() - 1;
-		bstack.push_back(new_el);
 		return true;
 	}
 
-	void Trs::func(std::vector<Identity>& identities, Term* t_lhs, Term* t_rhs)
+	int Matcher::getVarId(const std::vector<int>& posPath)
 	{
-		ts.bin.clear();
-		ts.terms_map.clear();
+		return m_variablesOrder.find(posPath)->second;
+	}
 
+	void Matcher::genSub(Sub* sub, const std::function<void()>& callback, int depth)
+	{
+		for (auto& next : sub->next)
 		{
-			generateTermStr(t_lhs);
-			std::wstring termStr = t_lhs->term_str;
-			compact(t_lhs, 0, ts.terms_map);
-			t_lhs = ts.terms_map[termStr].get();
-			markPatternNodes(t_lhs);
-			setupOrder(t_lhs);
-		}
-
-		{
-			generateTermStr(t_rhs);
-			std::wstring termStr = t_rhs->term_str;
-			compact(t_rhs, 0, ts.terms_map);
-			t_rhs = ts.terms_map[termStr].get();
-		}
-
-		for (auto& id : identities)
-		{
+			next.var->capture = next.subj;
+			if (depth == m_variablesOrder.size() - 1)
 			{
-				generateTermStr(id.t_lhs);
-				id.lhs = id.t_lhs->term_str;
-				compact(id.t_lhs, 0, ts.terms_map);
-				id.t_lhs = ts.terms_map[id.lhs].get();
-				markPatternNodes(id.t_lhs);
-				setupOrder(id.t_lhs);
+				callback();
 			}
-
+			else
 			{
-				generateTermStr(id.t_rhs);
-				id.rhs = id.t_rhs->term_str;
-				compact(id.t_rhs, 0, ts.terms_map);
-				id.t_rhs = ts.terms_map[id.rhs].get();
-				markPatternNodes(id.t_rhs);
-				setupOrder(id.t_rhs);
-			}
-		}
-
-
-		auto start = std::chrono::high_resolution_clock::now();
-		for (int i = 0; i < 30; ++i)
-		{
-			std::vector<Identity> new_ids;
-			for (auto& id : identities)
-			{
-				for (auto& t : ts.terms_map)
-				{
-					if (t.second->pat)
-					{
-						continue;
-					}
-					if (t.second->e_rep != t.second.get())
-					{
-						continue;
-					}
-					Matcher mc;
-					while (mc.match(id.t_lhs, t.second.get()))
-					{
-						std::wstring str;
-						//generate a string representing the rewritten expression
-						rewrite(id.t_rhs, mc.args, str);
-						//create new identity
-						auto& new_id = new_ids.emplace_back();
-						//cache lhs used in mathcing
-						new_id.t_lhs = t.second.get();
-						//assign str to the new identity
-						new_id.rhs = std::move(str);
-					}
-				}
-			}
-			for (auto& new_id : new_ids)
-			{
-				if (new_id.t_lhs->term_str == new_id.rhs)
-				{
-					//lhs equals rhs
-					continue;
-				}
-				//find term in map
-				auto found = ts.terms_map.find(new_id.rhs);
-				if (new_id.rhs == L"trm_2(*,2,trm_2(*,a,trm_2(*,a,b)))")
-				{
-					std::cout << "sdfsa";
-				}
-				if (found != ts.terms_map.end())
-				{
-					//if rhs already exists
-					//if it congruent to lhs, then they are equal already
-					//since system is closed under congruence
-					new_id.t_rhs = found->second.get();
-				}
-				else
-				{
-
-					//parse string into new term
-					Parser pr(new_id.rhs);
-					pr.parse();
-					compact(pr.m_current_term, 0, ts.terms_map, false);
-					new_id.t_rhs = ts.terms_map[new_id.rhs].get();
-					//if new term
-					//update congruence
-					//if still different with lhs -> merge
-					updateCongruence(new_id.t_rhs, ts);
-				}
-
-				if (find(new_id.t_lhs) == find(new_id.t_rhs))
-				{
-					continue;
-				}
-				merge(new_id.t_lhs, new_id.t_rhs, ts);
-				ts.bin.clear();
-			}
-			std::wcout << ts.terms_map.size() << '\n';
-			Matcher mc;
-			if (mc.match(t_lhs, t_rhs))
-			{
-				std::wcout << "match------------- \n";
-				auto end = std::chrono::high_resolution_clock::now();
-
-				auto duration =
-					std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-
-				std::wcout << duration.count() << " ms\n";
-				for (auto& arg : mc.args)
-				{
-					std::wcout << arg.first->term_str << " = " << arg.second.term->term_str << '\n';
-				}
-				return;
+				genSub(&next, callback, depth + 1);
 			}
 		}
 	}
+
+	void Matcher::genSub(const std::function<void()>& callback)
+	{
+		genSub(&m_subRoot, callback);
+	}
+
 }

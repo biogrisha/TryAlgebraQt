@@ -438,7 +438,7 @@ namespace TryAlgebraCore::Trs
 						break;
 					}
 				}
-				else if (!compare(pat[patI].get(), subj[subjI].get()))
+				else if (patI >= pat.size() || subjI >= subj.size() || !compare(pat[patI].get(), subj[subjI].get()))
 				{
 					return false;
 				}
