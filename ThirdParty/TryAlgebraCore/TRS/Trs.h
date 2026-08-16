@@ -89,7 +89,7 @@ namespace NewTrs
 	class Trs
 	{
 	public:
-		void run(Identity id, std::vector<Identity> ids);
+		std::vector<std::unordered_map<Term*, Term*>> run(Identity id, std::vector<Identity> ids);
 		bool cong(Term* t1, Term* t2);
 		void unionTerms(Term* t1, Term* t2);
 		void remove(Term* t1);
@@ -99,6 +99,7 @@ namespace NewTrs
 		void setupParent(Term* t, Term* parent = nullptr);
 		void markPatternNodes(Term* t);
 		void deleteRec(Term* t);
+		void collectVariables(Term* t, std::unordered_set<Term*>& vars);
 		//returns true if created new term(not equal and not congruent to other terms)
 		//this would imply that all parent terms also will be unique
 		bool updateCongruence(Term*& t);

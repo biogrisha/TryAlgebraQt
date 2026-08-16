@@ -1,6 +1,7 @@
 #include "ToProperTerm.h"
 #include <vector>
 #include "TokenMatcher.h"
+#include <iostream>
 
 namespace TryAlgebraCore::Trs
 {
@@ -11,7 +12,10 @@ namespace TryAlgebraCore::Trs
 		markVariables(m_terms);
 		m_transformer.applyAll(m_terms);
 		m_transformer.applyAll(equation.rhs);
-
+		/*if (true)
+		{
+			return;
+		}*/
 		const auto& ids = m_trsIdentitiesParser.identities();
 
 		std::vector<NewTrs::Identity> trsIdentities;
@@ -29,7 +33,20 @@ namespace TryAlgebraCore::Trs
 		toTerm(equation.rhs.back(), id.rhs);
 
 		NewTrs::Trs trs;
-		trs.run(id, trsIdentities);
+		auto res = trs.run(id, trsIdentities);
+		std::system("cls");
+		for (auto& subs : res)
+		{
+			std::cout << "========\n";
+			for (auto& [var, subj] : subs)
+			{
+				std::vector<std::unique_ptr<TermIntermediate>> t;
+				t.emplace_back();
+				toIntermediate(subj, t.back());
+				print(t);
+				std::cout << "\n";
+			}
+		}
 	}
 
 	const std::vector<std::unique_ptr<TermIntermediate>>& ToProperTerm::get() const
@@ -82,8 +99,10 @@ namespace TryAlgebraCore::Trs
 		{
 			m_ch++;
 			it->second = m_ch;
+			m_symbolsInv[m_ch] = from->label;
 		}
 		to->label = std::string(1, it->second);
+		//to->label = std::string(from->label.begin(), from->label.end());
 		to->eRep = to;
 		to->eReps.push_back(to);
 		if (parent)
@@ -94,6 +113,18 @@ namespace TryAlgebraCore::Trs
 		{
 			NewTrs::Term*& childTerm = to->children.emplace_back(nullptr);
 			toTerm(ch, childTerm, to);
+		}
+	}
+
+	void ToProperTerm::toIntermediate(NewTrs::Term* term, std::unique_ptr<TermIntermediate>& intermediate)
+	{
+		intermediate = std::make_unique<TermIntermediate>();
+		intermediate->label = m_symbolsInv[term->label.back()];
+		//intermediate->label = std::wstring(term->label.begin(), term->label.end());
+		for (NewTrs::Term* ch : term->children)
+		{
+			auto& newCh = intermediate->children.emplace_back();
+			toIntermediate(ch, newCh);
 		}
 	}
 
@@ -134,6 +165,25 @@ namespace TryAlgebraCore::Trs
 			}
 		}
 		return progress = token.size();
+	}
+
+	void ToProperTerm::print(const std::vector<std::unique_ptr<TermIntermediate>>& terms)
+	{
+		if (terms.empty())
+		{
+			return;
+		}
+		std::wcout << "(";
+		for (auto& t : terms)
+		{
+			std::wcout << t->label;
+			print(t->children);
+			if (t != terms.back())
+			{
+				std::wcout << ",";
+			}
+		}
+		std::wcout << ")";
 	}
 
 }

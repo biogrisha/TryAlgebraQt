@@ -203,6 +203,15 @@ namespace MeParserGenericTest
 			endChildren(res);
 			cases += MeParserGenericCase({ "MeParserGenericTest", "10" }, L"ab\\func1\\meta1\\{\\}", res);
 		}
+		{
+			std::vector<State> res;
+			addMe(L"vr", L"uni", res);
+			addGlyph(L'y', res);
+			endChildren(res);
+			addGlyph(L't', res);
+
+			cases += MeParserGenericCase({ "MeParserGenericTest", "11" }, L"\\vr\\uni\\{y\\}t", res);
+		}
 	}
 
 }

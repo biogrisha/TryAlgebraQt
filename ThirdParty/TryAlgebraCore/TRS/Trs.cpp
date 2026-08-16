@@ -3,7 +3,7 @@
 #include <chrono>
 namespace NewTrs
 {
-	void Trs::run(Identity id, std::vector<Identity> ids)
+	std::vector<std::unordered_map<Term*, Term*>> Trs::run(Identity id, std::vector<Identity> ids)
 	{
 
 		m_id = id;
@@ -42,13 +42,15 @@ namespace NewTrs
 				markPatternNodes(id.rhs);
 			}
 		}
+		std::unordered_set<Term*> variables;
+		collectVariables(m_id.lhs, variables);
 		struct NewIdentity
 		{
 			Term* lhs = nullptr;
 			Term* rhs = nullptr;
 		};
 		auto start = std::chrono::high_resolution_clock::now();
-		for (int i = 0; i < 7; ++i)
+		for (int i = 0; i < 8; ++i)
 		{
 			std::vector<NewIdentity> newIdentities;
 			for (auto& id : m_ids)
@@ -71,6 +73,9 @@ namespace NewTrs
 								Term* newTerm = nullptr;
 								Trs::rewrite(id.rhs, newTerm);
 								newIdentities.emplace_back(trm.get(), newTerm);
+								//std::cout << "===";
+								//std::cout << id.lhs->termString << "->" << trm->termString << "\n";
+								//Trs::printVars(id.lhs);
 							});
 					}
 				}
@@ -106,40 +111,26 @@ namespace NewTrs
 						std::chrono::duration<double, std::milli>(end - start);
 
 					std::cout << duration.count() << " ms\n";
-					matcher.genSub([this]()
+					std::vector<std::unordered_map<Term*, Term*>> res;
+					matcher.genSub([this, &variables, &res]()
 						{
-							std::cout << "===";
+							/*std::cout << "===";
 							std::cout << m_id.lhs->termString << "->" << m_id.rhs->termString << "\n";
-							Trs::printVars(m_id.lhs);
-
-							//Term* newTerm = nullptr;
-							//Trs::rewrite(id.rhs, newTerm);
-							//newIdentities.emplace_back(trm.get(), newTerm);
+							Trs::printVars(m_id.lhs);*/
+							auto& map = res.emplace_back();
+							for (Term* var : variables)
+							{
+								map[var] = var->capture;
+							}
 						});
 
-					for (auto& el : m_storage)
-					{
-						if (el.second->eRep == el.second.get())
-						{
-							auto& reps = el.second->eReps;
-							for (int i = 0; i < reps.size(); ++i)
-							{
-								for (int j = i + 1; j < reps.size(); ++j)
-								{
-									if (cong(reps[i], reps[j]))
-									{
-										std::cout << reps[i]->termString << "=== " << reps[j]->termString << "\n";
-									}
-								}
-							}
-						}
-					}
-					return;
+					return res;
 				}
 			}
 
 		}
-		for (auto& el : m_storage)
+		return {};
+		/*for (auto& el : m_storage)
 		{
 			if (el.second->eRep == el.second.get())
 			{
@@ -149,7 +140,7 @@ namespace NewTrs
 					std::cout << el.second->termString << "=== " << reps[i]->termString << "\n";
 				}
 			}
-		}
+		}*/
 
 	}
 	bool Trs::cong(Term* t1, Term* t2)
@@ -419,6 +410,19 @@ namespace NewTrs
 		delete t;
 	}
 
+	void Trs::collectVariables(Term* t, std::unordered_set<Term*>& vars)
+	{
+		if (t->isVariable)
+		{
+			vars.insert(t);
+			return;
+		}
+		for (Term* ch : t->children)
+		{
+			collectVariables(ch, vars);
+		}
+	}
+
 	bool Trs::updateCongruence(Term*& t)
 	{
 		if (t->stored)
@@ -620,6 +624,7 @@ namespace NewTrs
 				if (!match(pat->children[compOrder[i]], rep->children[compOrder[i]], compOrder[i]))
 				{
 					result = false;
+					break;
 				}
 			}
 			repSucceded |= result;

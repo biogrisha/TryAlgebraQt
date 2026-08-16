@@ -14,53 +14,58 @@ namespace TryAlgebraCore::Trs {
 		std::wstring_view str;
 		int readStart = 0;
 		bool finishedWithEndChildren = false;
-		for (int i = 0; i < static_cast<int>(m_str.size()) - 1; ++i)
+		for (int i = 0; i < static_cast<int>(m_str.size()); ++i)
 		{
-			finishedWithEndChildren = false;
-			if (m_str[i] == L'\\' && m_str[i + 1] == L'{')
+			if (i < m_str.size() - 1)
 			{
-				if (state == State::ReadMeta)
+				if (m_str[i] == L'\\' && m_str[i + 1] == L'{')
 				{
-					addMeta(str);
-				}
-				else if (state == State::ReadName)
-				{
-					createMe(str);
-				}
-				state = State::ReadGlyph;
-				++i;
-				startChildren();
-			}
-			else if (m_str[i] == L'\\' && m_str[i + 1] == L',')
-			{
-				++i;
-				nextChild();
-			}
-			else if (m_str[i] == L'\\' && m_str[i + 1] == L'}')
-			{
-				finishedWithEndChildren = true;
-				++i;
-				endChildren();
-			}
-			else if (m_str[i] == L'\\')
-			{
-				readStart = i + 1;
-				if (state == State::ReadGlyph)
-				{
-					state = State::ReadName;
-				}
-				else if (state == State::ReadName)
-				{
-					state = State::ReadMeta;
-					createMe(str);
-				}
-				else if (state == State::ReadMeta)
-				{
+					if (state == State::ReadMeta)
+					{
+						addMeta(str);
+					}
+					else if (state == State::ReadName)
+					{
+						createMe(str);
+					}
 					state = State::ReadGlyph;
-					addMeta(str);
+					++i;
+					startChildren();
+					continue;
+				}
+				else if (m_str[i] == L'\\' && m_str[i + 1] == L',')
+				{
+					++i;
+					nextChild();
+					continue;
+				}
+				else if (m_str[i] == L'\\' && m_str[i + 1] == L'}')
+				{
+					++i;
+					endChildren();
+					continue;
+				}
+				else if (m_str[i] == L'\\')
+				{
+					readStart = i + 1;
+					if (state == State::ReadGlyph)
+					{
+						state = State::ReadName;
+					}
+					else if (state == State::ReadName)
+					{
+						state = State::ReadMeta;
+						createMe(str);
+					}
+					else if (state == State::ReadMeta)
+					{
+						state = State::ReadGlyph;
+						addMeta(str);
+					}
+					continue;
 				}
 			}
-			else if (state == State::ReadName || state == State::ReadMeta)
+			if (state == State::ReadName || state == State::ReadMeta)
 			{
 				str = std::wstring_view{ m_str }.substr(readStart, i - readStart + 1);
 			}
@@ -68,26 +73,14 @@ namespace TryAlgebraCore::Trs {
 			{
 				addGlyph(m_str[i]);
 			}
-
 		}
-		if (finishedWithEndChildren)
-		{
-			return;
-		}
-		//last glyph
-		str = std::wstring_view{ m_str }.substr(readStart, m_str.size());
-		if (state == State::ReadMeta)
-		{
-			addMeta(str);
-		}
-		else if (state == State::ReadName)
+		if (state == State::ReadName)
 		{
 			createMe(str);
 		}
-		else if (state == State::ReadGlyph)
+		else if (state == State::ReadMeta)
 		{
-			addGlyph(m_str.back());
+			addMeta(str);
 		}
-
 	}
 }
