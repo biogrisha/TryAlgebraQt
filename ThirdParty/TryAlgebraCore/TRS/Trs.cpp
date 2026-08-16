@@ -161,17 +161,6 @@ namespace NewTrs
 	}
 	void Trs::unionTerms(Term* t1, Term* t2)
 	{
-		const auto& found1 = m_storage.find("trm_2(^,trm_2(*,a,trm_2(*,a,c)),2)");
-		const auto& found2 = m_storage.find("trm_2(*,a,trm_2(*,c,trm_2(*,c,trm_2(*,a,trm_2(*,a,trm_2(*,a,c))))))");
-		if (found1 != m_storage.end() && found2 != m_storage.end())
-		{
-			if (find(found1->second.get()) == find(t1) && find(found2->second.get()) == find(t2)
-				|| find(found1->second.get()) == find(t2) && find(found2->second.get()) == find(t1))
-			{
-				std::cout << "sdf";
-			}
-
-		}
 		//move t1 into t2
 		auto* topT1 = find(t1);
 		auto* topT2 = find(t2);
