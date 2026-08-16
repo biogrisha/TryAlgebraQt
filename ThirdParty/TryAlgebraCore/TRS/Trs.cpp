@@ -73,9 +73,6 @@ namespace NewTrs
 								Term* newTerm = nullptr;
 								Trs::rewrite(id.rhs, newTerm);
 								newIdentities.emplace_back(trm.get(), newTerm);
-								//std::cout << "===";
-								//std::cout << id.lhs->termString << "->" << trm->termString << "\n";
-								//Trs::printVars(id.lhs);
 							});
 					}
 				}
@@ -640,6 +637,13 @@ namespace NewTrs
 	{
 		if (id == 0)
 		{
+			for (Sub& next : sub->next)
+			{
+				if (next.subj == subj)
+				{
+					return true;
+				}
+			}
 			auto& newSub = sub->next.emplace_back();
 			newSub.path = path;
 			newSub.subj = subj;
