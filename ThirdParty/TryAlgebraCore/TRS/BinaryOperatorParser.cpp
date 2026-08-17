@@ -10,11 +10,11 @@ namespace TryAlgebraCore::Trs
 		{
 			switch (rule.type)
 			{
-			case RuleType::RecursiveExhausting:
-				recursiveExhausting(subj, rule);
+			case RuleType::TDRecursiveExhausting:
+				tdRecursiveExhausting(subj, rule);
 				break;
-			case RuleType::SimpleRecursive:
-				simpleRecursive(subj, rule);
+			case RuleType::TDSimpleRecursive:
+				tdSimpleRecursive(subj, rule);
 				break;
 			default:
 				break;
@@ -24,7 +24,12 @@ namespace TryAlgebraCore::Trs
 		removeContainers(subj);
 	}
 
-	void Transformer::simpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
+	void Transformer::applyAllInverse(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	{
+		addContainers(subj);
+	}
+
+	void Transformer::tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
 	{
 		if (subj.empty())
 		{
@@ -48,17 +53,17 @@ namespace TryAlgebraCore::Trs
 		{
 			for (int i = 1; i < subj.size(); ++i)
 			{
-				simpleRecursive(subj[i]->children, rule);
+				tdSimpleRecursive(subj[i]->children, rule);
 			}
 			return;
 		}
 		for (auto& t : subj)
 		{
-			simpleRecursive(t->children, rule);
+			tdSimpleRecursive(t->children, rule);
 		}
 	}
 
-	void Transformer::recursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
+	void Transformer::tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
 	{
 		if (subj.empty() || subj.back()->label == MeNames::term + MeNames::termToken)
 		{
@@ -86,13 +91,13 @@ namespace TryAlgebraCore::Trs
 		{
 			for (int i = 1; i < subj.size(); ++i)
 			{
-				recursiveExhausting(subj[i]->children, rule);
+				tdRecursiveExhausting(subj[i]->children, rule);
 			}
 			return;
 		}
 		for (auto& t : subj)
 		{
-			recursiveExhausting(t->children, rule);
+			tdRecursiveExhausting(t->children, rule);
 		}
 	}
 
@@ -129,5 +134,28 @@ namespace TryAlgebraCore::Trs
 				subj[i] = std::move(subj[i]->children.back());
 			}
 		}
+	}
+	void Transformer::addContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	{
+		for (int i = 0; i < subj.size(); ++i)
+		{
+			addContainers(subj[i]->children);
+			if (isTrm(subj[i]->label))
+			{
+				auto children = std::move(subj[i]->children);
+				subj[i]->children.clear();
+				for (auto& ch : children)
+				{
+					auto& cont = subj[i]->children.emplace_back(std::make_unique<TermIntermediate>());
+					cont->label = MeNames::cont;
+					cont->children.push_back(std::move(ch));
+				}
+			}
+		}
+	}
+
+	bool Transformer::isTrm(const std::wstring& l) const
+	{
+		return l.size() > 2 && l[0] == L't' && l[1] == L'r' && l[2] == L'm';
 	}
 }

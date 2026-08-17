@@ -37,14 +37,14 @@ namespace TryAlgebraCore::Trs
 
 		for (auto& subs : res)
 		{
-			std::cout << "========\n";
 			for (auto& [var, subj] : subs)
 			{
 				std::vector<std::unique_ptr<TermIntermediate>> t;
 				t.emplace_back();
 				toIntermediate(subj, t.back());
-				print(t);
-				std::cout << "\n";
+				m_terms = std::move(t);
+				m_transformer.applyAllInverse(m_terms);
+				return;
 			}
 		}
 	}
@@ -82,7 +82,7 @@ namespace TryAlgebraCore::Trs
 					else
 					{
 						m_transformer.addRules(tb.getSubstring(from, to)
-							, token == L"-rec" ? RuleType::SimpleRecursive : RuleType::RecursiveExhausting);
+							, token == L"-rec" ? RuleType::TDSimpleRecursive : RuleType::TDRecursiveExhausting);
 					}
 				}
 			}
@@ -94,15 +94,15 @@ namespace TryAlgebraCore::Trs
 	{
 		to = new NewTrs::Term;
 		to->isVariable = from->isVariable;
-		/*const auto& [it, inserted] = m_symbols.emplace(from->label, m_ch);
+		const auto& [it, inserted] = m_symbols.emplace(from->label, m_ch);
 		if (inserted)
 		{
 			m_ch++;
 			it->second = m_ch;
 			m_symbolsInv[m_ch] = from->label;
 		}
-		to->label = std::string(1, it->second);*/
-		to->label = std::string(from->label.begin(), from->label.end());
+		to->label = std::string(1, it->second);
+		//to->label = std::string(from->label.begin(), from->label.end());
 		to->eRep = to;
 		to->eReps.push_back(to);
 		if (parent)
@@ -119,8 +119,8 @@ namespace TryAlgebraCore::Trs
 	void ToProperTerm::toIntermediate(NewTrs::Term* term, std::unique_ptr<TermIntermediate>& intermediate)
 	{
 		intermediate = std::make_unique<TermIntermediate>();
-		//intermediate->label = m_symbolsInv[term->label.back()];
-		intermediate->label = std::wstring(term->label.begin(), term->label.end());
+		intermediate->label = m_symbolsInv[term->label.back()];
+		//intermediate->label = std::wstring(term->label.begin(), term->label.end());
 		for (NewTrs::Term* ch : term->children)
 		{
 			auto& newCh = intermediate->children.emplace_back();

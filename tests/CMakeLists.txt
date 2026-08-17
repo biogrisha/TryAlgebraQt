@@ -23,7 +23,5 @@ add_executable(TryAlgebraTest
 
 target_link_libraries(TryAlgebraTest 
     PRIVATE 
-    GTest::gtest
-    GTest::gtest_main
     TryAlgebraCore
 )

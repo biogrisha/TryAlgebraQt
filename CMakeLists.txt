@@ -9,7 +9,6 @@ project(TryAlgebraProj LANGUAGES CXX)
 
 enable_testing()
 
-find_package(GTest CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Qml Quick)
 
 qt_standard_project_setup(REQUIRES 6.5)
