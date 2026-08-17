@@ -96,7 +96,7 @@ namespace NewTrs
 		void mergeCong(Term* t1, Term* t2);
 		void merge(Term* t1, Term* t2);
 		void compact(Term*& t);
-		void setupParent(Term* t, Term* parent = nullptr);
+		void setupParent(Term* t, Term* parent = nullptr, int depth = 0);
 		void markPatternNodes(Term* t);
 		void deleteRec(Term* t);
 		void collectVariables(Term* t, std::unordered_set<Term*>& vars);

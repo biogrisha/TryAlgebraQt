@@ -65,6 +65,7 @@ namespace NewTrs
 					{
 						continue;
 					}
+
 					Matcher matcher(id.variablesOrder);
 					if (matcher.match(id.lhs, trm.get()))
 					{
@@ -73,6 +74,9 @@ namespace NewTrs
 								Term* newTerm = nullptr;
 								Trs::rewrite(id.rhs, newTerm);
 								newIdentities.emplace_back(trm.get(), newTerm);
+								/*std::cout << "===";
+								std::cout << id.lhs->termString << "->" << trm->termString << "\n";
+								Trs::printVars(id.lhs);*/
 							});
 					}
 				}
@@ -112,9 +116,8 @@ namespace NewTrs
 					std::vector<std::unordered_map<Term*, Term*>> res;
 					matcher.genSub([this, &variables, &res]()
 						{
-							/*std::cout << "===";
-							std::cout << m_id.lhs->termString << "->" << m_id.rhs->termString << "\n";
-							Trs::printVars(m_id.lhs);*/
+							std::cout << "===solution===\n";
+							Trs::printVars(m_id.lhs);
 							auto& map = res.emplace_back();
 							for (Term* var : variables)
 							{
@@ -298,15 +301,19 @@ namespace NewTrs
 		}
 	}
 
-	void Trs::setupParent(Term* t, Term* parent)
+	void Trs::setupParent(Term* t, Term* parent, int depth)
 	{
+		if (depth == 40)
+		{
+			return;
+		}
 		if (parent)
 		{
 			find(t)->parents.insert(parent);
 		}
 		for (Term* ch : t->children)
 		{
-			setupParent(ch, t);
+			setupParent(ch, t, depth + 1);
 		}
 	}
 
@@ -660,7 +667,10 @@ namespace NewTrs
 			{
 				continue;
 			}
-			return addSub(&next, path, var, subj, id - 1);
+			if (addSub(&next, path, var, subj, id - 1))
+			{
+				return true;
+			}
 		}
 		return false;
 	}

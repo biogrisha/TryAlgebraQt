@@ -35,18 +35,26 @@ namespace TryAlgebraCore::Trs
 		NewTrs::Trs trs;
 		auto res = trs.run(id, trsIdentities);
 
-		for (auto& subs : res)
-		{
-			for (auto& [var, subj] : subs)
-			{
-				std::vector<std::unique_ptr<TermIntermediate>> t;
-				t.emplace_back();
-				toIntermediate(subj, t.back());
-				m_terms = std::move(t);
-				m_transformer.applyAllInverse(m_terms);
-				return;
-			}
-		}
+		//for (auto& subs : res)
+		//{
+		//	std::cout << " --------solution--------\n";
+		//	for (auto& [var, subj] : subs)
+		//	{
+		//		std::vector<std::unique_ptr<TermIntermediate>> rhs;
+		//		rhs.emplace_back();
+		//		std::vector<std::unique_ptr<TermIntermediate>> lhs;
+		//		lhs.emplace_back();
+		//		toIntermediate(var, lhs.back());
+		//		toIntermediate(subj, rhs.back());
+		//		print(lhs);
+		//		std::cout << " -> ";
+		//		print(rhs);
+		//		std::cout << "\n";
+		//		//m_terms = std::move(t);
+		//		//m_transformer.applyAllInverse(m_terms);
+
+		//	}
+		//}
 	}
 
 	const std::vector<std::unique_ptr<TermIntermediate>>& ToProperTerm::get() const
@@ -94,15 +102,15 @@ namespace TryAlgebraCore::Trs
 	{
 		to = new NewTrs::Term;
 		to->isVariable = from->isVariable;
-		const auto& [it, inserted] = m_symbols.emplace(from->label, m_ch);
-		if (inserted)
-		{
-			m_ch++;
-			it->second = m_ch;
-			m_symbolsInv[m_ch] = from->label;
-		}
-		to->label = std::string(1, it->second);
-		//to->label = std::string(from->label.begin(), from->label.end());
+		//const auto& [it, inserted] = m_symbols.emplace(from->label, m_ch);
+		//if (inserted)
+		//{
+		//	m_ch++;
+		//	it->second = m_ch;
+		//	m_symbolsInv[m_ch] = from->label;
+		//}
+		//to->label = std::string(1, it->second);
+		to->label = std::string(from->label.begin(), from->label.end());
 		to->eRep = to;
 		to->eReps.push_back(to);
 		if (parent)
@@ -119,8 +127,8 @@ namespace TryAlgebraCore::Trs
 	void ToProperTerm::toIntermediate(NewTrs::Term* term, std::unique_ptr<TermIntermediate>& intermediate)
 	{
 		intermediate = std::make_unique<TermIntermediate>();
-		intermediate->label = m_symbolsInv[term->label.back()];
-		//intermediate->label = std::wstring(term->label.begin(), term->label.end());
+		//intermediate->label = m_symbolsInv[term->label.back()];
+		intermediate->label = std::wstring(term->label.begin(), term->label.end());
 		for (NewTrs::Term* ch : term->children)
 		{
 			auto& newCh = intermediate->children.emplace_back();
