@@ -8,7 +8,9 @@ namespace TryAlgebraCore::Trs
 	{
 		TDSimpleRecursive,
 		TDRecursiveExhausting,
-		BUSimpleRecursive
+		BUSimpleRecursive,
+		BURecursiveExhausting,
+		None
 	};
 
 	struct RewritingRule
@@ -29,13 +31,15 @@ namespace TryAlgebraCore::Trs
 
 		void tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
 		void tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
+		void buSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
 
-		void addRules(const std::wstring& rawStr, RuleType type);
+		void addRules(const std::wstring& rawStr, RuleType type, bool inv = false);
 		void removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 		void addContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 	private:
 		bool isTrm(const std::wstring& label) const;
 		std::vector<RewritingRule> m_rules;
+		std::vector<RewritingRule> m_invRules;
 		BracketsParser bracketsParser;
 	};
 }

@@ -303,10 +303,6 @@ namespace NewTrs
 
 	void Trs::setupParent(Term* t, Term* parent, int depth)
 	{
-		if (depth == 40)
-		{
-			return;
-		}
 		if (parent)
 		{
 			find(t)->parents.insert(parent);
@@ -644,13 +640,6 @@ namespace NewTrs
 	{
 		if (id == 0)
 		{
-			for (Sub& next : sub->next)
-			{
-				if (next.subj == subj)
-				{
-					return true;
-				}
-			}
 			auto& newSub = sub->next.emplace_back();
 			newSub.path = path;
 			newSub.subj = subj;

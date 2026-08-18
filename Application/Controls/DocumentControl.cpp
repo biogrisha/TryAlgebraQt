@@ -241,11 +241,13 @@ void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
 		}
 		TryAlgebraCore::Trs::ToProperTerm toProperTerm;
 		toProperTerm.setup(m_currDoc->textBuffer());
-		toProperTerm.run(str);
-		TryAlgebraCore::TreeDisplay treeDisplay(vt);
-		treeDisplay.setTree(toProperTerm.get());
-		treeDisplay.move({ 100,20 });
-		treeDisplay.draw();
+		auto res = toProperTerm.run(str);
+		//TryAlgebraCore::TreeDisplay treeDisplay(vt);
+		//treeDisplay.setTree(toProperTerm.get());
+		//treeDisplay.move({ 100,20 });
+		//treeDisplay.draw();
+		m_currDoc->type(str + res);
+		m_currDoc->draw();
 		updateElements(true, true, true);
 	}
 }

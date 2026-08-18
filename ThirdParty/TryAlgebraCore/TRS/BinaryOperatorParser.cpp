@@ -27,6 +27,20 @@ namespace TryAlgebraCore::Trs
 	void Transformer::applyAllInverse(std::vector<std::unique_ptr<TermIntermediate>>& subj)
 	{
 		addContainers(subj);
+		for (auto& rule : m_invRules)
+		{
+			switch (rule.type)
+			{
+			case RuleType::TDRecursiveExhausting:
+				tdRecursiveExhausting(subj, rule);
+				break;
+			case RuleType::TDSimpleRecursive:
+				tdSimpleRecursive(subj, rule);
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	void Transformer::tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
@@ -101,7 +115,7 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	void Transformer::addRules(const std::wstring& rawStr, RuleType type)
+	void Transformer::addRules(const std::wstring& rawStr, RuleType type, bool inv)
 	{
 		auto identities = parseIdentities(rawStr);
 		for (auto& id : identities)
@@ -120,7 +134,14 @@ namespace TryAlgebraCore::Trs
 			{
 				rule.bundles.push_back(&b);
 			}
-			m_rules.push_back(std::move(rule));
+			if (inv)
+			{
+				m_invRules.push_back(std::move(rule));
+			}
+			else
+			{
+				m_rules.push_back(std::move(rule));
+			}
 		}
 	}
 
@@ -128,6 +149,10 @@ namespace TryAlgebraCore::Trs
 	{
 		for (int i = 0; i < subj.size(); ++i)
 		{
+			if (subj[i]->isVariable)
+			{
+				continue;
+			}
 			removeContainers(subj[i]->children);
 			if (subj[i]->label == MeNames::cont)
 			{

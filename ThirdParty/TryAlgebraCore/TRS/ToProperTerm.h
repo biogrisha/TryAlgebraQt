@@ -13,11 +13,12 @@ namespace TryAlgebraCore::Trs
 	class ToProperTerm
 	{
 	public:
-		void run(const std::wstring& str);
+		std::wstring run(const std::wstring& str);
 		const std::vector<std::unique_ptr<TermIntermediate>>& get() const;
 		void setup(const TextBuffer& tb);
 
 	private:
+		RuleType tokenToType(const std::wstring& token) const;
 		void toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent = nullptr);
 		void toIntermediate(NewTrs::Term* term, std::unique_ptr<TermIntermediate>& intermediate);
 		std::optional<std::wstring> getSection(const TextBuffer& tb, const std::wstring& sectionName);

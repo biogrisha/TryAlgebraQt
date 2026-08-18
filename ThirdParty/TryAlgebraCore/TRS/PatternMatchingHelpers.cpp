@@ -786,6 +786,49 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
+	void termIntermediateToStr(const std::vector<std::unique_ptr<TermIntermediate>>& terms, std::wstring& res)
+	{
+		for (const auto& term : terms)
+		{
+			if (term->label.size() == 1)
+			{
+				res += term->label;
+				continue;
+			}
+			const auto pos = term->label.find(L'_');
+
+			std::wstring first;
+			std::wstring second;
+
+			if (pos != std::wstring::npos) {
+				first = term->label.substr(0, pos);
+				second = term->label.substr(pos + 1);
+				res += L'\\';
+				res += first;
+				res += L'\\';
+				res += second;
+			}
+			else
+			{
+				res += L'\\';
+				res += term->label;
+			}
+			if (!term->children.empty())
+			{
+				res += L"\\{";
+				for (const auto& ch : term->children)
+				{
+					termIntermediateToStr(ch->children, res);
+					if (ch != term->children.back())
+					{
+						res += L"\\,";
+					}
+				}
+				res += L"\\}";
+			}
+		}
+	}
+
 	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring& str)
 	{
 		Trs::MeParserGeneric parser(str);

@@ -127,6 +127,7 @@ namespace TryAlgebraCore::Trs
 
 	void markVariables(std::vector<std::unique_ptr<TermIntermediate>>& pat);
 
+	void termIntermediateToStr(const std::vector<std::unique_ptr<TermIntermediate>>& terms, std::wstring& res);
 	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring& str);
 	std::vector<IdentityIntermediate> parseIdentities(const std::wstring& str);
 
