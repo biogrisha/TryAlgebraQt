@@ -21,6 +21,8 @@ namespace NewTrs
 		bool isVariable = false;
 		bool isPat = false;
 		bool deleteByCong = false;
+		bool cong = false;
+		bool congProtect = false;
 		Term* capture = nullptr;
 		//term is used in identities
 		bool persistent = false;
@@ -53,6 +55,13 @@ namespace NewTrs
 		Term* rhs = nullptr;
 	};
 
+	struct ExpectedId
+	{
+		Term* lhs = nullptr;
+		Term* rhs = nullptr;
+		std::unordered_map<Identity*, std::vector<ExpectedId>> attempts;
+	};
+
 	class Matcher
 	{
 		struct Path
@@ -69,8 +78,9 @@ namespace NewTrs
 		};
 
 	public:
-		Matcher(const std::map<std::vector<int>, int>& variablesOrder)
-			:m_variablesOrder(variablesOrder)
+		Matcher(const std::map<std::vector<int>, int>& variablesOrder, std::unordered_set<Term*>& fails)
+			: m_variablesOrder(variablesOrder)
+			, m_fails(fails)
 		{
 
 		}
@@ -84,6 +94,7 @@ namespace NewTrs
 		Path m_path;
 		Sub m_subRoot;
 		const std::map<std::vector<int>, int>& m_variablesOrder;
+		std::unordered_set<Term*>& m_fails;
 	};
 
 	class Trs
@@ -110,10 +121,9 @@ namespace NewTrs
 		static void setupVariablesOrder(Term* t, std::vector<int>& pos, int& id, std::map<std::vector<int>, int>& res);
 		static void printVars(Term* t);
 		static void rewrite(Term* t, Term*& res);
+
 		Identity m_id;
 		std::vector<Identity> m_ids;
 		std::map<std::string, std::unique_ptr<Term>> m_storage;
-
-		std::unordered_set<Term*> m_cong;
 	};
 }

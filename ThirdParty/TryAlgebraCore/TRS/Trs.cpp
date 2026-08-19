@@ -44,43 +44,96 @@ namespace NewTrs
 		}
 		std::unordered_set<Term*> variables;
 		collectVariables(m_id.lhs, variables);
+
+
 		struct NewIdentity
 		{
 			Term* lhs = nullptr;
 			Term* rhs = nullptr;
 		};
+
+		std::vector<int> sizes = {
+			0,
+			30,
+			50,
+			60,
+			80,
+		};
 		auto start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < 15; ++i)
 		{
 			std::vector<NewIdentity> newIdentities;
+			std::unordered_set<Term*> fails;
+			Matcher matcher(m_id.variablesOrder, fails);
+			if (matcher.match(m_id.lhs, m_id.rhs))
+			{
+				std::cout << "SUCCEDED\n";
+				auto end = std::chrono::high_resolution_clock::now();
+
+				auto duration =
+					std::chrono::duration<double, std::milli>(end - start);
+
+				std::cout << duration.count() << " ms\n";
+				matcher.genSub([this]()
+					{
+						std::cout << "===";
+						std::cout << m_id.lhs->termString << "->" << m_id.rhs->termString << "\n";
+						Trs::printVars(m_id.lhs);
+
+						//Term* newTerm = nullptr;
+						//Trs::rewrite(id.rhs, newTerm);
+						//newIdentities.emplace_back(trm.get(), newTerm);
+					});
+				return {};
+			}
+
 			for (auto& id : m_ids)
 			{
-				for (auto& [str, trm] : m_storage)
+				Matcher matcher(id.variablesOrder, fails);
+				if (matcher.match(id.lhs, m_id.rhs))
 				{
-					if (trm->isPat)
-					{
-						continue;
-					}
-					if (trm->eRep != trm.get())
-					{
-						continue;
-					}
+					matcher.genSub([this, &newIdentities, &id]()
+						{
+							Term* newTerm = nullptr;
+							Trs::rewrite(id.rhs, newTerm);
+							newIdentities.emplace_back(m_id.rhs, newTerm);
+							/*std::cout << "===";
+							std::cout << id.lhs->termString << "->" << trm->termString << "\n";
+							Trs::printVars(id.lhs);*/
+						});
+				}
+			}
 
-					Matcher matcher(id.variablesOrder);
-					if (matcher.match(id.lhs, trm.get()))
+			std::unordered_set<Term*> intersection = fails;
+			while (!intersection.empty())
+			{
+				std::unordered_set<Term*> fails2;
+				for (Term* t : intersection)
+				{
+					for (auto& id : m_ids)
 					{
-						matcher.genSub([this, &newIdentities, &id, &trm]()
-							{
-								Term* newTerm = nullptr;
-								Trs::rewrite(id.rhs, newTerm);
-								newIdentities.emplace_back(trm.get(), newTerm);
-								/*std::cout << "===";
-								std::cout << id.lhs->termString << "->" << trm->termString << "\n";
-								Trs::printVars(id.lhs);*/
-							});
+						Matcher matcher(id.variablesOrder, fails2);
+						if (matcher.match(id.lhs, t))
+						{
+							matcher.genSub([this, &newIdentities, &id, t]()
+								{
+									Term* newTerm = nullptr;
+									Trs::rewrite(id.rhs, newTerm);
+									newIdentities.emplace_back(t, newTerm);
+									/*std::cout << "===";
+									std::cout << id.lhs->termString << "->" << trm->termString << "\n";
+									Trs::printVars(id.lhs);*/
+								});
+						}
 					}
 				}
-
+				intersection.clear();
+				for (Term* x : fails2)
+				{
+					if (!fails.contains(x))
+						intersection.insert(x);
+				}
+				fails.merge(fails2);
 			}
 			for (auto& newId : newIdentities)
 			{
@@ -92,58 +145,16 @@ namespace NewTrs
 					merge(newId.lhs, newId.rhs);
 				}
 			}
-			for (auto* t : m_cong)
-			{
-				if (find(t)->eReps.size() > 1)
-				{
-					remove(t);
-				}
-			}
-			m_cong.clear();
-			std::cout << "size " << m_storage.size() << "\n";
-			{
-				Matcher matcher(m_id.variablesOrder);
-				if (matcher.match(m_id.lhs, m_id.rhs))
-				{
 
-					std::cout << "SUCCEDED\n";
-					auto end = std::chrono::high_resolution_clock::now();
-
-					auto duration =
-						std::chrono::duration<double, std::milli>(end - start);
-
-					std::cout << duration.count() << " ms\n";
-					std::vector<std::unordered_map<Term*, Term*>> res;
-					matcher.genSub([this, &variables, &res]()
-						{
-							std::cout << "===solution===\n";
-							Trs::printVars(m_id.lhs);
-							auto& map = res.emplace_back();
-							for (Term* var : variables)
-							{
-								map[var] = var->capture;
-							}
-						});
-
-					return res;
-				}
-			}
 
 		}
 		return {};
-		/*for (auto& el : m_storage)
-		{
-			if (el.second->eRep == el.second.get())
-			{
-				auto& reps = el.second->eReps;
-				for (int i = 0; i < reps.size(); ++i)
-				{
-					std::cout << el.second->termString << "=== " << reps[i]->termString << "\n";
-				}
-			}
-		}*/
 
 	}
+
+
+
+
 	bool Trs::cong(Term* t1, Term* t2)
 	{
 		if (t1->label != t2->label)
@@ -169,6 +180,7 @@ namespace NewTrs
 		topT2->parents.merge(topT1->parents);
 		topT1->parents.clear();
 		topT1->eReps.clear();
+
 	}
 
 	void Trs::remove(Term* tToRemove)
@@ -225,15 +237,34 @@ namespace NewTrs
 		//collect congruent
 		if (t1->persistent && !t2->persistent)
 		{
-			m_cong.insert(t2);
+			t2->congProtect = false;
+			t2->cong = true;
 		}
 		else if (!t1->persistent && t2->persistent)
 		{
-			m_cong.insert(t1);
+			t1->congProtect = false;
+			t1->cong = true;
 		}
 		else if (!t1->persistent)
 		{
-			m_cong.insert(t1);
+			if (t1->congProtect && !t2->congProtect)
+			{
+				t2->cong = true;
+			}
+			else if (t2->congProtect && !t1->congProtect)
+			{
+				t1->cong = true;
+			}
+			else if (t2->congProtect && t1->congProtect)
+			{
+				t1->congProtect = false;
+				t1->cong = true;
+			}
+			else
+			{
+				t1->congProtect = true;
+				t2->cong = true;
+			}
 		}
 
 		//if they are congruent but in the same e-class
@@ -598,6 +629,11 @@ namespace NewTrs
 		if (!pat->isPat)
 		{
 			bool res = Trs::find(pat) == Trs::find(subj);
+			if (!res)
+			{
+				m_fails.insert(pat);
+				m_fails.insert(subj);
+			}
 			m_path.posPath.pop_back();
 			m_path.repPath.pop_back();
 			return res;
@@ -614,7 +650,7 @@ namespace NewTrs
 		bool repSucceded = false;
 		for (auto* rep : reps)
 		{
-			if (pat->label != rep->label)
+			if (rep->cong || pat->label != rep->label)
 			{
 				continue;
 			}
@@ -648,12 +684,14 @@ namespace NewTrs
 		}
 		for (auto& next : sub->next)
 		{
-			if (next.var == var && Trs::find(next.subj) != Trs::find(subj))
+			if (!pathsCompatible(next.path, path))
 			{
 				continue;
 			}
-			if (!pathsCompatible(next.path, path))
+			if (next.var == var && Trs::find(next.subj) != Trs::find(subj))
 			{
+				m_fails.insert(next.subj);
+				m_fails.insert(subj);
 				continue;
 			}
 			if (addSub(&next, path, var, subj, id - 1))
