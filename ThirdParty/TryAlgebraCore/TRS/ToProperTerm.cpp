@@ -44,7 +44,7 @@ namespace TryAlgebraCore::Trs
 		NewTrs::Trs trs;
 		auto res = trs.run(id, trsIdentities);
 
-		/*std::wstring resStr;
+		std::wstring resStr;
 		for (auto& subs : res)
 		{
 			resStr += L"\n=======";
@@ -77,8 +77,7 @@ namespace TryAlgebraCore::Trs
 				}
 			}
 		}
-		return resStr;*/
-		return L"";
+		return resStr;
 	}
 
 	const std::vector<std::unique_ptr<TermIntermediate>>& ToProperTerm::get() const

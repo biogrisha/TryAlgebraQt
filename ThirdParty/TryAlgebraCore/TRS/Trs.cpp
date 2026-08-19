@@ -52,16 +52,10 @@ namespace NewTrs
 			Term* rhs = nullptr;
 		};
 
-		std::vector<int> sizes = {
-			0,
-			30,
-			50,
-			60,
-			80,
-		};
 		auto start = std::chrono::high_resolution_clock::now();
 		for (int i = 0; i < 15; ++i)
 		{
+			std::cout << m_storage.size() << "\n";
 			std::vector<NewIdentity> newIdentities;
 			std::unordered_set<Term*> fails;
 			Matcher matcher(m_id.variablesOrder, fails);
@@ -74,17 +68,19 @@ namespace NewTrs
 					std::chrono::duration<double, std::milli>(end - start);
 
 				std::cout << duration.count() << " ms\n";
-				matcher.genSub([this]()
+				std::vector<std::unordered_map<Term*, Term*>> res;
+				matcher.genSub([this, &variables, &res]()
 					{
-						std::cout << "===";
-						std::cout << m_id.lhs->termString << "->" << m_id.rhs->termString << "\n";
+						std::cout << "===solution===\n";
 						Trs::printVars(m_id.lhs);
-
-						//Term* newTerm = nullptr;
-						//Trs::rewrite(id.rhs, newTerm);
-						//newIdentities.emplace_back(trm.get(), newTerm);
+						auto& map = res.emplace_back();
+						for (Term* var : variables)
+						{
+							map[var] = var->capture;
+						}
 					});
-				return {};
+
+				return res;
 			}
 
 			for (auto& id : m_ids)
