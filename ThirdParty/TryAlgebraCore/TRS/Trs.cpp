@@ -42,6 +42,14 @@ namespace NewTrs
 				markPatternNodes(id.rhs);
 			}
 		}
+
+		std::vector<SimpleIdentity> requirements;
+		findRequirenment(m_ids[1].rhs, m_ids[2].lhs, requirements);
+
+		if (true)
+		{
+			return {};
+		}
 		std::unordered_set<Term*> variables;
 		collectVariables(m_id.lhs, variables);
 
@@ -448,6 +456,32 @@ namespace NewTrs
 		for (Term* ch : t->children)
 		{
 			collectVariables(ch, vars);
+		}
+	}
+
+	void Trs::findRequirenment(Term* t1, Term* t2, std::vector<SimpleIdentity>& ids)
+	{
+		if (t1->isVariable || t2->isVariable)
+		{
+			//isVar
+			//01,10,11
+			ids.emplace_back(t1, t2);
+			return;
+		}
+		else
+		{
+			//00
+			if (t1->label != t2->label)
+			{
+				ids.emplace_back(t1, t2);
+			}
+			else
+			{
+				for (int i = 0; i < t1->children.size(); ++i)
+				{
+					findRequirenment(t1->children[i], t2->children[i], ids);
+				}
+			}
 		}
 	}
 

@@ -55,11 +55,10 @@ namespace NewTrs
 		Term* rhs = nullptr;
 	};
 
-	struct ExpectedId
+	struct SimpleIdentity
 	{
 		Term* lhs = nullptr;
 		Term* rhs = nullptr;
-		std::unordered_map<Identity*, std::vector<ExpectedId>> attempts;
 	};
 
 	class Matcher
@@ -111,6 +110,7 @@ namespace NewTrs
 		void markPatternNodes(Term* t);
 		void deleteRec(Term* t);
 		void collectVariables(Term* t, std::unordered_set<Term*>& vars);
+		void findRequirenment(Term* t1, Term* t2, std::vector<SimpleIdentity>& ids);
 		//returns true if created new term(not equal and not congruent to other terms)
 		//this would imply that all parent terms also will be unique
 		bool updateCongruence(Term*& t);
@@ -125,5 +125,6 @@ namespace NewTrs
 		Identity m_id;
 		std::vector<Identity> m_ids;
 		std::map<std::string, std::unique_ptr<Term>> m_storage;
+		std::vector < std::vector <
 	};
 }
