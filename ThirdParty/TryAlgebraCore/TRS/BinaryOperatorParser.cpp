@@ -63,7 +63,7 @@ namespace TryAlgebraCore::Trs
 				var->variableMeta->captured = {};
 			}
 		}
-		if (subj.back()->parent && subj.back()->parent->label == MeNames::term + MeNames::termFunction)
+		if (subj.back()->parent && subj.back()->parent->label.find(MeNames::term) != std::wstring::npos)
 		{
 			for (int i = 1; i < subj.size(); ++i)
 			{
@@ -73,13 +73,16 @@ namespace TryAlgebraCore::Trs
 		}
 		for (auto& t : subj)
 		{
-			tdSimpleRecursive(t->children, rule);
+			if (!t->isVariable)
+			{
+				tdSimpleRecursive(t->children, rule);
+			}
 		}
 	}
 
 	void Transformer::tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
 	{
-		if (subj.empty() || subj.back()->label == MeNames::term + MeNames::termToken)
+		if (subj.empty())
 		{
 			return;
 		}
@@ -101,7 +104,7 @@ namespace TryAlgebraCore::Trs
 				var->variableMeta->captured = {};
 			}
 		}
-		if (subj.back()->parent && subj.back()->parent->label == MeNames::term + MeNames::termFunction)
+		if (subj.back()->parent && subj.back()->parent->label.find(MeNames::term) != std::wstring::npos)
 		{
 			for (int i = 1; i < subj.size(); ++i)
 			{
@@ -111,7 +114,10 @@ namespace TryAlgebraCore::Trs
 		}
 		for (auto& t : subj)
 		{
-			tdRecursiveExhausting(t->children, rule);
+			if (!t->isVariable)
+			{
+				tdRecursiveExhausting(t->children, rule);
+			}
 		}
 	}
 

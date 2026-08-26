@@ -19,8 +19,8 @@ namespace TryAlgebraCore::Trs
 		IdentityIntermediate equation = std::move(parseIdentities(string).back());
 		m_terms = std::move(equation.lhs);
 		markVariables(m_terms);
-		m_transformer.applyAll(m_terms);
 		m_transformer.applyAll(equation.rhs);
+		m_transformer.applyAll(m_terms);
 		/*if (true)
 		{
 			return L"";

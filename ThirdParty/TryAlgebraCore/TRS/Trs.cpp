@@ -43,16 +43,10 @@ namespace NewTrs
 			}
 		}
 
-		std::vector<SimpleIdentity> requirements;
-		findRequirenment(m_ids[1].rhs, m_ids[2].lhs, requirements);
 
-		if (true)
-		{
-			return {};
-		}
+
 		std::unordered_set<Term*> variables;
 		collectVariables(m_id.lhs, variables);
-
 
 		struct NewIdentity
 		{
@@ -61,7 +55,7 @@ namespace NewTrs
 		};
 
 		auto start = std::chrono::high_resolution_clock::now();
-		for (int i = 0; i < 15; ++i)
+		while (true)
 		{
 			std::cout << m_storage.size() << "\n";
 			std::vector<NewIdentity> newIdentities;
@@ -139,6 +133,7 @@ namespace NewTrs
 				}
 				fails.merge(fails2);
 			}
+			int storageSize = m_storage.size();
 			for (auto& newId : newIdentities)
 			{
 				generateTermStr(newId.rhs);
@@ -147,7 +142,41 @@ namespace NewTrs
 				if (find(newId.lhs) != find(newId.rhs))
 				{
 					merge(newId.lhs, newId.rhs);
+					if (m_storage.size() > 5000)
+					{
+						//max storage
+						//last try to solve
+						Matcher matcher(m_id.variablesOrder, fails);
+						if (matcher.match(m_id.lhs, m_id.rhs))
+						{
+							std::cout << "SUCCEDED\n";
+							auto end = std::chrono::high_resolution_clock::now();
+
+							auto duration =
+								std::chrono::duration<double, std::milli>(end - start);
+
+							std::cout << duration.count() << " ms\n";
+							std::vector<std::unordered_map<Term*, Term*>> res;
+							matcher.genSub([this, &variables, &res]()
+								{
+									std::cout << "===solution===\n";
+									Trs::printVars(m_id.lhs);
+									auto& map = res.emplace_back();
+									for (Term* var : variables)
+									{
+										map[var] = var->capture;
+									}
+								});
+
+							return res;
+						}
+						return {};
+					}
 				}
+			}
+			if (m_storage.size() == storageSize)
+			{
+				return {};
 			}
 
 
@@ -456,32 +485,6 @@ namespace NewTrs
 		for (Term* ch : t->children)
 		{
 			collectVariables(ch, vars);
-		}
-	}
-
-	void Trs::findRequirenment(Term* t1, Term* t2, std::vector<SimpleIdentity>& ids)
-	{
-		if (t1->isVariable || t2->isVariable)
-		{
-			//isVar
-			//01,10,11
-			ids.emplace_back(t1, t2);
-			return;
-		}
-		else
-		{
-			//00
-			if (t1->label != t2->label)
-			{
-				ids.emplace_back(t1, t2);
-			}
-			else
-			{
-				for (int i = 0; i < t1->children.size(); ++i)
-				{
-					findRequirenment(t1->children[i], t2->children[i], ids);
-				}
-			}
 		}
 	}
 
