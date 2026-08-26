@@ -24,14 +24,26 @@ Item {
         id: tabsControl
     }
 
+    //============== Menu Bar =================
     MenuBar {
         id:menuBar
         Menu {
             title: qsTr("File")
             Action {
+                text: qsTr("New")
+                onTriggered: {
+                    fileDialog.reason = "newFile"
+                    fileDialog.fileMode = FileDialog.SaveFile
+                    fileDialog.options &= ~FileDialog.ReadOnly
+                    fileDialog.open()
+                }
+            }
+            Action {
                 text: qsTr("Open")
                 onTriggered: {
                     fileDialog.reason = "openFile"
+                    fileDialog.fileMode = FileDialog.OpenFile
+                    fileDialog.options |= FileDialog.ReadOnly
                     fileDialog.open()
                 }
             }
@@ -44,24 +56,27 @@ Item {
         }
     }
 
+    //============== File dialog menu =================
     FileDialog {
         id:fileDialog
         property string reason: "openFile"
-
+        nameFilters: ["Text files (*.mdoc)"]
         onAccepted:
         {
             switch (reason) { 
                 case "openFile":
-                    //open file in menu control
                     menuControl.openDocument(fileDialog.selectedFile)
                     if(!documentLoader.source.href)
                     {
                         documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
-                        documentLoader.item.setDocumentControl(UserApplication.getDocumentControl())
                     }
                     break 
-                case "saveFile":
-                    console.log("Save file")
+                case "newFile":
+                    menuControl.newDocument(fileDialog.selectedFile)
+                    if(!documentLoader.source.href)
+                    {
+                        documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
+                    }
                 break 
             }
         }

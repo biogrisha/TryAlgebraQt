@@ -10,10 +10,10 @@
 #include <TRS/ToProperTerm.h>
 #include <MathEditor/include/TreeDisplay.h>
 
-DocumentControl::DocumentControl(QObject* parent)
-	: QObject(parent)
+DocumentControl::DocumentControl()
 {
 	DocumentsModel* docModel = AppGlobal::appMod->docModel();
+	onCurrentDocChanged();
 	QObject::connect(docModel, &DocumentsModel::onCurrentDocChanged, this, &DocumentControl::onCurrentDocChanged);
 	QObject::connect(docModel, &DocumentsModel::onBeforeDocRemoved, this, &DocumentControl::onBeforeDocRemoved);
 }
@@ -94,7 +94,8 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 	case Qt::Key_X:
 		if (bCtrl)
 		{
-			//doc->CutSelected();
+			m_currDoc->cut();
+			m_currDoc->draw();
 			updateElements(true, true, true);
 			break;
 		}
@@ -135,6 +136,7 @@ void DocumentControl::canvasReady()
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdocState = m_canvasState;
 	m_currDoc->setVisualToolkit(vt);
+	m_currDoc->draw();
 }
 
 void DocumentControl::addMeByName(const QString& meName)
@@ -147,10 +149,10 @@ void DocumentControl::addMeByName(const QString& meName)
 	}
 }
 
-void DocumentControl::onCurrentDocChanged(const QString& docPath)
+void DocumentControl::onCurrentDocChanged()
 {
 	DocumentsModel* docModel = AppGlobal::appMod->docModel();
-	DocumentInfo* docInfo = docModel->docInfo(docPath);
+	DocumentInfo* docInfo = docModel->currDoc();
 	m_currDoc = docInfo->meDoc();
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();

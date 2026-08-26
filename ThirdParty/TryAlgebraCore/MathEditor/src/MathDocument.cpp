@@ -18,6 +18,8 @@ namespace TryAlgebraCore
 		m_selection_end = {
 			LeafPos(0)
 		};
+		m_container = MyRTTI::MakeTypedUnique<MeContainer>();
+		m_container->setScalingFactor(1);
 	}
 
 	void MathDocument::setVisualToolkit(const VisualToolkit& visual_toolkit)
@@ -182,6 +184,18 @@ namespace TryAlgebraCore
 	void MathDocument::copy()
 	{
 		m_copiedText = getSelectedText();
+	}
+
+	void MathDocument::cut()
+	{
+		copy();
+		if (hasSelection())
+		{
+			deleteSelected();
+		}
+		m_selection_end = m_selection_start;
+		adjustLineFrom();
+		markDirty(DirtyState::Text | DirtyState::Selection);
 	}
 
 	void MathDocument::paste()

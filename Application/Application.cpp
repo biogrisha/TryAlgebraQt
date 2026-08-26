@@ -38,7 +38,6 @@ Application::Application(QObject* parent)
 	//creating controls
 	m_files_control = new FilesControl(this);
 	m_menu_control = new MenuControl(this);
-	m_document_control = new DocumentControl(this);
 	//caching dpi
 	QScreen* screen = QGuiApplication::primaryScreen();
 	qreal logicalDpiX = screen->logicalDotsPerInchX();
@@ -46,11 +45,6 @@ Application::Application(QObject* parent)
 
 	//initializing freetype
 	m_ft_wrap.Init(logicalDpiX, logicalDpiY);
-}
-
-DocumentControl* Application::getDocumentControl()
-{
-	return m_document_control;
 }
 
 ApplicationModel* Application::applicationModel()

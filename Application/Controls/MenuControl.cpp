@@ -16,44 +16,63 @@ MenuControl::MenuControl(QObject* parent)
 
 void MenuControl::saveDocument()
 {
-    DocumentsModel* docModel = AppGlobal::appMod->docModel();
-    auto currDocPath = docModel->curDocPath();
-    if (!currDocPath)
-    {
-        return;
-    }
-    auto currDocInfo = docModel->docInfo(currDocPath.value());
-    QFile file(currDocPath.value());
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-        QTextStream out(&file);
-        out << currDocInfo->meDoc()->getText();
-    }
+	DocumentsModel* docModel = AppGlobal::appMod->docModel();
+	auto currDocPath = docModel->curDocPath();
+	if (!currDocPath)
+	{
+		return;
+	}
+	auto currDocInfo = docModel->docInfo(currDocPath.value());
+	QFile file(currDocPath.value());
+	if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		QTextStream out(&file);
+		out << currDocInfo->meDoc()->getText();
+	}
 }
 
 void MenuControl::openDocument(const QUrl& url)
-{	
-    auto docModel = AppGlobal::appMod->docModel();
-    if (docModel->isDocumentOpened(url.toLocalFile()))
-    {
-        return;
-    }
-    QFile file(url.toLocalFile());
+{
+	auto docModel = AppGlobal::appMod->docModel();
+	if (docModel->isDocumentOpened(url.toLocalFile()))
+	{
+		return;
+	}
+	QFile file(url.toLocalFile());
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qCritical() << "Failed to open file:" << url.toLocalFile();
-        return;
-    }
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		qCritical() << "Failed to open file:" << url.toLocalFile();
+		return;
+	}
 
-    QTextStream stream(&file);
+	QTextStream stream(&file);
 
-    stream.setEncoding(QStringConverter::Utf8);
+	stream.setEncoding(QStringConverter::Utf8);
 
-    QString text = stream.readAll();
-    DocumentInfo docInfo(url.toLocalFile(), std::make_unique<TryAlgebraCore::MathDocument>());
-    docInfo.meDoc()->setText(text.toStdWString());
-    docModel->addDocInfo(std::move(docInfo));
-    docModel->setCurrentDocument(url.toLocalFile());
+	QString text = stream.readAll();
+	DocumentInfo docInfo(url.toLocalFile(), std::make_unique<TryAlgebraCore::MathDocument>());
+	docInfo.meDoc()->setText(text.toStdWString());
+	docModel->addDocInfo(std::move(docInfo));
+	docModel->setCurrentDocument(url.toLocalFile());
+}
+
+void MenuControl::newDocument(const QUrl& url)
+{
+	auto docModel = AppGlobal::appMod->docModel();
+	auto localFile = url.toLocalFile();
+	QFile file(localFile);
+
+	if (!file.open(QIODevice::WriteOnly))
+	{
+		qCritical() << "Failed to open file:" << localFile;
+		return;
+	}
+	file.write("");
+	file.close();
+
+	DocumentInfo docInfo(url.toLocalFile(), std::make_unique<TryAlgebraCore::MathDocument>());
+	docModel->addDocInfo(std::move(docInfo));
+	docModel->setCurrentDocument(url.toLocalFile());
 }
 

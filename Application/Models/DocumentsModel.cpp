@@ -41,7 +41,7 @@ QVariant DocumentsModel::data(const QModelIndex& index, int role) const
 		QFileInfo fileInfo(docInfo.filePath());
 		return fileInfo.fileName();
 	}
-	
+
 	return QVariant();
 }
 
@@ -109,7 +109,7 @@ void DocumentsModel::setCurrentDocument(const QString& fileName)
 	onCurrentDocChanged(m_curDocPath.value());
 }
 
-std::optional<QString> DocumentsModel::curDocPath()
+std::optional<QString> DocumentsModel::curDocPath() const
 {
 	return m_curDocPath;
 }
@@ -124,6 +124,11 @@ bool DocumentsModel::isDocumentOpened(const QString& filePath)
 		}
 	}
 	return false;
+}
+
+DocumentInfo* DocumentsModel::currDoc()
+{
+	return docInfo(curDocPath().value());
 }
 
 QHash<int, QByteArray> DocumentsModel::roleNames() const

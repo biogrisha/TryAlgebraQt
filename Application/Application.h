@@ -30,14 +30,10 @@ public slots:
 	//Returns menu control
 	MenuControl* getMenu();
 
-	//Returns document control
-	DocumentControl* getDocumentControl();
-
 	ApplicationModel* applicationModel();
 private:
 
 	MenuControl* m_menu_control = nullptr;
-	DocumentControl* m_document_control = nullptr;
 	FilesControl* m_files_control = nullptr;
 
 	ApplicationModel* m_app_model = nullptr;

@@ -5,16 +5,14 @@ import com.Application
 Rectangle {
     width: 200
     height: 100
-    property DocumentControl m_docControl: null
 
-    function setDocumentControl(docControl) 
-        { 
-            m_docControl = docControl
-            m_docControl.bindMathDocumentItem(mathDoc)
-            filteredMeList.model = UserApplication.applicationModel().meListModel();
-        }
+	Component.onCompleted: {
+        m_docControl.bindMathDocumentItem(mathDocCanvas)
+    }
 
-
+	DocumentControl{
+		id: m_docControl
+	}
 
 	Flickable {
 		id: flick
@@ -50,6 +48,7 @@ Rectangle {
 
 	SortFilterProxyModel {
 		id: filteredMeList
+		model: UserApplication.applicationModel().meListModel();
 		filters: [
 			FunctionFilter {
 				component RoleData: QtObject { property string meName }
@@ -110,13 +109,13 @@ Rectangle {
 
 			onClicked: {
 				m_docControl.addMeByName(button.meName)
-				mathDoc.focus = true
+				mathDocCanvas.focus = true
 			}
 		}
 	}
 
 	MathDocumentCanvas {
-		id:mathDoc
+		id:mathDocCanvas
 		focus: true
 		anchors.left: mathElementsList.right
         anchors.top: parent.top
@@ -130,7 +129,7 @@ Rectangle {
 			acceptedButtons: Qt.LeftButton | Qt.RightButton
 			anchors.fill: parent
 			onClicked: { 
-				mathDoc.focus = true 
+				mathDocCanvas.focus = true 
 			} 
 			onPressed: (event) => {
 				m_docControl.mouseBtnDown(event.x, event.y, event.button)

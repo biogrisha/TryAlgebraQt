@@ -47,6 +47,9 @@ int main(int argc, char* argv[])
 	view.setResizeMode(QQuickView::SizeRootObjectToView);
 	view.setSource(QUrl("qrc:/qt/qml/TryAlgebra/main.qml"));
 	view.setVulkanInstance(&inst);
+	view.setMinimumHeight(300);
+	view.setMinimumWidth(300);
+
 	QObject::connect(&view, &QQuickWindow::sceneGraphInitialized,
 		[&view, userApplication]() {
 			auto* ri = view.rendererInterface();

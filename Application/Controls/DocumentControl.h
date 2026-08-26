@@ -22,8 +22,7 @@ class DocumentControl : public QObject
 	Q_OBJECT
 		QML_ELEMENT
 public:
-	DocumentControl(QObject* parent);
-	DocumentControl() = default;
+	DocumentControl();
 
 public slots:
 
@@ -40,7 +39,7 @@ public slots:
 	void addMeByName(const QString& meName);
 
 	//Called when new math document is selected
-	void onCurrentDocChanged(const QString& docPath);
+	void onCurrentDocChanged();
 
 	void onBeforeDocRemoved(DocumentInfo* docInfo);
 

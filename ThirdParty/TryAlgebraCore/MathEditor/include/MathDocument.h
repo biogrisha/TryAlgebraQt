@@ -30,6 +30,7 @@ namespace TryAlgebraCore
 		void updateSelection(const glm::vec2& pos);
 		void stopSelection();
 		void copy();
+		void cut();
 		void paste();
 		void draw();
 		bool restoreCaretPos(MeBase* me);
