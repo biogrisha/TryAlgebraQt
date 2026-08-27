@@ -314,6 +314,11 @@ namespace TryAlgebraCore
 		return m_textBuffer;
 	}
 
+	void MathDocument::markDirty()
+	{
+		markDirty(DirtyState::Selection | DirtyState::Text);
+	}
+
 	void MathDocument::markDirty(DirtyState flags)
 	{
 		m_dirty_states |= flags;

@@ -78,3 +78,11 @@ std::mutex& FMathDocumentState::mtx()
 {
 	return m_mtx;
 }
+
+void FMathDocumentState::clear()
+{
+	for (auto& layer : m_layers)
+	{
+		layer.clear();
+	}
+}

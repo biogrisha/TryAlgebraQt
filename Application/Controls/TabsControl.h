@@ -11,14 +11,11 @@
 class TabsControl : public QObject
 {
 	Q_OBJECT
-	QML_ELEMENT
+		QML_ELEMENT
 public:
 	TabsControl() = default;
 	TabsControl(QObject* parent);
 public slots:
 	void selectTab(qint32 id);
-
 	void closeTab(qint32 id);
-
-	void setCurrentTabId(qint32 id);
 };

@@ -24,37 +24,31 @@ public:
 	enum DocumentTabInfoRoles {
 		FilePath = Qt::UserRole + 1,
 		FileName,
+		CurrentDoc,
 	};
 
 	DocumentsModel(QObject* parent = nullptr);
-
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-
 	DocumentInfo* docInfo(const QModelIndex& index);
-
 	DocumentInfo* docInfo(const QString& filePath);
-
 	void addDocInfo(DocumentInfo&& Info);
-
 	void removeDocInfo(const QString& filePath);
-
 	void removeDocInfo(qint32 ind);
-
 	void setCurrentDocument(const QString& filePath);
-
+	void setCurrentDocument(qint32 ind);
 	std::optional<QString> curDocPath() const;
-
 	bool isDocumentOpened(const QString& filePath);
-
 	DocumentInfo* currDoc();
+
 signals:
 	void onCurrentDocChanged(const QString& docPath);
 	void onDocumentAdded(DocumentInfo* docInfo);
 	void onBeforeDocRemoved(DocumentInfo* docInfo);
+
 protected:
 	QHash<int, QByteArray> roleNames() const;
+	std::optional<qint32> getDocId(const QString& filePath) const;
 
 private:
 	std::vector<DocumentInfo> m_documents;

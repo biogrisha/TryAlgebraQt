@@ -162,6 +162,7 @@ void DocumentControl::onCurrentDocChanged()
 	{
 		const QSize size = m_docCanvas->getSize();
 		m_currDoc->setDocSize({ size.width(), size.height() });
+		m_currDoc->markDirty();
 		m_currDoc->draw();
 		updateElements(true, true, true);
 	}

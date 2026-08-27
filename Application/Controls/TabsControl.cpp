@@ -9,12 +9,13 @@
 TabsControl::TabsControl(QObject* parent)
 	:QObject(parent)
 {
-	
+
 }
 
 void TabsControl::selectTab(qint32 id)
 {
-	
+	DocumentsModel* docModel = AppGlobal::appMod->docModel();
+	docModel->setCurrentDocument(id);
 }
 
 void TabsControl::closeTab(qint32 id)
@@ -22,10 +23,3 @@ void TabsControl::closeTab(qint32 id)
 	DocumentsModel* docModel = AppGlobal::appMod->docModel();
 	docModel->removeDocInfo(id);
 }
-
-void TabsControl::setCurrentTabId(qint32 id)
-{
-
-}
-
-

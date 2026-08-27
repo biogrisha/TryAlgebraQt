@@ -32,6 +32,7 @@ public:
 	FMathDocumentState(int layersCount);
 	Layer& at(int i);
 	std::mutex& mtx();
+	void clear();
 private:
 	std::vector<Layer> m_layers;
 	mutable std::mutex m_mtx;

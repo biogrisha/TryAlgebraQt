@@ -15,9 +15,9 @@ int main(int argc, char* argv[])
 	QGuiApplication app(argc, argv);
 	QVulkanInstance inst;
 	inst.setApiVersion(QVersionNumber(1, 4));
-	inst.setLayers({
-	"VK_LAYER_KHRONOS_validation"
-		});
+	//inst.setLayers({
+	//"VK_LAYER_KHRONOS_validation"
+	//	});
 	bool ok = inst.create();
 	if (!ok) {
 		return 1;

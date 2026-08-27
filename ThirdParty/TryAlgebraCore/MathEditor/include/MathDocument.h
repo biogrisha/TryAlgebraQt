@@ -38,6 +38,7 @@ namespace TryAlgebraCore
 		std::wstring getText();
 		std::wstring getSelectedText();
 		const TextBuffer& textBuffer() const;
+		void markDirty();
 	private:
 		void markDirty(DirtyState flags);
 		void clearDirty();

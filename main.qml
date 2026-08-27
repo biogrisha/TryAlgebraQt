@@ -99,12 +99,14 @@ Item {
                 required property int index
 			    required property string fileName
                 required property string filePath
+                required property bool currentDoc
+
 			    width: 150
 			    text: fileName
 			    background: Rectangle {
 				    anchors.left: button.left
 				    anchors.right: button.right
-				    color: button.down ? "#c2c2c2" : (tabsControl.currentTabId === button.index ? "#cdd9cc" : "#e3e3e3")
+				    color: button.down ? "#c2c2c2" : (currentDoc ? "#cdd9cc" : "#e3e3e3")
 				    border.color: "#c2c2c2"
 				    border.width: 1
 				    radius: 1
