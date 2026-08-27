@@ -24,7 +24,6 @@ class DrawImageRendering
 public:
 	void Init(FRendering* rendering, FImageBuffer* input, FImageBuffer* output);
 	void InitPLine();
-	void setExtent(const vk::Extent3D& extent);
 
 	void Render(bool clearAttachment);
 private:
@@ -43,8 +42,6 @@ private:
 	std::unique_ptr<FBuffer> m_vertexBuffer;
 	std::unique_ptr<FBuffer> m_indexBuffer;
 	FImageBuffer* m_output = nullptr;
-
-	VkExtent3D m_extent = { 300,300,1 };
 	FRendering* m_rendering = nullptr;
 
 	uint16_t SetHndl = UINT16_MAX;

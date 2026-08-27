@@ -38,16 +38,11 @@ void DrawImageRendering::InitPLine()
 	PLineHndl = m_rendering->AddPipeline(PLineLayoutHndl, &m_vertexLayout, assetsPath + "/Shader/DrawImage.spv");
 }
 
-void DrawImageRendering::setExtent(const vk::Extent3D& extent)
-{
-	m_extent = extent;
-}
-
 void DrawImageRendering::Render(bool clearAttachment)
 {
 	FRunPipelineInfo run;
 	run.PipelineId = PLineHndl;
-	run.OutputExtent = m_extent;
+	run.OutputExtent = m_output->GetExtent();
 	run.VertexBuffers = { m_vertexBuffer.get() };
 	run.IndexBuffer = m_indexBuffer.get();
 	run.DescriptorSets = { SetHndl };

@@ -72,14 +72,16 @@ void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& extent)
 	{
 		m_layer2->SetExtent(extent);
 	}
+	if (m_output)
+	{
+		m_output->SetExtent(extent);
+	}
 	m_rectRendering1.setExtent(extent);
 	m_spriteRendering1.setExtent(extent);
 
 	m_rectRendering2.setExtent(extent);
 	m_linesRendering2.setExtent(extent);
 	m_textRendering2.setExtent(extent);
-	m_layer1ToOutput.setExtent(extent);
-	m_layer2ToOutput.setExtent(extent);
 }
 
 

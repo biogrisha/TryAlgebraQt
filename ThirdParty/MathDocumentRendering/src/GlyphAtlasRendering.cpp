@@ -71,7 +71,7 @@ void FGlyphAtlasRendering::Render()
 	FRunPipelineInfo Run;
 
 	Run.PipelineId = PLine;
-	Run.OutputExtent = Extent;
+	Run.OutputExtent = Atlas->GetExtent();
 	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
 	Run.IndexBuffer = IndexBuffer.get();
 	Run.DescriptorSets = { S_1 };
