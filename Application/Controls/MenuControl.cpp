@@ -34,11 +34,13 @@ void MenuControl::saveDocument()
 void MenuControl::openDocument(const QUrl& url)
 {
 	auto docModel = AppGlobal::appMod->docModel();
-	if (docModel->isDocumentOpened(url.toLocalFile()))
+	QString filePath = url.toLocalFile();
+	if (docModel->isDocumentOpened(filePath))
 	{
+		docModel->setCurrentDocument(filePath);
 		return;
 	}
-	QFile file(url.toLocalFile());
+	QFile file(filePath);
 
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
@@ -60,12 +62,17 @@ void MenuControl::openDocument(const QUrl& url)
 void MenuControl::newDocument(const QUrl& url)
 {
 	auto docModel = AppGlobal::appMod->docModel();
-	auto localFile = url.toLocalFile();
-	QFile file(localFile);
+	QString filePath = url.toLocalFile();
+	if (docModel->isDocumentOpened(filePath))
+	{
+		docModel->setCurrentDocument(filePath);
+		return;
+	}
+	QFile file(filePath);
 
 	if (!file.open(QIODevice::WriteOnly))
 	{
-		qCritical() << "Failed to open file:" << localFile;
+		qCritical() << "Failed to open file:" << filePath;
 		return;
 	}
 	file.write("");

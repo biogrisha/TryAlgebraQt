@@ -126,7 +126,7 @@ namespace TryAlgebraCore
 		{
 			if (m_line_to == line_num)
 			{
-				++m_line_from;
+				++m_lineFrom;
 				m_snap_to_end = true;
 				markDirty(DirtyState::Text);
 			}
@@ -138,13 +138,13 @@ namespace TryAlgebraCore
 		}
 		else
 		{
-			if (m_line_from - 1 == line_num)
+			if (m_lineFrom - 1 == line_num)
 			{
-				--m_line_from;
+				--m_lineFrom;
 				m_snap_to_end = false;
 				markDirty(DirtyState::Text);
 			}
-			else if (line_num == m_line_from && m_snap_to_end)
+			else if (line_num == m_lineFrom && m_snap_to_end)
 			{
 				m_snap_to_end = false;
 				markDirty(DirtyState::Text);
@@ -221,16 +221,16 @@ namespace TryAlgebraCore
 			float cont_visible_y = 0;
 			m_container = MyRTTI::MakeTypedUnique<MeContainer>();
 			m_container->setScalingFactor(1);
-			if (m_line_from > 0)
+			if (m_lineFrom > 0)
 			{
 				//calculate one line above
-				MeParser parser(m_textBuffer, std::max(0, m_line_from - 1));
+				MeParser parser(m_textBuffer, std::max(0, m_lineFrom - 1));
 				parser.parseLine(m_container.get());
 				m_container->calcLine(&m_visual_toolkit);
 				line_before_h = m_container->getSize().y;
 			}
-			MeParser parser(m_textBuffer, std::max(0, m_line_from));
-			m_line_to = m_line_from;
+			MeParser parser(m_textBuffer, std::max(0, m_lineFrom));
+			m_line_to = m_lineFrom;
 			while (true)
 			{
 				++m_line_to;
@@ -287,10 +287,15 @@ namespace TryAlgebraCore
 
 	void MathDocument::scroll(bool up)
 	{
-		m_line_from += -up + !up;
-		m_line_from = std::clamp<int>(m_line_from, 0, m_textBuffer.getLinesCount() - 1);
-		m_snap_to_end = false;
-		markDirty(DirtyState::Selection | DirtyState::Text);
+		auto oldLine = m_lineFrom;
+		m_lineFrom += -up + !up;
+		m_lineFrom = std::clamp<int>(m_lineFrom, 0, m_textBuffer.getLinesCount() - 1);
+		if (m_lineFrom != oldLine)
+		{
+			m_snap_to_end = false;
+			markDirty(DirtyState::Selection | DirtyState::Text);
+			onCurrentLineChanged(m_lineFrom);
+		}
 	}
 
 	std::wstring MathDocument::getText()
@@ -317,6 +322,11 @@ namespace TryAlgebraCore
 	void MathDocument::markDirty()
 	{
 		markDirty(DirtyState::Selection | DirtyState::Text);
+	}
+
+	int MathDocument::linesCount() const
+	{
+		return m_line_to - m_lineFrom;
 	}
 
 	void MathDocument::markDirty(DirtyState flags)
@@ -349,9 +359,9 @@ namespace TryAlgebraCore
 		std::optional<uint64_t> line_num = m_textBuffer.getLineNumber(std::get<LeafPos>(m_selection_end.back()).pos);
 		if (line_num.has_value())
 		{
-			if (line_num >= m_line_to || line_num < m_line_from)
+			if (line_num >= m_line_to || line_num < m_lineFrom)
 			{
-				m_line_from = line_num.value();
+				m_lineFrom = line_num.value();
 			}
 		}
 
@@ -359,12 +369,12 @@ namespace TryAlgebraCore
 
 	void MathDocument::calcLinesAboveBelow(int center_line)
 	{
-		m_line_from = std::max(0, center_line - 1);
+		m_lineFrom = std::max(0, center_line - 1);
 		size_t to = std::min<size_t>(m_textBuffer.getLinesCount(), center_line + 2);
 		m_container = MyRTTI::MakeTypedUnique<MeContainer>();
-		MeParser parser(m_textBuffer, m_line_from);
+		MeParser parser(m_textBuffer, m_lineFrom);
 
-		for (size_t i = m_line_from; i < to; ++i)
+		for (size_t i = m_lineFrom; i < to; ++i)
 		{
 			parser.parseLine(m_container.get());
 			m_container->calcLine(&m_visual_toolkit);
@@ -375,7 +385,7 @@ namespace TryAlgebraCore
 
 	bool MathDocument::isLineOutside(int line_num)
 	{
-		return line_num > m_line_to || line_num < m_line_from - 1;
+		return line_num > m_line_to || line_num < m_lineFrom - 1;
 	}
 
 	void MathDocument::filterInput(std::wstring& str)

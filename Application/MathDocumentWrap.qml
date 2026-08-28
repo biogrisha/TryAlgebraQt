@@ -5,6 +5,7 @@ import com.Application
 Rectangle {
     width: 200
     height: 100
+	property alias mathCanvas: mathDocCanvas
 
 	Component.onCompleted: {
         m_docControl.bindMathDocumentItem(mathDocCanvas)
@@ -32,7 +33,7 @@ Rectangle {
 			else if (contentY+height <= r.y+r.height)
 				contentY = r.y+r.height-height;
 		}
-
+		
 		TextEdit {
 			id: meSearchBar
 			width: flick.width
@@ -152,7 +153,7 @@ Rectangle {
         anchors.right: parent.right 
         anchors.top: parent.top 
         anchors.bottom: parent.bottom // Full range 
-        //size: m_docControl ? m_docControl.scrollHandleSize : 0.1
+        size: m_docControl ? m_docControl.scrollControlSize() : 0.1
 		onPositionChanged: {
 			//m_docControl.moveScrollHandle(position)
 		}

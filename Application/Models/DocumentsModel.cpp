@@ -129,7 +129,16 @@ void DocumentsModel::setCurrentDocument(const QString& fileName)
 {
 	if (auto docId = getDocId(fileName))
 	{
+		auto oldDocPath = m_curDocPath;
 		m_curDocPath = fileName;
+		if (oldDocPath)
+		{
+			if (auto currentDocId = getDocId(oldDocPath.value()))
+			{
+				dataChanged(createIndex(currentDocId.value(), 0, &m_documents[currentDocId.value()]),
+					createIndex(currentDocId.value(), 0, &m_documents[currentDocId.value()]));
+			}
+		}
 		onCurrentDocChanged(m_curDocPath.value());
 		dataChanged(createIndex(docId.value(), 0, &m_documents[docId.value()]),
 			createIndex(docId.value(), 0, &m_documents[docId.value()]));
@@ -138,7 +147,16 @@ void DocumentsModel::setCurrentDocument(const QString& fileName)
 
 void DocumentsModel::setCurrentDocument(qint32 ind)
 {
+	auto oldDocPath = m_curDocPath;
 	m_curDocPath = m_documents[ind].filePath();
+	if (oldDocPath)
+	{
+		if (auto currentDocId = getDocId(oldDocPath.value()))
+		{
+			dataChanged(createIndex(currentDocId.value(), 0, &m_documents[currentDocId.value()]),
+				createIndex(currentDocId.value(), 0, &m_documents[currentDocId.value()]));
+		}
+	}
 	onCurrentDocChanged(m_curDocPath.value());
 	dataChanged(createIndex(ind, 0, &m_documents[ind]), createIndex(ind, 0, &m_documents[ind]));
 }

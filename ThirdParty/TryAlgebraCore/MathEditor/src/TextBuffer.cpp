@@ -54,7 +54,7 @@ namespace TryAlgebraCore
 		return std::nullopt;
 	}
 
-	size_t TextBuffer::getLinesCount()
+	size_t TextBuffer::getLinesCount() const
 	{
 		uint64_t line_num = 1;
 		for (auto ch : m_buffer)

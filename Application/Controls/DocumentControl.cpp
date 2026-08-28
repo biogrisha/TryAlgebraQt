@@ -274,6 +274,14 @@ void DocumentControl::mousePosUpdated(float x, float y, Qt::MouseButton button)
 	updateElements(true, false, true);
 }
 
+qreal DocumentControl::scrollControlSize() const
+{
+	qreal linesCount = m_currDoc->textBuffer().getLinesCount();
+	qreal linesCountOnPage = m_currDoc->linesCount();
+	qreal scrollSize = linesCount != 0 ? (linesCountOnPage != 0 ? linesCountOnPage : 20) / linesCount : 1;
+	return scrollSize;
+}
+
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)
 {
 	m_docCanvas->update();
@@ -281,6 +289,7 @@ void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)
 
 void DocumentControl::clearDocument()
 {
+	m_canvasState->clear();
 	m_docCanvas->update();
 }
 

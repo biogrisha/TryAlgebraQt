@@ -1,5 +1,5 @@
 find_package(glm REQUIRED)
-
+find_package(Boost REQUIRED COMPONENTS signals2)
 # Create a library target
 add_library(TryAlgebraCore STATIC 
 	MathEditor/include/MathDocument.h

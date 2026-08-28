@@ -114,6 +114,7 @@ Item {
 			    onClicked:
 			    {
 				    tabsControl.selectTab(button.index)
+                    documentLoader.item.mathCanvas.forceActiveFocus()
 			    }
                 Button {
                     id: closeTabButton
@@ -122,7 +123,11 @@ Item {
                     height: 20
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    onClicked: tabsControl.closeTab(button.index)
+                    onClicked:
+                    {
+                        tabsControl.closeTab(button.index)
+                        documentLoader.item.mathCanvas.forceActiveFocus()
+                    }
                 }
 		    }
 	    }

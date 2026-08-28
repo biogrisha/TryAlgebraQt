@@ -4,6 +4,7 @@
 #include <MathDocumentState.h>
 #include <MathEditor/include/Structs.h>
 #include <Helpers/include/EnumFlags.h>
+#include <boost/signals2.hpp>
 
 namespace TryAlgebraCore
 {
@@ -39,6 +40,9 @@ namespace TryAlgebraCore
 		std::wstring getSelectedText();
 		const TextBuffer& textBuffer() const;
 		void markDirty();
+		int linesCount() const;
+
+		boost::signals2::signal<void(int lineNumber)> onCurrentLineChanged;
 	private:
 		void markDirty(DirtyState flags);
 		void clearDirty();
@@ -59,11 +63,12 @@ namespace TryAlgebraCore
 		MePath m_selection_end;
 		// The drawing function always calculates (if any) one line above and one line below the visible area.
 		// so there is always room for a step.
-		int m_line_from = 0;
+		int m_lineFrom = 0;
 		int m_line_to = 0;
 		bool m_snap_to_end = false;
 		VisualToolkit m_visual_toolkit;
 		std::wstring m_copiedText;
+
 	};
 
 	template<>

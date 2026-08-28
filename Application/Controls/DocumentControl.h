@@ -57,6 +57,8 @@ public slots:
 	void mouseBtnUp(float x, float y, Qt::MouseButton button);
 
 	void mousePosUpdated(float x, float y, Qt::MouseButton button);
+
+	qreal scrollControlSize() const;
 private:
 	//Updates the rendering data of the selected elements
 	void updateElements(bool bRect, bool bText, bool bCaret);
