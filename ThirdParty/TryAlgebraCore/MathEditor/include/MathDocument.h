@@ -36,13 +36,14 @@ namespace TryAlgebraCore
 		void draw();
 		bool restoreCaretPos(MeBase* me);
 		void scroll(bool delta);
+		void setLineFrom(int line);
 		std::wstring getText();
 		std::wstring getSelectedText();
 		const TextBuffer& textBuffer() const;
 		void markDirty();
 		int linesCount() const;
-
-		boost::signals2::signal<void(int lineNumber)> onCurrentLineChanged;
+		int currentLine() const;
+		boost::signals2::signal<void(int currentLine, int linesCount, int linesOnScreen)> scrollDataChanged;
 	private:
 		void markDirty(DirtyState flags);
 		void clearDirty();
@@ -50,8 +51,9 @@ namespace TryAlgebraCore
 		bool hasSelection();
 		DirtyState getDirtyState() { return m_dirty_states; }
 		void adjustLineFrom();
+		//clears layout and recalculates center_line - 1 -> cneter_line + 2
 		void calcLinesAboveBelow(int center_line);
-		bool isLineOutside(int line_num);
+		bool isLineCalculated(int line_num);
 		void filterInput(std::wstring& str);
 		TextBuffer m_textBuffer;
 		std::unique_ptr<MeContainer> m_container;

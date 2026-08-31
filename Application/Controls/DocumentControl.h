@@ -12,6 +12,7 @@
 #include <Models/DocumentsModel.h>
 
 #include <MathEditor/include/MathDocument.h>
+#include <boost/signals2.hpp>
 
 class FTAMathDocumentInfo;
 /*
@@ -59,6 +60,10 @@ public slots:
 	void mousePosUpdated(float x, float y, Qt::MouseButton button);
 
 	qreal scrollControlSize() const;
+
+signals:
+	void scrollDataChanged(int currentLine, int linesCount, int linesCountOnScreen);
+
 private:
 	//Updates the rendering data of the selected elements
 	void updateElements(bool bRect, bool bText, bool bCaret);
@@ -77,5 +82,6 @@ private:
 	bool m_bLmbDown = false;
 
 	TryAlgebraCore::MathDocument* m_currDoc;
+	boost::signals2::connection m_onScrollDataChangedConn;
 };
 

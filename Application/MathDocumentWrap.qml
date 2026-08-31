@@ -147,15 +147,46 @@ Rectangle {
 		}
 	}
         
-	ScrollBar { 
-        id: vbar 
-        orientation: Qt.Vertical 
-        anchors.right: parent.right 
-        anchors.top: parent.top 
-        anchors.bottom: parent.bottom // Full range 
-        size: m_docControl ? m_docControl.scrollControlSize() : 0.1
+	ScrollBar {
+		id: vbar
+
+		orientation: Qt.Vertical
+		policy: ScrollBar.AlwaysOn
+
+		anchors.right: parent.right
+		anchors.top: parent.top
+		anchors.bottom: parent.bottom
+
+		size: m_docControl ? m_docControl.scrollControlSize() : 0.1
+
 		onPositionChanged: {
-			//m_docControl.moveScrollHandle(position)
+			// m_docControl.moveScrollHandle(position)
 		}
-    }
+
+		Connections {
+			target: m_docControl
+
+			function onScrollDataChanged(currentLine, linesCount, linesCountOnScreen) {
+				var size = linesCount > 0
+						? Math.min(1.0, linesCountOnScreen / linesCount)
+						: 1.0
+
+				var position = linesCount > linesCountOnScreen
+						? Math.min(1.0 - size, currentLine / (linesCount - linesCountOnScreen))
+						: 0
+
+				console.log(
+					"currentLine:", currentLine,
+					"linesCount:", linesCount,
+					"linesCountOnScreen:", linesCountOnScreen,
+					"linesCount:", linesCount,
+					"size:", size,
+					"position:", position
+				)
+
+				vbar.size = size
+				vbar.position = position
+			}
+		}
+	}
 }

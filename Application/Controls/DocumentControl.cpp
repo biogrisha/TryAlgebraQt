@@ -166,6 +166,11 @@ void DocumentControl::onCurrentDocChanged()
 		m_currDoc->draw();
 		updateElements(true, true, true);
 	}
+	m_onScrollDataChangedConn.disconnect();
+	m_onScrollDataChangedConn = m_currDoc->scrollDataChanged.connect([this](int currentLine, int linesCount, int linesOnScreen)
+		{
+			emit scrollDataChanged(currentLine, linesCount, linesOnScreen);
+		});
 }
 
 void DocumentControl::onBeforeDocRemoved(DocumentInfo* docInfo)
