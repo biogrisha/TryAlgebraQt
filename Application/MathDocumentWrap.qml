@@ -167,25 +167,17 @@ Rectangle {
 			target: m_docControl
 
 			function onScrollDataChanged(currentLine, linesCount, linesCountOnScreen) {
-				var size = linesCount > 0
-						? Math.min(1.0, linesCountOnScreen / linesCount)
-						: 1.0
-
-				var position = linesCount > linesCountOnScreen
-						? Math.min(1.0 - size, currentLine / (linesCount - linesCountOnScreen))
-						: 0
-
-				console.log(
-					"currentLine:", currentLine,
-					"linesCount:", linesCount,
-					"linesCountOnScreen:", linesCountOnScreen,
-					"linesCount:", linesCount,
-					"size:", size,
-					"position:", position
-				)
-
-				vbar.size = size
-				vbar.position = position
+				
+				if(linesCount > 1)
+				{
+					vbar.position = currentLine / (linesCount + 20)
+					vbar.size = 20 / (linesCount + 19)
+				}
+				else
+				{
+					vbar.size = 1
+					vbar.position = 0
+				}
 			}
 		}
 	}
