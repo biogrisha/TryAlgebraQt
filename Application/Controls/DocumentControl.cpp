@@ -71,7 +71,8 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 	case Qt::Key_Z:
 		if (bCtrl)
 		{
-			//doc->Undo();
+			m_currDoc->undo();
+			m_currDoc->draw();
 			updateElements(true, true, true);
 			break;
 		}
@@ -79,7 +80,8 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 	case Qt::Key_Y:
 		if (bCtrl)
 		{
-			//doc->Redo();
+			m_currDoc->redo();
+			m_currDoc->draw();
 			updateElements(true, true, true);
 			break;
 		}

@@ -7,11 +7,13 @@ add_library(TryAlgebraCore STATIC
 	MathEditor/include/DocumentNavigation.h
 	MathEditor/include/Structs.h
 	MathEditor/include/TreeDisplay.h
+	MathEditor/include/DocumentHistory.h
 
 	MathEditor/src/MathDocument.cpp
 	MathEditor/src/TextBuffer.cpp
 	MathEditor/src/DocumentNavigation.cpp
 	MathEditor/src/TreeDisplay.cpp
+	MathEditor/src/DocumentHistory.cpp
 
 	Me/include/MeBase.h
 	Me/include/MeCharacter.h

@@ -33,21 +33,35 @@ namespace TryAlgebraCore
 		markDirty(DirtyState::Text);
 	}
 
-	void MathDocument::type(const std::wstring& str)
+	void MathDocument::type(std::wstring str)
 	{
-		auto str_copy = str;
-		filterInput(str_copy);
-		if (hasSelection())
+		bool deletedSelection = false;
+		//history info
+		std::wstring deletedStr;
+		MePath insertPos;
+
+		filterInput(str);
+		deletedSelection = hasSelection();
+		if (deletedSelection)
 		{
-			deleteSelected();
+			deletedStr = deleteSelected();
 		}
 		LeafPos& from = std::get<LeafPos>(m_selection_start.back());
-		m_textBuffer.insert(str_copy, from.pos);
-		from.pos += str_copy.size();
-		MeHelpers::propagateMeChange(m_selection_start, str_copy.size());
+		insertPos = m_selection_start;
+		m_textBuffer.insert(str, from.pos);
+		from.pos += str.size();
+		MeHelpers::propagateMeChange(m_selection_start, str.size());
 		m_selection_end = m_selection_start;
 		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
+		if (deletedSelection)
+		{
+			m_history.recordReplace(insertPos, str.size(), std::move(deletedStr));
+		}
+		else
+		{
+			m_history.recordInsertion(insertPos, str.size());
+		}
 	}
 
 	void MathDocument::typeByName(const std::wstring& str)
@@ -65,40 +79,44 @@ namespace TryAlgebraCore
 
 	void MathDocument::delBackward()
 	{
+		std::wstring deletedStr;
 		if (hasSelection())
 		{
-			deleteSelected();
+			deletedStr = deleteSelected();
 		}
 		else
 		{
 			step(StepDir::left, true);
 			if (hasSelection())
 			{
-				deleteSelected();
+				deletedStr = deleteSelected();
 			}
 		}
 		m_selection_end = m_selection_start;
 		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
+		m_history.recordDeletion(m_selection_start, std::move(deletedStr));
 	}
 
 	void MathDocument::delForward()
 	{
+		std::wstring deletedStr;
 		if (hasSelection())
 		{
-			deleteSelected();
+			deletedStr = deleteSelected();
 		}
 		else
 		{
 			step(StepDir::right, true);
 			if (hasSelection())
 			{
-				deleteSelected();
+				deletedStr = deleteSelected();
 			}
 		}
 		m_selection_end = m_selection_start;
 		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
+		m_history.recordDeletion(m_selection_start, std::move(deletedStr));
 	}
 
 	void MathDocument::step(StepDir dir, bool with_selection)
@@ -353,6 +371,73 @@ namespace TryAlgebraCore
 		return m_lineFrom;
 	}
 
+	void TryAlgebraCore::MathDocument::undo()
+	{
+		inverseAction(true);
+	}
+
+	void TryAlgebraCore::MathDocument::redo()
+	{
+		inverseAction(false);
+	}
+
+	void MathDocument::inverseAction(bool undo)
+	{
+		auto actionOpt = m_history.pop(undo);
+		if (!actionOpt)
+		{
+			return;
+		}
+		if (undo)
+		{
+			m_history.setUndoMode(false);
+		}
+
+		std::visit([this](auto&& action) {
+			using T = std::decay_t<decltype(action)>;
+
+			if constexpr (std::is_same_v<T, InvertDelete>) {
+				m_selection_start = action.pos;
+				m_selection_end = action.pos;
+				std::get<LeafPos>(m_selection_start.back()).pos += action.string.size();
+				std::get<LeafPos>(m_selection_end.back()).pos += action.string.size();
+
+				m_selecting = false;
+				int from = std::get<LeafPos>(action.pos.back()).pos;
+				m_textBuffer.insert(action.string, from);
+				markDirty(DirtyState::Selection | DirtyState::Text);
+				m_history.recordInsertion(action.pos, action.string.size());
+			}
+			else if constexpr (std::is_same_v<T, InvertInsert>) {
+				m_selection_start = action.pos;
+				m_selection_end = action.pos;
+				m_selecting = false;
+				int from = std::get<LeafPos>(action.pos.back()).pos;
+				std::wstring deletedStr = m_textBuffer.getSubstring(from, from + action.size);
+				m_textBuffer.del(from, from + action.size);
+				markDirty(DirtyState::Selection | DirtyState::Text);
+				m_history.recordDeletion(action.pos, deletedStr);
+			}
+			else if constexpr (std::is_same_v<T, InvertReplace>) {
+				m_selection_start = action.pos;
+				m_selection_end = action.pos;
+				std::get<LeafPos>(m_selection_start.back()).pos += action.deletedStr.size();
+				std::get<LeafPos>(m_selection_end.back()).pos += action.deletedStr.size();
+				m_selecting = false;
+				int from = std::get<LeafPos>(action.pos.back()).pos;
+				std::wstring deletedStr = m_textBuffer.getSubstring(from, from + action.insertSize);
+				m_textBuffer.del(from, from + action.insertSize);
+				m_textBuffer.insert(action.deletedStr, from);
+				markDirty(DirtyState::Selection | DirtyState::Text);
+				m_history.recordReplace(action.pos, action.deletedStr.size(), deletedStr);
+			}
+			}, actionOpt.value());
+		if (undo)
+		{
+			m_history.setUndoMode(true);
+		}
+	}
+
 	void MathDocument::markDirty(DirtyState flags)
 	{
 		m_dirty_states |= flags;
@@ -363,14 +448,16 @@ namespace TryAlgebraCore
 		m_dirty_states = DirtyState::None;
 	}
 
-	void MathDocument::deleteSelected()
+	std::wstring MathDocument::deleteSelected()
 	{
 		MeHelpers::orderPaths(m_selection_start, m_selection_end);
 		MeHelpers::trimToCommonContainer(m_selection_start, m_selection_end);
 		int from = std::get<LeafPos>(m_selection_start.back()).pos;
 		int to = std::get<LeafPos>(m_selection_end.back()).pos;
+		std::wstring deletedString = m_textBuffer.getSubstring(from, to);
 		m_textBuffer.del(from, to);
 		MeHelpers::propagateMeChange(m_selection_start, from - to);
+		return deletedString;
 	}
 
 	bool MathDocument::hasSelection()

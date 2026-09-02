@@ -5,6 +5,7 @@
 #include <MathEditor/include/Structs.h>
 #include <Helpers/include/EnumFlags.h>
 #include <boost/signals2.hpp>
+#include <MathEditor/include/DocumentHistory.h>
 
 namespace TryAlgebraCore
 {
@@ -23,7 +24,7 @@ namespace TryAlgebraCore
 		void setVisualToolkit(const VisualToolkit& visual_toolkit);
 		void setDocSize(const glm::vec2& size) { m_doc_size = size; }
 		void setText(const std::wstring& str);
-		void type(const std::wstring& str);
+		void type(std::wstring str);
 		void typeByName(const std::wstring& str);
 		void delBackward();
 		void delForward();
@@ -43,11 +44,14 @@ namespace TryAlgebraCore
 		void markDirty();
 		int linesCount() const;
 		int currentLine() const;
+		void undo();
+		void redo();
 		boost::signals2::signal<void(int currentLine, int linesCount, int linesOnScreen)> scrollDataChanged;
 	private:
+		void inverseAction(bool undo);
 		void markDirty(DirtyState flags);
 		void clearDirty();
-		void deleteSelected();
+		std::wstring deleteSelected();
 		bool hasSelection();
 		DirtyState getDirtyState() { return m_dirty_states; }
 		void adjustLineFrom();
@@ -70,7 +74,7 @@ namespace TryAlgebraCore
 		bool m_snap_to_end = false;
 		VisualToolkit m_visual_toolkit;
 		std::wstring m_copiedText;
-
+		DocumentHistory m_history;
 	};
 
 	template<>
