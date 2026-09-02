@@ -221,6 +221,10 @@ void DocumentControl::moveScrollHandle(float newPos)
 	{
 		return;
 	}
+	float newLine = m_currDoc->textBuffer().getLinesCount() * newPos;
+	m_currDoc->setLineFrom(static_cast<int>(newLine));
+	m_currDoc->draw();
+	m_docCanvas->update();
 }
 
 void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
@@ -277,14 +281,6 @@ void DocumentControl::mousePosUpdated(float x, float y, Qt::MouseButton button)
 	vt.mdocState = m_canvasState;
 	m_currDoc->draw();
 	updateElements(true, false, true);
-}
-
-qreal DocumentControl::scrollControlSize() const
-{
-	qreal linesCount = m_currDoc->textBuffer().getLinesCount();
-	qreal linesCountOnPage = m_currDoc->linesCount();
-	qreal scrollSize = linesCount != 0 ? (linesCountOnPage != 0 ? linesCountOnPage : 20) / linesCount : 1;
-	return scrollSize;
 }
 
 void DocumentControl::updateElements(bool bRect, bool bText, bool bCaret)

@@ -59,8 +59,6 @@ public slots:
 
 	void mousePosUpdated(float x, float y, Qt::MouseButton button);
 
-	qreal scrollControlSize() const;
-
 signals:
 	void scrollDataChanged(int currentLine, int linesCount, int linesCountOnScreen);
 

@@ -157,26 +157,35 @@ Rectangle {
 		anchors.top: parent.top
 		anchors.bottom: parent.bottom
 
-		size: m_docControl ? m_docControl.scrollControlSize() : 0.1
-
+		property bool scrollingLock1: false
+		property bool scrollingLock2: false
 		onPositionChanged: {
-			// m_docControl.moveScrollHandle(position)
+			if(!scrollingLock1)
+			{
+				scrollingLock2 = true;
+				m_docControl.moveScrollHandle(position / (1 - size))
+				scrollingLock2 = false;
+			}
 		}
 
 		Connections {
 			target: m_docControl
 
 			function onScrollDataChanged(currentLine, linesCount, linesCountOnScreen) {
-				
-				if(linesCount > 1)
+				if(!vbar.scrollingLock2)
 				{
-					vbar.position = currentLine / (linesCount + 20)
-					vbar.size = 20 / (linesCount + 19)
-				}
-				else
-				{
-					vbar.size = 1
-					vbar.position = 0
+					vbar.scrollingLock1 = true;
+					if(linesCount > 1)
+					{
+						vbar.position = currentLine / (linesCount + 19)
+						vbar.size = 20 / (linesCount + 19)
+					}
+					else
+					{
+						vbar.size = 1
+						vbar.position = 0
+					}
+					vbar.scrollingLock1 = false;
 				}
 			}
 		}
