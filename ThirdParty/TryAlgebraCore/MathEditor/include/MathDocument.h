@@ -31,6 +31,7 @@ namespace TryAlgebraCore
 		void step(StepDir dir, bool with_selection = false);
 		void updateSelection(const glm::vec2& pos);
 		void stopSelection();
+		void selectAll();
 		void copy();
 		void cut();
 		void paste();
@@ -46,6 +47,7 @@ namespace TryAlgebraCore
 		int currentLine() const;
 		void undo();
 		void redo();
+		void goToCaret();
 		boost::signals2::signal<void(int currentLine, int linesCount, int linesOnScreen)> scrollDataChanged;
 	private:
 		void inverseAction(bool undo);

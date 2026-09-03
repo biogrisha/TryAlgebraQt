@@ -33,4 +33,9 @@ namespace TryAlgebraCore
 		buffer->pop_back();
 		return res;
 	}
+
+	void DocumentHistory::clearRedo()
+	{
+		m_redoHistory.clear();
+	}
 }

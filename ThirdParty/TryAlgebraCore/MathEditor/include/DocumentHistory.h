@@ -35,6 +35,7 @@ namespace TryAlgebraCore
 		void recordReplace(const MePath& pos, int insertSize, std::wstring deleteString);
 		void setUndoMode(bool val);
 		std::optional<InvAction> pop(bool undo);
+		void clearRedo();
 	private:
 		bool m_undoMode = true;
 		std::vector<InvAction> m_undoHistory;

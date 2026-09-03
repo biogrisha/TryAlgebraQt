@@ -62,6 +62,7 @@ namespace TryAlgebraCore
 		{
 			m_history.recordInsertion(insertPos, str.size());
 		}
+		m_history.clearRedo();
 	}
 
 	void MathDocument::typeByName(const std::wstring& str)
@@ -96,6 +97,7 @@ namespace TryAlgebraCore
 		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
 		m_history.recordDeletion(m_selection_start, std::move(deletedStr));
+		m_history.clearRedo();
 	}
 
 	void MathDocument::delForward()
@@ -117,6 +119,7 @@ namespace TryAlgebraCore
 		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
 		m_history.recordDeletion(m_selection_start, std::move(deletedStr));
+		m_history.clearRedo();
 	}
 
 	void MathDocument::step(StepDir dir, bool with_selection)
@@ -203,6 +206,15 @@ namespace TryAlgebraCore
 	void MathDocument::stopSelection()
 	{
 		m_selecting = false;
+	}
+
+	void MathDocument::selectAll()
+	{
+		m_selection_start.clear();
+		m_selection_start.push_back(LeafPos{ 0 });
+		m_selection_end.clear();
+		m_selection_end.push_back(LeafPos{ m_textBuffer.getSize() });
+		markDirty(DirtyState::Selection);
 	}
 
 	void MathDocument::copy()
@@ -379,6 +391,17 @@ namespace TryAlgebraCore
 	void TryAlgebraCore::MathDocument::redo()
 	{
 		inverseAction(false);
+	}
+
+	void MathDocument::goToCaret()
+	{
+		int from = std::get<LeafPos>(m_selection_end.back()).pos;
+		uint64_t line = m_textBuffer.getLineNumber(from).value();
+		if (line < m_lineFrom || line >= m_line_to)
+		{
+			m_lineFrom = line;
+		}
+		markDirty(DirtyState::Selection | DirtyState::Text);
 	}
 
 	void MathDocument::inverseAction(bool undo)

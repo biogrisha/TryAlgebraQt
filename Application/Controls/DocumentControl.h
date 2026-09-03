@@ -61,7 +61,7 @@ public slots:
 
 signals:
 	void scrollDataChanged(int currentLine, int linesCount, int linesCountOnScreen);
-
+	void meListRequested(int x, int y);
 private:
 	//Updates the rendering data of the selected elements
 	void updateElements(bool bRect, bool bText, bool bCaret);

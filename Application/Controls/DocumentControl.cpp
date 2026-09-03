@@ -68,6 +68,9 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 		m_currDoc->draw();
 		updateElements(true, true, true);
 		break;
+	case Qt::Key_Backslash:
+		emit meListRequested();
+		break;
 	case Qt::Key_Z:
 		if (bCtrl)
 		{
@@ -106,6 +109,15 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 		if (bCtrl)
 		{
 			m_currDoc->paste();
+			m_currDoc->draw();
+			updateElements(true, true, true);
+			break;
+		}
+		[[fallthrough]];
+	case Qt::Key_A:
+		if (bCtrl)
+		{
+			m_currDoc->selectAll();
 			m_currDoc->draw();
 			updateElements(true, true, true);
 			break;
