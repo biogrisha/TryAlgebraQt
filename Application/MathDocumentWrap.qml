@@ -126,6 +126,7 @@ Rectangle {
 		Keys.onPressed: (event) => {
 			m_docControl.keyInput(event.key, event.text, event.modifiers)
 		}
+
 		MouseArea { 
 			acceptedButtons: Qt.LeftButton | Qt.RightButton
 			anchors.fill: parent
@@ -145,6 +146,28 @@ Rectangle {
 				m_docControl.scrollY(event.angleDelta.y > 0)
 			}
 		}
+
+		Connections {
+		target: m_docControl
+
+		function onScrollDataChanged(currentLine, linesCount, linesCountOnScreen) {
+			if(!vbar.scrollingLock2)
+			{
+				vbar.scrollingLock1 = true;
+				if(linesCount > 1)
+				{
+					vbar.position = currentLine / (linesCount + 19)
+					vbar.size = 20 / (linesCount + 19)
+				}
+				else
+				{
+					vbar.size = 1
+					vbar.position = 0
+				}
+				vbar.scrollingLock1 = false;
+			}
+		}
+		
 	}
         
 	ScrollBar {

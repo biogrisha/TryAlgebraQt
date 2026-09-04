@@ -69,7 +69,11 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 		updateElements(true, true, true);
 		break;
 	case Qt::Key_Backslash:
-		emit meListRequested();
+		m_currDoc->goToCaret();
+		m_currDoc->draw();
+		updateElements(true, true, true);
+		auto caretPos = m_currDoc->caretPos();
+		emit meListRequested(caretPos.x, caretPos.y);
 		break;
 	case Qt::Key_Z:
 		if (bCtrl)

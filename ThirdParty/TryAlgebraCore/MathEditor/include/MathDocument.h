@@ -48,6 +48,7 @@ namespace TryAlgebraCore
 		void undo();
 		void redo();
 		void goToCaret();
+		glm::vec2 caretPos() const;
 		boost::signals2::signal<void(int currentLine, int linesCount, int linesOnScreen)> scrollDataChanged;
 	private:
 		void inverseAction(bool undo);

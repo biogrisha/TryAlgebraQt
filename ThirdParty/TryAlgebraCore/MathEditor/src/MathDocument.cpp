@@ -404,6 +404,12 @@ namespace TryAlgebraCore
 		markDirty(DirtyState::Selection | DirtyState::Text);
 	}
 
+	glm::vec2 MathDocument::caretPos() const
+	{
+		auto caretData = MeHelpers::getCaretData(m_container.get(), m_selection_end);
+		return caretData.Pos;
+	}
+
 	void MathDocument::inverseAction(bool undo)
 	{
 		auto actionOpt = m_history.pop(undo);
