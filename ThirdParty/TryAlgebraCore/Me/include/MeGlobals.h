@@ -34,6 +34,10 @@ namespace TryAlgebraCore
 
 		inline std::wstring fraction = L"fr";
 
+		inline std::wstring sprite = L"spr";
+		inline std::wstring spriteCursorPlacement = L"cur";
+		inline std::wstring spritePaste = L"pst";
+
 		inline std::wstring makeMe(const std::wstring& name, const std::wstring& meta, const size_t cont_num)
 		{
 			std::wstring res;
