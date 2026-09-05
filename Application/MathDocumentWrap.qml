@@ -5,166 +5,67 @@ import com.Application
 Rectangle {
     width: 200
     height: 100
-	property alias mathCanvas: mathDocCanvas
+	property alias mathCanvas: mathCanvas
 
 	Component.onCompleted: {
-        m_docControl.bindMathDocumentItem(mathDocCanvas)
+        docControl.bindMathDocumentItem(mathCanvas)
     }
 
 	DocumentControl{
-		id: m_docControl
+		id: docControl
 	}
 
-	Flickable {
-		id: flick
-
-		width: 150; height: 30;
-		contentWidth: meSearchBar.contentWidth
-		contentHeight: meSearchBar.contentHeight
-
-		function ensureVisible(r)
-		{
-			if (contentX >= r.x)
-				contentX = r.x;
-			else if (contentX+width <= r.x+r.width)
-				contentX = r.x+r.width-width;
-			if (contentY >= r.y)
-				contentY = r.y;
-			else if (contentY+height <= r.y+r.height)
-				contentY = r.y+r.height-height;
-		}
-		
-		TextEdit {
-			id: meSearchBar
-			width: flick.width
-			focus: true
-			wrapMode: TextEdit.Wrap
-			onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
-			onTextChanged:
-			{
-				filteredMeList.invalidate()
-			}
-		}
-	}
-
-	SortFilterProxyModel {
-		id: filteredMeList
-		model: UserApplication.applicationModel().meListModel();
-		filters: [
-			FunctionFilter {
-				component RoleData: QtObject { property string meName }
-				function filter(data: RoleData) : bool {
-					if(meSearchBar.text === "")
-					{
-						return true
-					}
-					return data.meName.toLowerCase().includes(meSearchBar.text.toLowerCase())
-				}
-			}
-		]
-	}
-
-	ListView {
-		focus: false
-		id: mathElementsList
-		width: 150 
-		height: 300
-		anchors.top: flick.bottom 
-		anchors.left: parent.left
-		model: filteredMeList
-		clip: true
-		delegate: Button {
-			id: button
-
-			required property string meName
-			required property point viewPos
-			required property size viewSize
-			width: 150
-			height: viewSize.height + 10
-
-			contentItem: Row {
-				spacing: 8
-
-				Item {
-					width: button.viewSize.width
-					height: button.viewSize.height
-					clip: true
-
-					Image {
-						source: "image://MeAtlas/atlas"
-
-						width: 500
-						height: 83
-
-						x: -button.viewPos.x
-						y: -button.viewPos.y
-					}
-				}
-
-				Text {
-					text: button.meName
-					anchors.verticalCenter: parent.verticalCenter
-					verticalAlignment: Text.AlignVCenter
-				}
-			}
-
-			onClicked: {
-				m_docControl.addMeByName(button.meName)
-				mathDocCanvas.focus = true
-			}
-		}
-	}
 
 	MathDocumentCanvas {
-		id:mathDocCanvas
+		id:mathCanvas
 		focus: true
-		anchors.left: mathElementsList.right
+		anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 		anchors.right: parent.right
 
+		MeListSearchBar{
+			id: meListSearchBar
+			docControl: docControl
+			mathCanvas: mathCanvas
+			x:100
+			y:100
+			z:1000
+		}
+
 		Keys.onPressed: (event) => {
-			m_docControl.keyInput(event.key, event.text, event.modifiers)
+			docControl.keyInput(event.key, event.text, event.modifiers)
 		}
 
 		MouseArea { 
 			acceptedButtons: Qt.LeftButton | Qt.RightButton
 			anchors.fill: parent
 			onClicked: { 
-				mathDocCanvas.focus = true 
+				mathCanvas.focus = true 
 			} 
 			onPressed: (event) => {
-				m_docControl.mouseBtnDown(event.x, event.y, event.button)
+				meListSearchBar.close()
+				docControl.mouseBtnDown(event.x, event.y, event.button)
 			}
 			onReleased: (event) => {
-				m_docControl.mouseBtnUp(event.x, event.y, event.button)
+				docControl.mouseBtnUp(event.x, event.y, event.button)
 			}
 			onPositionChanged: (event) => {
-				m_docControl.mousePosUpdated(event.x, event.y, event.button)
+				docControl.mousePosUpdated(event.x, event.y, event.button)
 			}
 			onWheel: (event) => {
-				m_docControl.scrollY(event.angleDelta.y > 0)
+				meListSearchBar.close()
+				docControl.scrollY(event.angleDelta.y > 0)
 			}
 		}
 
 		Connections {
-		target: m_docControl
-
-		function onScrollDataChanged(currentLine, linesCount, linesCountOnScreen) {
-			if(!vbar.scrollingLock2)
-			{
-				vbar.scrollingLock1 = true;
-				if(linesCount > 1)
-				{
-					vbar.position = currentLine / (linesCount + 19)
-					vbar.size = 20 / (linesCount + 19)
-				}
-				else
-				{
-					vbar.size = 1
-					vbar.position = 0
-				}
-				vbar.scrollingLock1 = false;
+		target: docControl
+		
+			function onMeListRequested(x,y) {
+				meListSearchBar.open()
+				meListSearchBar.x = x
+				meListSearchBar.y = y
 			}
 		}
 		
@@ -186,13 +87,13 @@ Rectangle {
 			if(!scrollingLock1)
 			{
 				scrollingLock2 = true;
-				m_docControl.moveScrollHandle(position / (1 - size))
+				docControl.moveScrollHandle(position / (1 - size))
 				scrollingLock2 = false;
 			}
 		}
 
 		Connections {
-			target: m_docControl
+			target: docControl
 
 			function onScrollDataChanged(currentLine, linesCount, linesCountOnScreen) {
 				if(!vbar.scrollingLock2)

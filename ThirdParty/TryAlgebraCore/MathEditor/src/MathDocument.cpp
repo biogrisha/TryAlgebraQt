@@ -11,7 +11,7 @@ namespace TryAlgebraCore
 {
 	MathDocument::MathDocument()
 	{
-		m_doc_size = { 0, 0 };
+		m_docSize = { 0, 0 };
 		m_selection_start = {
 			LeafPos(0)
 		};
@@ -242,6 +242,7 @@ namespace TryAlgebraCore
 	void MathDocument::draw()
 	{
 		std::lock_guard<std::mutex> guard(m_visual_toolkit.mdocState->mtx());
+
 		if (hasFlag(getDirtyState(), DirtyState::Text))
 		{
 			m_visual_toolkit.mdocState->at(1).clear();
@@ -249,7 +250,13 @@ namespace TryAlgebraCore
 		if (hasFlag(getDirtyState(), DirtyState::Selection))
 		{
 			m_visual_toolkit.mdocState->at(0).clear();
+			FRectInst background;
+			background.Color = { 0.5,0.4,0.5,1 };
+			background.Pos = { 0,0 };
+			background.Size = m_docSize;
+			m_visual_toolkit.mdocState->at(0).addRectangle(background);
 		}
+
 
 		if (hasFlag(getDirtyState(), DirtyState::Text))
 		{
@@ -277,7 +284,7 @@ namespace TryAlgebraCore
 				}
 				m_container->calcLine(&m_visual_toolkit);
 				cont_visible_y = m_container->getSize().y - line_before_h;
-				if (cont_visible_y > m_doc_size.y)
+				if (cont_visible_y > m_docSize.y)
 				{
 					//exceeded document size
 					//calculate one more line
@@ -289,10 +296,10 @@ namespace TryAlgebraCore
 				}
 			}
 
-			m_container->setPosY(-line_before_h - m_snap_to_end * (cont_visible_y - m_doc_size.y));
+			m_container->setPosY(-line_before_h - m_snap_to_end * (cont_visible_y - m_docSize.y));
 			m_container->calculatePos();
-			m_container->setSizeX(std::max(m_doc_size.x, m_container->getSize().x));
-			m_container->setSizeY(std::max(m_doc_size.y, m_container->getSize().y));
+			m_container->setSizeX(std::max(m_docSize.x, m_container->getSize().x));
+			m_container->setSizeY(std::max(m_docSize.y, m_container->getSize().y));
 			restoreCaretPos(m_container.get());
 			m_container->draw(&m_visual_toolkit);
 		}

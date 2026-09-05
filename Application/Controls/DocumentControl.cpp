@@ -210,6 +210,7 @@ void DocumentControl::onResized(const QSize& new_size)
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdocState = m_canvasState;
 	m_currDoc->setDocSize({ new_size.width(), new_size.height() });
+	m_currDoc->markDirty();
 	m_currDoc->draw();
 	m_docCanvas->update();
 }

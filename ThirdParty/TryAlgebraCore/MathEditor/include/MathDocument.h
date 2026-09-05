@@ -22,7 +22,7 @@ namespace TryAlgebraCore
 	public:
 		MathDocument();
 		void setVisualToolkit(const VisualToolkit& visual_toolkit);
-		void setDocSize(const glm::vec2& size) { m_doc_size = size; }
+		void setDocSize(const glm::vec2& size) { m_docSize = size; }
 		void setText(const std::wstring& str);
 		void type(std::wstring str);
 		void typeByName(const std::wstring& str);
@@ -64,7 +64,7 @@ namespace TryAlgebraCore
 		void filterInput(std::wstring& str);
 		TextBuffer m_textBuffer;
 		std::unique_ptr<MeContainer> m_container;
-		glm::vec2 m_doc_size;
+		glm::vec2 m_docSize;
 
 		DirtyState m_dirty_states = DirtyState::None;
 		bool m_selecting = false;

@@ -10,6 +10,7 @@ qt_add_qml_module(Application
     VERSION 1.0
     QML_FILES
         MathDocumentWrap.qml
+        MeListSearchBar.qml
     SOURCES
         AppGlobal.h
         Application.h
