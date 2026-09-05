@@ -6,7 +6,6 @@ Rectangle {
     width: 200
     height: 100
 	property alias mathCanvas: mathCanvas
-
 	Component.onCompleted: {
         docControl.bindMathDocumentItem(mathCanvas)
     }
@@ -20,6 +19,7 @@ Rectangle {
 		id:mathCanvas
 		focus: true
 		anchors.left: parent.left
+		anchors.leftMargin: 2
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 		anchors.right: parent.right

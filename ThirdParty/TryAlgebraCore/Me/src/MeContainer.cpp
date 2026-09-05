@@ -39,13 +39,21 @@ namespace TryAlgebraCore
 		m_size.y += g_caret_def_size.y * m_scaling_factor;
 	}
 
+	void MeContainer::setDrawBackground(bool val)
+	{
+		m_drawBackground = val;
+	}
+
 	void MeContainer::draw(VisualToolkit* vt)
 	{
-		//FRectInst rect;
-		//rect.Color = { 1,1,1,0.5 };
-		//rect.Pos = getPos();
-		//rect.Size = getSize();
-		//vt->mdocState->at(1).addRectangle(rect);
+		if (m_drawBackground)
+		{
+			FRectInst rect;
+			rect.Color = { 1,1,1,0.5 };
+			rect.Pos = getPos();
+			rect.Size = getSize();
+			vt->mdocState->at(1).addRectangle(rect);
+		}
 		MeBase::draw(vt);
 	}
 

@@ -8,7 +8,7 @@ Rectangle {
 	required property var mathCanvas
 
 	visible: false
-	width: 150
+	width: 200
 	height: searchBar.height + mathElementsList.height
 
 	color: "#d0d0d0"
@@ -50,7 +50,7 @@ Rectangle {
 			id: searchBar
 
 			width: parent.width
-			height: 30
+			height: 50
 			color: "#d0d0d0"
 
 			TextField {

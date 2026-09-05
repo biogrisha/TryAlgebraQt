@@ -224,14 +224,16 @@ namespace TryAlgebraCore
 
 	void MathDocument::cut()
 	{
-		copy();
 		if (hasSelection())
 		{
-			deleteSelected();
+			copy();
+			std::wstring deletedStr = deleteSelected();
+			m_selection_end = m_selection_start;
+			adjustLineFrom();
+			markDirty(DirtyState::Text | DirtyState::Selection);
+			m_history.recordDeletion(m_selection_start, std::move(deletedStr));
+			m_history.clearRedo();
 		}
-		m_selection_end = m_selection_start;
-		adjustLineFrom();
-		markDirty(DirtyState::Text | DirtyState::Selection);
 	}
 
 	void MathDocument::paste()
@@ -251,7 +253,7 @@ namespace TryAlgebraCore
 		{
 			m_visual_toolkit.mdocState->at(0).clear();
 			FRectInst background;
-			background.Color = { 0.5,0.4,0.5,1 };
+			background.Color = { 0.3,0.25,0.3,1 };
 			background.Pos = { 0,0 };
 			background.Size = m_docSize;
 			m_visual_toolkit.mdocState->at(0).addRectangle(background);
@@ -297,6 +299,7 @@ namespace TryAlgebraCore
 			}
 
 			m_container->setPosY(-line_before_h - m_snap_to_end * (cont_visible_y - m_docSize.y));
+			m_container->setPosX(10);
 			m_container->calculatePos();
 			m_container->setSizeX(std::max(m_docSize.x, m_container->getSize().x));
 			m_container->setSizeY(std::max(m_docSize.y, m_container->getSize().y));

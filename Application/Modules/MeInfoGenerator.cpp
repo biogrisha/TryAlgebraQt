@@ -2,6 +2,7 @@
 #include <Me/include/MeAtlas.h>
 #include <Me/include/MeParser.h>
 #include <Me/include/MeGlobals.h>
+#include <Me/include/MeContainer.h>
 #include <MathEditor/include/TextBuffer.h>
 #include <Application.h>
 #include <AppGlobal.h>
@@ -24,6 +25,7 @@ void MeInfoGenerator::gen(MeListModel* model)
 	MeParser pr(tb, 0);
 	while (pr.parseLine(atlas.get()));
 
+	setDrawContBackground(atlas.get());
 	FMathDocumentRendering md_rendering;
 	VisualToolkit vt;
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
@@ -74,4 +76,16 @@ void MeInfoGenerator::gen(MeListModel* model)
 		model->addMathElementInfo({ QString(meTable[i].first), pos, size });
 	}
 	model->setImage(std::move(image));
+}
+
+void MeInfoGenerator::setDrawContBackground(TryAlgebraCore::MeBase* me)
+{
+	if (auto cont = MyRTTI::Cast<TryAlgebraCore::MeContainer>(me))
+	{
+		cont->setDrawBackground(true);
+	}
+	for (auto& ch : me->getChildren())
+	{
+		setDrawContBackground(ch.get());
+	}
 }

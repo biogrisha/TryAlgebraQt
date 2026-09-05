@@ -16,8 +16,10 @@ namespace TryAlgebraCore
 
 		void calcLine(VisualToolkit* visual_toolkit, size_t end = UINT64_MAX);
 		void addEmptyLine();
+		void setDrawBackground(bool val);
 	private:
 		float next_line_y = 0;
 		int end_line_i = 0;
+		bool m_drawBackground = false;
 	};
 }
