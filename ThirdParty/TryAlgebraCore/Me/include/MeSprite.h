@@ -17,9 +17,8 @@ namespace TryAlgebraCore
 		MeSprite(const std::wstring& meta);
 		virtual void calculate(VisualToolkit* visual_toolkit) override;
 		virtual void draw(VisualToolkit* visual_toolkit) override;
-		virtual std::wstring getName() override;
 	private:
-		FSpriteInstByName m_spriteData;
+		FSpriteInstByName m_sprite;
 		Type m_type = Type::CursorPlacement;
 	};
 }

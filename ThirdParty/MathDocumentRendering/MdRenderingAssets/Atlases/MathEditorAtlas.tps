@@ -4,7 +4,7 @@
         <key>fileFormatVersion</key>
         <int>6</int>
         <key>texturePackerVersion</key>
-        <string>7.11.0</string>
+        <string>8.2.2</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -144,6 +144,8 @@
         <false/>
         <key>trimSpriteNames</key>
         <false/>
+        <key>enableCacheBusting</key>
+        <false/>
         <key>prependSmartFolderName</key>
         <false/>
         <key>autodetectAnimations</key>
@@ -226,8 +228,8 @@
                 <key>files</key>
                 <array>
                     <filename>../Icons/Caret.png</filename>
-                    <filename>C:/Users/biogr/Downloads/mouse-arrow.png</filename>
                     <filename>C:/Users/biogr/Downloads/paste.png</filename>
+                    <filename>C:/Users/biogr/Downloads/mouse-arrow.png</filename>
                 </array>
             </struct>
         </map>

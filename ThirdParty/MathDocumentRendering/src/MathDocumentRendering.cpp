@@ -42,6 +42,7 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* ft)
 	m_rectRendering2.Init(m_rendering.get(), m_layer2.get());
 	m_linesRendering2.Init(m_rendering.get(), m_layer2.get());
 	m_textRendering2.init(m_rendering.get(), m_layer2.get(), ft);
+	m_spriteRendering2.Init(m_rendering.get(), m_layer2.get());
 
 	m_layer1ToOutput.Init(m_rendering.get(), m_layer1.get(), m_output.get());
 	m_layer2ToOutput.Init(m_rendering.get(), m_layer2.get(), m_output.get());
@@ -56,6 +57,7 @@ void FMathDocumentRendering::Init(FFreeTypeWrap* ft)
 	m_rectRendering2.InitPLine();
 	m_linesRendering2.InitPLine();
 	m_textRendering2.initPLine();
+	m_spriteRendering2.InitPLine();
 
 	m_layer1ToOutput.InitPLine();
 	m_layer2ToOutput.InitPLine();
@@ -82,6 +84,7 @@ void FMathDocumentRendering::SetDocumentExtent(const VkExtent3D& extent)
 	m_rectRendering2.setExtent(extent);
 	m_linesRendering2.setExtent(extent);
 	m_textRendering2.setExtent(extent);
+	m_spriteRendering2.setExtent(extent);
 }
 
 
@@ -108,10 +111,12 @@ FImageBuffer* FMathDocumentRendering::Render()
 
 		m_rectRendering2.SetInstances(m_state.at(1).rectangles());
 		m_linesRendering2.setInstances(m_state.at(1).lines());
+		m_spriteRendering2.SetInstances(m_state.at(1).sprites());
 		m_textRendering2.updateText(m_state.at(1).text());
 		m_rectRendering2.Render();
 		m_linesRendering2.Render();
 		m_textRendering2.render();
+		m_spriteRendering2.Render();
 	}
 	m_layer1ToOutput.Render(true);
 	m_layer2ToOutput.Render(false);

@@ -10,7 +10,7 @@ class FSpriteLayout : public FVertexInputLayout {
 	virtual std::vector<vk::VertexInputBindingDescription> getBindingDescription() override {
 		return {
 			{ 0, sizeof(FVertTex), vk::VertexInputRate::eVertex },
-			{ 1, sizeof(FGlyphSpriteInst), vk::VertexInputRate::eInstance },
+			{ 1, sizeof(FSpriteInst), vk::VertexInputRate::eInstance },
 		};
 	}
 	virtual std::vector<vk::VertexInputAttributeDescription> getAttributeDescriptions() override {

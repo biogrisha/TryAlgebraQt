@@ -8,6 +8,7 @@
 #include <Me/include/MeTerm.h>
 #include <Me/include/MePower.h>
 #include <Me/include/MeFraction.h>
+#include <Me/include/MeSprite.h>
 
 namespace TryAlgebraCore
 {
@@ -43,6 +44,16 @@ namespace TryAlgebraCore
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeFraction>();
+			});
+		m_factory.emplace(MeNames::spriteCursorPlacement,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeSprite>(MeNames::spriteCursorPlacement);
+			});
+		m_factory.emplace(MeNames::spritePaste,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeSprite>(MeNames::spritePaste);
 			});
 	}
 
@@ -167,6 +178,13 @@ namespace TryAlgebraCore
 						startChildren();
 						return;
 					}
+					else if (*next == L'\\')
+					{
+						m_current->setMeta(str);
+						m_it.next();
+						return;
+					}
+
 				}
 			}
 			str += ch;

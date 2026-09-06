@@ -41,6 +41,7 @@ private:
 	FRectRendering m_rectRendering2;
 	LinesRendering m_linesRendering2;
 	TextRendering m_textRendering2;
+	FSpriteRendering m_spriteRendering2;
 
 	DrawImageRendering m_layer1ToOutput;
 	DrawImageRendering m_layer2ToOutput;

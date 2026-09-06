@@ -14,6 +14,8 @@ namespace TryAlgebraCore
 		float max_y = 0;
 		for (const auto& ch : m_children)
 		{
+			ch->setScalingFactor(1);
+			ch->calculate(visual_toolkit);
 			float x_next = ch->getSize().x + x;
 			if (x_next > m_max_width)
 			{
@@ -22,8 +24,6 @@ namespace TryAlgebraCore
 				y = max_y;
 				x = 0;
 			}
-			ch->setScalingFactor(1);
-			ch->calculate(visual_toolkit);
 			ch->setPos({ x, y });
 			max_y = std::max(y + ch->getSize().y, max_y);
 			x += ch->getSize().x;
