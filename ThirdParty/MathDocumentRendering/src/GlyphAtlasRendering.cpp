@@ -3,9 +3,10 @@
 #include <VulkanContext.h>
 #include "FileSystemUtilities.h"
 
-void FGlyphAtlasRendering::Init(FRendering* InRendering)
+void FGlyphAtlasRendering::Init(FRendering* InRendering, FImageBuffer* output)
 {
 	Rendering = InRendering;
+	m_output = output;
 	//Creating resources
 	VertexBuffer = MyRTTI::MakeTypedUnique<FBuffer>();
 	VertexBuffer->SetProperties(FBufferInfo{ VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, true });
@@ -25,11 +26,6 @@ void FGlyphAtlasRendering::Init(FRendering* InRendering)
 	UniformBuffer->SetProperties({ VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT , false });
 	UniformBuffer->SetData(sizeof(Extent), &Extent);
 
-	FImageBufferInfo image_info;
-	image_info.Extent = Extent;
-	image_info.UsageFlags |= vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eSampled;
-	Atlas = MyRTTI::MakeTypedUnique<FImageBuffer>(image_info);
-
 	S_1 = Rendering->GetDescriptorManager().MakeDescriptorSet(
 		{
 			{OutlineBuffer.get(),vk::ShaderStageFlagBits::eFragment},
@@ -47,9 +43,8 @@ void FGlyphAtlasRendering::InitPLine()
 
 void FGlyphAtlasRendering::SetExtent(const VkExtent3D& InExtent)
 {
-	if (Atlas)
+	if (UniformBuffer)
 	{
-		Atlas->SetExtent(InExtent);
 		UniformBuffer->SetData(sizeof(InExtent), &InExtent);
 	}
 	Extent = InExtent;
@@ -71,19 +66,14 @@ void FGlyphAtlasRendering::Render()
 	FRunPipelineInfo Run;
 
 	Run.PipelineId = PLine;
-	Run.OutputExtent = Atlas->GetExtent();
+	Run.OutputExtent = m_output->GetExtent();
 	Run.VertexBuffers = { VertexBuffer.get(), InstanceBuffer.get() };
 	Run.IndexBuffer = IndexBuffer.get();
 	Run.DescriptorSets = { S_1 };
-	Run.ColorAttachment = Atlas.get();
+	Run.ColorAttachment = m_output;
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = Instances.size();
 
 	Rendering->AddRunPipelineInfo(Run);
 	Rendering->Render();
-}
-
-FImageBuffer* FGlyphAtlasRendering::GetAtlas()
-{
-	return Atlas.get();
 }

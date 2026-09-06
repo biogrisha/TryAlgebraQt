@@ -7,9 +7,20 @@
 struct FOutlineCurvePoints
 {
 	glm::vec2 points[3] = { glm::vec2(),glm::vec2(),glm::vec2() };
+	//discreminant a and b coeffs
 	float a = 0;
 	float b = 0;
 };
+
+
+struct FGlyphInstance
+{
+	glm::vec2 Offset;
+	glm::vec2 Size;
+	uint32_t StartIndex;
+	uint32_t CurvesCount;
+};
+
 
 struct FGlyphRenderData
 {

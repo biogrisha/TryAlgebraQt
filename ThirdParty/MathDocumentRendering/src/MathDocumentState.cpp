@@ -34,6 +34,12 @@ void Layer::addLine(LineChain lineChain)
 	m_dirty = true;
 }
 
+void Layer::addCustomGlyph(std::vector<FOutlineCurvePoints> outline, const glm::vec2& pos)
+{
+
+	m_customGlyphsOutline.insert(m_customGlyphsOutline.end(), outline.begin(), outline.end());
+}
+
 void Layer::markClean()
 {
 	m_dirty = false;

@@ -15,7 +15,7 @@ FFreeTypeWrap::~FFreeTypeWrap()
 }
 void FFreeTypeWrap::Init(float InDpiX, float InDpiY)
 {
-	
+
 	DpiX = InDpiX;
 	DpiY = InDpiY;
 
@@ -182,7 +182,7 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphId& GlyphId)
 	{
 		for (auto& Point : Curve.points)
 		{
-			Point.y = - Point.y + VerticalOffset;
+			Point.y = -Point.y + VerticalOffset;
 		}
 		std::swap(Curve.points[0], Curve.points[2]);
 		Curve.a = Curve.points[0].y - 2 * Curve.points[1].y + Curve.points[2].y;

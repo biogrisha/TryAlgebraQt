@@ -12,14 +12,6 @@ struct FSimpleVertex
 	glm::vec2 Pos;
 };
 
-struct FGlyphInstance
-{
-	glm::vec2 Offset;
-	glm::vec2 Size;
-	uint32_t StartIndex;
-	uint32_t CurvesCount;
-};
-
 class FGlyphAtlasInputLayout : public FVertexInputLayout {
 	virtual std::vector<vk::VertexInputBindingDescription> getBindingDescription() override {
 		return {
@@ -43,20 +35,19 @@ class FGlyphAtlasInputLayout : public FVertexInputLayout {
 class FGlyphAtlasRendering
 {
 public:
-	void Init(FRendering* InRendering);
+	void Init(FRendering* InRendering, FImageBuffer* output);
 	void InitPLine();
 	void SetExtent(const VkExtent3D& InExetent);
 	void SetInstances(const std::vector<FGlyphInstance>& InInstances);
 	void SetOutlineCurves(const std::vector<FOutlineCurvePoints>& InOutlineCurves);
 	void Render();
-	FImageBuffer* GetAtlas();
 private:
 	std::unique_ptr<FBuffer> VertexBuffer;
 	std::unique_ptr<FBuffer> InstanceBuffer;
 	std::unique_ptr<FBuffer> IndexBuffer;
 	std::unique_ptr<FBuffer> OutlineBuffer;
 	std::unique_ptr<FBuffer> UniformBuffer;
-	std::unique_ptr<FImageBuffer> Atlas;
+	FImageBuffer* m_output = nullptr;
 	std::vector<FOutlineCurvePoints> OutlineCurves;
 	std::vector<FGlyphInstance> Instances;
 	FGlyphAtlasInputLayout GlyphAtlasInputLayout;

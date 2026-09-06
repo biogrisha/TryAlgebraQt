@@ -14,6 +14,7 @@ public:
 private:
 	FGlyphAtlasRendering m_atlasRendering;
 	FTextFromAtlasRendering m_textFromAtlasRendering;
+	std::unique_ptr<FImageBuffer> m_atlas;
 	FFreeTypeWrap* m_ft = nullptr;
 	vk::Extent3D m_extent;
 	bool m_hasContent = false;

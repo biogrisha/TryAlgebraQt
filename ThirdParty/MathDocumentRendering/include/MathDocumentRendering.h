@@ -14,6 +14,7 @@
 #include "LinesRendering.h"
 #include "TextRendering.h"
 #include "DrawImageRendering.h"
+#include "GlyphAtlasRendering.h"
 
 class FMathDocumentRendering
 {
@@ -42,6 +43,7 @@ private:
 	LinesRendering m_linesRendering2;
 	TextRendering m_textRendering2;
 	FSpriteRendering m_spriteRendering2;
+	FGlyphAtlasRendering m_vectorSymbolsRendering2;
 
 	DrawImageRendering m_layer1ToOutput;
 	DrawImageRendering m_layer2ToOutput;

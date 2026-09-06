@@ -3,9 +3,13 @@
 void TextRendering::init(FRendering* rendering, FImageBuffer* output, FFreeTypeWrap* ft)
 {
 	m_ft = ft;
-	m_atlasRendering.Init(rendering);
+	FImageBufferInfo image_info;
+	image_info.Extent = m_extent;
+	image_info.UsageFlags |= vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eSampled;
+	m_atlas = MyRTTI::MakeTypedUnique<FImageBuffer>(image_info);
+	m_atlasRendering.Init(rendering, m_atlas.get());
 
-	m_textFromAtlasRendering.SetAtlas(m_atlasRendering.GetAtlas());
+	m_textFromAtlasRendering.SetAtlas(m_atlas.get());
 	m_textFromAtlasRendering.SetOutputImage(output);
 	m_textFromAtlasRendering.Init(rendering);
 }
@@ -56,7 +60,8 @@ void TextRendering::updateText(std::vector<FGlyphData> documentContent)
 		glyphData.second.RenderData->TextureOffset.y = currY;
 
 		atlasInstanceData[glyphId].Offset = glm::vec2(currX, currY);
-		atlasInstanceData[glyphId].Size = glm::vec2(glyphData.second.RenderData->WidthInPixels, glyphData.second.RenderData->HeightInPixels);
+		atlasInstanceData[glyphId].Size = glm::vec2(glyphData.second.RenderData->WidthInPixels,
+			glyphData.second.RenderData->HeightInPixels);
 
 		currX += glyphData.second.RenderData->WidthInPixels;
 		maxGlyphY = std::max(maxGlyphY, glyphData.second.RenderData->HeightInPixels);
@@ -98,6 +103,10 @@ void TextRendering::render()
 void TextRendering::setExtent(const vk::Extent3D& extent)
 {
 	m_extent = extent;
+	if (m_atlas)
+	{
+		m_atlas->SetExtent(extent);
+	}
 	m_atlasRendering.SetExtent(extent);
 	m_textFromAtlasRendering.SetExtent(extent);
 }
