@@ -36,7 +36,19 @@ void Layer::addLine(LineChain lineChain)
 
 void Layer::addCustomGlyph(std::vector<FOutlineCurvePoints> outline, const glm::vec2& pos)
 {
-
+	FGlyphInstance instance;
+	float maxX = 0;
+	float maxY = 0;
+	for (auto& curve : outline)
+	{
+		curve.points[0] *= 64.0f;
+		curve.points[1] *= 64.0f;
+		curve.points[2] *= 64.0f;
+		curve.a = curve.points[0].y - 2 * curve.points[1].y + curve.points[2].y;
+		curve.b = curve.points[0].y - curve.points[1].y;
+		maxX = std::max({ maxX, curve.points[0].x, curve.points[1].x, curve.points[2].x });
+		maxY = std::max({ maxY, curve.points[0].y, curve.points[1].y, curve.points[2].y });
+	}
 	m_customGlyphsOutline.insert(m_customGlyphsOutline.end(), outline.begin(), outline.end());
 }
 
