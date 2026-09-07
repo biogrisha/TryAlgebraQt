@@ -9,52 +9,62 @@
 #include <Me/include/MePower.h>
 #include <Me/include/MeFraction.h>
 #include <Me/include/MeSprite.h>
+#include <Me/include/MeBracket.h>
 
 namespace TryAlgebraCore
 {
 	MeParser::MeParser(const TextBuffer& text_buffer, int line_num)
 		:m_it(text_buffer, line_num)
 	{
-		m_factory.emplace(MeNames::from_to,
+		//=========me factory
+		m_meFactory.emplace(MeNames::from_to,
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeFromTo>();
 			});
-		m_factory.emplace(MeNames::new_line,
+		m_meFactory.emplace(MeNames::new_line,
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeNewLine>();
 			});
-		m_factory.emplace(MeNames::variable,
+		m_meFactory.emplace(MeNames::variable,
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeVariable>();
 			});
-		m_factory.emplace(MeNames::term,
+		m_meFactory.emplace(MeNames::term,
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeTerm>();
 			});
-		m_factory.emplace(MeNames::power,
+		m_meFactory.emplace(MeNames::power,
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MePower>();
 			});
-		m_factory.emplace(MeNames::fraction,
+		m_meFactory.emplace(MeNames::fraction,
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeFraction>();
 			});
-		m_factory.emplace(MeNames::spriteCursorPlacement,
+		m_meFactory.emplace(MeNames::spriteCursorPlacement,
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeSprite>(MeNames::spriteCursorPlacement);
 			});
-		m_factory.emplace(MeNames::spritePaste,
+		m_meFactory.emplace(MeNames::spritePaste,
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeSprite>(MeNames::spritePaste);
 			});
+
+		//=========ch factory 
+		m_chFactory.emplace(L'[',
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeBracket>(L'[');
+			});
+
 	}
 
 	bool MeParser::parseLine(MeBase* container)
@@ -114,7 +124,7 @@ namespace TryAlgebraCore
 			}
 			else
 			{
-				auto me = MyRTTI::MakeTypedUnique<MeCharacter>(ch);
+				auto me = make(ch);
 				me->setParent(m_parent);
 				me->setChFrom(m_it.getChId() - 1);
 				me->setChTo(m_it.getChId());
@@ -214,12 +224,22 @@ namespace TryAlgebraCore
 
 	std::unique_ptr<MeBase> MeParser::make(const std::wstring& name)
 	{
-		auto found = m_factory.find(name);
-		if (found != m_factory.end())
+		auto found = m_meFactory.find(name);
+		if (found != m_meFactory.end())
 		{
 			return found->second();
 		}
 		return std::unique_ptr<MeBase>();
+	}
+
+	std::unique_ptr<MeBase> MeParser::make(wchar_t ch)
+	{
+		auto found = m_chFactory.find(ch);
+		if (found != m_chFactory.end())
+		{
+			return found->second();
+		}
+		return MyRTTI::MakeTypedUnique<MeCharacter>(ch);
 	}
 
 }

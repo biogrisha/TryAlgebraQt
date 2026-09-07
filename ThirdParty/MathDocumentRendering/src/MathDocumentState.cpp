@@ -6,7 +6,8 @@ void Layer::clear()
 	m_sprites.clear();
 	m_rectangles.clear();
 	m_lines.clear();
-
+	m_customGlyphsInstances.clear();
+	m_customGlyphsOutline.clear();
 	m_dirty = true;
 }
 
@@ -34,22 +35,24 @@ void Layer::addLine(LineChain lineChain)
 	m_dirty = true;
 }
 
-void Layer::addCustomGlyph(std::vector<FOutlineCurvePoints> outline, const glm::vec2& pos)
+void Layer::addCustomGlyph(std::vector<FOutlineCurvePoints> outline, const glm::vec2& pos, const glm::vec2& size)
 {
-	FGlyphInstance instance;
-	float maxX = 0;
-	float maxY = 0;
 	for (auto& curve : outline)
 	{
 		curve.points[0] *= 64.0f;
 		curve.points[1] *= 64.0f;
 		curve.points[2] *= 64.0f;
+		std::swap(curve.points[0], curve.points[2]);
 		curve.a = curve.points[0].y - 2 * curve.points[1].y + curve.points[2].y;
 		curve.b = curve.points[0].y - curve.points[1].y;
-		maxX = std::max({ maxX, curve.points[0].x, curve.points[1].x, curve.points[2].x });
-		maxY = std::max({ maxY, curve.points[0].y, curve.points[1].y, curve.points[2].y });
 	}
+	auto& inst = m_customGlyphsInstances.emplace_back();
+	inst.CurvesCount = outline.size();
+	inst.StartIndex = m_customGlyphsOutline.size();
+	inst.Size = size;
+	inst.Offset = pos;
 	m_customGlyphsOutline.insert(m_customGlyphsOutline.end(), outline.begin(), outline.end());
+	m_dirty = true;
 }
 
 void Layer::markClean()
@@ -80,6 +83,16 @@ const std::vector<FRectInst>& Layer::rectangles() const
 const std::vector<LineChain>& Layer::lines() const
 {
 	return m_lines;
+}
+
+const std::vector<FOutlineCurvePoints>& Layer::customGlyphsOutline() const
+{
+	return m_customGlyphsOutline;
+}
+
+const std::vector<FGlyphInstance>& Layer::customGlyphsInstances() const
+{
+	return m_customGlyphsInstances;
 }
 
 FMathDocumentState::FMathDocumentState(int layersCount)

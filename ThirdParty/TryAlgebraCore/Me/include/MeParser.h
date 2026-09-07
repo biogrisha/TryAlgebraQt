@@ -28,11 +28,13 @@ namespace TryAlgebraCore
 		void consumeMeta();
 		void startChildren();
 		std::unique_ptr<MeBase> make(const std::wstring& name);
+		std::unique_ptr<MeBase> make(wchar_t ch);
 
 		TextBufferIterator m_it;
 		MeBase* m_current = nullptr;
 		MeBase* m_parent = nullptr;
-		std::unordered_map<std::wstring, std::function<std::unique_ptr<MeBase>()>> m_factory;
+		std::unordered_map<std::wstring, std::function<std::unique_ptr<MeBase>()>> m_meFactory;
+		std::unordered_map<wchar_t, std::function<std::unique_ptr<MeBase>()>> m_chFactory;
 		int depth = -1;
 	};
 }

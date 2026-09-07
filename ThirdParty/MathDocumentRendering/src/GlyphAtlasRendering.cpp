@@ -52,17 +52,27 @@ void FGlyphAtlasRendering::SetExtent(const VkExtent3D& InExtent)
 void FGlyphAtlasRendering::SetInstances(const std::vector<FGlyphInstance>& InInstances)
 {
 	Instances = InInstances;
-	InstanceBuffer->SetData(Instances);
+	if (!InInstances.empty())
+	{
+		InstanceBuffer->SetData(Instances);
+	}
 }
 
 void FGlyphAtlasRendering::SetOutlineCurves(const std::vector<FOutlineCurvePoints>& InOutlineCurves)
 {
 	OutlineCurves = InOutlineCurves;
-	OutlineBuffer->SetData(OutlineCurves);
+	if (!InOutlineCurves.empty())
+	{
+		OutlineBuffer->SetData(OutlineCurves);
+	}
 }
 
 void FGlyphAtlasRendering::Render()
 {
+	if (Instances.empty())
+	{
+		return;
+	}
 	FRunPipelineInfo Run;
 
 	Run.PipelineId = PLine;
@@ -73,7 +83,7 @@ void FGlyphAtlasRendering::Render()
 	Run.ColorAttachment = m_output;
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = Instances.size();
-
+	Run.bClearAttachment = false;
 	Rendering->AddRunPipelineInfo(Run);
 	Rendering->Render();
 }

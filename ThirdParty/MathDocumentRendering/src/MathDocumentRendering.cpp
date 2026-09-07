@@ -115,11 +115,14 @@ FImageBuffer* FMathDocumentRendering::Render()
 		m_linesRendering2.setInstances(m_state.at(1).lines());
 		m_spriteRendering2.SetInstances(m_state.at(1).sprites());
 		m_textRendering2.updateText(m_state.at(1).text());
+		m_vectorSymbolsRendering2.SetOutlineCurves(m_state.at(1).customGlyphsOutline());
+		m_vectorSymbolsRendering2.SetInstances(m_state.at(1).customGlyphsInstances());
 
 		m_rectRendering2.Render();
 		m_linesRendering2.Render();
 		m_textRendering2.render();
 		m_spriteRendering2.Render();
+		m_vectorSymbolsRendering2.Render();
 	}
 	m_layer1ToOutput.Render(true);
 	m_layer2ToOutput.Render(false);

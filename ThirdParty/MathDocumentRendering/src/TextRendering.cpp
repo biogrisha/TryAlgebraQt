@@ -1,5 +1,6 @@
 #include "TextRendering.h"
 #include "FreeTypeWrap.h"
+#include <VulkanHelpers.h>
 void TextRendering::init(FRendering* rendering, FImageBuffer* output, FFreeTypeWrap* ft)
 {
 	m_ft = ft;
@@ -96,6 +97,10 @@ void TextRendering::render()
 	{
 		return;
 	}
+	auto cmdBuffer = VkHelpers::BeginSingleTimeCommands();
+	VkHelpers::ImageTransition_ToTransferDst(m_atlas.get(), cmdBuffer);
+	VkHelpers::ClearImage(m_atlas.get(), cmdBuffer);
+	VkHelpers::EndSingleTimeCommands(cmdBuffer);
 	m_atlasRendering.Render();
 	m_textFromAtlasRendering.Render();
 }

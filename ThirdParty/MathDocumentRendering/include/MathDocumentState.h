@@ -12,13 +12,16 @@ public:
 	void addSprite(const FSpriteInstByName& sprite);
 	void addRectangle(const FRectInst& rect);
 	void addLine(LineChain lineChain);
-	void addCustomGlyph(std::vector<FOutlineCurvePoints> outline, const glm::vec2& pos);
+	void addCustomGlyph(std::vector<FOutlineCurvePoints> outline, const glm::vec2& pos, const glm::vec2& size);
 	void markClean();
 	bool dirty();
+
 	const std::vector<FGlyphData>& text() const;
 	const std::vector<FSpriteInstByName>& sprites() const;
 	const std::vector<FRectInst>& rectangles() const;
 	const std::vector<LineChain>& lines() const;
+	const std::vector<FOutlineCurvePoints>& customGlyphsOutline() const;
+	const std::vector<FGlyphInstance>& customGlyphsInstances() const;
 private:
 	std::vector<FGlyphData> m_text;
 	std::vector<FSpriteInstByName> m_sprites;

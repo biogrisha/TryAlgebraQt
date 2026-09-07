@@ -75,7 +75,7 @@ void MeInfoGenerator::gen(MeListModel* model)
 		QSize size{ int(children[i]->getSize().x), int(children[i]->getSize().y) };
 		model->addMathElementInfo({ QString(meTable[i].first), pos, size });
 	}
-	image.save("D:/Projects/TryAlgebraQt/misc/atlas.png");
+	//image.save("D:/Projects/TryAlgebraQt/misc/atlas.png");
 	model->setImage(std::move(image));
 }
 
