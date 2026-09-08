@@ -11,9 +11,11 @@ namespace TryAlgebraCore
 		MeBracket(wchar_t ch);
 		virtual void calculate(VisualToolkit* visual_toolkit) override;
 		virtual void draw(VisualToolkit* visual_toolkit) override;
+		void setHeight(float height);
+		wchar_t ch() const { return m_ch; }
 	private:
 		wchar_t m_ch;
 		std::vector<FOutlineCurvePoints> m_points;
-		FGlyphInstance m_instance;
+		float m_height = 0;
 	};
 }

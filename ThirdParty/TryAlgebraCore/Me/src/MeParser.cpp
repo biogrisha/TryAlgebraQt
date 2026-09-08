@@ -64,6 +64,11 @@ namespace TryAlgebraCore
 			{
 				return MyRTTI::MakeTypedUnique<MeBracket>(L'[');
 			});
+		m_chFactory.emplace(L']',
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeBracket>(L']');
+			});
 
 	}
 

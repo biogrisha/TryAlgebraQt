@@ -3,9 +3,12 @@
 #include <Me/include/MeCharacter.h>
 #include <Me/include/MeGlobals.h>
 #include <Me/include/MeNewLine.h>
+#include <Me/include/MeBracket.h>
 #include <Helpers/include/MeHelpers.h>
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
+
 namespace TryAlgebraCore
 {
 	void MeContainer::calcLine(VisualToolkit* visual_toolkit, size_t end)
@@ -42,6 +45,37 @@ namespace TryAlgebraCore
 	void MeContainer::setDrawBackground(bool val)
 	{
 		m_drawBackground = val;
+	}
+
+	void MeContainer::adjustBrackets()
+	{
+		static const std::unordered_map<wchar_t, wchar_t> bracketsMap =
+		{
+			{L'[', L']'}
+		};
+		struct OpenBracketInfo
+		{
+			int iFrom = 0;
+			MeBracket* bracket = nullptr;
+			wchar_t expectedBr = L']';
+		};
+		std::vector<OpenBracketInfo> openBrackets;
+		for (int i = end_line_i; i < m_children.size(); ++i)
+		{
+			if (auto bracket = MyRTTI::Cast<MeBracket>(m_children[i].get()))
+			{
+				wchar_t ch = bracket->ch();
+				auto found = bracketsMap.find(ch);
+				if (found != bracketsMap.end())
+				{
+					//if found, then this is opening bracket
+					auto& pair = openBrackets.emplace_back();
+					pair.expectedBr = found->second;
+					pair.iFrom = i;
+					pair.bracket = bracket;
+				}
+			}
+		}
 	}
 
 	void MeContainer::draw(VisualToolkit* vt)

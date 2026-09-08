@@ -12,6 +12,33 @@ struct FOutlineCurvePoints
 	float b = 0;
 };
 
+struct OutlineBuilder
+{
+	void addPoint(float x, float y, bool newCurve = false)
+	{
+		outline.emplace_back();
+		outline.back().points[0] = { x,y };
+		if (outline.size() > 1 && !newCurve)
+		{
+			auto& points = outline[outline.size() - 2].points;
+			points[2] = { x,y };
+			points[1] = points[0] + points[2];
+			points[1] /= 2;
+		}
+	};
+
+	void closeCurve(float x, float y)
+	{
+		auto& points = outline[outline.size() - 1].points;
+		points[2] = { x,y };
+		points[1] = points[0] + points[2];
+		points[1] /= 2;
+
+	};
+
+	std::vector<FOutlineCurvePoints> outline;
+};
+
 
 struct FGlyphInstance
 {
