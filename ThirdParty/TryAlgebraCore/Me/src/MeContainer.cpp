@@ -32,7 +32,9 @@ namespace TryAlgebraCore
 			ch->setPosY(ch->getPos().y + next_line_y + max_bearing);
 			max_y_offset = std::max(max_y_offset, ch->getPos().y + ch->getSize().y);
 		}
-		next_line_y = max_y_offset;
+		float bracketOffset = 0;
+		adjustBrackets(bracketOffset);
+		next_line_y = max_y_offset + bracketOffset;
 		m_size.x = std::max(x, m_size.x);
 		m_size.y = next_line_y;
 		end_line_i = std::min(m_children.size(), end);
@@ -47,12 +49,13 @@ namespace TryAlgebraCore
 		m_drawBackground = val;
 	}
 
-	void MeContainer::adjustBrackets()
+	void MeContainer::adjustBrackets(float& bracketOffset)
 	{
 		static const std::unordered_map<wchar_t, wchar_t> bracketsMap =
 		{
 			{L'[', L']'}
 		};
+		const float bracketEnlargment = 3 * m_scaling_factor;
 		struct OpenBracketInfo
 		{
 			int iFrom = 0;
@@ -60,6 +63,7 @@ namespace TryAlgebraCore
 			wchar_t expectedBr = L']';
 		};
 		std::vector<OpenBracketInfo> openBrackets;
+		float minBracketY = next_line_y;
 		for (int i = end_line_i; i < m_children.size(); ++i)
 		{
 			if (auto bracket = MyRTTI::Cast<MeBracket>(m_children[i].get()))
@@ -74,7 +78,31 @@ namespace TryAlgebraCore
 					pair.iFrom = i;
 					pair.bracket = bracket;
 				}
+				else if (!openBrackets.empty())
+				{
+					if (openBrackets.back().expectedBr == ch)
+					{
+						float minY = std::numeric_limits<float>::max();
+						float maxY = std::numeric_limits<float>::lowest();
+						for (int iMe = openBrackets.back().iFrom; iMe < i; ++iMe)
+						{
+							minY = std::min(minY, m_children[iMe]->getPos().y);
+							maxY = std::max(maxY, m_children[iMe]->getPos().y + m_children[iMe]->getSize().y);
+						}
+						openBrackets.back().bracket->setPosY(minY - bracketEnlargment);
+						openBrackets.back().bracket->setHeight(maxY - minY + bracketEnlargment * 2);
+						bracket->setPosY(minY - bracketEnlargment);
+						bracket->setHeight(maxY - minY + bracketEnlargment * 2);
+						openBrackets.pop_back();
+						minBracketY = std::min(minBracketY, bracket->getPos().y);
+					}
+				}
 			}
+		}
+		bracketOffset = next_line_y - minBracketY;
+		for (int i = end_line_i; i < m_children.size(); ++i)
+		{
+			m_children[i]->setPosY(m_children[i]->getPos().y + bracketOffset);
 		}
 	}
 

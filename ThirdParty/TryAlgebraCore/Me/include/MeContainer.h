@@ -18,7 +18,7 @@ namespace TryAlgebraCore
 		void addEmptyLine();
 		void setDrawBackground(bool val);
 	private:
-		void adjustBrackets();
+		void adjustBrackets(float& bracketOffset);
 		float next_line_y = 0;
 		int end_line_i = 0;
 		bool m_drawBackground = false;

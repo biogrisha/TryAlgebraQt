@@ -16,6 +16,5 @@ namespace TryAlgebraCore
 	private:
 		wchar_t m_ch;
 		std::vector<FOutlineCurvePoints> m_points;
-		float m_height = 0;
 	};
 }

@@ -7,7 +7,7 @@ namespace TryAlgebraCore
 	MeCharacter::MeCharacter(wchar_t ch)
 		:m_ch(ch)
 	{
-		m_glyph.GlyphId.Glyph = (ch == L' ') ? L'M' : ch;
+		m_glyph.GlyphId.Glyph = (ch == L' ') ? L'I' : ch;
 	}
 
 	void MeCharacter::calculate(VisualToolkit* visual_toolkit)

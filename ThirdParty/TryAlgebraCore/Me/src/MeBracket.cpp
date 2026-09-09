@@ -5,6 +5,9 @@ namespace TryAlgebraCore
 
 	namespace {
 
+		constexpr float bracketWidth = 2.f;
+		constexpr float bracketDashLen = 5.f;
+
 		std::vector<FOutlineCurvePoints> createSquareBracket(
 			int height,
 			int dashLength = 30,
@@ -43,7 +46,31 @@ namespace TryAlgebraCore
 
 	void MeBracket::calculate(VisualToolkit* visual_toolkit)
 	{
-		m_points = createSquareBracket(40, 5, 2, 2, m_ch == L']');
+		//geometry calculated in setHeight
+		m_size = { bracketDashLen, 20 };
+		m_size *= m_scaling_factor;
+		m_bearing_y = m_size.y / 2;
+	}
+
+	void MeBracket::draw(VisualToolkit* visual_toolkit)
+	{
+		if (!m_points.empty())
+		{
+			visual_toolkit->mdocState->at(1).addCustomGlyph(m_points, m_pos, m_size);
+		}
+		else
+		{
+			visual_toolkit->mdocState->at(1)
+				.addCustomGlyph(
+					createSquareBracket(m_size.y, bracketDashLen, bracketWidth, bracketWidth, m_ch == L']'),
+					m_pos, m_size);
+
+		}
+	}
+
+	void MeBracket::setHeight(float height)
+	{
+		m_points = createSquareBracket(height, bracketDashLen, bracketWidth, bracketWidth, m_ch == L']');
 		float maxX = 0;
 		float maxY = 0;
 		for (auto& curve : m_points)
@@ -53,16 +80,6 @@ namespace TryAlgebraCore
 		}
 		m_size = { maxX, maxY };
 		m_bearing_y = m_size.y / 2;
-	}
-
-	void MeBracket::draw(VisualToolkit* visual_toolkit)
-	{
-		visual_toolkit->mdocState->at(1).addCustomGlyph(m_points, m_pos, m_size);
-	}
-
-	void MeBracket::setHeight(float height)
-	{
-		m_height = height;
 	}
 
 }
