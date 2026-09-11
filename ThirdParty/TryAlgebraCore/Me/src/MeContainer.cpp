@@ -32,9 +32,9 @@ namespace TryAlgebraCore
 			ch->setPosY(ch->getPos().y + next_line_y + max_bearing);
 			max_y_offset = std::max(max_y_offset, ch->getPos().y + ch->getSize().y);
 		}
-		float bracketOffset = 0;
-		adjustBrackets(bracketOffset);
-		next_line_y = max_y_offset + bracketOffset;
+		float maxY = 0;
+		adjustBrackets(maxY);
+		next_line_y = std::max(max_y_offset, maxY);
 		m_size.x = std::max(x, m_size.x);
 		m_size.y = next_line_y;
 		end_line_i = std::min(m_children.size(), end);
@@ -49,7 +49,7 @@ namespace TryAlgebraCore
 		m_drawBackground = val;
 	}
 
-	void MeContainer::adjustBrackets(float& bracketOffset)
+	void MeContainer::adjustBrackets(float& outMaxY)
 	{
 		static const std::unordered_map<wchar_t, wchar_t> bracketsMap =
 		{
@@ -64,6 +64,7 @@ namespace TryAlgebraCore
 		};
 		std::vector<OpenBracketInfo> openBrackets;
 		float minBracketY = next_line_y;
+		float maxBracketY = next_line_y;
 		for (int i = end_line_i; i < m_children.size(); ++i)
 		{
 			if (auto bracket = MyRTTI::Cast<MeBracket>(m_children[i].get()))
@@ -95,15 +96,17 @@ namespace TryAlgebraCore
 						bracket->setHeight(maxY - minY + bracketEnlargment * 2);
 						openBrackets.pop_back();
 						minBracketY = std::min(minBracketY, bracket->getPos().y);
+						maxBracketY = std::max(maxBracketY, bracket->getPos().y + bracket->getSize().y);
 					}
 				}
 			}
 		}
-		bracketOffset = next_line_y - minBracketY;
+		const float offset = next_line_y - minBracketY;
 		for (int i = end_line_i; i < m_children.size(); ++i)
 		{
-			m_children[i]->setPosY(m_children[i]->getPos().y + bracketOffset);
+			m_children[i]->setPosY(m_children[i]->getPos().y + offset);
 		}
+		outMaxY = maxBracketY + offset;
 	}
 
 	void MeContainer::draw(VisualToolkit* vt)

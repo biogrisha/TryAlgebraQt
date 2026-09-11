@@ -18,4 +18,6 @@ public slots:
 	void openDocument(const QUrl& url);
 	void newDocument(const QUrl& url);
 	void saveDocument();
+	void openBindings() const;
+	void compile() const;
 };

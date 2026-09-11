@@ -17,3 +17,7 @@ MeListModel* ApplicationModel::meListModel()
 	return m_meListModel;
 }
 
+TryAlgebraCore::KeyBinding* ApplicationModel::keyBinding()
+{
+	return &m_keyBinding;
+}

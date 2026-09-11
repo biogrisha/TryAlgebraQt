@@ -8,6 +8,8 @@
 #include <QTextStream>
 #include <QString>
 #include <string>
+#include <QStandardPaths>
+#include <QDir>
 
 MenuControl::MenuControl(QObject* parent)
 	: QObject(parent)
@@ -83,3 +85,70 @@ void MenuControl::newDocument(const QUrl& url)
 	docModel->setCurrentDocument(url.toLocalFile());
 }
 
+void MenuControl::openBindings() const
+{
+	auto docModel = AppGlobal::appMod->docModel();
+	const QString configDir =
+		QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+
+	QDir().mkpath(configDir);
+
+	const QString filePath = QDir(configDir).filePath("keybindings.mdoc");
+	if (docModel->isDocumentOpened(filePath))
+	{
+		docModel->setCurrentDocument(filePath);
+		return;
+	}
+
+	QString text;
+	if (!QFile::exists(filePath)) {
+		QFile file(filePath);
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+			file.write("");
+		}
+	}
+	else
+	{
+		QFile file(filePath);
+
+		if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		{
+			qCritical() << "Failed to open file:" << filePath;
+			return;
+		}
+
+		QTextStream stream(&file);
+
+		stream.setEncoding(QStringConverter::Utf8);
+
+		text = stream.readAll();
+	}
+	DocumentInfo docInfo(filePath, std::make_unique<TryAlgebraCore::MathDocument>());
+	docInfo.meDoc()->setText(text.toStdWString());
+	docModel->addDocInfo(std::move(docInfo));
+	docModel->setCurrentDocument(filePath);
+}
+
+void MenuControl::compile() const
+{
+	const QString configDir =
+		QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+
+	const QString filePath = QDir(configDir).filePath("keybindings.mdoc");
+	QFile file(filePath);
+
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		qCritical() << "Failed to open file:" << filePath;
+		return;
+	}
+
+	QTextStream stream(&file);
+
+	stream.setEncoding(QStringConverter::Utf8);
+
+
+	QString keyBindingConfig = stream.readAll();
+
+	AppGlobal::appMod->keyBinding()->setConfiguration(keyBindingConfig.toStdWString());
+}

@@ -35,6 +35,8 @@ qt_add_qml_module(Application
         Modules/MeInfoGenerator.cpp
         Modules/ImageProvider.h
         Modules/ImageProvider.cpp
+        Actions/Actions.h
+        Actions/Actions.cpp
 )
 
 target_link_libraries(Application

@@ -13,7 +13,11 @@ int main(int argc, char* argv[])
 	//system("cmd /c \"cd /d D:/Projects/TryAlgebraQt/TryAlgebraQt/ThirdParty/MathDocumentRendering/MdRenderingAssets/Shader/ && compile.bat\"");
 	//system("cmd /c \"cd /d C:/dev/TryAlgebraQt/ThirdParty/MathDocumentRendering/MdRenderingAssets/Shader/ && compile.bat\"");
 
+
 	QGuiApplication app(argc, argv);
+	QCoreApplication::setOrganizationName("TryAlgebra");
+	QCoreApplication::setApplicationName("TryAlgebra");
+
 	QVulkanInstance inst;
 	inst.setApiVersion(QVersionNumber(1, 4));
 	//inst.setLayers({

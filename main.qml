@@ -24,9 +24,10 @@ Item {
         id: tabsControl
     }
 
-    //============== Menu Bar =================
+     //============== Menu Bar =================
     MenuBar {
-        id:menuBar
+        id: menuBar
+
         Menu {
             title: qsTr("File")
             Action {
@@ -53,6 +54,47 @@ Item {
                     menuControl.saveDocument()
                 }
             }
+            Action {
+                text: qsTr("Bindings")
+                onTriggered: {
+                    menuControl.openBindings()
+                    if(!documentLoader.source.href)
+                    {
+                        documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
+                    }
+                }
+            }
+        }
+    }
+
+    Button {
+        id: compileButton
+        text: qsTr("Compile")
+
+        width: 90
+        height: menuBar.height - 4
+
+        anchors.right: parent.right
+        anchors.rightMargin: 4
+        anchors.verticalCenter: menuBar.verticalCenter
+
+        background: Rectangle {
+            radius: 3
+            color: compileButton.down
+                   ? "#d6a900"
+                   : "#f0c419"
+        }
+
+        contentItem: Text {
+            text: compileButton.text
+            font: compileButton.font
+            color: "#202020"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
+
+        onClicked: {
+            menuControl.compile()
         }
     }
 
