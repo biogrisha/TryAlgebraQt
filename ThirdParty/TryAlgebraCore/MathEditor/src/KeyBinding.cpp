@@ -42,4 +42,20 @@ namespace TryAlgebraCore
 			m_bindings.emplace(left, right);
 		}
 	}
+
+	void KeyBinding::addKey(wchar_t ch)
+	{
+		m_currentCommand += ch;
+	}
+
+	std::optional<std::wstring> KeyBinding::runCommand()
+	{
+		auto found = m_bindings.find(m_currentCommand);
+		m_currentCommand.clear();
+		if (found != m_bindings.end())
+		{
+			return found->second;
+		}
+		return std::nullopt;
+	}
 }

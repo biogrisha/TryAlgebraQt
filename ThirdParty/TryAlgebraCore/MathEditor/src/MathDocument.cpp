@@ -65,6 +65,29 @@ namespace TryAlgebraCore
 		m_history.clearRedo();
 	}
 
+	void MathDocument::applyKeyBinding(std::wstring str)
+	{
+		size_t pos = 0;
+
+		auto selectedText = getSelectedText();
+		std::wstring mePaste = L'\\' + MeNames::spritePaste + L"\\\\";
+		std::wstring meCursor = L'\\' + MeNames::spriteCursorPlacement + L"\\\\";
+		while ((pos = str.find(mePaste, pos)) != std::wstring::npos) {
+			str.replace(pos, mePaste.size(), selectedText);
+			pos += selectedText.size();
+		}
+		pos = 0;
+		std::optional<uint64_t> cursorOffset;
+		if (auto pos = str.find(meCursor); pos != std::wstring::npos)
+		{
+			str.replace(pos, meCursor.size(), L"");
+			cursorOffset = str.size() - pos;
+		}
+		type(std::move(str));
+		LeafPos& from = std::get<LeafPos>(m_selection_start.back());
+		setCaretPos(from.pos - cursorOffset.value());
+	}
+
 	void MathDocument::typeByName(const std::wstring& str)
 	{
 		auto& meTable = MeNames::getMeTable();
@@ -215,6 +238,13 @@ namespace TryAlgebraCore
 		m_selection_end.clear();
 		m_selection_end.push_back(LeafPos{ m_textBuffer.getSize() });
 		markDirty(DirtyState::Selection);
+	}
+
+	void MathDocument::setCaretPos(int posInText)
+	{
+		calcLinesAboveBelow(m_textBuffer.getLineNumber(posInText).value());
+		m_selection_start = m_selection_end = MeHelpers::textPosToMePath(m_container.get(), posInText).value();
+		markDirty();
 	}
 
 	void MathDocument::copy()

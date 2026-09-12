@@ -25,6 +25,7 @@ namespace TryAlgebraCore
 		void setDocSize(const glm::vec2& size) { m_docSize = size; }
 		void setText(const std::wstring& str);
 		void type(std::wstring str);
+		void applyKeyBinding(std::wstring str);
 		void typeByName(const std::wstring& str);
 		void delBackward();
 		void delForward();
@@ -32,6 +33,7 @@ namespace TryAlgebraCore
 		void updateSelection(const glm::vec2& pos);
 		void stopSelection();
 		void selectAll();
+		void setCaretPos(int posInText);
 		void copy();
 		void cut();
 		void paste();

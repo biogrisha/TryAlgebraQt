@@ -37,6 +37,10 @@ Rectangle {
 			docControl.keyInput(event.key, event.text, event.modifiers)
 		}
 
+		Keys.onReleased: (event) => {
+			docControl.keyReleased(event.key)
+		}
+
 		MouseArea { 
 			acceptedButtons: Qt.LeftButton | Qt.RightButton
 			anchors.fill: parent

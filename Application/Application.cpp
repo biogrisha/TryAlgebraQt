@@ -1,5 +1,4 @@
 #include "Application.h"
-#include "Application.h"
 #include <qqmlengine.h>
 #include <QQuickWindow>
 #include <QVulkanInstance>
@@ -15,6 +14,7 @@
 #include <AppGlobal.h>
 #include <Modules/MeInfoGenerator.h>
 #include <Modules/ImageProvider.h>
+#include <Actions/Actions.h>
 
 Application::~Application()
 {
@@ -45,6 +45,8 @@ Application::Application(QObject* parent)
 
 	//initializing freetype
 	m_ft_wrap.Init(logicalDpiX, logicalDpiY);
+
+	Actions::compile();
 }
 
 ApplicationModel* Application::applicationModel()

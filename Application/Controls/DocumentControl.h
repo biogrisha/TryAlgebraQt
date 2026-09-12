@@ -33,6 +33,8 @@ public slots:
 	//Handles key input
 	void keyInput(int key, QString text, int modifiers);
 
+	void keyReleased(int key);
+
 	//Handles signal when math document is ready to render
 	void canvasReady();
 

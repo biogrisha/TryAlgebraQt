@@ -37,6 +37,13 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 
 	bool bShift = modifiers == Qt::Modifier::SHIFT;
 	bool bCtrl = modifiers == Qt::Modifier::CTRL;
+	bool altPressed = modifiers == Qt::Modifier::ALT;
+
+	if (altPressed && !text.isEmpty())
+	{
+		AppGlobal::application->applicationModel()->keyBinding()->addKey(text.toStdWString()[0]);
+		return;
+	}
 	switch (key) {
 	case Qt::Key_Left:
 		m_currDoc->step(TryAlgebraCore::StepDir::left, bShift);
@@ -139,6 +146,20 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 			updateElements(true, true, true);
 		}
 		break;
+	}
+}
+
+void DocumentControl::keyReleased(int key)
+{
+
+	if (key == Qt::Key_Alt)
+	{
+		if (auto resOpt = AppGlobal::application->applicationModel()->keyBinding()->runCommand())
+		{
+			m_currDoc->applyKeyBinding(std::move(resOpt.value()));
+			m_currDoc->draw();
+			updateElements(true, true, true);
+		}
 	}
 }
 
