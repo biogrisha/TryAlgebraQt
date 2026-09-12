@@ -176,16 +176,30 @@ Item {
     }
 
     Rectangle {
+        id: documentArea
+
         anchors.top: menuBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: tabsArea.right
-        anchors.right: parent.right
-        anchors.rightMargin: 20
+        anchors.right: fileSystemView.left
+        anchors.rightMargin: 10
 
         Loader {
             id: documentLoader
             anchors.fill: parent
             focus: true
         }
+    }
+
+    FileSystemView {
+        id: fileSystemView
+
+        width: 250
+
+        anchors.top: menuBar.bottom
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+
+        model: UserApplication.applicationModel().fileSystemModel()
     }
 }

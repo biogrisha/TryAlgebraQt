@@ -11,6 +11,7 @@ qt_add_qml_module(Application
     QML_FILES
         MathDocumentWrap.qml
         MeListSearchBar.qml
+        FileSystemView.qml
     SOURCES
         AppGlobal.h
         Application.h
