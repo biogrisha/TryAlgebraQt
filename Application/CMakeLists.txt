@@ -28,6 +28,8 @@ qt_add_qml_module(Application
         Controls/TabsControl.cpp
         Controls/FilesControl.h
         Controls/FilesControl.cpp
+        Controls/FileSystemViewControl.h
+        Controls/FileSystemViewControl.cpp
         Models/MeListModel.h
         Models/MeListModel.cpp
         Models/DocumentsModel.h
