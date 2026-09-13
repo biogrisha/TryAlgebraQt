@@ -12,6 +12,8 @@ class ApplicationModel : public QObject
 		QML_ELEMENT
 public:
 	ApplicationModel(QObject* parent = nullptr);
+	void setCurrentFolder(QString currentFolder);
+
 signals:
 	void onNewDoc();
 
@@ -20,9 +22,13 @@ public slots:
 	DocumentsModel* docModel();
 	TryAlgebraCore::KeyBinding* keyBinding();
 	QFileSystemModel* fileSystemModel();
+	QStringList recentFolders() const;
+	QModelIndex fileSystemRootIndex() const;
 private:
 	MeListModel* m_meListModel;
 	DocumentsModel* m_docModel;
 	TryAlgebraCore::KeyBinding m_keyBinding;
 	QFileSystemModel* m_fileSystemModel;
+	QString m_currentFolder;
+	QModelIndex m_fileSystemRootIndex;
 };

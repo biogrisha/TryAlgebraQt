@@ -78,7 +78,7 @@ namespace TryAlgebraCore
 		int m_line_to = 0;
 		bool m_snap_to_end = false;
 		VisualToolkit m_visual_toolkit;
-		std::wstring m_copiedText;
+		static inline std::wstring m_copiedText;
 		DocumentHistory m_history;
 	};
 

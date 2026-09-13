@@ -12,6 +12,7 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: 6
         model: UserApplication.applicationModel().fileSystemModel()
+        rootIndex:UserApplication.applicationModel().fileSystemRootIndex()
         clip: true
 
         delegate: Rectangle {

@@ -33,7 +33,8 @@ public slots:
 	MenuControl* getMenu();
 
 	ApplicationModel* applicationModel();
-	void projectSelected(const QString& path);
+	void projectSelectedByUrl(const QUrl& url);
+	void projectSelected(QString folderPath);
 private:
 
 	MenuControl* m_menu_control = nullptr;

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
 
 Rectangle {
     id: root
@@ -10,14 +11,6 @@ Rectangle {
 
     color: "#947fa0"
     radius: 6
-
-    ListModel {
-        id: projectModel
-
-        ListElement { path: "../../folder1" }
-        ListElement { path: "../../folder2" }
-        ListElement { path: "../../folder3" }
-    }
 
     Button {
         id: closeButton
@@ -61,9 +54,7 @@ Rectangle {
                 text: "Open folder"
 
                 onClicked: {
-                    console.log("Open folder clicked")
-                    UserApplication.projectSelected("")
-                    root.Window.window.close()
+                    folderDialog.open()
                 }
             }
         }
@@ -82,21 +73,17 @@ Rectangle {
                     margins: 12
                 }
 
-                model: projectModel
+                model: UserApplication.applicationModel().recentFolders()
                 spacing: 2
                 clip: true
 
                 delegate: Rectangle {
-                    required property string path
-                    required property int index
+                    required property string modelData
 
                     width: projectList.width
                     height: 22
 
                     color: {
-                        if (projectList.currentIndex === index)
-                            return "#c7c2cc"
-
                         if (mouseArea.containsMouse)
                             return "#eeeeee"
 
@@ -112,7 +99,7 @@ Rectangle {
                             verticalCenter: parent.verticalCenter
                         }
 
-                        text: path
+                        text: modelData
                         color: "#222222"
                         font.pixelSize: 16
                     }
@@ -124,16 +111,23 @@ Rectangle {
                         hoverEnabled: true
 
                         onClicked: {
-                            projectList.currentIndex = index
-                            console.log("Selected:", path)
-                        }
-
-                        onDoubleClicked: {
-                            console.log("Open project:", path)
+                            UserApplication.projectSelected(modelData)
+                            root.Window.window.close()
                         }
                     }
                 }
             }
+        }
+    }
+
+    FolderDialog {
+        id: folderDialog
+
+        title: "Select project folder"
+
+        onAccepted: {
+            UserApplication.projectSelectedByUrl(selectedFolder)
+            root.Window.window.close()
         }
     }
 }

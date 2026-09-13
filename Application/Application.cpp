@@ -1,4 +1,6 @@
 #include "Application.h"
+#include "Application.h"
+#include "Application.h"
 #include <qqmlengine.h>
 #include <QQuickWindow>
 #include <QVulkanInstance>
@@ -54,8 +56,14 @@ ApplicationModel* Application::applicationModel()
 	return m_app_model;
 }
 
-void Application::projectSelected(const QString& path)
+void Application::projectSelectedByUrl(const QUrl& url)
 {
+	projectSelected(url.toLocalFile());
+}
+
+void Application::projectSelected(QString folderPath)
+{
+	applicationModel()->setCurrentFolder(std::move(folderPath));
 	m_vulkanInst = std::make_unique<QVulkanInstance>();
 	m_vulkanInst->setApiVersion(QVersionNumber(1, 4));
 	//inst.setLayers({
