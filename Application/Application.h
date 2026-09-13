@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <FreeTypeWrap.h>
+#include <QQuickView>
 
 class MenuControl;
 class DocumentControl;
@@ -25,12 +26,14 @@ public:
 	//Returns control to manipulate files
 	FilesControl* getFilesControl();
 
-	void generateMeAtlas(QQmlEngine* engine);
+	void generateMeAtlas();
+	void setQmlEngine(QQmlEngine* engine);
 public slots:
 	//Returns menu control
 	MenuControl* getMenu();
 
 	ApplicationModel* applicationModel();
+	void projectSelected(const QString& path);
 private:
 
 	MenuControl* m_menu_control = nullptr;
@@ -39,4 +42,7 @@ private:
 	ApplicationModel* m_app_model = nullptr;
 	//free type module
 	FFreeTypeWrap m_ft_wrap;
+	QQmlEngine* m_qmlEngine = nullptr;
+	std::unique_ptr<QVulkanInstance> m_vulkanInst;
+	std::unique_ptr<QQuickView> m_mainWindow;
 };

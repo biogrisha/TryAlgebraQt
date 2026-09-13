@@ -1,8 +1,8 @@
 #pragma once
-#include <qqml.h>
 #include <QObject>
 #include <Models/MeListModel.h>
 #include <Models/DocumentsModel.h>
+#include <qqml.h>
 #include <MathEditor/include/KeyBinding.h>
 #include <QFileSystemModel>
 

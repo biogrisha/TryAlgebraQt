@@ -12,6 +12,8 @@ qt_add_qml_module(Application
         MathDocumentWrap.qml
         MeListSearchBar.qml
         FileSystemView.qml
+        OpenProjectDialog.qml
+
     SOURCES
         AppGlobal.h
         Application.h
@@ -53,8 +55,11 @@ target_link_libraries(Application
     TryAlgebraCore
 )
 
-target_include_directories(Application BEFORE PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/Controls
-    ${CMAKE_CURRENT_SOURCE_DIR}/Models
+target_include_directories(Application
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Controls
+        ${CMAKE_CURRENT_SOURCE_DIR}/Models
 )

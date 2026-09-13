@@ -5,20 +5,13 @@ import com.Application
 Rectangle {
     id: root
 
-    property alias model: tree.model
-
     color: "#252525"
-
-    function setRoot(path) {
-        tree.rootIndex = tree.model.index(path)
-    }
-
     TreeView {
         id: tree
 
         anchors.fill: parent
         anchors.margins: 6
-
+        model: UserApplication.applicationModel().fileSystemModel()
         clip: true
 
         delegate: Rectangle {

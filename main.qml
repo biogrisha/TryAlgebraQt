@@ -199,7 +199,5 @@ Item {
         anchors.top: menuBar.bottom
         anchors.bottom: parent.bottom
         anchors.right: parent.right
-
-        model: UserApplication.applicationModel().fileSystemModel()
     }
 }
