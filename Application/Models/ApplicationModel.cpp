@@ -47,13 +47,18 @@ QModelIndex ApplicationModel::fileSystemRootIndex() const
 	return m_fileSystemRootIndex;
 }
 
+QString ApplicationModel::projectFolder() const
+{
+	return m_projectFolder;
+}
+
 void ApplicationModel::setCurrentFolder(QString currentFolder)
 {
-	m_currentFolder = std::move(currentFolder);
-	m_fileSystemRootIndex = m_fileSystemModel->setRootPath(m_currentFolder);
+	m_projectFolder = std::move(currentFolder);
+	m_fileSystemRootIndex = m_fileSystemModel->setRootPath(m_projectFolder);
 	QSettings settings;
 	QStringList recentFolders = settings.value(SettingKeys::RecentFolders).toStringList();
-	recentFolders.removeAll(m_currentFolder);
-	recentFolders.append(m_currentFolder);
+	recentFolders.removeAll(m_projectFolder);
+	recentFolders.append(m_projectFolder);
 	settings.setValue(SettingKeys::RecentFolders, recentFolders);
 }

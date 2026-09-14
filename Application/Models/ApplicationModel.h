@@ -24,11 +24,12 @@ public slots:
 	QFileSystemModel* fileSystemModel();
 	QStringList recentFolders() const;
 	QModelIndex fileSystemRootIndex() const;
+	QString projectFolder() const;
 private:
 	MeListModel* m_meListModel;
 	DocumentsModel* m_docModel;
 	TryAlgebraCore::KeyBinding m_keyBinding;
 	QFileSystemModel* m_fileSystemModel;
-	QString m_currentFolder;
+	QString m_projectFolder;
 	QModelIndex m_fileSystemRootIndex;
 };

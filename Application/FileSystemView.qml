@@ -5,15 +5,42 @@ import com.Application
 Rectangle {
     id: root
 
+    FileSystemViewControl {
+        id: control
+    }
+
     color: "#252525"
+
+    Text {
+        id: rootPathLabel
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 8
+
+        text: UserApplication.applicationModel().projectFolder()
+
+        color: "#E8E8E8"
+        font.pixelSize: 13
+        font.bold: true
+
+        elide: Text.ElideMiddle
+    }
+
     TreeView {
         id: tree
 
-        anchors.fill: parent
+        anchors.top: rootPathLabel.bottom
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+
         anchors.margins: 6
 
         model: UserApplication.applicationModel().fileSystemModel()
         rootIndex: UserApplication.applicationModel().fileSystemRootIndex()
+        selectionModel: ItemSelectionModel {}
 
         clip: true
 
@@ -36,9 +63,24 @@ Rectangle {
             required property bool expanded
             required property bool hasChildren
 
-            color: mouseArea.containsMouse
-                   ? "#3A3A3A"
-                   : row % 2 === 0 ? "#292929" : "#252525"
+            function getRowColor(hovered, selected) {
+                if (hovered && selected)
+                    return "#555555"
+
+                if (hovered)
+                    return "#3A3A3A"
+
+                if (selected)
+                    return "#444444"
+
+                return "#292929"
+            }
+
+            color: getRowColor(
+                mouseArea.containsMouse,
+                tree.selectionModel.currentIndex ===
+                    tree.index(rowItem.row, rowItem.column)
+            )
 
             radius: 3
 
@@ -47,7 +89,7 @@ Rectangle {
 
                 x: 8 + depth * 18
                 spacing: 6
-
+                
                 Text {
                     width: 12
 
@@ -80,6 +122,9 @@ Rectangle {
                 onClicked: {
                     if (rowItem.hasChildren)
                         tree.toggleExpanded(rowItem.row)
+                    tree.selectionModel.setCurrentIndex(tree.index(rowItem.row, rowItem.column),
+                        ItemSelectionModel.NoUpdate)
+                    control.selectFile(tree.index(rowItem.row, rowItem.column));
                 }
             }
         }

@@ -49,8 +49,6 @@ public slots:
 	//Handles item size update
 	void onResized(const QSize& new_size);
 
-	float getScrollHandleSize();
-
 	void scrollY(bool Up);
 
 	void moveScrollHandle(float newPos);
@@ -81,7 +79,7 @@ private:
 	bool m_isCanvasReady = false;
 	bool m_bLmbDown = false;
 
-	TryAlgebraCore::MathDocument* m_currDoc;
+	TryAlgebraCore::MathDocument* m_currDoc = nullptr;
 	boost::signals2::connection m_onScrollDataChangedConn;
 };
 

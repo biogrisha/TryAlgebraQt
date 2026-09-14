@@ -180,6 +180,10 @@ bool DocumentsModel::isDocumentOpened(const QString& filePath)
 
 DocumentInfo* DocumentsModel::currDoc()
 {
+	if (!curDocPath())
+	{
+		return nullptr;
+	}
 	return docInfo(curDocPath().value());
 }
 

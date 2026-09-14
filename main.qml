@@ -12,7 +12,6 @@ Item {
 	Component.onCompleted: 
     { 
         menuControl = UserApplication.getMenu()
-        documentLoader.source = ""
     }
 
     id: window
@@ -58,10 +57,6 @@ Item {
                 text: qsTr("Bindings")
                 onTriggered: {
                     menuControl.openBindings()
-                    if(!documentLoader.source.href)
-                    {
-                        documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
-                    }
                 }
             }
         }
@@ -108,17 +103,9 @@ Item {
             switch (reason) { 
                 case "openFile":
                     menuControl.openDocument(fileDialog.selectedFile)
-                    if(!documentLoader.source.href)
-                    {
-                        documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
-                    }
                     break 
                 case "newFile":
                     menuControl.newDocument(fileDialog.selectedFile)
-                    if(!documentLoader.source.href)
-                    {
-                        documentLoader.source = "/qt/qml/com/Application/MathDocumentWrap.qml"
-                    }
                 break 
             }
         }
@@ -156,7 +143,7 @@ Item {
 			    onClicked:
 			    {
 				    tabsControl.selectTab(button.index)
-                    documentLoader.item.mathCanvas.forceActiveFocus()
+                    documentArea.mathCanvas.forceActiveFocus()
 			    }
                 Button {
                     id: closeTabButton
@@ -175,7 +162,7 @@ Item {
 	    }
     }
 
-    Rectangle {
+    MathDocumentWrap {
         id: documentArea
 
         anchors.top: menuBar.bottom
@@ -183,12 +170,6 @@ Item {
         anchors.left: tabsArea.right
         anchors.right: fileSystemView.left
         anchors.rightMargin: 10
-
-        Loader {
-            id: documentLoader
-            anchors.fill: parent
-            focus: true
-        }
     }
 
     FileSystemView {

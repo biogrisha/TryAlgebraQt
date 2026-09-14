@@ -13,7 +13,6 @@
 DocumentControl::DocumentControl()
 {
 	DocumentsModel* docModel = AppGlobal::appMod->docModel();
-	onCurrentDocChanged();
 	QObject::connect(docModel, &DocumentsModel::onCurrentDocChanged, this, &DocumentControl::onCurrentDocChanged);
 	QObject::connect(docModel, &DocumentsModel::onBeforeDocRemoved, this, &DocumentControl::onBeforeDocRemoved);
 }
@@ -171,11 +170,6 @@ void DocumentControl::canvasReady()
 	QObject::connect(m_docCanvas, &MathDocumentCanvas::onResized, this, &DocumentControl::onResized);
 	m_isCanvasReady = true;
 	m_canvasState = m_docCanvas->getCanvasState();
-	VisualToolkit vt;
-	vt.ft = AppGlobal::application->getFreeTypeWrap();
-	vt.mdocState = m_canvasState;
-	m_currDoc->setVisualToolkit(vt);
-	m_currDoc->draw();
 }
 
 void DocumentControl::addMeByName(const QString& meName)
@@ -234,11 +228,7 @@ void DocumentControl::onResized(const QSize& new_size)
 	m_currDoc->markDirty();
 	m_currDoc->draw();
 	m_docCanvas->update();
-}
 
-float DocumentControl::getScrollHandleSize()
-{
-	return 0.7f;
 }
 
 void DocumentControl::scrollY(bool Up)
