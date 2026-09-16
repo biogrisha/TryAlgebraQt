@@ -29,24 +29,6 @@ namespace NewTrs
 		std::vector<int> compOrder;
 	};
 
-	class Parser
-	{
-	public:
-		Parser(const std::string& str)
-			: m_str(str)
-		{
-		}
-
-		void parse();
-
-		void consumeTermName();
-
-		Term* m_current_term = nullptr;
-		Term* m_parent_term = nullptr;
-		const std::string& m_str;
-		int m_pos = 0;
-	};
-
 	struct Identity
 	{
 		std::map<std::vector<int>, int> variablesOrder;

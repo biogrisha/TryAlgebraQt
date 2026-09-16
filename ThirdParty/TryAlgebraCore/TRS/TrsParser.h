@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "BinaryOperatorParser.h"
+#include "TermTransformer.h"
 
 namespace TryAlgebraCore::Trs
 {

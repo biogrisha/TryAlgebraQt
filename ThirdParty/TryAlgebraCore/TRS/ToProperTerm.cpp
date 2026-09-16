@@ -21,10 +21,6 @@ namespace TryAlgebraCore::Trs
 		markVariables(m_terms);
 		m_transformer.applyAll(equation.rhs);
 		m_transformer.applyAll(m_terms);
-		/*if (true)
-		{
-			return L"";
-		}*/
 		const auto& ids = m_trsIdentitiesParser.identities();
 
 		std::vector<NewTrs::Identity> trsIdentities;

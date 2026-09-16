@@ -1,4 +1,4 @@
-#include "BinaryOperatorParser.h"
+#include "TermTransformer.h"
 #include <Me/include/MeGlobals.h>
 
 namespace TryAlgebraCore::Trs

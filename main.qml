@@ -9,6 +9,7 @@ import QtQuick.Controls.Basic
 import QtQuick.Dialogs
 
 Item {
+
 	Component.onCompleted: 
     { 
         menuControl = UserApplication.getMenu()
@@ -155,7 +156,7 @@ Item {
                     onClicked:
                     {
                         tabsControl.closeTab(button.index)
-                        documentLoader.item.mathCanvas.forceActiveFocus()
+                        documentArea.mathCanvas.forceActiveFocus()
                     }
                 }
 		    }

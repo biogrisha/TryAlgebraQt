@@ -35,10 +35,12 @@ Rectangle {
 
 		Keys.onPressed: (event) => {
 			docControl.keyInput(event.key, event.text, event.modifiers)
+			event.accepted = true
 		}
 
 		Keys.onReleased: (event) => {
 			docControl.keyReleased(event.key)
+			event.accepted = true
 		}
 
 		MouseArea { 

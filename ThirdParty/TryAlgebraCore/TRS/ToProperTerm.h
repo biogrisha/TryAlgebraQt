@@ -4,7 +4,7 @@
 #include <vector>
 #include "PatternMatchingHelpers.h"
 #include <MathEditor/include/TextBuffer.h>
-#include "BinaryOperatorParser.h"
+#include "TermTransformer.h"
 #include "Trs.h"
 #include "TrsParser.h"
 

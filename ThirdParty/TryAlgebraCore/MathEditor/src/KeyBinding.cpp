@@ -1,4 +1,6 @@
 #include <MathEditor/include/KeyBinding.h>
+#include <algorithm>
+#include <cwctype>
 
 namespace TryAlgebraCore
 {
@@ -39,13 +41,17 @@ namespace TryAlgebraCore
 
 		if (!left.empty() && !right.empty())
 		{
+			std::transform(
+				left.begin(), left.end(), left.begin(),
+				[](wchar_t c) { return std::towlower(c); }
+			);
 			m_bindings.emplace(left, right);
 		}
 	}
 
 	void KeyBinding::addKey(wchar_t ch)
 	{
-		m_currentCommand += ch;
+		m_currentCommand += std::towlower(ch);
 	}
 
 	std::optional<std::wstring> KeyBinding::runCommand()

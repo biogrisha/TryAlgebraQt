@@ -34,11 +34,11 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 	vt.ft = AppGlobal::application->getFreeTypeWrap();
 	vt.mdocState = m_canvasState;
 
-	bool bShift = modifiers == Qt::Modifier::SHIFT;
-	bool bCtrl = modifiers == Qt::Modifier::CTRL;
-	bool altPressed = modifiers == Qt::Modifier::ALT;
+	bool bShift = Qt::Modifiers(modifiers).testFlag(Qt::Modifier::SHIFT);
+	bool bCtrl = Qt::Modifiers(modifiers).testFlag(Qt::Modifier::CTRL);
+	bool altPressed = Qt::Modifiers(modifiers).testFlag(Qt::Modifier::ALT);
 
-	if (altPressed && !text.isEmpty())
+	if (bCtrl && altPressed && !text.isEmpty())
 	{
 		AppGlobal::application->applicationModel()->keyBinding()->addKey(text.toStdWString()[0]);
 		return;
@@ -151,7 +151,7 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 void DocumentControl::keyReleased(int key)
 {
 
-	if (key == Qt::Key_Alt)
+	if (key == Qt::Key_Control)
 	{
 		if (auto resOpt = AppGlobal::application->applicationModel()->keyBinding()->runCommand())
 		{

@@ -59,14 +59,16 @@ add_library(TryAlgebraCore STATIC
 	TRS/MeParserGeneric.cpp
 	TRS/ToProperTerm.h
 	TRS/ToProperTerm.cpp
-	TRS/BinaryOperatorParser.h
-	TRS/BinaryOperatorParser.cpp
+	TRS/TermTransformer.h
+	TRS/TermTransformer.cpp
 	TRS/TokenMatcher.h
 	TRS/TokenMatcher.cpp
 	TRS/BracketsParser.h
 	TRS/BracketsParser.cpp
 	TRS/TrsParser.h
 	TRS/TrsParser.cpp
+	TRS/FormulasSystem.h
+	TRS/FormulasSystem.cpp
 )
 
 # Set include directories
