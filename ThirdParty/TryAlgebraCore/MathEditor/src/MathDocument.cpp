@@ -251,8 +251,10 @@ namespace TryAlgebraCore
 
 	void MathDocument::setCaretPos(int posInText)
 	{
+		int lineFrom = m_lineFrom;
 		calcLinesAboveBelow(m_textBuffer.getLineNumber(posInText).value());
 		m_selection_start = m_selection_end = MeHelpers::textPosToMePath(m_container.get(), posInText).value();
+		m_lineFrom = lineFrom;
 		markDirty();
 	}
 

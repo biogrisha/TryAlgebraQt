@@ -69,6 +69,8 @@ add_library(TryAlgebraCore STATIC
 	TRS/TrsParser.cpp
 	TRS/FormulasSystem.h
 	TRS/FormulasSystem.cpp
+	TRS/FileParser.h
+	TRS/FileParser.cpp
 )
 
 # Set include directories
