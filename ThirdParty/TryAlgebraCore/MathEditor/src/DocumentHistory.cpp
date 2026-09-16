@@ -2,20 +2,20 @@
 
 namespace TryAlgebraCore
 {
-	void DocumentHistory::recordDeletion(const MePath& pos, std::wstring text)
+	void DocumentHistory::recordDeletion(const MePath& pos, const MePath& invPos, std::wstring text)
 	{
 		std::vector<InvAction>* buffer = (m_undoMode ? &m_undoHistory : &m_redoHistory);
-		buffer->push_back(InvertDelete{ pos, std::move(text) });
+		buffer->push_back(InvertDelete{ pos, invPos, std::move(text) });
 	}
-	void DocumentHistory::recordInsertion(const MePath& pos, int size)
+	void DocumentHistory::recordInsertion(const MePath& pos, const MePath& invPos, int size)
 	{
 		std::vector<InvAction>* buffer = (m_undoMode ? &m_undoHistory : &m_redoHistory);
-		buffer->push_back(InvertInsert{ pos, size });
+		buffer->push_back(InvertInsert{ pos, invPos, size });
 	}
-	void DocumentHistory::recordReplace(const MePath& pos, int insertSize, std::wstring deleteString)
+	void DocumentHistory::recordReplace(const MePath& pos, const MePath& invPos, int insertSize, std::wstring deleteString)
 	{
 		std::vector<InvAction>* buffer = (m_undoMode ? &m_undoHistory : &m_redoHistory);
-		buffer->push_back(InvertReplace{ pos, insertSize, deleteString });
+		buffer->push_back(InvertReplace{ pos, invPos, insertSize, deleteString });
 	}
 
 	void DocumentHistory::setUndoMode(bool val)
