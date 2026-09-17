@@ -8,14 +8,23 @@ namespace TryAlgebraCore::Trs
 {
 	struct ParsingRules
 	{
+		std::wstring importKeyword;
+		std::wstring formulaKeyword;
 		std::unordered_set<std::wstring> identitySections;
 		std::vector<std::wstring> tokens;
 	};
 
 	struct FileSection
 	{
-		std::wstring sectionName;
-		bool hasIdentities = false;
+		enum class Type
+		{
+			Keyword,
+			ParsingRule,
+			TrsRule,
+			SyntacticFormula,
+			Formula,
+		};
+		std::wstring meta;
 		std::vector<std::vector<std::unique_ptr<TermIntermediate>>>	identities;
 	};
 

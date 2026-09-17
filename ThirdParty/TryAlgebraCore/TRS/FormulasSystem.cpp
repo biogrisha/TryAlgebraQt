@@ -17,7 +17,9 @@ namespace TryAlgebraCore::Trs
 		L"$TopDownSimple",
 		L"$$",
 		};
-		rules.formulaKeyword = { L"$TopDownExausting", L"$TopDownSimple" }
+		rules.identitySections = { L"$TopDownExausting", L"$TopDownSimple" };
+		rules.formulaKeyword = L"$$";
+		rules.importKeyword = L"$Import";
 		parser.parse(document, rules);
 	}
 }
