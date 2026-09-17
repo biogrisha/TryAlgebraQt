@@ -2,7 +2,7 @@
 
 namespace TryAlgebraCore::Trs {
 
-	MeParserGeneric::MeParserGeneric(const std::wstring& str)
+	MeParserGeneric::MeParserGeneric(std::wstring_view str)
 		:m_str(str)
 	{
 
@@ -67,7 +67,7 @@ namespace TryAlgebraCore::Trs {
 			}
 			if (state == State::ReadName || state == State::ReadMeta)
 			{
-				str = std::wstring_view{ m_str }.substr(readStart, i - readStart + 1);
+				str = m_str.substr(readStart, i - readStart + 1);
 			}
 			else if (state == State::ReadGlyph)
 			{

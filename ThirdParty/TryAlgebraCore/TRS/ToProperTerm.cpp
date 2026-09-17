@@ -83,48 +83,48 @@ namespace TryAlgebraCore::Trs
 
 	void ToProperTerm::setup(const TextBuffer& tb)
 	{
-		std::vector<std::wstring> tokens = {
-			Tokens::buEx,
-			Tokens::buRec,
-			Tokens::inv,
-			Tokens::rules,
-			Tokens::tdEx,
-			Tokens::tdRec,
-		};
+		//std::vector<std::wstring> tokens = {
+		//	Tokens::buEx,
+		//	Tokens::buRec,
+		//	Tokens::inv,
+		//	Tokens::rules,
+		//	Tokens::tdEx,
+		//	Tokens::tdRec,
+		//};
 
 
-		TokenMatcher matcher(tokens);
+		//TokenMatcher matcher(tokens);
 
-		TextBufferIterator it(tb, 0);
+		//TextBufferIterator it(tb, 0);
 
-		bool inv = false;
-		while (!it.isEnd())
-		{
-			if (auto match = matcher.findNext(it))
-			{
-				const std::wstring& token = tokens[match->tokenIndex];
-				auto from = it.getChId();
-				if (token == Tokens::inv)
-				{
-					inv = true;
-					continue;
-				}
-				if (waitToken(it, token))
-				{
-					auto to = it.getChId() - token.size();
-					if (token == L"-rules")
-					{
-						m_trsIdentitiesParser.setup(tb.getSubstring(from, to));
-					}
-					else
-					{
-						m_transformer.addRules(tb.getSubstring(from, to)
-							, tokenToType(token), inv);
-					}
-				}
-			}
-		}
-		m_trsIdentitiesParser.refine(m_transformer);
+		//bool inv = false;
+		//while (!it.isEnd())
+		//{
+		//	if (auto match = matcher.findNext(it))
+		//	{
+		//		const std::wstring& token = tokens[match->tokenIndex];
+		//		auto from = it.getChId();
+		//		if (token == Tokens::inv)
+		//		{
+		//			inv = true;
+		//			continue;
+		//		}
+		//		if (waitToken(it, token))
+		//		{
+		//			auto to = it.getChId() - token.size();
+		//			if (token == L"-rules")
+		//			{
+		//				m_trsIdentitiesParser.setup(tb.getSubstring(from, to));
+		//			}
+		//			else
+		//			{
+		//				m_transformer.addRules(tb.getSubstring(from, to)
+		//					, tokenToType(token), inv);
+		//			}
+		//		}
+		//	}
+		//}
+		//m_trsIdentitiesParser.refine(m_transformer);
 	}
 
 	RuleType ToProperTerm::tokenToType(const std::wstring& token) const

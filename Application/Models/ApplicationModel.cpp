@@ -29,6 +29,11 @@ TryAlgebraCore::KeyBinding* ApplicationModel::keyBinding()
 	return &m_keyBinding;
 }
 
+TryAlgebraCore::Trs::FormulasSystem* ApplicationModel::formulasSystem()
+{
+	return &m_formulasSystem;
+}
+
 QFileSystemModel* ApplicationModel::fileSystemModel()
 {
 	return m_fileSystemModel;

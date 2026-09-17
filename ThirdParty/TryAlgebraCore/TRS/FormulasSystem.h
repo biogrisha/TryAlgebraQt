@@ -18,7 +18,7 @@ namespace TryAlgebraCore::Trs
 	class FormulasSystem
 	{
 	public:
-		void parseSyntacticFormulas(const std::wstring& document);
+		void addFile(const std::wstring& document);
 	private:
 
 	};

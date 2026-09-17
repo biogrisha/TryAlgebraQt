@@ -1,9 +1,23 @@
 #include "FormulasSystem.h"
+#include "FileParser.h"
 
 namespace TryAlgebraCore::Trs
 {
-	void FormulasSystem::parseSyntacticFormulas(const std::wstring& document)
+	void FormulasSystem::addFile(const std::wstring& document)
 	{
-
+		FileParser parser;
+		ParsingRules rules;
+		rules.tokens = {
+		L"$Parsing"
+		L"$SyntacticFormulas",
+		L"$Formulas",
+		L"$TrsRules",
+		L"$Import",
+		L"$TopDownExausting",
+		L"$TopDownSimple",
+		L"$$",
+		};
+		rules.formulaKeyword = { L"$TopDownExausting", L"$TopDownSimple" }
+		parser.parse(document, rules);
 	}
 }

@@ -19,13 +19,14 @@ namespace TryAlgebraCore
 		buildFailureLinks();
 	}
 
-	std::optional<TokenMatcher::Match> TokenMatcher::findNext(TextBufferIterator& it) const
+	std::optional<TokenMatcher::Match> TokenMatcher::findNext(const std::wstring& string, int& pos) const
 	{
 		size_t state = 0;
 
-		while (!it.isEnd())
+		while (pos < string.size())
 		{
-			wchar_t ch = it.next();
+			wchar_t ch = string[pos];
+			++pos;
 
 			// Follow failure links until we either find a transition
 			// or reach the root.
@@ -50,7 +51,7 @@ namespace TryAlgebraCore
 				// You could instead select longest/shortest here.
 				return Match{
 					nodes_[state].outputs.front(),
-					it.getChId()
+					pos
 				};
 			}
 		}

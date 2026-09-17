@@ -21,7 +21,7 @@ namespace TryAlgebraCore {
 
 		explicit TokenMatcher(const std::vector<std::wstring>& tokens);
 
-		std::optional<Match> findNext(TextBufferIterator& it) const;
+		std::optional<Match> findNext(const std::wstring& string, int& pos) const;
 
 	private:
 		struct Node

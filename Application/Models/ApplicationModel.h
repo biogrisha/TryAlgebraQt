@@ -4,6 +4,7 @@
 #include <Models/DocumentsModel.h>
 #include <qqml.h>
 #include <MathEditor/include/KeyBinding.h>
+#include <TRS/FormulasSystem.h>
 #include <QFileSystemModel>
 
 class ApplicationModel : public QObject
@@ -21,6 +22,7 @@ public slots:
 	MeListModel* meListModel();
 	DocumentsModel* docModel();
 	TryAlgebraCore::KeyBinding* keyBinding();
+	TryAlgebraCore::Trs::FormulasSystem* formulasSystem();
 	QFileSystemModel* fileSystemModel();
 	QStringList recentFolders() const;
 	QModelIndex fileSystemRootIndex() const;
@@ -29,6 +31,7 @@ private:
 	MeListModel* m_meListModel;
 	DocumentsModel* m_docModel;
 	TryAlgebraCore::KeyBinding m_keyBinding;
+	TryAlgebraCore::Trs::FormulasSystem m_formulasSystem;
 	QFileSystemModel* m_fileSystemModel;
 	QString m_projectFolder;
 	QModelIndex m_fileSystemRootIndex;

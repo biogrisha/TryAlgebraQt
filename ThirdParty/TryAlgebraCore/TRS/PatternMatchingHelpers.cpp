@@ -829,7 +829,7 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring& str)
+	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring_view& str)
 	{
 		Trs::MeParserGeneric parser(str);
 		std::vector<std::unique_ptr<TermIntermediate>> res;

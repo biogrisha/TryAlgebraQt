@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <string_view>
 #include <functional>
 
 namespace TryAlgebraCore::Trs
@@ -15,7 +15,7 @@ namespace TryAlgebraCore::Trs
 			None
 		};
 	public:
-		MeParserGeneric(const std::wstring& str);
+		MeParserGeneric(std::wstring_view str);
 		void parse();
 		std::function<void(const std::wstring_view& str)> createMe;
 		std::function<void(const std::wstring_view& str)> addMeta;
@@ -24,7 +24,7 @@ namespace TryAlgebraCore::Trs
 		std::function<void()> endChildren;
 		std::function<void()> nextChild;
 	private:
-		const std::wstring& m_str;
+		std::wstring_view m_str;
 	};
 
 }

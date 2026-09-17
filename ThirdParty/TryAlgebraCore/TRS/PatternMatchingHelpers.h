@@ -2,9 +2,10 @@
 #include <span>
 #include <memory>
 #include <vector>
-#include <string>
+#include <string_view>
 #include <unordered_set>
 #include <functional>
+#include <string>
 
 namespace TryAlgebraCore::Trs
 {
@@ -128,7 +129,7 @@ namespace TryAlgebraCore::Trs
 	void markVariables(std::vector<std::unique_ptr<TermIntermediate>>& pat);
 
 	void termIntermediateToStr(const std::vector<std::unique_ptr<TermIntermediate>>& terms, std::wstring& res);
-	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring& str);
+	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring_view& str);
 	std::vector<IdentityIntermediate> parseIdentities(const std::wstring& str);
 
 	bool tryMatch(std::vector<Bundle*>& childBundles

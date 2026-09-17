@@ -47,8 +47,6 @@ Application::Application(QObject* parent)
 
 	//initializing freetype
 	m_ft_wrap.Init(logicalDpiX, logicalDpiY);
-
-	Actions::compile();
 }
 
 ApplicationModel* Application::applicationModel()
@@ -122,6 +120,7 @@ void Application::projectSelected(QString folderPath)
 			FVulkanStatic::ClearContext();
 		});
 	m_mainWindow->showMaximized();
+	Actions::compile();
 }
 
 FFreeTypeWrap* Application::getFreeTypeWrap()
