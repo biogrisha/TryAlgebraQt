@@ -3,23 +3,9 @@
 
 namespace TryAlgebraCore::Trs
 {
-	void FormulasSystem::addFile(const std::wstring& document)
+	void FormulasSystem::addFile(const std::wstring& document, const std::wstring& filePath)
 	{
 		FileParser parser;
-		ParsingRules rules;
-		rules.tokens = {
-		L"$Parsing"
-		L"$SyntacticFormulas",
-		L"$Formulas",
-		L"$TrsRules",
-		L"$Import",
-		L"$TopDownExausting",
-		L"$TopDownSimple",
-		L"$$",
-		};
-		rules.identitySections = { L"$TopDownExausting", L"$TopDownSimple" };
-		rules.formulaKeyword = L"$$";
-		rules.importKeyword = L"$Import";
-		parser.parse(document, rules);
+		parser.parse(document, filePath);
 	}
 }

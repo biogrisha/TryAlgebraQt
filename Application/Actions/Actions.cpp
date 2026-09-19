@@ -64,9 +64,14 @@ void Actions::compile()
 
 	//setup formulas
 	{
-		auto filePaths = getMdocFiles(AppGlobal::appMod->projectFolder());
+		QString currentFolder = AppGlobal::appMod->projectFolder();
+		QDir projectDir(currentFolder);
+
+		auto filePaths = getMdocFiles(currentFolder);
+
 		for (const auto& filePath : filePaths)
 		{
+			QString relativePath = projectDir.relativeFilePath(filePath);
 
 			QFile file(filePath);
 
@@ -78,9 +83,10 @@ void Actions::compile()
 
 			QTextStream stream(&file);
 			stream.setEncoding(QStringConverter::Utf8);
-			QString fileContent = stream.readAll();
-			AppGlobal::appMod->formulasSystem()->addFile(fileContent.toStdWString());
 
+			QString fileContent = stream.readAll();
+
+			AppGlobal::appMod->formulasSystem()->addFile(fileContent.toStdWString(), relativePath.toStdWString());
 		}
 	}
 

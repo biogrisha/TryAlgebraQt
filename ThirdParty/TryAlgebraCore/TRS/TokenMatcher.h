@@ -19,7 +19,7 @@ namespace TryAlgebraCore {
 			int startCharIndex(const std::vector<std::wstring>& tokens) const;
 		};
 
-		explicit TokenMatcher(const std::vector<std::wstring>& tokens);
+		explicit TokenMatcher(std::vector<std::wstring> tokens);
 
 		std::optional<Match> findNext(const std::wstring& string, int& pos) const;
 
@@ -36,9 +36,9 @@ namespace TryAlgebraCore {
 		void buildTrie();
 
 		void buildFailureLinks();
-
+		const std::vector<std::wstring>& tokens() const;
 	private:
-		std::vector<std::wstring> tokens_;
-		std::vector<Node> nodes_;
+		std::vector<std::wstring> m_tokens;
+		std::vector<Node> m_nodes;
 	};
 }

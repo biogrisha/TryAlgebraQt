@@ -3,40 +3,41 @@
 #include <MathEditor/include/TextBuffer.h>
 #include <string_view>
 #include <unordered_set>
+#include "TermTransformer.h"
+#include <variant>
 
 namespace TryAlgebraCore::Trs
 {
-	struct ParsingRules
+	struct FormulasFile
 	{
-		std::wstring importKeyword;
-		std::wstring formulaKeyword;
-		std::unordered_set<std::wstring> identitySections;
-		std::vector<std::wstring> tokens;
+		std::wstring filePath;
+		std::wstring parserFilePath;
+		//formulas - formula - terms sequence
+		std::vector<std::vector<std::vector<std::unique_ptr<TermIntermediate>>>> formulas;
 	};
 
-	struct FileSection
+	struct ParserFile
 	{
-		enum class Type
-		{
-			Keyword,
-			ParsingRule,
-			TrsRule,
-			SyntacticFormula,
-			Formula,
-		};
-		std::wstring meta;
-		std::vector<std::vector<std::unique_ptr<TermIntermediate>>>	identities;
+		std::wstring filePath;
+		std::vector<RewritingRule> rules;
+		std::vector<RewritingRule> invRules;
+	};
+
+	struct TrsFile
+	{
+		std::wstring filePath;
+		std::vector<IdentityIntermediate> rules;
 	};
 
 	class FileParser
 	{
 	public:
-		void parse(const std::wstring& string, const ParsingRules& rules);
+		std::variant<FormulasFile, ParserFile, TrsFile, std::monostate> parse(const std::wstring& string, const std::wstring& filePath);
 	private:
+		ParserFile handleParserFile();
 		bool waitToken(const std::wstring& token);
 		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> parseIdentities(const std::wstring_view& str);
-		std::vector<FileSection> m_sections;
-		std::wstring m_str;
+		std::wstring_view m_str;
 		int m_chPos = 0;
 	};
 

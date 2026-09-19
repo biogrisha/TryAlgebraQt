@@ -1,0 +1,39 @@
+$Formulas
+$Import relative/path
+
+$$formula 1
+.....
+$$formula 2
+.....
+===============================
+$Parsing
+$TDOnce
+a=b
+b=c
+$TDExhaustive
+a=b
+b=c
+$Inverse
+$TDOnce
+a=b
+b=c
+$TDExhaustive
+a=b
+b=c
+===============================
+$Trs
+a=b
+b=c
+...
+==========================
+$Formulas
+$Parsing
+$Trs
+
+$TDOnce
+$TDExhaustive
+$Inverse
+
+
+$Import relative/path
+$$formula 1

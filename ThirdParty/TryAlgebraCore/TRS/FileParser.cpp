@@ -4,43 +4,66 @@
 
 namespace TryAlgebraCore::Trs
 {
-	void FileParser::parse(const std::wstring& string, const ParsingRules& rules)
+	namespace Tokens
 	{
-		m_str = string;
-		TokenMatcher matcher(rules.tokens);
 
-		bool inv = false;
-		while (m_chPos < string.size())
+		constexpr const wchar_t Parser = L"$Parser";
+		constexpr const wchar_t Formulas = L"$Formulas";
+		constexpr const wchar_t Trs = L"$Trs";
+
+		constexpr const wchar_t TDOnce = L"$TDOnce";
+		constexpr const wchar_t TDEx = L"$TDEx";
+		constexpr const wchar_t Inverse = L"$Inverse";
+	}
+	std::variant<FormulasFile, ParserFile, TrsFile, std::monostate> FileParser::parse(const std::wstring& string, const std::wstring& filePath)
+	{
+		m_str = std::wstring_view(string);
+		TokenMatcher tokenMatcher({
+			Tokens::Parser,
+			Tokens::Formulas,
+			Tokens::Trs,
+			});
+
+		m_chPos = 0;
+
+		if (auto match = tokenMatcher.findNext(string, m_chPos))
 		{
-			if (auto match = matcher.findNext(string, m_chPos))
+			auto token = tokenMatcher.tokens()[match.value().tokenIndex];
+			if (token == Tokens::Parser)
 			{
-				const std::wstring& token = rules.tokens[match->tokenIndex];
-				auto from = m_chPos;
-				if (rules.identitySections.contains(token))
-				{
-					if (waitToken(token))
-					{
-						const auto substr = std::wstring_view{ string }.substr(from, m_chPos - token.size() - from);
-						auto identities = parseIdentities(substr);
-						if (!identities.empty())
-						{
-							auto& section = m_sections.emplace_back();
-							section.sectionName = token;
-							section.identities = std::move(identities);
-							section.hasIdentities = true;
-						}
-					}
-					else
-					{
-						return;
-					}
-				}
-				else
-				{
-					auto& newSection = m_sections.emplace_back();
-					newSection.sectionName = token;
-				}
+				return ParserFile();
 			}
+			else if (token == Tokens::Formulas)
+			{
+				return FormulasFile();
+			}
+			else if (token == Tokens::Trs)
+			{
+				return TrsFile();
+			}
+		}
+		return std::monostate;
+	}
+
+	ParserFile FileParser::handleParserFile()
+	{
+		//pos points right after $Parser
+		ParserFile res;
+		TokenMatcher tokenMatcher({
+			Tokens::TDOnce,
+			Tokens::TDEx,
+			Tokens::Inverse
+			});
+		bool inverse = false;
+		auto startMatch = tokenMatcher.findNext(m_str, m_chPos);
+		if (!startMatch || tokenMatcher.tokens()[startMatch.value().tokenIndex] == Tokens::Inverse)
+		{
+			return {};
+		}
+		std::optional<TokenMatcher::Match> nextMatch;
+		while (true)
+		{
+
 		}
 	}
 

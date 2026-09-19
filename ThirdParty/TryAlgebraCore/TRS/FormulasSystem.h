@@ -18,7 +18,7 @@ namespace TryAlgebraCore::Trs
 	class FormulasSystem
 	{
 	public:
-		void addFile(const std::wstring& document);
+		void addFile(const std::wstring& document, const std::wstring& filePath);
 	private:
 
 	};

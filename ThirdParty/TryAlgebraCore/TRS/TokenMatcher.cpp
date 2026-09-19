@@ -10,10 +10,10 @@ namespace TryAlgebraCore
 			+ 1;
 	}
 
-	TokenMatcher::TokenMatcher(const std::vector<std::wstring>& tokens)
-		: tokens_(tokens)
+	TokenMatcher::TokenMatcher(std::vector<std::wstring> tokens)
+		: m_tokens(std::move(tokens))
 	{
-		nodes_.emplace_back(); // root
+		m_nodes.emplace_back(); // root
 
 		buildTrie();
 		buildFailureLinks();
@@ -31,26 +31,26 @@ namespace TryAlgebraCore
 			// Follow failure links until we either find a transition
 			// or reach the root.
 			while (state != 0 &&
-				nodes_[state].next.find(ch) == nodes_[state].next.end())
+				m_nodes[state].next.find(ch) == m_nodes[state].next.end())
 			{
-				state = nodes_[state].failure;
+				state = m_nodes[state].failure;
 			}
 
-			auto transition = nodes_[state].next.find(ch);
+			auto transition = m_nodes[state].next.find(ch);
 
-			if (transition != nodes_[state].next.end())
+			if (transition != m_nodes[state].next.end())
 				state = transition->second;
 			else
 				state = 0;
 
-			if (!nodes_[state].outputs.empty())
+			if (!m_nodes[state].outputs.empty())
 			{
 				// If several tokens finish at this character,
 				// return the first one.
 				//
 				// You could instead select longest/shortest here.
 				return Match{
-					nodes_[state].outputs.front(),
+					m_nodes[state].outputs.front(),
 					pos
 				};
 			}
@@ -61,9 +61,9 @@ namespace TryAlgebraCore
 
 	void TokenMatcher::buildTrie()
 	{
-		for (size_t tokenIndex = 0; tokenIndex < tokens_.size(); ++tokenIndex)
+		for (size_t tokenIndex = 0; tokenIndex < m_tokens.size(); ++tokenIndex)
 		{
-			const auto& token = tokens_[tokenIndex];
+			const auto& token = m_tokens[tokenIndex];
 
 			if (token.empty())
 				continue;
@@ -72,7 +72,7 @@ namespace TryAlgebraCore
 
 			for (wchar_t ch : token)
 			{
-				auto& transitions = nodes_[state].next;
+				auto& transitions = m_nodes[state].next;
 
 				auto it = transitions.find(ch);
 
@@ -82,20 +82,20 @@ namespace TryAlgebraCore
 				}
 				else
 				{
-					const size_t newState = nodes_.size();
+					const size_t newState = m_nodes.size();
 
 					// Do this while nodes_[state] is definitely valid.
 					transitions.emplace(ch, newState);
 
 					// This may reallocate nodes_.
-					nodes_.emplace_back();
+					m_nodes.emplace_back();
 
 					// Don't use `transitions` or `it` after emplace_back().
 					state = newState;
 				}
 			}
 
-			nodes_[state].outputs.push_back(tokenIndex);
+			m_nodes[state].outputs.push_back(tokenIndex);
 		}
 	}
 
@@ -104,9 +104,9 @@ namespace TryAlgebraCore
 		std::queue<size_t> queue;
 
 		// Children of root fail back to root.
-		for (const auto& [ch, child] : nodes_[0].next)
+		for (const auto& [ch, child] : m_nodes[0].next)
 		{
-			nodes_[child].failure = 0;
+			m_nodes[child].failure = 0;
 			queue.push(child);
 		}
 
@@ -115,35 +115,39 @@ namespace TryAlgebraCore
 			size_t state = queue.front();
 			queue.pop();
 
-			for (const auto& [ch, child] : nodes_[state].next)
+			for (const auto& [ch, child] : m_nodes[state].next)
 			{
-				size_t failure = nodes_[state].failure;
+				size_t failure = m_nodes[state].failure;
 
 				while (failure != 0 &&
-					nodes_[failure].next.find(ch) ==
-					nodes_[failure].next.end())
+					m_nodes[failure].next.find(ch) ==
+					m_nodes[failure].next.end())
 				{
-					failure = nodes_[failure].failure;
+					failure = m_nodes[failure].failure;
 				}
 
-				auto it = nodes_[failure].next.find(ch);
+				auto it = m_nodes[failure].next.find(ch);
 
-				if (it != nodes_[failure].next.end())
-					nodes_[child].failure = it->second;
+				if (it != m_nodes[failure].next.end())
+					m_nodes[child].failure = it->second;
 				else
-					nodes_[child].failure = 0;
+					m_nodes[child].failure = 0;
 
 				// A suffix may itself be a complete token.
 				const auto& inherited =
-					nodes_[nodes_[child].failure].outputs;
+					m_nodes[m_nodes[child].failure].outputs;
 
-				nodes_[child].outputs.insert(
-					nodes_[child].outputs.end(),
+				m_nodes[child].outputs.insert(
+					m_nodes[child].outputs.end(),
 					inherited.begin(),
 					inherited.end());
 
 				queue.push(child);
 			}
 		}
+	}
+	const std::vector<std::wstring>& TokenMatcher::tokens() const
+	{
+		return m_tokens;
 	}
 }
