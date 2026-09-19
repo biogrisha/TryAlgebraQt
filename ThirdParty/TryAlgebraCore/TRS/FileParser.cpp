@@ -7,13 +7,13 @@ namespace TryAlgebraCore::Trs
 	namespace Tokens
 	{
 
-		constexpr const wchar_t Parser = L"$Parser";
-		constexpr const wchar_t Formulas = L"$Formulas";
-		constexpr const wchar_t Trs = L"$Trs";
+		constexpr const wchar_t* Parser = L"$Parser";
+		constexpr const wchar_t* Formulas = L"$Formulas";
+		constexpr const wchar_t* Trs = L"$Trs";
 
-		constexpr const wchar_t TDOnce = L"$TDOnce";
-		constexpr const wchar_t TDEx = L"$TDEx";
-		constexpr const wchar_t Inverse = L"$Inverse";
+		constexpr const wchar_t* TDOnce = L"$TDOnce";
+		constexpr const wchar_t* TDEx = L"$TDEx";
+		constexpr const wchar_t* Inverse = L"$Inverse";
 	}
 	std::variant<FormulasFile, ParserFile, TrsFile, std::monostate> FileParser::parse(const std::wstring& string, const std::wstring& filePath)
 	{
@@ -24,9 +24,9 @@ namespace TryAlgebraCore::Trs
 			Tokens::Trs,
 			});
 
-		m_chPos = 0;
+		m_pos = 0;
 
-		if (auto match = tokenMatcher.findNext(string, m_chPos))
+		if (auto match = tokenMatcher.findNext(string, m_pos))
 		{
 			auto token = tokenMatcher.tokens()[match.value().tokenIndex];
 			if (token == Tokens::Parser)
@@ -42,7 +42,7 @@ namespace TryAlgebraCore::Trs
 				return TrsFile();
 			}
 		}
-		return std::monostate;
+		return std::monostate{};
 	}
 
 	ParserFile FileParser::handleParserFile()
@@ -54,27 +54,21 @@ namespace TryAlgebraCore::Trs
 			Tokens::TDEx,
 			Tokens::Inverse
 			});
-		bool inverse = false;
-		auto startMatch = tokenMatcher.findNext(m_str, m_chPos);
-		if (!startMatch || tokenMatcher.tokens()[startMatch.value().tokenIndex] == Tokens::Inverse)
-		{
-			return {};
-		}
-		std::optional<TokenMatcher::Match> nextMatch;
-		while (true)
-		{
 
-		}
+		auto match1 = tokenMatcher.findNext(m_str, m_pos);
+		auto match2 = tokenMatcher.findNext(m_str, m_pos);
+		//parseIdentities(std::wstring_view(m_str).substr(startMatch.value().endCharIndex, nextMatch.value().endCharIndex))
+		return {};
 	}
 
 	bool FileParser::waitToken(const std::wstring& token)
 	{
 		int progress = 0;
 
-		while (m_chPos < m_str.size())
+		while (m_pos < m_str.size())
 		{
-			wchar_t ch = m_str[m_chPos];
-			m_chPos++;
+			wchar_t ch = m_str[m_pos];
+			m_pos++;
 			if (ch == token[progress])
 			{
 				++progress;

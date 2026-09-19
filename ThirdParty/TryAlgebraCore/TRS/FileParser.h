@@ -38,7 +38,7 @@ namespace TryAlgebraCore::Trs
 		bool waitToken(const std::wstring& token);
 		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> parseIdentities(const std::wstring_view& str);
 		std::wstring_view m_str;
-		int m_chPos = 0;
+		int m_pos = 0;
 	};
 
 }

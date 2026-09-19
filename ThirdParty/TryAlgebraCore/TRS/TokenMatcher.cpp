@@ -19,7 +19,7 @@ namespace TryAlgebraCore
 		buildFailureLinks();
 	}
 
-	std::optional<TokenMatcher::Match> TokenMatcher::findNext(const std::wstring& string, int& pos) const
+	std::optional<TokenMatcher::Match> TokenMatcher::findNext(const std::wstring_view& string, int& pos) const
 	{
 		size_t state = 0;
 
