@@ -31,12 +31,20 @@ namespace TryAlgebraCore::Trs
 
 	class FileParser
 	{
+		struct ParserRule
+		{
+			std::vector<std::unique_ptr<TermIntermediate>> from;
+			std::vector<std::unique_ptr<TermIntermediate>> to;
+		};
+
 	public:
 		std::variant<FormulasFile, ParserFile, TrsFile, std::monostate> parse(const std::wstring& string, const std::wstring& filePath);
 	private:
 		ParserFile handleParserFile();
+		FormulasFile handleFormulasFile();
 		bool waitToken(const std::wstring& token);
-		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> parseIdentities(const std::wstring_view& str);
+		std::vector<ParserRule> parseParsingRules(const std::wstring_view& str);
+		std::vector<std::unique_ptr<TermIntermediate>> parseFormula(const std::wstring_view& str);
 		std::wstring_view m_str;
 		int m_pos = 0;
 	};
