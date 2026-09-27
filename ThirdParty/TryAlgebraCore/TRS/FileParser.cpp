@@ -16,6 +16,19 @@ namespace TryAlgebraCore::Trs
 		constexpr const wchar_t* TDEx = L"$TDEx";
 		constexpr const wchar_t* Inverse = L"$Inverse";
 	}
+	namespace {
+		void trim(std::wstring& s)
+		{
+			const auto first = s.find_first_not_of(L" \t\n\r");
+			if (first == std::wstring::npos) {
+				s.clear();
+				return;
+			}
+
+			const auto last = s.find_last_not_of(L" \t\n\r");
+			s = s.substr(first, last - first + 1);
+		}
+	}
 	std::variant<FormulasFile, ParserFile, TrsFile, std::monostate> FileParser::parse(const std::wstring& string, const std::wstring& filePath)
 	{
 		m_str = std::wstring_view(string);
@@ -38,7 +51,7 @@ namespace TryAlgebraCore::Trs
 			}
 			else if (token == Tokens::Formulas)
 			{
-				return FormulasFile();
+				return handleFormulasFile();
 			}
 			else if (token == Tokens::Trs)
 			{
@@ -137,59 +150,57 @@ namespace TryAlgebraCore::Trs
 
 	FormulasFile FileParser::handleFormulasFile()
 	{
-		//pos points right after $Parser
-		ParserFile res;
-		TokenMatcher tokenMatcher({
-			Tokens::Import,
-			Tokens::FormulaStart,
-			});
+		FormulasFile res;
 
-		auto firstMatch = tokenMatcher.findNext(m_str, m_pos);
-		if (!firstMatch)
+		//find import path
+		if (waitToken(Tokens::Import))
 		{
-			return {};
-		}
-
-		auto consumeFormula = [&, this]()
+			int from = m_pos;
+			if (waitToken(L"\n"))
 			{
-				int from = m_pos;
-				std::wstring formulaName;
-				for (; m_pos < m_str.size(); ++m_pos)
-				{
-					if (m_str[m_pos] == L'\n')
-					{
-						formulaName.insert(formulaName.begin(), m_str.begin() + from, m_str.begin() + m_pos);
-						break;
-					}
-				}
-
-			};
-
-		if (tokenMatcher.tokens()[firstMatch.value().tokenIndex] == Tokens::Import)
-		{
-			std::wstring path;
-			for (; m_pos < m_str.size(); ++m_pos)
-			{
-				if (m_str[m_pos] == L'\n')
-				{
-					path.insert(path.begin(), m_str.begin() + firstMatch.value().endCharIndex, m_str.begin() + m_pos);
-					break;
-				}
+				--m_pos;
 			}
+			res.parserFilePath = m_str.substr(from, m_pos - from);
+			trim(res.parserFilePath);
 		}
 		else
 		{
-			std::wstring formulaName;
+			m_pos = 0;
+		}
+
+		if (!waitToken(Tokens::FormulaStart))
+		{
+			return {};
+		}
+		while (true)
+		{
+			int from = m_pos;
+			std::wstring name;
 			for (; m_pos < m_str.size(); ++m_pos)
 			{
 				if (m_str[m_pos] == L'\n')
 				{
-					formulaName.insert(formulaName.begin(), m_str.begin() + firstMatch.value().endCharIndex, m_str.begin() + m_pos);
+					name.insert(name.begin(), m_str.begin() + from, m_str.begin() + m_pos);
+					++m_pos;
 					break;
 				}
 			}
-
+			from = m_pos;
+			bool hasNext = waitToken(Tokens::FormulaStart);
+			int size = hasNext ? m_pos - from - std::wstring(Tokens::FormulaStart).size() : m_pos - from;
+			auto equality = parseFormula(m_str.substr(from, size));
+			if (!equality.empty())
+			{
+				auto& formula = res.formulas.emplace_back();
+				formula.equality = std::move(equality);
+				formula.name = std::move(name);
+			}
+			if (!hasNext)
+			{
+				break;
+			}
 		}
+		return res;
 	}
 
 	bool FileParser::waitToken(const std::wstring& token)
@@ -213,7 +224,7 @@ namespace TryAlgebraCore::Trs
 				progress = 0;
 			}
 		}
-		return progress = token.size();
+		return progress == token.size();
 	}
 
 	std::vector<FileParser::ParserRule> FileParser::parseParsingRules(const std::wstring_view& str)
@@ -258,9 +269,39 @@ namespace TryAlgebraCore::Trs
 		return res;
 	}
 
-	std::vector<std::unique_ptr<TermIntermediate>> FileParser::parseFormula(const std::wstring_view& str)
+	std::vector<std::vector<std::unique_ptr<TermIntermediate>>> FileParser::parseFormula(const std::wstring_view& str)
 	{
-		return std::vector<std::unique_ptr<TermIntermediate>>();
+		std::unordered_set<std::wstring> clear = {
+			L"\n",
+			L" "
+		};
+		auto terms = parseToTermIntermediate(str);
+		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> res;
+		std::vector<std::unique_ptr<TermIntermediate>> sequence;
+		for (auto& term : terms)
+		{
+			if (clear.contains(term->label))
+			{
+				continue;
+			}
+			if (term->label == L"=")
+			{
+				if (sequence.empty())
+				{
+					return {};
+				}
+				res.push_back(std::move(sequence));
+				sequence.clear();
+				continue;
+			}
+			sequence.push_back(std::move(term));
+		}
+		if (sequence.empty())
+		{
+			return {};
+		}
+		res.push_back(std::move(sequence));
+		return res;
 	}
 
 }

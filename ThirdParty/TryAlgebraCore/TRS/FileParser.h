@@ -8,12 +8,17 @@
 
 namespace TryAlgebraCore::Trs
 {
+	struct Formula
+	{
+		std::wstring name;
+		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> equality;
+	};
 	struct FormulasFile
 	{
 		std::wstring filePath;
 		std::wstring parserFilePath;
 		//formulas - formula - terms sequence
-		std::vector<std::vector<std::vector<std::unique_ptr<TermIntermediate>>>> formulas;
+		std::vector<Formula> formulas;
 	};
 
 	struct ParserFile
@@ -44,7 +49,7 @@ namespace TryAlgebraCore::Trs
 		FormulasFile handleFormulasFile();
 		bool waitToken(const std::wstring& token);
 		std::vector<ParserRule> parseParsingRules(const std::wstring_view& str);
-		std::vector<std::unique_ptr<TermIntermediate>> parseFormula(const std::wstring_view& str);
+		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> parseFormula(const std::wstring_view& str);
 		std::wstring_view m_str;
 		int m_pos = 0;
 	};
