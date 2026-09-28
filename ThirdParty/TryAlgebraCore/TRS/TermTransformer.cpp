@@ -151,6 +151,24 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
+	void Transformer::addRules(std::vector<RewritingRule>&& rules)
+	{
+		for (auto& rule : rules)
+		{
+			markVariables(rule.from);
+			markVariables(rule.to);
+			unifyVariables(rule.from, rule.variables);
+			unifyVariables(rule.to, rule.variables);
+			markPatternNodes(rule.from);
+			rule.levels = generateLevels(rule.from);
+			for (auto& b : rule.levels.front().bundles)
+			{
+				rule.bundles.push_back(&b);
+			}
+			m_rules.push_back(std::move(rule));
+		}
+	}
+
 	void Transformer::removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj)
 	{
 		for (int i = 0; i < subj.size(); ++i)

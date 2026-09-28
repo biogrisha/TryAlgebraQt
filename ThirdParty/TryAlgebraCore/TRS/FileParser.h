@@ -2,7 +2,6 @@
 #include "PatternMatchingHelpers.h"
 #include <MathEditor/include/TextBuffer.h>
 #include <string_view>
-#include <unordered_set>
 #include "TermTransformer.h"
 #include <variant>
 
@@ -13,10 +12,18 @@ namespace TryAlgebraCore::Trs
 		std::wstring name;
 		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> equality;
 	};
+
+	struct RewritingRuleRaw
+	{
+		std::vector<std::unique_ptr<TermIntermediate>> from;
+		std::vector<std::unique_ptr<TermIntermediate>> to;
+	};
+
 	struct FormulasFile
 	{
 		std::wstring filePath;
 		std::wstring parserFilePath;
+		std::wstring trsFilePath;
 		//formulas - formula - terms sequence
 		std::vector<Formula> formulas;
 	};
@@ -31,24 +38,19 @@ namespace TryAlgebraCore::Trs
 	struct TrsFile
 	{
 		std::wstring filePath;
-		std::vector<IdentityIntermediate> rules;
+		std::vector<RewritingRuleRaw> rules;
 	};
 
 	class FileParser
 	{
-		struct ParserRule
-		{
-			std::vector<std::unique_ptr<TermIntermediate>> from;
-			std::vector<std::unique_ptr<TermIntermediate>> to;
-		};
-
 	public:
 		std::variant<FormulasFile, ParserFile, TrsFile, std::monostate> parse(const std::wstring& string, const std::wstring& filePath);
 	private:
-		ParserFile handleParserFile();
-		FormulasFile handleFormulasFile();
+		std::optional<ParserFile> handleParserFile();
+		std::optional<FormulasFile> handleFormulasFile();
+		std::optional<TrsFile> handleTrsFile();
 		bool waitToken(const std::wstring& token);
-		std::vector<ParserRule> parseParsingRules(const std::wstring_view& str);
+		std::vector<RewritingRuleRaw> parseRewritingRules(const std::wstring_view& str);
 		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> parseFormula(const std::wstring_view& str);
 		std::wstring_view m_str;
 		int m_pos = 0;

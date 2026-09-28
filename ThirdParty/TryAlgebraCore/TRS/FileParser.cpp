@@ -7,7 +7,8 @@ namespace TryAlgebraCore::Trs
 	namespace Tokens
 	{
 		constexpr const wchar_t* FormulaStart = L"$$";
-		constexpr const wchar_t* Import = L"$Import";
+		constexpr const wchar_t* ImportParser = L"$ImportParser";
+		constexpr const wchar_t* ImportTrs = L"$ImportTrs";
 		constexpr const wchar_t* Parser = L"$Parser";
 		constexpr const wchar_t* Formulas = L"$Formulas";
 		constexpr const wchar_t* Trs = L"$Trs";
@@ -45,23 +46,33 @@ namespace TryAlgebraCore::Trs
 			auto token = tokenMatcher.tokens()[match.value().tokenIndex];
 			if (token == Tokens::Parser)
 			{
-				auto parserFile = handleParserFile();
-				parserFile.filePath = filePath;
-				return parserFile;
+				if (auto parserFile = handleParserFile())
+				{
+					parserFile.value().filePath = filePath;
+					return std::move(parserFile.value());
+				}
 			}
 			else if (token == Tokens::Formulas)
 			{
-				return handleFormulasFile();
+				if (auto formulaFile = handleFormulasFile())
+				{
+					formulaFile.value().filePath = filePath;
+					return std::move(formulaFile.value());
+				}
 			}
 			else if (token == Tokens::Trs)
 			{
-				return TrsFile();
+				if (auto trsFile = handleTrsFile())
+				{
+					trsFile.value().filePath = filePath;
+					return std::move(trsFile.value());
+				}
 			}
 		}
 		return std::monostate{};
 	}
 
-	ParserFile FileParser::handleParserFile()
+	std::optional<ParserFile> FileParser::handleParserFile()
 	{
 		//pos points right after $Parser
 		ParserFile res;
@@ -76,18 +87,18 @@ namespace TryAlgebraCore::Trs
 			auto lastMatch = tokenMatcher.findNext(m_str, m_pos);
 			while (m_pos < m_str.size())
 			{
-				auto newMatch = tokenMatcher.findNext(m_str, m_pos);
-				if (tokenMatcher.tokens()[newMatch.value().tokenIndex] == Tokens::Inverse)
+				if (tokenMatcher.tokens()[lastMatch.value().tokenIndex] == Tokens::Inverse)
 				{
 					break;
 				}
+				auto newMatch = tokenMatcher.findNext(m_str, m_pos);
 				auto& token = tokenMatcher.tokens()[lastMatch.value().tokenIndex];
 				RuleType type =
 					token == Tokens::TDOnce ? RuleType::TDSimpleRecursive :
 					token == Tokens::TDEx ? RuleType::TDRecursiveExhausting : RuleType::None;
 				if (type == RuleType::None)
 				{
-					return {};
+					return std::nullopt;
 				}
 				int from = lastMatch.value().endCharIndex;
 				int size = 0;
@@ -99,7 +110,7 @@ namespace TryAlgebraCore::Trs
 				{
 					size = m_pos - from;
 				}
-				auto rules = parseParsingRules(std::wstring_view(m_str).substr(from, size));
+				auto rules = parseRewritingRules(std::wstring_view(m_str).substr(from, size));
 				for (auto& rule : rules)
 				{
 					auto& newRule = res.rules.emplace_back();
@@ -122,7 +133,7 @@ namespace TryAlgebraCore::Trs
 					token == Tokens::TDEx ? RuleType::TDRecursiveExhausting : RuleType::None;
 				if (type == RuleType::None)
 				{
-					return {};
+					return std::nullopt;
 				}
 				int from = lastMatch.value().endCharIndex;
 				int size = 0;
@@ -134,7 +145,7 @@ namespace TryAlgebraCore::Trs
 				{
 					size = m_pos - from;
 				}
-				auto rules = parseParsingRules(std::wstring_view(m_str).substr(from, size));
+				auto rules = parseRewritingRules(std::wstring_view(m_str).substr(from, size));
 				for (auto& rule : rules)
 				{
 					auto& newRule = res.invRules.emplace_back();
@@ -148,13 +159,15 @@ namespace TryAlgebraCore::Trs
 		return res;
 	}
 
-	FormulasFile FileParser::handleFormulasFile()
+	std::optional<FormulasFile> FileParser::handleFormulasFile()
 	{
 		FormulasFile res;
-
-		//find import path
-		if (waitToken(Tokens::Import))
+		if (!waitToken(Tokens::ImportParser))
 		{
+			return std::nullopt;
+		}
+		{
+			//handle parser path
 			int from = m_pos;
 			if (waitToken(L"\n"))
 			{
@@ -163,14 +176,25 @@ namespace TryAlgebraCore::Trs
 			res.parserFilePath = m_str.substr(from, m_pos - from);
 			trim(res.parserFilePath);
 		}
-		else
+
+		if (!waitToken(Tokens::ImportTrs))
 		{
-			m_pos = 0;
+			return std::nullopt;
+		}
+		{
+			//handle trs path
+			int from = m_pos;
+			if (waitToken(L"\n"))
+			{
+				--m_pos;
+			}
+			res.trsFilePath = m_str.substr(from, m_pos - from);
+			trim(res.trsFilePath);
 		}
 
 		if (!waitToken(Tokens::FormulaStart))
 		{
-			return {};
+			return std::nullopt;
 		}
 		while (true)
 		{
@@ -203,6 +227,18 @@ namespace TryAlgebraCore::Trs
 		return res;
 	}
 
+	std::optional<TrsFile> FileParser::handleTrsFile()
+	{
+		auto rules = parseRewritingRules(m_str.substr(m_pos, m_str.size() - m_pos));
+		if (rules.empty())
+		{
+			return std::nullopt;
+		}
+		TrsFile res;
+		res.rules = std::move(rules);
+		return res;
+	}
+
 	bool FileParser::waitToken(const std::wstring& token)
 	{
 		int progress = 0;
@@ -227,12 +263,12 @@ namespace TryAlgebraCore::Trs
 		return progress == token.size();
 	}
 
-	std::vector<FileParser::ParserRule> FileParser::parseParsingRules(const std::wstring_view& str)
+	std::vector<RewritingRuleRaw> FileParser::parseRewritingRules(const std::wstring_view& str)
 	{
-		std::vector<ParserRule> res;
+		std::vector<RewritingRuleRaw> res;
 		auto terms = parseToTermIntermediate(str);
 
-		ParserRule currentRule;
+		RewritingRuleRaw currentRule;
 		bool isFrom = true;
 		for (auto& term : terms)
 		{
@@ -265,6 +301,10 @@ namespace TryAlgebraCore::Trs
 			{
 				currentRule.to.push_back(std::move(term));
 			}
+		}
+		if (!currentRule.from.empty() && !currentRule.to.empty())
+		{
+			res.push_back(std::move(currentRule));
 		}
 		return res;
 	}
