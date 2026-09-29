@@ -3,50 +3,18 @@
 #include <chrono>
 namespace NewTrs
 {
-	std::vector<std::unordered_map<Term*, Term*>> Trs::run(Identity id, std::vector<Identity> ids)
+	std::vector<std::unordered_map<Term*, Term*>> Trs::run(Term* pat)
 	{
 		std::system("cls");
-		m_id = id;
-		m_ids = std::move(ids);
-
-		{
-			generateTermStr(m_id.lhs);
-			compact(m_id.lhs);
-			m_id.lhs->persistent = true;
-			markPatternNodes(m_id.lhs);
-			initCompOrder(m_id.lhs);
-			m_id.variablesOrder = setupVariablesOrder(m_id.lhs);
-		}
-
-		{
-			generateTermStr(m_id.rhs);
-			compact(m_id.rhs);
-			m_id.rhs->persistent = true;
-		}
-
-		for (auto& id : m_ids)
-		{
-			{
-				generateTermStr(id.lhs);
-				compact(id.lhs);
-				id.lhs->persistent = true;
-				markPatternNodes(id.lhs);
-				initCompOrder(id.lhs);
-				id.variablesOrder = setupVariablesOrder(id.lhs);
-			}
-
-			{
-				generateTermStr(id.rhs);
-				compact(id.rhs);
-				id.rhs->persistent = true;
-				markPatternNodes(id.rhs);
-			}
-		}
-
-
-
 		std::unordered_set<Term*> variables;
-		collectVariables(m_id.lhs, variables);
+		std::map<std::vector<int>, int> patVariablesOrder;
+
+		collectVariables(pat, variables);
+		markPatternNodes(pat);
+		generateTermStr(pat);
+		compact(pat, StorageType::Pattern);
+		initCompOrder(pat);
+		patVariablesOrder = setupVariablesOrder(pat);
 
 		struct NewIdentity
 		{
@@ -57,11 +25,11 @@ namespace NewTrs
 		auto start = std::chrono::high_resolution_clock::now();
 		while (true)
 		{
-			std::cout << m_storage.size() << "\n";
+			std::cout << m_saturationStorage.size() << "\n";
 			std::vector<NewIdentity> newIdentities;
 			std::unordered_set<Term*> fails;
-			Matcher matcher(m_id.variablesOrder, fails);
-			if (matcher.match(m_id.lhs, m_id.rhs))
+			Matcher matcher(patVariablesOrder, fails);
+			if (matcher.match(pat, m_subj))
 			{
 				std::cout << "SUCCEDED\n";
 				auto end = std::chrono::high_resolution_clock::now();
@@ -71,10 +39,10 @@ namespace NewTrs
 
 				std::cout << duration.count() << " ms\n";
 				std::vector<std::unordered_map<Term*, Term*>> res;
-				matcher.genSub([this, &variables, &res]()
+				matcher.genSub([&, this]()
 					{
 						std::cout << "===solution===\n";
-						Trs::printVars(m_id.lhs);
+						Trs::printVars(pat);
 						auto& map = res.emplace_back();
 						for (Term* var : variables)
 						{
@@ -88,13 +56,13 @@ namespace NewTrs
 			for (auto& id : m_ids)
 			{
 				Matcher matcher(id.variablesOrder, fails);
-				if (matcher.match(id.lhs, m_id.rhs))
+				if (matcher.match(id.lhs, m_subj))
 				{
 					matcher.genSub([this, &newIdentities, &id]()
 						{
 							Term* newTerm = nullptr;
 							Trs::rewrite(id.rhs, newTerm);
-							newIdentities.emplace_back(m_id.rhs, newTerm);
+							newIdentities.emplace_back(m_subj, newTerm);
 							/*std::cout << "===";
 							std::cout << id.lhs->termString << "->" << trm->termString << "\n";
 							Trs::printVars(id.lhs);*/
@@ -133,21 +101,21 @@ namespace NewTrs
 				}
 				fails.merge(fails2);
 			}
-			int storageSize = m_storage.size();
+			int storageSize = m_saturationStorage.size();
 			for (auto& newId : newIdentities)
 			{
 				generateTermStr(newId.rhs);
-				updateCongruence(newId.rhs);
+				updateCongruence(newId.rhs, StorageType::Saturation);
 				setupParent(newId.rhs);
 				if (find(newId.lhs) != find(newId.rhs))
 				{
 					merge(newId.lhs, newId.rhs);
-					if (m_storage.size() > 5000)
+					if (m_saturationStorage.size() > 5000)
 					{
 						//max storage
 						//last try to solve
-						Matcher matcher(m_id.variablesOrder, fails);
-						if (matcher.match(m_id.lhs, m_id.rhs))
+						Matcher matcher(patVariablesOrder, fails);
+						if (matcher.match(pat, m_subj))
 						{
 							std::cout << "SUCCEDED\n";
 							auto end = std::chrono::high_resolution_clock::now();
@@ -157,10 +125,10 @@ namespace NewTrs
 
 							std::cout << duration.count() << " ms\n";
 							std::vector<std::unordered_map<Term*, Term*>> res;
-							matcher.genSub([this, &variables, &res]()
+							matcher.genSub([&, this]()
 								{
 									std::cout << "===solution===\n";
-									Trs::printVars(m_id.lhs);
+									Trs::printVars(pat);
 									auto& map = res.emplace_back();
 									for (Term* var : variables)
 									{
@@ -174,7 +142,7 @@ namespace NewTrs
 					}
 				}
 			}
-			if (m_storage.size() == storageSize)
+			if (m_saturationStorage.size() == storageSize)
 			{
 				return {};
 			}
@@ -185,8 +153,33 @@ namespace NewTrs
 
 	}
 
+	void Trs::setIds(std::vector<Identity>&& ids)
+	{
+		m_ids = std::move(ids);
+		for (auto& id : m_ids)
+		{
+			{
+				markPatternNodes(id.lhs);
+				generateTermStr(id.lhs);
+				compact(id.lhs, StorageType::Rules);
+				initCompOrder(id.lhs);
+				id.variablesOrder = setupVariablesOrder(id.lhs);
+			}
 
+			{
+				markPatternNodes(id.rhs);
+				generateTermStr(id.rhs);
+				compact(id.rhs, StorageType::Rules);
+			}
+		}
+	}
 
+	void Trs::setSubj(Term* subj)
+	{
+		generateTermStr(subj);
+		compact(subj, StorageType::Saturation);
+		m_subj = subj;
+	}
 
 	bool Trs::cong(Term* t1, Term* t2)
 	{
@@ -216,89 +209,28 @@ namespace NewTrs
 
 	}
 
-	void Trs::remove(Term* tToRemove)
-	{
-		auto tTop = find(tToRemove);
-		//remove from reps
-		std::erase(tTop->eReps, tToRemove);
-
-		if (tTop == tToRemove)
-		{
-			//want to remove top
-			//find new top
-			Term* newTop = *tTop->eReps.begin();
-			for (Term* rep : tTop->eReps)
-			{
-				//set new top for reps
-				rep->eRep = newTop;
-			}
-			//move all information to the newTop
-			newTop->eReps = std::move(tTop->eReps);
-			newTop->parents = std::move(tTop->parents);
-			tTop = newTop;
-		}
-		else
-		{
-			for (Term* rep : tTop->eReps)
-			{
-				//set new top for reps
-				rep->eRep = tTop;
-			}
-		}
-
-		//replace itself in parents with the newTop
-		for (Term* parent : tTop->parents)
-		{
-			for (Term*& sibling : parent->children)
-			{
-				if (sibling == tToRemove)
-				{
-					sibling = tTop;
-				}
-			}
-		}
-		//replace remove itself from parents
-		for (Term* child : tToRemove->children)
-		{
-			find(child)->parents.erase(tToRemove);
-		}
-		m_storage.erase(tToRemove->termString);
-	}
-
 	void Trs::mergeCong(Term* t1, Term* t2)
 	{
 		//collect congruent
-		if (t1->persistent && !t2->persistent)
+		if (t1->congProtect && !t2->congProtect)
 		{
-			t2->congProtect = false;
 			t2->cong = true;
 		}
-		else if (!t1->persistent && t2->persistent)
+		else if (t2->congProtect && !t1->congProtect)
+		{
+			t1->cong = true;
+		}
+		else if (t2->congProtect && t1->congProtect)
 		{
 			t1->congProtect = false;
 			t1->cong = true;
 		}
-		else if (!t1->persistent)
+		else
 		{
-			if (t1->congProtect && !t2->congProtect)
-			{
-				t2->cong = true;
-			}
-			else if (t2->congProtect && !t1->congProtect)
-			{
-				t1->cong = true;
-			}
-			else if (t2->congProtect && t1->congProtect)
-			{
-				t1->congProtect = false;
-				t1->cong = true;
-			}
-			else
-			{
-				t1->congProtect = true;
-				t2->cong = true;
-			}
+			t1->congProtect = true;
+			t2->cong = true;
 		}
+
 
 		//if they are congruent but in the same e-class
 		//all their parents already were congruent at this point
@@ -340,32 +272,32 @@ namespace NewTrs
 		}
 	}
 
-	void Trs::compact(Term*& t)
+	void Trs::compact(Term*& t, StorageType storageType)
 	{
 		if (t->stored)
 		{
 			return;
 		}
-		auto [it, inserted] = m_storage.emplace(t->termString, t);
+		auto [storedTerm, inserted] = addToStorage(t, storageType);
 		if (!inserted)
 		{
-			it->second->parents.merge(t->parents);
+			storedTerm->parents.merge(t->parents);
 			deleteRec(t);
-			t = it->second.get();
+			t = storedTerm;
 			//element already in the map, therefore its children are as well
 			return;
 		}
 		else
 		{
-			it->second->stored = true;
+			storedTerm->stored = true;
 			for (auto*& ch : t->children)
 			{
-				compact(ch);
+				compact(ch, storageType);
 			}
 		}
 	}
 
-	void Trs::setupParent(Term* t, Term* parent, int depth)
+	void Trs::setupParent(Term* t, Term* parent)
 	{
 		if (parent)
 		{
@@ -373,7 +305,7 @@ namespace NewTrs
 		}
 		for (Term* ch : t->children)
 		{
-			setupParent(ch, t, depth + 1);
+			setupParent(ch, t);
 		}
 	}
 
@@ -488,7 +420,7 @@ namespace NewTrs
 		}
 	}
 
-	bool Trs::updateCongruence(Term*& t)
+	bool Trs::updateCongruence(Term*& t, StorageType storageType)
 	{
 		if (t->stored)
 		{
@@ -497,10 +429,10 @@ namespace NewTrs
 		bool createdNewTerm = false;
 		for (Term*& ch : t->children)
 		{
-			if (updateCongruence(ch))
+			if (updateCongruence(ch, storageType))
 			{
 				t->stored = true;
-				m_storage.emplace(t->termString, t);
+				addToStorage(t, storageType);
 				createdNewTerm = true;
 			}
 		}
@@ -509,18 +441,18 @@ namespace NewTrs
 			return true;
 		}
 
-		auto found = m_storage.find(t->termString);
-		if (found != m_storage.end())
+		auto found = findInStorage(t->termString);
+		if (found)
 		{
 			delete t;
-			t = found->second.get();
+			t = found;
 			//element already in the map, therefore its children are as well
 			return false;
 		}
 		if (t->children.empty())
 		{
 			t->stored = true;
-			m_storage.emplace(t->termString, t);
+			addToStorage(t, storageType);
 			return true;
 		}
 		auto* ch = t->children.back();
@@ -535,7 +467,7 @@ namespace NewTrs
 			}
 		}
 		t->stored = true;
-		m_storage.emplace(t->termString, t);
+		addToStorage(t, storageType);
 		return true;
 	}
 
@@ -594,6 +526,62 @@ namespace NewTrs
 				t->compOrder.push_back(i);
 			}
 		}
+	}
+
+	std::tuple<Term*, bool> Trs::addToStorage(Term* t, StorageType storageType)
+	{
+
+		if (auto* found = findInStorage(t->termString))
+		{
+			return { found, false };
+		}
+
+		if (storageType == StorageType::Rules)
+		{
+			m_rulesStorage.emplace(t->termString, t);
+		}
+		if (storageType == StorageType::Saturation)
+		{
+			m_saturationStorage.emplace(t->termString, t);
+		}
+		else if (storageType == StorageType::Pattern)
+		{
+			if (t->isPat)
+			{
+				m_patStorage.emplace(t->termString, t);
+			}
+			else
+			{
+				m_saturationStorage.emplace(t->termString, t);
+			}
+		}
+		return { t, true };
+	}
+
+	Term* Trs::findInStorage(const std::string& termString)
+	{
+		{
+			auto found = m_rulesStorage.find(termString);
+			if (found != m_rulesStorage.end())
+			{
+				return found->second.get();
+			}
+		}
+		{
+			auto found = m_patStorage.find(termString);
+			if (found != m_patStorage.end())
+			{
+				return found->second.get();
+			}
+		}
+		{
+			auto found = m_saturationStorage.find(termString);
+			if (found != m_saturationStorage.end())
+			{
+				return found->second.get();
+			}
+		}
+		return nullptr;
 	}
 
 	bool Matcher::match(Term* pat, Term* subj, int pos)

@@ -16,7 +16,7 @@ namespace TryAlgebraCore::Trs
 	}
 	std::wstring ToProperTerm::run(const std::wstring& string)
 	{
-		IdentityIntermediate equation = std::move(parseIdentities(string).back());
+		/*IdentityIntermediate equation = std::move(parseIdentities(string).back());
 		m_terms = std::move(equation.lhs);
 		markVariables(m_terms);
 		m_transformer.applyAll(equation.rhs);
@@ -73,7 +73,8 @@ namespace TryAlgebraCore::Trs
 				}
 			}
 		}
-		return resStr;
+		return resStr;*/
+		return L"";
 	}
 
 	const std::vector<std::unique_ptr<TermIntermediate>>& ToProperTerm::get() const

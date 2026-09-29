@@ -24,14 +24,16 @@ namespace TryAlgebraCore::Trs
 	{
 		for (auto& file : m_parserFiles)
 		{
-			Transformer tr;
-			tr.addRules(std::move(file.rules));
+			std::unique_ptr<Transformer> tr = std::make_unique<Transformer>();
+			tr->addRules(std::move(file.rules));
+			tr->addInvRules(std::move(file.invRules));
+			m_transformers.emplace(file.filePath, std::move(tr));
 		}
 
 		for (auto& formulasFile : m_formulasFiles)
 		{
-			auto parserFile = m_parserFiles.find(formulasFile.parserFilePath);
-			if (parserFile == m_parserFiles.end())
+			auto transformer = m_transformers.find(formulasFile.parserFilePath);
+			if (transformer == m_transformers.end())
 			{
 				continue;
 			}
@@ -40,8 +42,49 @@ namespace TryAlgebraCore::Trs
 			{
 				continue;
 			}
-			FormulasBundle bundle;
-			bundle.
+
+			std::wstring trsKey = formulasFile.trsFilePath;
+			trsKey.insert(trsKey.end(), formulasFile.parserFilePath.begin(), formulasFile.parserFilePath.end())
+				std::vector<NewTrs::Identity> trsIds;
+			for (auto& trsRule : trsFile->second.rules)
+			{
+				auto copy = copyTermIntermediate(trsRule.from);
+				transformer->second->applyAll(copy);
+				NewTrs::Term* term = nullptr;
+				toTerm(copy.back(), term);
+
+			}
+			//transformer->second->applyAll()
+			//
+
+			//FormulasBundle bundle;
+			//bundle.transformer = trans->second.get();
+			//trsFile.
+		}
+	}
+	void FormulasSystem::toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent)
+	{
+		to = new NewTrs::Term;
+		to->isVariable = from->isVariable;
+		//const auto& [it, inserted] = m_symbols.emplace(from->label, m_ch);
+		//if (inserted)
+		//{
+		//	m_ch++;
+		//	it->second = m_ch;
+		//	m_symbolsInv[m_ch] = from->label;
+		//}
+		//to->label = std::string(1, it->second);
+		to->label = std::string(from->label.begin(), from->label.end());
+		to->eRep = to;
+		to->eReps.push_back(to);
+		if (parent)
+		{
+			to->parents.insert(parent);
+		}
+		for (auto& ch : from->children)
+		{
+			NewTrs::Term*& childTerm = to->children.emplace_back(nullptr);
+			toTerm(ch, childTerm, to);
 		}
 	}
 }

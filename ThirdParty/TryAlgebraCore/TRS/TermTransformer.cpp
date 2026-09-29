@@ -121,36 +121,6 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	void Transformer::addRules(const std::wstring& rawStr, RuleType type, bool inv)
-	{
-		auto identities = parseIdentities(rawStr);
-		for (auto& id : identities)
-		{
-			RewritingRule rule;
-			rule.from = std::move(id.lhs);
-			rule.to = std::move(id.rhs);
-			rule.type = type;
-			markVariables(rule.from);
-			markVariables(rule.to);
-			unifyVariables(rule.from, rule.variables);
-			unifyVariables(rule.to, rule.variables);
-			markPatternNodes(rule.from);
-			rule.levels = generateLevels(rule.from);
-			for (auto& b : rule.levels.front().bundles)
-			{
-				rule.bundles.push_back(&b);
-			}
-			if (inv)
-			{
-				m_invRules.push_back(std::move(rule));
-			}
-			else
-			{
-				m_rules.push_back(std::move(rule));
-			}
-		}
-	}
-
 	void Transformer::addRules(std::vector<RewritingRule>&& rules)
 	{
 		for (auto& rule : rules)
@@ -167,6 +137,26 @@ namespace TryAlgebraCore::Trs
 			}
 			m_rules.push_back(std::move(rule));
 		}
+		m_rules = std::move(rules);
+	}
+
+	void Transformer::addInvRules(std::vector<RewritingRule>&& rules)
+	{
+		for (auto& rule : rules)
+		{
+			markVariables(rule.from);
+			markVariables(rule.to);
+			unifyVariables(rule.from, rule.variables);
+			unifyVariables(rule.to, rule.variables);
+			markPatternNodes(rule.from);
+			rule.levels = generateLevels(rule.from);
+			for (auto& b : rule.levels.front().bundles)
+			{
+				rule.bundles.push_back(&b);
+			}
+			m_rules.push_back(std::move(rule));
+		}
+		m_invRules = std::move(rules);
 	}
 
 	void Transformer::removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj)

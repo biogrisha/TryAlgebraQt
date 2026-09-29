@@ -6,11 +6,9 @@
 #include <unordered_map>
 namespace TryAlgebraCore::Trs
 {
-	class FormulasBundle
+	struct FormulasBundle
 	{
-		Transformer transformer;
-		std::map<std::string, std::unique_ptr<NewTrs::Term>> storage;
-		int storageSize = 0;
+		Transformer* transformer;
 		std::vector<NewTrs::Term*> formulasLhs;
 		std::vector<std::unique_ptr<TermIntermediate>> formulasRhs;
 		std::vector<NewTrs::Identity> identities;
@@ -22,9 +20,12 @@ namespace TryAlgebraCore::Trs
 		void addFile(const std::wstring& document, const std::wstring& filePath);
 		void compile();
 	private:
+		void toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent = nullptr);
 		std::unordered_map<std::wstring, TrsFile> m_trsFiles;
 		std::vector<ParserFile> m_parserFiles;
 		std::vector<FormulasFile> m_formulasFiles;
-		std::unordered_map<std::wstring, Transformer> transformers;
+		std::unordered_map<std::wstring, std::unique_ptr<Transformer>> m_transformers;
+		//key trs path + transformer path
+		std::unordered_map<std::wstring, std::unique_ptr<NewTrs::Trs>> m_trsMap;
 	};
 }

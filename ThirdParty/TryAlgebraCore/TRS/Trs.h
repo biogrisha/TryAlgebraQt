@@ -6,7 +6,7 @@
 #include <memory>
 #include <map>
 #include <functional>
-
+#include <tuple>
 namespace NewTrs
 {
 	struct Term
@@ -24,8 +24,6 @@ namespace NewTrs
 		bool cong = false;
 		bool congProtect = false;
 		Term* capture = nullptr;
-		//term is used in identities
-		bool persistent = false;
 		std::vector<int> compOrder;
 	};
 
@@ -74,31 +72,43 @@ namespace NewTrs
 
 	class Trs
 	{
+		enum class StorageType
+		{
+			Saturation,
+			Rules,
+			Pattern
+		};
 	public:
-		std::vector<std::unordered_map<Term*, Term*>> run(Identity id, std::vector<Identity> ids);
+
+		std::vector<std::unordered_map<Term*, Term*>> run(Term* pat);
+		void setIds(std::vector<Identity>&& ids);
+		void setSubj(Term* subj);
 		bool cong(Term* t1, Term* t2);
 		void unionTerms(Term* t1, Term* t2);
-		void remove(Term* t1);
 		void mergeCong(Term* t1, Term* t2);
 		void merge(Term* t1, Term* t2);
-		void compact(Term*& t);
-		void setupParent(Term* t, Term* parent = nullptr, int depth = 0);
+		void compact(Term*& t, StorageType storageType);
+		void setupParent(Term* t, Term* parent = nullptr);
 		void markPatternNodes(Term* t);
 		void deleteRec(Term* t);
 		void collectVariables(Term* t, std::unordered_set<Term*>& vars);
 		//returns true if created new term(not equal and not congruent to other terms)
 		//this would imply that all parent terms also will be unique
-		bool updateCongruence(Term*& t);
+		bool updateCongruence(Term*& t, StorageType storageType);
 		void generateTermStr(Term* t);
 		void initCompOrder(Term* t);
+		std::tuple<Term*, bool> addToStorage(Term* t, StorageType storageType);
+		Term* findInStorage(const std::string& termString);
 		static Term* find(Term* t);
 		static std::map<std::vector<int>, int> setupVariablesOrder(Term* t);
 		static void setupVariablesOrder(Term* t, std::vector<int>& pos, int& id, std::map<std::vector<int>, int>& res);
 		static void printVars(Term* t);
 		static void rewrite(Term* t, Term*& res);
 
-		Identity m_id;
+		Term* m_subj = nullptr;
 		std::vector<Identity> m_ids;
-		std::map<std::string, std::unique_ptr<Term>> m_storage;
+		std::map<std::string, std::unique_ptr<Term>> m_rulesStorage;
+		std::map<std::string, std::unique_ptr<Term>> m_saturationStorage;
+		std::map<std::string, std::unique_ptr<Term>> m_patStorage;
 	};
 }

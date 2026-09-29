@@ -34,6 +34,7 @@ namespace TryAlgebraCore::Trs
 		void buSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
 
 		void addRules(std::vector<RewritingRule>&& rules);
+		void addInvRules(std::vector<RewritingRule>&& rules);
 		void removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 		void addContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 	private:
