@@ -88,6 +88,7 @@ void Actions::compile()
 
 			AppGlobal::appMod->formulasSystem()->addFile(fileContent.toStdWString(), relativePath.toStdWString());
 		}
+		AppGlobal::appMod->formulasSystem()->compile();
 	}
 
 }

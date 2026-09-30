@@ -8,10 +8,10 @@ namespace TryAlgebraCore::Trs
 {
 	struct FormulasBundle
 	{
-		Transformer* transformer;
-		std::vector<NewTrs::Term*> formulasLhs;
-		std::vector<std::unique_ptr<TermIntermediate>> formulasRhs;
-		std::vector<NewTrs::Identity> identities;
+		std::wstring filePath;
+		Transformer* transformer = nullptr;
+		NewTrs::Trs* trs = nullptr;
+		std::vector<Formula> formulas;
 	};
 
 	class FormulasSystem
@@ -27,5 +27,6 @@ namespace TryAlgebraCore::Trs
 		std::unordered_map<std::wstring, std::unique_ptr<Transformer>> m_transformers;
 		//key trs path + transformer path
 		std::unordered_map<std::wstring, std::unique_ptr<NewTrs::Trs>> m_trsMap;
+		std::vector<FormulasBundle> m_bundles;
 	};
 }

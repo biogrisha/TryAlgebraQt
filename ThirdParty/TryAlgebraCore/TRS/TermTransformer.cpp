@@ -123,7 +123,8 @@ namespace TryAlgebraCore::Trs
 
 	void Transformer::addRules(std::vector<RewritingRule>&& rules)
 	{
-		for (auto& rule : rules)
+		m_rules = std::move(rules);
+		for (auto& rule : m_rules)
 		{
 			markVariables(rule.from);
 			markVariables(rule.to);
@@ -135,14 +136,13 @@ namespace TryAlgebraCore::Trs
 			{
 				rule.bundles.push_back(&b);
 			}
-			m_rules.push_back(std::move(rule));
 		}
-		m_rules = std::move(rules);
 	}
 
 	void Transformer::addInvRules(std::vector<RewritingRule>&& rules)
 	{
-		for (auto& rule : rules)
+		m_invRules = std::move(rules);
+		for (auto& rule : m_invRules)
 		{
 			markVariables(rule.from);
 			markVariables(rule.to);
@@ -154,9 +154,7 @@ namespace TryAlgebraCore::Trs
 			{
 				rule.bundles.push_back(&b);
 			}
-			m_rules.push_back(std::move(rule));
 		}
-		m_invRules = std::move(rules);
 	}
 
 	void Transformer::removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj)
