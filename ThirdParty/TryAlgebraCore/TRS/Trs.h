@@ -30,7 +30,6 @@ namespace NewTrs
 	struct Identity
 	{
 		std::map<std::vector<int>, int> variablesOrder;
-		std::unordered_set<Term*> variables;
 		Term* lhs = nullptr;
 		Term* rhs = nullptr;
 	};

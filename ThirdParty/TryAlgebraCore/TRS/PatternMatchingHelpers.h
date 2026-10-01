@@ -139,5 +139,6 @@ namespace TryAlgebraCore::Trs
 	void copyTermIntermediate(const std::span<std::unique_ptr<TermIntermediate>>& from
 		, std::vector<std::unique_ptr<TermIntermediate>>& to, TermIntermediate* parent = nullptr);
 	std::vector<std::unique_ptr<TermIntermediate>> copyTermIntermediate(const std::span<std::unique_ptr<TermIntermediate>>& from);
+	std::unique_ptr<TermIntermediate> copyTermIntermediate(const std::unique_ptr<TermIntermediate>& from);
 	void expandVars(std::vector<std::unique_ptr<TermIntermediate>>& term);
 }

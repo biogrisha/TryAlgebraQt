@@ -9,11 +9,12 @@ namespace NewTrs
 		std::unordered_set<Term*> variables;
 		std::map<std::vector<int>, int> patVariablesOrder;
 
-		collectVariables(pat, variables);
+		m_patStorage.clear();
 		markPatternNodes(pat);
 		generateTermStr(pat);
 		compact(pat, StorageType::Pattern);
 		initCompOrder(pat);
+		collectVariables(pat, variables);
 		patVariablesOrder = setupVariablesOrder(pat);
 
 		struct NewIdentity

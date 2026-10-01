@@ -41,7 +41,6 @@ namespace TryAlgebraCore::Trs
 
 		for (auto& formulasFile : m_formulasFiles)
 		{
-			FormulasBundle bundle;
 			auto transformer = m_transformers.find(formulasFile.parserFilePath);
 			if (transformer == m_transformers.end())
 			{
@@ -49,18 +48,19 @@ namespace TryAlgebraCore::Trs
 			}
 
 			//trskey = trs path + transformer path
-			std::wstring trsKey = formulasFile.trsFilePath;
-			trsKey.insert(trsKey.end(), formulasFile.parserFilePath.begin(), formulasFile.parserFilePath.end());
+			std::wstring bundleKey = formulasFile.trsFilePath;
+			bundleKey.insert(bundleKey.end(), formulasFile.parserFilePath.begin(), formulasFile.parserFilePath.end());
 
-			auto trsIt = m_trsMap.find(trsKey);
-			if (trsIt != m_trsMap.end())
+			FormulasBundle* bundle = nullptr;
+			auto bundleIt = m_bundles.find(bundleKey);
+			if (bundleIt != m_bundles.end())
 			{
 				//found trs for same file and parser
-				bundle.trs = trsIt->second.get();
+				bundle = bundleIt->second.get();
 			}
 			else
 			{
-				//no such trs, create new
+				//no such bundle, create new
 				auto trsFile = m_trsFiles.find(formulasFile.trsFilePath);
 				if (trsFile == m_trsFiles.end())
 				{
@@ -85,10 +85,11 @@ namespace TryAlgebraCore::Trs
 					id.rhs = termTo;
 				}
 
-				auto trs = std::make_unique<NewTrs::Trs>();
-				trs->setIds(std::move(trsIds));
-				bundle.trs = trs.get();
-				m_trsMap.emplace(trsKey, std::move(trs));
+				auto newBundle = std::make_unique<FormulasBundle>();
+				newBundle->trs.setIds(std::move(trsIds));
+				bundle = newBundle.get();
+				m_bundles.emplace(bundleKey, std::move(newBundle));
+				bundle->transformer = transformer->second.get();
 			}
 
 			for (auto& formula : formulasFile.formulas)
@@ -99,11 +100,76 @@ namespace TryAlgebraCore::Trs
 					transformer->second->applyAll(expr);
 				}
 			}
-			bundle.formulas = std::move(formulasFile.formulas);
-			bundle.filePath = formulasFile.filePath;
-			m_bundles.push_back(std::move(bundle));
+			bundle->formulaFiles.push_back(std::move(formulasFile));
 		}
 	}
+
+	std::vector<FileRes> FormulasSystem::findFormulas(const std::wstring& subjString)
+	{
+		auto subjIntermediate = parseToTermIntermediate(subjString);
+		std::vector<FileRes> res;
+		for (auto& [key, bundle] : m_bundles)
+		{
+			auto subjCopy = copyTermIntermediate(subjIntermediate);
+			bundle->transformer->applyAll(subjCopy);
+			NewTrs::Term* subjTerm = nullptr;
+			toTerm(subjCopy.back(), subjTerm);
+			bundle->trs.setSubj(subjTerm);
+			for (auto& file : bundle->formulaFiles)
+			{
+				FileRes fileRes;
+				fileRes.filePath = file.filePath;
+				for (auto& formula : file.formulas)
+				{
+					FormulaRes formulaRes;
+					formulaRes.formulaName = formula.name;
+					for (auto& id : formula.equality)
+					{
+						NewTrs::Term* idTerm = nullptr;
+						toTerm(id.back(), idTerm);
+						auto matches = bundle->trs.run(idTerm);
+
+						if (!matches.empty())
+						{
+							for (auto& idSub : formula.equality)
+							{
+								std::vector<std::wstring> variations;
+								for (auto& match : matches)
+								{
+									auto idCopy = copyTermIntermediate(idSub);
+									for (auto& [var, sub] : match)
+									{
+										std::unique_ptr<TermIntermediate> varInter;
+										std::unique_ptr<TermIntermediate> subInter;
+										toIntermediate(var, varInter);
+										toIntermediate(sub, subInter);
+
+										substitute(idCopy.back(), subInter, subInter);
+									}
+									variations.emplace_back();
+									termIntermediateToStr(idCopy, variations.back());
+								}
+								if (!variations.empty())
+								{
+									formulaRes.exprs.push_back(std::move(variations));
+								}
+							}
+						}
+
+						if (!formulaRes.exprs.empty())
+						{
+							fileRes.formulas.push_back(std::move(formulaRes));
+						}
+						if (!matches.empty())
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	void FormulasSystem::toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent)
 	{
 		to = new NewTrs::Term;
@@ -127,6 +193,37 @@ namespace TryAlgebraCore::Trs
 		{
 			NewTrs::Term*& childTerm = to->children.emplace_back(nullptr);
 			toTerm(ch, childTerm, to);
+		}
+	}
+
+	void FormulasSystem::toIntermediate(NewTrs::Term* term, std::unique_ptr<TermIntermediate>& intermediate)
+	{
+		intermediate = std::make_unique<TermIntermediate>();
+		//intermediate->label = m_symbolsInv[term->label.back()];
+		intermediate->label = std::wstring(term->label.begin(), term->label.end());
+		for (NewTrs::Term* ch : term->children)
+		{
+			auto& newCh = intermediate->children.emplace_back();
+			toIntermediate(ch, newCh);
+		}
+	}
+
+	void FormulasSystem::substitute(std::unique_ptr<TermIntermediate>& subj,
+		const std::unique_ptr<TermIntermediate>& var, const std::unique_ptr<TermIntermediate>& sub)
+	{
+		if (subj->isVariable)
+		{
+			if (compare(subj.get(), var.get()))
+			{
+				subj = copyTermIntermediate(sub);
+			}
+		}
+		else
+		{
+			for (auto& ch : subj->children)
+			{
+				substitute(ch, var, sub);
+			}
 		}
 	}
 }

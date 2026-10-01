@@ -738,6 +738,17 @@ namespace TryAlgebraCore::Trs
 		return res;
 	}
 
+	std::unique_ptr<TermIntermediate> copyTermIntermediate(const std::unique_ptr<TermIntermediate>& from)
+	{
+		auto res = std::make_unique<TermIntermediate>();
+		res->label = from->label;
+		res->isPattern = from->isPattern;
+		res->isVariable = from->isVariable;
+		res->variableMeta = from->variableMeta;
+		copyTermIntermediate(from->children, res->children, res.get());
+		return res;
+	}
+
 	void expandVars(std::vector<std::unique_ptr<TermIntermediate>>& term)
 	{
 		for (int i = term.size() - 1; i >= 0; --i)
