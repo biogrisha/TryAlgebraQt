@@ -147,6 +147,7 @@ namespace TryAlgebraCore::Trs
 										substitute(idCopy.back(), subInter, subInter);
 									}
 									variations.emplace_back();
+									bundle->transformer->applyAllInverse(idCopy);
 									termIntermediateToStr(idCopy, variations.back());
 								}
 								if (!variations.empty())
@@ -154,20 +155,22 @@ namespace TryAlgebraCore::Trs
 									formulaRes.exprs.push_back(std::move(variations));
 								}
 							}
-						}
-
-						if (!formulaRes.exprs.empty())
-						{
-							fileRes.formulas.push_back(std::move(formulaRes));
-						}
-						if (!matches.empty())
-						{
+							if (!formulaRes.exprs.empty())
+							{
+								fileRes.formulas.push_back(std::move(formulaRes));
+							}
 							break;
 						}
+
 					}
+				}
+				if (!fileRes.formulas.empty())
+				{
+					res.push_back(std::move(fileRes));
 				}
 			}
 		}
+		return res;
 	}
 
 	void FormulasSystem::toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent)
