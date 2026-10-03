@@ -49,6 +49,11 @@ namespace TryAlgebraCore
 		m_drawBackground = val;
 	}
 
+	void MeContainer::setDrawBorder(bool val)
+	{
+		m_drawBorder = val;
+	}
+
 	void MeContainer::adjustBrackets(float& outMaxY)
 	{
 		static const std::unordered_map<wchar_t, wchar_t> bracketsMap =
@@ -118,6 +123,18 @@ namespace TryAlgebraCore
 			rect.Pos = getPos();
 			rect.Size = getSize();
 			vt->mdocState->at(1).addRectangle(rect);
+		}
+		if (m_drawBorder)
+		{
+			LineChain border;
+			border.width = 1;
+			border.color = { 1,1,1,1 };
+			border.points.push_back(getPos());
+			border.points.push_back(getPos() + glm::vec2(getSize().x, 0));
+			border.points.push_back(getPos() + getSize());
+			border.points.push_back(getPos() + glm::vec2(0, getSize().y));
+			border.points.push_back(getPos());
+			vt->mdocState->at(1).addLine(border);
 		}
 		MeBase::draw(vt);
 	}
@@ -275,6 +292,15 @@ namespace TryAlgebraCore
 		}
 		setSizeX(std::max(getSize().x, m_scaling_factor * 10));
 		setSizeY(std::max(getSize().y, m_scaling_factor * g_caret_def_size.y));
+		if (m_drawBorder)
+		{
+			float padding = 2;
+			for (auto& ch : m_children)
+			{
+				ch->setPos(ch->getPos() + glm::vec2{ padding, padding });
+			}
+			setSize(getSize() + glm::vec2{ padding, padding } * 2.f);
+		}
 	}
 	std::wstring MeContainer::getName()
 	{

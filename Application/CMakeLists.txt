@@ -13,7 +13,7 @@ qt_add_qml_module(Application
         MeListSearchBar.qml
         FileSystemView.qml
         OpenProjectDialog.qml
-
+        ActionsList.qml
     SOURCES
         AppGlobal.h
         Application.h

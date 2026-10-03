@@ -17,10 +17,12 @@ namespace TryAlgebraCore
 		void calcLine(VisualToolkit* visual_toolkit, size_t end = UINT64_MAX);
 		void addEmptyLine();
 		void setDrawBackground(bool val);
+		void setDrawBorder(bool val);
 	private:
 		void adjustBrackets(float& bracketOffset);
 		float next_line_y = 0;
 		int end_line_i = 0;
 		bool m_drawBackground = false;
+		bool m_drawBorder = false;
 	};
 }

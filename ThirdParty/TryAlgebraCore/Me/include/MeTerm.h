@@ -20,7 +20,6 @@ namespace TryAlgebraCore
 		void step(StepDir dir, StepFrom step_from, MePath& path) override;
 		std::wstring getName() override;
 	private:
-		FGlyphData m_glyph;
 		Type m_type;
 	};
 }

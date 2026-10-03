@@ -18,6 +18,12 @@ class FTAMathDocumentInfo;
 /*
 * Control used to interact with selected math document
 */
+enum class DocumentMode
+{
+	Editor,
+	TreeView
+};
+
 class DocumentControl : public QObject
 {
 	Q_OBJECT

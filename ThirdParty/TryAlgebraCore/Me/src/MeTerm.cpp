@@ -1,7 +1,7 @@
 #include <Me/include/MeTerm.h>
 #include <Me/include/MeGlobals.h>
+#include <Me/include/MeContainer.h>
 #include <Helpers/include/MeHelpers.h>
-
 namespace TryAlgebraCore
 {
 	void MeTerm::setMeta(const std::wstring& meta)
@@ -17,17 +17,23 @@ namespace TryAlgebraCore
 	}
 
 	void MeTerm::calculate(VisualToolkit* visual_toolkit)
+
 	{
 		float padding = 2;
 		glm::vec2 size = { padding,0 };
-		float margin = m_scaling_factor * 5;
+		float margin = 0;
 		for (auto& ch : m_children)
 		{
+			if (auto* cont = MyRTTI::Cast<MeContainer>(ch.get()))
+			{
+				cont->setDrawBorder(true);
+			}
 			ch->setScalingFactor(m_scaling_factor);
 			ch->calculate(visual_toolkit);
 			ch->setPos({ size.x + margin, padding });
 			size.x = ch->getSize().x + ch->getPos().x;
 			size.y = std::max(size.y, ch->getSize().y);
+			margin = m_scaling_factor * 10;
 		}
 		setSize(size + glm::vec2{ padding * 2, padding * 2 });
 		setBearing(getSize().y / 2.);
