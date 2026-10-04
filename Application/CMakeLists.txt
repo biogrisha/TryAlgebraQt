@@ -38,6 +38,8 @@ qt_add_qml_module(Application
         Models/DocumentsModel.cpp
         Models/ApplicationModel.h
         Models/ApplicationModel.cpp
+        Models/MeActionsModel.cpp
+        Models/MeActionsModel.h
         Modules/MeInfoGenerator.h
         Modules/MeInfoGenerator.cpp
         Modules/ImageProvider.h
