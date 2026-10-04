@@ -104,10 +104,10 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	std::vector<FileRes> FormulasSystem::findFormulas(const std::wstring& subjString)
+	void FormulasSystem::findFormulas(const std::wstring& subjString)
 	{
+		m_lastRes.clear();
 		auto subjIntermediate = parseToTermIntermediate(subjString);
-		std::vector<FileRes> res;
 		for (auto& [key, bundle] : m_bundles)
 		{
 			auto subjCopy = copyTermIntermediate(subjIntermediate);
@@ -166,11 +166,20 @@ namespace TryAlgebraCore::Trs
 				}
 				if (!fileRes.formulas.empty())
 				{
-					res.push_back(std::move(fileRes));
+					m_lastRes.push_back(std::move(fileRes));
 				}
 			}
 		}
-		return res;
+	}
+
+	const std::vector<FileRes>& FormulasSystem::lastRes() const
+	{
+		return m_lastRes;
+	}
+
+	const std::unordered_map<std::wstring, std::unique_ptr<Transformer>>& FormulasSystem::transformers() const
+	{
+		return m_transformers;
 	}
 
 	void FormulasSystem::toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent)

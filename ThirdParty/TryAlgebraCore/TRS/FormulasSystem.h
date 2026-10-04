@@ -31,7 +31,9 @@ namespace TryAlgebraCore::Trs
 	public:
 		void addFile(const std::wstring& document, const std::wstring& filePath);
 		void compile();
-		std::vector<FileRes> findFormulas(const std::wstring& subjString);
+		void findFormulas(const std::wstring& subjString);
+		const std::vector<FileRes>& lastRes() const;
+		const std::unordered_map<std::wstring, std::unique_ptr<Transformer>>& transformers() const;
 	private:
 		void toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent = nullptr);
 		void toIntermediate(NewTrs::Term* term, std::unique_ptr<TermIntermediate>& intermediate);
@@ -42,5 +44,7 @@ namespace TryAlgebraCore::Trs
 		std::unordered_map<std::wstring, std::unique_ptr<Transformer>> m_transformers;
 		//key trs path + transformer path
 		std::unordered_map<std::wstring, std::unique_ptr<FormulasBundle>> m_bundles;
+		std::vector<FileRes> m_lastRes;
+
 	};
 }

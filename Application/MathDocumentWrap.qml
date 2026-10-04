@@ -33,6 +33,11 @@ Rectangle {
 			z:1000
 		}
 
+		ActionsList{
+			id: actionsList
+			z:1000
+		}
+
 		Keys.onPressed: (event) => {
 			docControl.keyInput(event.key, event.text, event.modifiers)
 			event.accepted = true
@@ -51,6 +56,7 @@ Rectangle {
 			} 
 			onPressed: (event) => {
 				meListSearchBar.close()
+				actionsList.visible = false;
 				docControl.mouseBtnDown(event.x, event.y, event.button)
 			}
 			onReleased: (event) => {
@@ -61,6 +67,7 @@ Rectangle {
 			}
 			onWheel: (event) => {
 				meListSearchBar.close()
+				actionsList.visible = false;
 				docControl.scrollY(event.angleDelta.y > 0)
 			}
 		}
@@ -74,7 +81,18 @@ Rectangle {
 				meListSearchBar.y = y
 			}
 		}
+
+		Connections {
+		target: docControl
 		
+			function onMeActionsRequested(x,y) {
+				actionsList.open()
+				actionsList.x = x
+				actionsList.y = y
+				
+			}
+		}
+			
 	}
         
 	ScrollBar {
