@@ -10,6 +10,4 @@ class MeActionsControl : public QObject
 		QML_ELEMENT
 public:
 	MeActionsControl() = default;
-public slots:
-	QStringList transformers() const;
 };

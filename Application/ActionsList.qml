@@ -3,30 +3,35 @@ import QtQuick.Controls.Basic
 import com.Application
 
 Rectangle {
-	
-    MeActionsControl
-    {
+    id: root
+
+    visible: false
+    width: 200
+    height: 300
+
+    color: "#d0d0d0"
+    radius: 4
+
+    MeActionsControl {
         id: meActionsControl
     }
 
+    MeActionsModel {
+        id: meActionsModel
+    }
+
     function open() {
-		root.visible = true
-        actionsList.model = meActionsControl.transformers()
-	}
-	id: root
+        root.visible = true
 
-    visible: false
-	width: 200
-	height: 300
+        meActionsModel.update()
+    }
 
-	color: "#d0d0d0"
-	radius: 4
-	ListView {
-        id: actionsList
+    TreeView {
+        id: actionsTree
 
         anchors.fill: parent
+        model: meActionsModel
 
-        model: meActionsControl.transformers()
         clip: true
         boundsBehavior: Flickable.StopAtBounds
 
@@ -39,8 +44,8 @@ Rectangle {
                     ? event.pixelDelta.y
                     : event.angleDelta.y
 
-                actionsList.contentY -= delta
-                actionsList.returnToBounds()
+                actionsTree.contentY -= delta
+                actionsTree.returnToBounds()
             }
         }
 
@@ -48,17 +53,22 @@ Rectangle {
             policy: ScrollBar.AsNeeded
         }
 
-        delegate: Column {
-            required property var modelData
+        delegate: TreeViewDelegate {
+            id: treeDelegate
 
-            width: ListView.view.width
+            width: TreeView.view.width
 
-            Text {
-                text: modelData
-                font.bold: true
+            contentItem: Text {
+                text: treeDelegate.display
+
+                leftPadding: treeDelegate.depth * 16
+                rightPadding: 4
+
+                verticalAlignment: Text.AlignVCenter
+                font.bold: treeDelegate.depth === 0
+
+                color: "#202020"
             }
-
-           
         }
     }
 }

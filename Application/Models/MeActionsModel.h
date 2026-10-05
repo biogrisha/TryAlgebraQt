@@ -13,7 +13,8 @@ class MeActionsModel : public QAbstractItemModel
 		{
 			File,
 			Formula,
-			Transformer
+			Transformer,
+			TransCategory
 		};
 
 		Type type;
@@ -26,7 +27,6 @@ class MeActionsModel : public QAbstractItemModel
 
 public:
 	MeActionsModel() = default;
-	void update();
 	QModelIndex index(int row, int column,
 		const QModelIndex& parent = QModelIndex()) const override;
 	QModelIndex parent(const QModelIndex& child) const override;
@@ -35,6 +35,8 @@ public:
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+public slots:
+	void update();
 private:
 	QStringList m_transformers;
 	std::vector<TryAlgebraCore::Trs::FileRes> m_foundFormulas;
