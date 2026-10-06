@@ -6,11 +6,14 @@ Rectangle {
     id: root
 
     visible: false
-    width: 200
+    width: 240
     height: 300
 
-    color: "#d0d0d0"
-    radius: 4
+    color: "#fafafa"
+    radius: 6
+    border.width: 1
+    border.color: "#c8c8c8"
+    clip: true
 
     MeActionsControl {
         id: meActionsControl
@@ -22,16 +25,18 @@ Rectangle {
 
     function open() {
         root.visible = true
-
+        sectionsList.model = null
         meActionsModel.update()
+        sectionsList.model = meActionsModel.sections()
     }
 
-    TreeView {
-        id: actionsTree
+    ListView {
+        id: sectionsList
 
         anchors.fill: parent
-        model: meActionsModel
+        anchors.margins: 6
 
+        spacing: 4
         clip: true
         boundsBehavior: Flickable.StopAtBounds
 
@@ -44,30 +49,145 @@ Rectangle {
                     ? event.pixelDelta.y
                     : event.angleDelta.y
 
-                actionsTree.contentY -= delta
-                actionsTree.returnToBounds()
+                sectionsList.contentY -= delta
+                sectionsList.returnToBounds()
             }
         }
 
         ScrollBar.vertical: ScrollBar {
+            width: 5
             policy: ScrollBar.AsNeeded
         }
 
-        delegate: TreeViewDelegate {
-            id: treeDelegate
+        delegate: Column {
+            id: sectionDelegate
 
-            width: TreeView.view.width
+            required property var modelData
+            property var section: modelData
 
-            contentItem: Text {
-                text: treeDelegate.display
+            width: sectionsList.width - 6
+            spacing: 2
 
-                leftPadding: treeDelegate.depth * 16
-                rightPadding: 4
-
+            Text {
+                width: parent.width
+                height: 24
+                leftPadding: 6
+                text: sectionDelegate.section.name()
+                font.pixelSize: 12
+                font.bold: true
                 verticalAlignment: Text.AlignVCenter
-                font.bold: treeDelegate.depth === 0
+                color: "#444444"
+                elide: Text.ElideRight
+            }
 
-                color: "#202020"
+            Repeater {
+                model: sectionDelegate.section.actions()
+
+                delegate: Loader {
+                    id: actionLoader
+
+                    required property var modelData
+                    property var actionData: modelData
+
+                    width: sectionDelegate.width
+                    height: item ? item.implicitHeight : 0
+                    sourceComponent: parserAction
+
+                    Component {
+                        id: parserAction
+
+                        Rectangle {
+                            id: actionItem
+
+                            width: actionLoader.width
+                            implicitHeight: 34
+                            radius: 4
+                            color: actionHover.hovered ? "#eeeeee" : "transparent"
+
+                            HoverHandler {
+                                id: actionHover
+                            }
+
+                            Row {
+                                anchors.fill: parent
+                                anchors.leftMargin: 7
+                                anchors.rightMargin: 4
+                                spacing: 4
+
+                                Text {
+                                    width: parent.width
+                                        - parseButton.width
+                                        - inverseButton.width
+                                        - parent.spacing * 2
+                                    height: parent.height
+                                    text: actionLoader.actionData.name()
+                                    font.pixelSize: 12
+                                    verticalAlignment: Text.AlignVCenter
+                                    color: "#282828"
+                                    elide: Text.ElideRight
+                                }
+
+                                Button {
+                                    id: parseButton
+
+                                    y: (parent.height - height) / 2
+                                    width: 48
+                                    height: 24
+                                    text: qsTr("Parse")
+                                    hoverEnabled: true
+
+                                    contentItem: Text {
+                                        text: parseButton.text
+                                        font.pixelSize: 11
+                                        color: "#ffffff"
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    background: Rectangle {
+                                        radius: 3
+                                        color: parseButton.down
+                                            ? "#4e4e4e"
+                                            : parseButton.hovered ? "#666666" : "#585858"
+                                    }
+                                }
+
+                                Button {
+                                    id: inverseButton
+
+                                    y: (parent.height - height) / 2
+                                    width: 54
+                                    height: 24
+                                    text: qsTr("Inverse")
+                                    hoverEnabled: true
+
+                                    contentItem: Text {
+                                        text: inverseButton.text
+                                        font.pixelSize: 11
+                                        color: "#444444"
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    background: Rectangle {
+                                        radius: 3
+                                        color: inverseButton.down
+                                            ? "#dddddd"
+                                            : inverseButton.hovered ? "#f3f3f3" : "#ffffff"
+                                        border.width: 1
+                                        border.color: "#b8b8b8"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: "#e4e4e4"
             }
         }
     }

@@ -2,43 +2,42 @@
 #include <QAbstractItemModel>
 #include <TRS/FormulasSystem.h>
 #include <qqml.h>
-class MeActionsModel : public QAbstractItemModel
+
+class MeActionData : public QObject
+{
+	Q_OBJECT
+public:
+	explicit MeActionData(QObject* parent = nullptr);
+public slots:
+	QString name() const;
+	QString type() const;
+public:
+	QString m_name;
+	QString m_type;
+};
+
+class MeActionSection : public QObject
+{
+	Q_OBJECT
+public:
+	explicit MeActionSection(QObject* parent = nullptr);
+public slots:
+	QString name() const;
+	QList<MeActionData*> actions() const;
+public:
+	QString m_name;
+	QList<MeActionData*> m_actions;
+};
+
+class MeActionsModel : public QObject
 {
 	Q_OBJECT
 		QML_ELEMENT
-
-		struct Node
-	{
-		enum class Type
-		{
-			File,
-			Formula,
-			Transformer,
-			TransCategory
-		};
-
-		Type type;
-
-		int indexInParent = 0;
-		Node* parent = nullptr;
-		std::vector<std::unique_ptr<Node>> children;
-		const void* data = nullptr;
-	};
-
 public:
 	MeActionsModel() = default;
-	QModelIndex index(int row, int column,
-		const QModelIndex& parent = QModelIndex()) const override;
-	QModelIndex parent(const QModelIndex& child) const override;
-
-	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-
-	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 public slots:
 	void update();
+	QList<MeActionSection*> sections() const;
 private:
-	QStringList m_transformers;
-	std::vector<TryAlgebraCore::Trs::FileRes> m_foundFormulas;
-	std::vector<std::unique_ptr<Node>> m_data;
+	QList<MeActionSection*> m_sections;
 };
