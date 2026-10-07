@@ -14,6 +14,7 @@ public slots:
 public:
 	QString m_name;
 	QString m_type;
+	const void* m_data = nullptr;
 };
 
 class MeActionSection : public QObject
@@ -40,4 +41,5 @@ public slots:
 	QList<MeActionSection*> sections() const;
 private:
 	QList<MeActionSection*> m_sections;
+	std::vector<TryAlgebraCore::Trs::FileRes> foundFormulas;
 };

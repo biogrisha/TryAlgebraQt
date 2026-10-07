@@ -287,6 +287,7 @@ void DocumentControl::mouseBtnDown(float x, float y, Qt::MouseButton button)
 		{
 			return;
 		}
+		AppGlobal::appMod->formulasSystem()->findFormulas(str);
 		auto caretPos = m_currDoc->caretPos();
 		emit meActionsRequested(caretPos.x, caretPos.y);
 		updateElements(true, true, true);

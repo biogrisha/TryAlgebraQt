@@ -44,24 +44,41 @@ void MeActionsModel::update()
 	}
 	m_sections.clear();
 
-	auto addAction = [](MeActionSection* section, const QString& name, const QString& type)
+	auto addAction = [](MeActionSection* section, const QString& name, const QString& type, const void* data = nullptr)
 		{
 			auto* action = new MeActionData(section);
 			action->m_name = name;
 			action->m_type = type;
+			action->m_data = data;
 			section->m_actions.append(action);
 		};
 
 	const auto& parsers = AppGlobal::appMod->formulasSystem()->transformers();
 	if (!parsers.empty())
 	{
-		auto* section1 = new MeActionSection(this);
-		section1->m_name = QStringLiteral("Parsers");
+		auto* section = new MeActionSection(this);
+		section->m_name = QStringLiteral("Parsers");
 		for (const auto& parser : parsers)
 		{
-			addAction(section1, QString::fromStdWString(parser.first), QStringLiteral("parser"));
+			addAction(section, QString::fromStdWString(parser.first), QStringLiteral("parser"));
 		}
-		m_sections.append(section1);
+		m_sections.append(section);
+	}
+	foundFormulas = AppGlobal::appMod->formulasSystem()->lastRes();
+	if (!foundFormulas.empty())
+	{
+		auto* section = new MeActionSection(this);
+		section->m_name = QStringLiteral("Formulas");
+		for (const auto& file : foundFormulas)
+		{
+			for (const auto& formula : file.formulas)
+			{
+				addAction(section,
+					QString::fromStdWString(formula.formulaName),
+					QStringLiteral("formula"), &formula);
+			}
+		}
+		m_sections.append(section);
 	}
 }
 

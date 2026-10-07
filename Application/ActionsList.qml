@@ -182,10 +182,55 @@ Rectangle {
                                         border.color: "#b8b8b8"
                                     }
 
-                                    onClicked: {
+                                onClicked: {
                                         meActionsControl.parseInverse(actionLoader.actionData.name())
                                         root.visible = false;
                                     }
+                                }
+                            }
+                        }
+                    }
+
+                    Component {
+                        id: formulaAction
+
+                        Rectangle {
+                            id: actionItem
+
+                            width: actionLoader.width
+                            implicitHeight: 34
+                            radius: 4
+                            color: actionHover.hovered ? "#eeeeee" : "transparent"
+
+                            HoverHandler {
+                                id: actionHover
+                            }
+
+                            Button {
+                                id: formulaButton
+
+                                y: (parent.height - height) / 2
+                                width: 48
+                                height: 24
+                                text: qsTr("Parse")
+                                hoverEnabled: true
+
+                                contentItem: Text {
+                                    text: actionLoader.actionData.name()
+                                    font.pixelSize: 11
+                                    color: "#ffffff"
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
+
+                                background: Rectangle {
+                                    radius: 3
+                                    color: formulaButton.down
+                                        ? "#4e4e4e"
+                                        : formulaButton.hovered ? "#666666" : "#585858"
+                                }
+                                onClicked: {
+
                                 }
                             }
                         }
