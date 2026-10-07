@@ -88,5 +88,6 @@ private:
 
 	TryAlgebraCore::MathDocument* m_currDoc = nullptr;
 	boost::signals2::connection m_onScrollDataChangedConn;
+	boost::signals2::connection m_onDocUpdated;
 };
 

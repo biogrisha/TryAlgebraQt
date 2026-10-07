@@ -68,7 +68,7 @@ void Actions::compile()
 		QDir projectDir(currentFolder);
 
 		auto filePaths = getMdocFiles(currentFolder);
-
+		AppGlobal::appMod->formulasSystem()->clear();
 		for (const auto& filePath : filePaths)
 		{
 			QString relativePath = projectDir.relativeFilePath(filePath);

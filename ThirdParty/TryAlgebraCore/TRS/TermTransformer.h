@@ -26,8 +26,8 @@ namespace TryAlgebraCore::Trs
 	class Transformer
 	{
 	public:
-		void applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj);
-		void applyAllInverse(std::vector<std::unique_ptr<TermIntermediate>>& subj);
+		void applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool removeCont = true);
+		void applyAllInverse(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool addCont = true);
 
 		void tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
 		void tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);

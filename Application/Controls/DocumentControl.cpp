@@ -204,6 +204,12 @@ void DocumentControl::onCurrentDocChanged()
 		{
 			emit scrollDataChanged(currentLine, linesCount, linesOnScreen);
 		});
+	m_onDocUpdated.disconnect();
+	m_onDocUpdated = m_currDoc->updated.connect([this]()
+		{
+			m_currDoc->draw();
+			updateElements(true, true, true);
+		});
 }
 
 void DocumentControl::onBeforeDocRemoved(DocumentInfo* docInfo)

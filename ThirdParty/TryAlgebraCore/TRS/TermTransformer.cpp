@@ -3,7 +3,7 @@
 
 namespace TryAlgebraCore::Trs
 {
-	void Transformer::applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	void Transformer::applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool removeCont)
 	{
 		bracketsParser.apply(subj);
 		for (auto& rule : m_rules)
@@ -21,12 +21,18 @@ namespace TryAlgebraCore::Trs
 			}
 		}
 		bracketsParser.removeBrackets(subj);
-		removeContainers(subj);
+		if (removeCont)
+		{
+			removeContainers(subj);
+		}
 	}
 
-	void Transformer::applyAllInverse(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	void Transformer::applyAllInverse(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool addCont)
 	{
-		addContainers(subj);
+		if (addCont)
+		{
+			addContainers(subj);
+		}
 		for (auto& rule : m_invRules)
 		{
 			switch (rule.type)

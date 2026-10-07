@@ -3,6 +3,16 @@
 
 namespace TryAlgebraCore::Trs
 {
+	void FormulasSystem::clear()
+	{
+		m_trsFiles.clear();
+		m_parserFiles.clear();
+		m_formulasFiles.clear();
+		m_transformers.clear();
+		m_bundles.clear();
+		m_lastRes.clear();
+	}
+
 	void FormulasSystem::addFile(const std::wstring& document, const std::wstring& filePath)
 	{
 		FileParser parser;

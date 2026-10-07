@@ -10,4 +10,7 @@ class MeActionsControl : public QObject
 		QML_ELEMENT
 public:
 	MeActionsControl() = default;
+public slots:
+	void parse(const QString& parserName);
+	void parseInverse(const QString& parserName);
 };

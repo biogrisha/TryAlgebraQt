@@ -29,6 +29,7 @@ namespace TryAlgebraCore::Trs
 	class FormulasSystem
 	{
 	public:
+		void clear();
 		void addFile(const std::wstring& document, const std::wstring& filePath);
 		void compile();
 		void findFormulas(const std::wstring& subjString);

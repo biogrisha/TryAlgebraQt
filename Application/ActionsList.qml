@@ -150,6 +150,10 @@ Rectangle {
                                             ? "#4e4e4e"
                                             : parseButton.hovered ? "#666666" : "#585858"
                                     }
+                                    onClicked: {
+                                        meActionsControl.parse(actionLoader.actionData.name())
+                                        root.visible = false;
+                                    }
                                 }
 
                                 Button {
@@ -176,6 +180,11 @@ Rectangle {
                                             : inverseButton.hovered ? "#f3f3f3" : "#ffffff"
                                         border.width: 1
                                         border.color: "#b8b8b8"
+                                    }
+
+                                    onClicked: {
+                                        meActionsControl.parseInverse(actionLoader.actionData.name())
+                                        root.visible = false;
                                     }
                                 }
                             }

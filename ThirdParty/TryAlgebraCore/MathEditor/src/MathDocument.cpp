@@ -522,6 +522,7 @@ namespace TryAlgebraCore
 	void MathDocument::markDirty(DirtyState flags)
 	{
 		m_dirty_states |= flags;
+		updated();
 	}
 
 	void MathDocument::clearDirty()

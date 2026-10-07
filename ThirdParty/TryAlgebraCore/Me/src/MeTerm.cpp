@@ -30,12 +30,12 @@ namespace TryAlgebraCore
 			}
 			ch->setScalingFactor(m_scaling_factor);
 			ch->calculate(visual_toolkit);
-			ch->setPos({ size.x + margin, padding });
+			ch->setPos({ size.x + margin, padding * 4 });
 			size.x = ch->getSize().x + ch->getPos().x;
 			size.y = std::max(size.y, ch->getSize().y);
 			margin = m_scaling_factor * 10;
 		}
-		setSize(size + glm::vec2{ padding * 2, padding * 2 });
+		setSize(size + glm::vec2{ padding * 2, padding * 8 });
 		setBearing(getSize().y / 2.);
 	}
 
