@@ -87,8 +87,8 @@ Rectangle {
 		
 			function onMeActionsRequested(x,y) {
 				actionsList.open()
-				actionsList.x = x
-				actionsList.y = y
+				actionsList.x = mathCanvas.x + mathCanvas.width - actionsList.width
+				actionsList.y = mathCanvas.y
 				
 			}
 		}

@@ -33,7 +33,7 @@ namespace TryAlgebraCore
 		markDirty(DirtyState::Text);
 	}
 
-	void MathDocument::type(std::wstring str)
+	void MathDocument::type(std::wstring str, bool select)
 	{
 		bool deletedSelection = false;
 		//history info
@@ -61,6 +61,10 @@ namespace TryAlgebraCore
 		}
 		from.pos += str.size();
 		m_selection_end = m_selection_start;
+		if (select)
+		{
+			from.pos -= str.size();
+		}
 		adjustLineFrom();
 		markDirty(DirtyState::Text | DirtyState::Selection);
 		m_history.clearRedo();

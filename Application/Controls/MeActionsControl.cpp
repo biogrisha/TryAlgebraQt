@@ -15,7 +15,7 @@ void MeActionsControl::parse(const QString& parserName)
 		parser->second->applyAll(term, false);
 		std::wstring res;
 		TryAlgebraCore::Trs::termIntermediateToStr(term, res);
-		currDoc->meDoc()->type(res);
+		currDoc->meDoc()->type(res, true);
 	}
 }
 
@@ -31,6 +31,14 @@ void MeActionsControl::parseInverse(const QString& parserName)
 		parser->second->applyAllInverse(term, false);
 		std::wstring res;
 		TryAlgebraCore::Trs::termIntermediateToStr(term, res);
-		currDoc->meDoc()->type(res);
+		currDoc->meDoc()->type(res, true);
+	}
+}
+
+void MeActionsControl::applyFormula(MeActionData* actionData, int part)
+{
+	if (auto* formulaRes = qobject_cast<MeFormulaRes*>(actionData))
+	{
+		qDebug() << QString::fromStdWString(formulaRes->m_data->exprs[part - 1].back());
 	}
 }

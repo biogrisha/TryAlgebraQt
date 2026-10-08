@@ -9,12 +9,22 @@ class MeActionData : public QObject
 public:
 	explicit MeActionData(QObject* parent = nullptr);
 public slots:
-	QString name() const;
 	QString type() const;
+	QString name() const;
 public:
-	QString m_name;
 	QString m_type;
-	const void* m_data = nullptr;
+	QString m_name;
+};
+
+class MeFormulaRes : public MeActionData
+{
+	Q_OBJECT
+public:
+	explicit MeFormulaRes(QObject* parent = nullptr);
+public slots:
+	int partsNum() const;
+public:
+	const TryAlgebraCore::Trs::FormulaRes* m_data = nullptr;
 };
 
 class MeActionSection : public QObject

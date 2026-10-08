@@ -24,7 +24,7 @@ namespace TryAlgebraCore
 		void setVisualToolkit(const VisualToolkit& visual_toolkit);
 		void setDocSize(const glm::vec2& size) { m_docSize = size; }
 		void setText(const std::wstring& str);
-		void type(std::wstring str);
+		void type(std::wstring str, bool select = false);
 		void applyKeyBinding(std::wstring str);
 		void typeByName(const std::wstring& str);
 		void delBackward();

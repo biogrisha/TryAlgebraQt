@@ -44,12 +44,11 @@ void MeActionsModel::update()
 	}
 	m_sections.clear();
 
-	auto addAction = [](MeActionSection* section, const QString& name, const QString& type, const void* data = nullptr)
+	auto addAction = [](MeActionSection* section, const QString& name, const QString& type)
 		{
 			auto* action = new MeActionData(section);
 			action->m_name = name;
 			action->m_type = type;
-			action->m_data = data;
 			section->m_actions.append(action);
 		};
 
@@ -73,9 +72,11 @@ void MeActionsModel::update()
 		{
 			for (const auto& formula : file.formulas)
 			{
-				addAction(section,
-					QString::fromStdWString(formula.formulaName),
-					QStringLiteral("formula"), &formula);
+				auto* action = new MeFormulaRes(section);
+				action->m_name = QString::fromStdWString(formula.formulaName);
+				action->m_type = "formula";
+				action->m_data = &formula;
+				section->m_actions.append(action);
 			}
 		}
 		m_sections.append(section);
@@ -85,4 +86,14 @@ void MeActionsModel::update()
 QList<MeActionSection*> MeActionsModel::sections() const
 {
 	return m_sections;
+}
+
+MeFormulaRes::MeFormulaRes(QObject* parent)
+	: MeActionData(parent)
+{
+}
+
+int MeFormulaRes::partsNum() const
+{
+	return m_data->exprs.size();
 }
