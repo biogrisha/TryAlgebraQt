@@ -102,7 +102,7 @@ namespace NewTrs
 				}
 				fails.merge(fails2);
 			}
-			int storageSize = m_saturationStorage.size();
+			int strSize = storageSize();
 			for (auto& newId : newIdentities)
 			{
 				generateTermStr(newId.rhs);
@@ -111,7 +111,7 @@ namespace NewTrs
 				if (find(newId.lhs) != find(newId.rhs))
 				{
 					merge(newId.lhs, newId.rhs);
-					if (m_saturationStorage.size() > 5000)
+					if (storageSize() > 5000)
 					{
 						//max storage
 						//last try to solve
@@ -143,7 +143,7 @@ namespace NewTrs
 					}
 				}
 			}
-			if (m_saturationStorage.size() == storageSize)
+			if (storageSize() == strSize)
 			{
 				return {};
 			}
@@ -583,6 +583,11 @@ namespace NewTrs
 			}
 		}
 		return nullptr;
+	}
+
+	int Trs::storageSize() const
+	{
+		return m_patStorage.size() + m_rulesStorage.size() + m_saturationStorage.size();
 	}
 
 	bool Matcher::match(Term* pat, Term* subj, int pos)

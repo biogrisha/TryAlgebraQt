@@ -39,6 +39,7 @@ void MeActionsControl::applyFormula(MeActionData* actionData, int part)
 {
 	if (auto* formulaRes = qobject_cast<MeFormulaRes*>(actionData))
 	{
-		qDebug() << QString::fromStdWString(formulaRes->m_data->exprs[part - 1].back());
+		auto* currDoc = AppGlobal::appMod->docModel()->currDoc();
+		currDoc->meDoc()->type(formulaRes->m_data->exprs[part - 1].back(), true);
 	}
 }

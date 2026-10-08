@@ -154,7 +154,7 @@ namespace TryAlgebraCore::Trs
 										toIntermediate(var, varInter);
 										toIntermediate(sub, subInter);
 
-										substitute(idCopy.back(), subInter, subInter);
+										substitute(idCopy.back(), varInter, subInter);
 									}
 									variations.emplace_back();
 									bundle->transformer->applyAllInverse(idCopy);

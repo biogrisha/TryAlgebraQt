@@ -98,6 +98,7 @@ namespace NewTrs
 		void initCompOrder(Term* t);
 		std::tuple<Term*, bool> addToStorage(Term* t, StorageType storageType);
 		Term* findInStorage(const std::string& termString);
+		int storageSize() const;
 		static Term* find(Term* t);
 		static std::map<std::vector<int>, int> setupVariablesOrder(Term* t);
 		static void setupVariablesOrder(Term* t, std::vector<int>& pos, int& id, std::map<std::vector<int>, int>& res);
