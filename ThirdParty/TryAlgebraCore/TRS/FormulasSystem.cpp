@@ -85,7 +85,7 @@ namespace TryAlgebraCore::Trs
 					NewTrs::Term* termFrom = nullptr;
 					toTerm(copyFrom.back(), termFrom);
 
-					auto copyTo = copyTermIntermediate(trsRule.from);
+					auto copyTo = copyTermIntermediate(trsRule.to);
 					transformer->second->applyAll(copyTo);
 					NewTrs::Term* termTo = nullptr;
 					toTerm(copyTo.back(), termTo);

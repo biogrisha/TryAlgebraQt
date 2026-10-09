@@ -1,6 +1,6 @@
 #include "TermTransformer.h"
 #include <Me/include/MeGlobals.h>
-
+#include <iostream>
 namespace TryAlgebraCore::Trs
 {
 	void Transformer::applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool removeCont)
@@ -33,8 +33,12 @@ namespace TryAlgebraCore::Trs
 		{
 			addContainers(subj);
 		}
+
 		for (auto& rule : m_invRules)
 		{
+			std::wstring t;
+			termIntermediateToStr(rule.from, t);
+			std::wcout << t << "\n";
 			switch (rule.type)
 			{
 			case RuleType::TDRecursiveExhausting:
@@ -47,9 +51,11 @@ namespace TryAlgebraCore::Trs
 				break;
 			}
 		}
+		std::cout << "\n\n";
 	}
 
-	void Transformer::tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
+	void Transformer::tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule,
+		TermIntermediate* parent)
 	{
 		if (subj.empty())
 		{
@@ -69,7 +75,7 @@ namespace TryAlgebraCore::Trs
 				var->variableMeta->captured = {};
 			}
 		}
-		if (subj.back()->parent && subj.back()->parent->label.find(MeNames::term) != std::wstring::npos)
+		if (subj.back()->label == MeNames::cont)
 		{
 			for (int i = 1; i < subj.size(); ++i)
 			{
@@ -86,7 +92,8 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	void Transformer::tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule)
+	void Transformer::tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj,
+		RewritingRule& rule, TermIntermediate* parent)
 	{
 		if (subj.empty())
 		{
@@ -110,7 +117,7 @@ namespace TryAlgebraCore::Trs
 				var->variableMeta->captured = {};
 			}
 		}
-		if (subj.back()->parent && subj.back()->parent->label.find(MeNames::term) != std::wstring::npos)
+		if (subj.back()->label == MeNames::cont)
 		{
 			for (int i = 1; i < subj.size(); ++i)
 			{

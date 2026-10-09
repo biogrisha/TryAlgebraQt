@@ -29,8 +29,8 @@ namespace TryAlgebraCore::Trs
 		void applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool removeCont = true);
 		void applyAllInverse(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool addCont = true);
 
-		void tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
-		void tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
+		void tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule, TermIntermediate* parent = nullptr);
+		void tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule, TermIntermediate* parent = nullptr);
 		void buSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
 
 		void addRules(std::vector<RewritingRule>&& rules);
