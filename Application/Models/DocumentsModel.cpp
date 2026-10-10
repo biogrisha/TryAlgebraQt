@@ -187,6 +187,11 @@ DocumentInfo* DocumentsModel::currDoc()
 	return docInfo(curDocPath().value());
 }
 
+std::vector<DocumentInfo>& DocumentsModel::documents()
+{
+	return m_documents;
+}
+
 QHash<int, QByteArray> DocumentsModel::roleNames() const
 {
 	QHash<int, QByteArray> roles;

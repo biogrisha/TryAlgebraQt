@@ -39,6 +39,8 @@ void Actions::openDocument(const QUrl& url)
 
 void Actions::compile()
 {
+	//save open documents
+	saveAll();
 	//setup bindings
 	{
 		const QString configDir =
@@ -91,6 +93,21 @@ void Actions::compile()
 		AppGlobal::appMod->formulasSystem()->compile();
 	}
 
+}
+
+void Actions::saveAll()
+{
+	DocumentsModel* docModel = AppGlobal::appMod->docModel();
+	auto& docs = docModel->documents();
+	for (auto& doc : docs)
+	{
+		QFile file(doc.filePath());
+		if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+		{
+			QTextStream out(&file);
+			out << doc.meDoc()->getText();
+		}
+	}
 }
 
 QStringList Actions::getMdocFiles(const QString& folder)

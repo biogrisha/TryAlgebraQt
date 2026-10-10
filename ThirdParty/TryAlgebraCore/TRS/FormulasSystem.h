@@ -9,8 +9,8 @@ namespace TryAlgebraCore::Trs
 	struct FormulasBundle
 	{
 		Transformer* transformer = nullptr;
-		NewTrs::Trs trs;
 		std::vector<FormulasFile> formulaFiles;
+		std::wstring trsPath;
 	};
 
 	struct FormulaRes
@@ -39,6 +39,7 @@ namespace TryAlgebraCore::Trs
 		void toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent = nullptr);
 		void toIntermediate(NewTrs::Term* term, std::unique_ptr<TermIntermediate>& intermediate);
 		void substitute(std::unique_ptr<TermIntermediate>& subj, const std::unique_ptr<TermIntermediate>& var, const std::unique_ptr<TermIntermediate>& sub);
+		std::unique_ptr<NewTrs::Trs> createTrs(const std::wstring& trsPath, Transformer* transformer);
 		std::unordered_map<std::wstring, TrsFile> m_trsFiles;
 		std::vector<ParserFile> m_parserFiles;
 		std::vector<FormulasFile> m_formulasFiles;

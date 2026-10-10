@@ -9,7 +9,6 @@ namespace NewTrs
 		std::unordered_set<Term*> variables;
 		std::map<std::vector<int>, int> patVariablesOrder;
 
-		m_patStorage.clear();
 		markPatternNodes(pat);
 		generateTermStr(pat);
 		compact(pat, StorageType::Pattern);
@@ -634,6 +633,11 @@ namespace NewTrs
 			}
 			repSucceded |= result;
 			m_path.repPath.back()++;
+		}
+		if (!repSucceded)
+		{
+			m_fails.insert(pat);
+			m_fails.insert(subj);
 		}
 		m_path.posPath.pop_back();
 		m_path.repPath.pop_back();

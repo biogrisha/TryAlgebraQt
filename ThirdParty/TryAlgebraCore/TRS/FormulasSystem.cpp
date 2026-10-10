@@ -70,36 +70,11 @@ namespace TryAlgebraCore::Trs
 			}
 			else
 			{
-				//no such bundle, create new
-				auto trsFile = m_trsFiles.find(formulasFile.trsFilePath);
-				if (trsFile == m_trsFiles.end())
-				{
-					continue;
-				}
-				std::vector<NewTrs::Identity> trsIds;
-
-				for (auto& trsRule : trsFile->second.rules)
-				{
-					auto copyFrom = copyTermIntermediate(trsRule.from);
-					transformer->second->applyAll(copyFrom);
-					NewTrs::Term* termFrom = nullptr;
-					toTerm(copyFrom.back(), termFrom);
-
-					auto copyTo = copyTermIntermediate(trsRule.to);
-					transformer->second->applyAll(copyTo);
-					NewTrs::Term* termTo = nullptr;
-					toTerm(copyTo.back(), termTo);
-
-					auto& id = trsIds.emplace_back();
-					id.lhs = termFrom;
-					id.rhs = termTo;
-				}
-
 				auto newBundle = std::make_unique<FormulasBundle>();
-				newBundle->trs.setIds(std::move(trsIds));
 				bundle = newBundle.get();
 				m_bundles.emplace(bundleKey, std::move(newBundle));
 				bundle->transformer = transformer->second.get();
+				bundle->trsPath = formulasFile.trsFilePath;
 			}
 
 			for (auto& formula : formulasFile.formulas)
@@ -124,7 +99,8 @@ namespace TryAlgebraCore::Trs
 			bundle->transformer->applyAll(subjCopy);
 			NewTrs::Term* subjTerm = nullptr;
 			toTerm(subjCopy.back(), subjTerm);
-			bundle->trs.setSubj(subjTerm);
+			auto trs = createTrs(bundle->trsPath, bundle->transformer);
+			trs->setSubj(subjTerm);
 			for (auto& file : bundle->formulaFiles)
 			{
 				FileRes fileRes;
@@ -137,7 +113,7 @@ namespace TryAlgebraCore::Trs
 					{
 						NewTrs::Term* idTerm = nullptr;
 						toTerm(id.back(), idTerm);
-						auto matches = bundle->trs.run(idTerm);
+						auto matches = trs->run(idTerm);
 
 						if (!matches.empty())
 						{
@@ -247,5 +223,34 @@ namespace TryAlgebraCore::Trs
 				substitute(ch, var, sub);
 			}
 		}
+	}
+	std::unique_ptr<NewTrs::Trs> FormulasSystem::createTrs(const std::wstring& trsPath, Transformer* transformer)
+	{
+		auto trsFile = m_trsFiles.find(trsPath);
+		if (trsFile == m_trsFiles.end())
+		{
+			return {};
+		}
+		std::vector<NewTrs::Identity> trsIds;
+
+		for (auto& trsRule : trsFile->second.rules)
+		{
+			auto copyFrom = copyTermIntermediate(trsRule.from);
+			transformer->applyAll(copyFrom);
+			NewTrs::Term* termFrom = nullptr;
+			toTerm(copyFrom.back(), termFrom);
+
+			auto copyTo = copyTermIntermediate(trsRule.to);
+			transformer->applyAll(copyTo);
+			NewTrs::Term* termTo = nullptr;
+			toTerm(copyTo.back(), termTo);
+
+			auto& id = trsIds.emplace_back();
+			id.lhs = termFrom;
+			id.rhs = termTo;
+		}
+		auto trs = std::make_unique<NewTrs::Trs>();
+		trs->setIds(std::move(trsIds));
+		return trs;
 	}
 }

@@ -40,7 +40,7 @@ public:
 	std::optional<QString> curDocPath() const;
 	bool isDocumentOpened(const QString& filePath);
 	DocumentInfo* currDoc();
-
+	std::vector<DocumentInfo>& documents();
 signals:
 	void onCurrentDocChanged(const QString& docPath);
 	void onDocumentAdded(DocumentInfo* docInfo);

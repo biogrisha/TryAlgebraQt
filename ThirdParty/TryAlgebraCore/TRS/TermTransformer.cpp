@@ -36,9 +36,6 @@ namespace TryAlgebraCore::Trs
 
 		for (auto& rule : m_invRules)
 		{
-			std::wstring t;
-			termIntermediateToStr(rule.from, t);
-			std::wcout << t << "\n";
 			switch (rule.type)
 			{
 			case RuleType::TDRecursiveExhausting:
@@ -51,7 +48,6 @@ namespace TryAlgebraCore::Trs
 				break;
 			}
 		}
-		std::cout << "\n\n";
 	}
 
 	void Transformer::tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule,

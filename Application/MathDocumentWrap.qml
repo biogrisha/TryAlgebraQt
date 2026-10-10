@@ -89,7 +89,6 @@ Rectangle {
 				actionsList.open()
 				actionsList.x = mathCanvas.x + mathCanvas.width - actionsList.width
 				actionsList.y = mathCanvas.y
-				
 			}
 		}
 			
