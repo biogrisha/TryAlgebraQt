@@ -6,7 +6,7 @@
 #include <Me/include/MeFromTo.h>
 #include <Me/include/MeVariable.h>
 #include <Me/include/MeTerm.h>
-#include <Me/include/MePower.h>
+#include <Me/include/MeScript.h>
 #include <Me/include/MeFraction.h>
 #include <Me/include/MeSprite.h>
 #include <Me/include/MeBracket.h>
@@ -37,10 +37,15 @@ namespace TryAlgebraCore
 			{
 				return MyRTTI::MakeTypedUnique<MeTerm>();
 			});
-		m_meFactory.emplace(MeNames::power,
+		m_meFactory.emplace(MeNames::subscript,
 			[]()
 			{
-				return MyRTTI::MakeTypedUnique<MePower>();
+				return MyRTTI::MakeTypedUnique<MeScript>(ScriptType::Subscript);
+			});
+		m_meFactory.emplace(MeNames::superscript,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeScript>(ScriptType::Superscript);
 			});
 		m_meFactory.emplace(MeNames::fraction,
 			[]()

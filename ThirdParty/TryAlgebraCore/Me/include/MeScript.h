@@ -4,14 +4,21 @@
 
 namespace TryAlgebraCore
 {
-	class MePower : public MeBase
+	enum class ScriptType
+	{
+		Subscript,
+		Superscript
+	};
+
+	class MeScript : public MeBase
 	{
 		TYPED_CLASS1(MeBase)
 	public:
+		explicit MeScript(ScriptType type);
 		void calculate(VisualToolkit* visual_toolkit) override;
 		void step(StepDir dir, StepFrom step_from, MePath& path) override;
-		std::wstring getName() override;
+		ScriptType type() const;
 	private:
-		FGlyphData m_glyph;
+		ScriptType m_type = ScriptType::Subscript;
 	};
 }

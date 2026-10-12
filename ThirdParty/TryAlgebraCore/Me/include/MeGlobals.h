@@ -30,7 +30,8 @@ namespace TryAlgebraCore
 		inline std::wstring termFunction = L"f";
 		inline std::wstring termToken = L"tok";
 
-		inline std::wstring power = L"pw";
+		inline std::wstring subscript = L"sub";
+		inline std::wstring superscript = L"sup";
 
 		inline std::wstring fraction = L"fr";
 
@@ -72,7 +73,8 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Term2", makeMe(term, L"2", 3));
 				res.emplace_back(L"Term1", makeMe(term, L"1", 2));
 				res.emplace_back(L"Token", makeMe(term, termToken, 1));
-				res.emplace_back(L"Power", makeMe(power, L"", 1));
+				res.emplace_back(L"Subscript", makeMe(subscript, L"", 1));
+				res.emplace_back(L"Superscript", makeMe(superscript, L"", 1));
 				res.emplace_back(L"Fraction", makeMe(fraction, L"", 2));
 				res.emplace_back(L"Cursor placement", L'\\' + spriteCursorPlacement + L"\\\\");
 				res.emplace_back(L"Paste selection", L'\\' + spritePaste + L"\\\\");

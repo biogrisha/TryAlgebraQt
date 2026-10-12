@@ -4,6 +4,7 @@
 #include <Me/include/MeGlobals.h>
 #include <Me/include/MeNewLine.h>
 #include <Me/include/MeBracket.h>
+#include <Me/include/MeScript.h>
 #include <Helpers/include/MeHelpers.h>
 #include <algorithm>
 #include <iostream>
@@ -32,13 +33,16 @@ namespace TryAlgebraCore
 			ch->setPosY(ch->getPos().y + next_line_y + max_bearing);
 			max_y_offset = std::max(max_y_offset, ch->getPos().y + ch->getSize().y);
 		}
+
 		float maxY = 0;
 		adjustBrackets(maxY);
+		adjustScripts();
 		next_line_y = std::max(max_y_offset, maxY);
 		m_size.x = std::max(x, m_size.x);
 		m_size.y = next_line_y;
 		end_line_i = std::min(m_children.size(), end);
 	}
+
 	void MeContainer::addEmptyLine()
 	{
 		m_size.y += g_caret_def_size.y * m_scaling_factor;
@@ -112,6 +116,45 @@ namespace TryAlgebraCore
 			m_children[i]->setPosY(m_children[i]->getPos().y + offset);
 		}
 		outMaxY = maxBracketY + offset;
+	}
+
+	void MeContainer::adjustScripts()
+	{
+		float minY = 0;
+		float maxY = 0;
+		MeBase* lastNotScript = nullptr;
+		int numSubscripts = 0;
+		int numSuperscript = 0;
+		float offset = 5 * m_scaling_factor;
+		for (int i = end_line_i; i < m_children.size(); ++i)
+		{
+			if (auto* script = MyRTTI::Cast<MeScript>(m_children[i].get()))
+			{
+				if (lastNotScript)
+				{
+					if (script->type() == ScriptType::Subscript)
+					{
+						script->setPosY(lastNotScript->getPos().y
+							+ lastNotScript->getSize().y - script->getSize().y / 2 + numSubscripts * offset);
+						maxY = std::min(script->getPos().y + script->getSize().y, maxY);
+						++numSubscripts;
+					}
+					if (script->type() == ScriptType::Superscript)
+					{
+						script->setPosY(lastNotScript->getPos().y
+							- script->getSize().y / 2 - numSuperscript * offset);
+						minY = std::min(script->getPos().y, minY);
+						++numSuperscript;
+					}
+				}
+			}
+			else
+			{
+				lastNotScript = m_children[i].get();
+				numSubscripts = 0;
+				numSuperscript = 0;
+			}
+		}
 	}
 
 	void MeContainer::draw(VisualToolkit* vt)
