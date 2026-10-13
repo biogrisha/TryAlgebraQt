@@ -32,6 +32,7 @@ namespace TryAlgebraCore
 		static void propagateMeChange(MePath& path, int text_added);
 		static std::optional<MePath> textPosToMePath(const MeBase* from, const uint64_t pos);
 		static std::optional<size_t> absToChildPos(const MeBase* from, size_t pos);
+
 		static GetByPathRes getByPath(MeBase* from, const MePath& path);
 		static FCaretData getCaretData(MeBase* from, const MePath& path);
 		static void orderPaths(MePath& path1, MePath& path2);
@@ -46,6 +47,9 @@ namespace TryAlgebraCore
 		static MeBase* getByTreePath(MeBase* from, const std::vector<size_t>& path);
 		static void defaultStep(MeBase* me, StepDir dir, StepFrom step_from, MePath& path);
 		static void defaultStepHorizontal(MeBase* me, StepDir dir, StepFrom step_from, MePath& path);
+		//MePos
+		static size_t contPos(MeBase* from, const MePath& pathToCont);
+		static void mePosToLeaf(MePath& path, bool left);
 		//me arrangement
 		static void alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x);
 

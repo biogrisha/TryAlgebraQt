@@ -525,6 +525,20 @@ namespace TryAlgebraCore
 		}
 	}
 
+	size_t MeHelpers::contPos(MeBase* from, const MePath& pathToCont)
+	{
+		assert(!std::holds_alternative<ContPos>(pathToCont.back()));
+		const ContPos& cont_pos = std::get<ContPos>(pathToCont.back());
+		return MeHelpers::absToChildPos(from, cont_pos.pos).value();
+	}
+
+	void MeHelpers::mePosToLeaf(MePath& path, bool left)
+	{
+		assert(std::holds_alternative<ContPos>(path.back()));
+		MePos mePos = std::get<MePos>(path.back());
+		path.back() = LeafPos{ .pos = left ? mePos.from : mePos.to };
+	}
+
 	void MeHelpers::alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x)
 	{
 		for (auto& me : mes)

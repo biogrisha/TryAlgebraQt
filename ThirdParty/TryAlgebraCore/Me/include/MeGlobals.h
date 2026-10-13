@@ -38,6 +38,8 @@ namespace TryAlgebraCore
 		inline std::wstring spriteCursorPlacement = L"cur";
 		inline std::wstring spritePaste = L"pst";
 
+		inline std::wstring matrix = L"mat";
+
 		inline std::wstring makeMe(const std::wstring& name, const std::wstring& meta, const size_t cont_num)
 		{
 			std::wstring res;
@@ -76,6 +78,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Subscript", makeMe(subscript, L"", 1));
 				res.emplace_back(L"Superscript", makeMe(superscript, L"", 1));
 				res.emplace_back(L"Fraction", makeMe(fraction, L"", 2));
+				res.emplace_back(L"Mat 3x4", makeMe(matrix, L"3,4", 12));
 				res.emplace_back(L"Cursor placement", L'\\' + spriteCursorPlacement + L"\\\\");
 				res.emplace_back(L"Paste selection", L'\\' + spritePaste + L"\\\\");
 				res.emplace_back(L"textalpha", L"α");

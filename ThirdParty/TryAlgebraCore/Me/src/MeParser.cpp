@@ -10,6 +10,7 @@
 #include <Me/include/MeFraction.h>
 #include <Me/include/MeSprite.h>
 #include <Me/include/MeBracket.h>
+#include <Me/include/MeMatrix.h>
 
 namespace TryAlgebraCore
 {
@@ -61,6 +62,11 @@ namespace TryAlgebraCore
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeSprite>(MeNames::spritePaste);
+			});
+		m_meFactory.emplace(MeNames::matrix,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeMatrix>();
 			});
 
 		//=========ch factory 
