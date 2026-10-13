@@ -128,6 +128,7 @@ namespace TryAlgebraCore
 		{
 			if (auto* script = MyRTTI::Cast<MeScript>(m_children[i].get()))
 			{
+				auto oldPos = script->getPos();
 				if (lastNotScript)
 				{
 					if (script->type() == ScriptType::Subscript)
@@ -144,6 +145,7 @@ namespace TryAlgebraCore
 						minY = std::min(script->getPos().y, minY);
 						++numSuperscript;
 					}
+					script->setBearing(script->getBearingY() + oldPos.y - script->getPos().y);
 				}
 			}
 			else
