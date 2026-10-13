@@ -34,10 +34,9 @@ namespace TryAlgebraCore
 			max_y_offset = std::max(max_y_offset, ch->getPos().y + ch->getSize().y);
 		}
 
-		float maxY = 0;
-		adjustBrackets(maxY);
-		adjustScripts();
-		next_line_y = std::max(max_y_offset, maxY);
+		adjustBrackets(max_y_offset);
+		adjustScripts(max_y_offset);
+		next_line_y = max_y_offset;
 		m_size.x = std::max(x, m_size.x);
 		m_size.y = next_line_y;
 		end_line_i = std::min(m_children.size(), end);
@@ -115,17 +114,16 @@ namespace TryAlgebraCore
 		{
 			m_children[i]->setPosY(m_children[i]->getPos().y + offset);
 		}
-		outMaxY = maxBracketY + offset;
+		outMaxY = std::max(maxBracketY + offset, outMaxY);
 	}
 
-	void MeContainer::adjustScripts()
+	void MeContainer::adjustScripts(float& maxY)
 	{
-		float minY = 0;
-		float maxY = 0;
+		float minY = next_line_y;
 		MeBase* lastNotScript = nullptr;
 		int numSubscripts = 0;
 		int numSuperscript = 0;
-		float offset = 5 * m_scaling_factor;
+		float verticalOffset = 5 * m_scaling_factor;
 		for (int i = end_line_i; i < m_children.size(); ++i)
 		{
 			if (auto* script = MyRTTI::Cast<MeScript>(m_children[i].get()))
@@ -135,14 +133,14 @@ namespace TryAlgebraCore
 					if (script->type() == ScriptType::Subscript)
 					{
 						script->setPosY(lastNotScript->getPos().y
-							+ lastNotScript->getSize().y - script->getSize().y / 2 + numSubscripts * offset);
-						maxY = std::min(script->getPos().y + script->getSize().y, maxY);
+							+ lastNotScript->getSize().y - script->getSize().y / 2 + numSubscripts * verticalOffset);
+						maxY = std::max(script->getPos().y + script->getSize().y, maxY);
 						++numSubscripts;
 					}
 					if (script->type() == ScriptType::Superscript)
 					{
 						script->setPosY(lastNotScript->getPos().y
-							- script->getSize().y / 2 - numSuperscript * offset);
+							- script->getSize().y / 2 - numSuperscript * verticalOffset);
 						minY = std::min(script->getPos().y, minY);
 						++numSuperscript;
 					}
@@ -155,6 +153,15 @@ namespace TryAlgebraCore
 				numSuperscript = 0;
 			}
 		}
+		const float lineOffset = next_line_y - minY;
+		if (lineOffset > 0)
+		{
+			for (int i = end_line_i; i < m_children.size(); ++i)
+			{
+				m_children[i]->setPosY(m_children[i]->getPos().y + lineOffset);
+			}
+		}
+		maxY = maxY + lineOffset;
 	}
 
 	void MeContainer::draw(VisualToolkit* vt)
