@@ -64,7 +64,7 @@ void TextRendering::updateText(std::vector<FGlyphData> documentContent)
 		atlasInstanceData[glyphId].Size = glm::vec2(glyphData.second.RenderData->WidthInPixels,
 			glyphData.second.RenderData->HeightInPixels);
 
-		currX += glyphData.second.RenderData->WidthInPixels;
+		currX += glyphData.second.RenderData->WidthInPixels + 5;
 		maxGlyphY = std::max(maxGlyphY, glyphData.second.RenderData->HeightInPixels);
 		auto& outline = glyphData.second.RenderData->Outline;
 		atlasInstanceData[glyphId].StartIndex = curveId;
