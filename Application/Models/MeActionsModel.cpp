@@ -43,6 +43,23 @@ void MeActionsModel::update()
 		delete section;
 	}
 	m_sections.clear();
+	//matrix action
+	{
+		auto* section = new MeActionSection(this);
+		section->m_name = QStringLiteral("Matrix");
+		for (const auto& file : foundFormulas)
+		{
+			for (const auto& formula : file.formulas)
+			{
+				auto* action = new MeFormulaRes(section);
+				action->m_name = QString::fromStdWString(formula.formulaName);
+				action->m_type = "formula";
+				action->m_data = &formula;
+				section->m_actions.append(action);
+			}
+		}
+		m_sections.append(section);
+	}
 
 	auto addAction = [](MeActionSection* section, const QString& name, const QString& type)
 		{

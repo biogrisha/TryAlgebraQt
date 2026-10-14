@@ -27,6 +27,19 @@ public:
 	const TryAlgebraCore::Trs::FormulaRes* m_data = nullptr;
 };
 
+class MatrixScalingData : public MeActionData
+{
+	Q_OBJECT
+public:
+	explicit MatrixScalingData(QObject* parent = nullptr);
+public slots:
+	int rows() const;
+	int columns() const
+public:
+	int m_rows = 0;
+	int m_columns = 0;
+};
+
 class MeActionSection : public QObject
 {
 	Q_OBJECT

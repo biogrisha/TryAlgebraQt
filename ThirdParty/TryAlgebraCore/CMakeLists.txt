@@ -2,6 +2,9 @@ find_package(glm REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2)
 # Create a library target
 add_library(TryAlgebraCore STATIC 
+	Actions/MatrixScaling.cpp
+	Actions/MatrixScaling.h
+
 	MathEditor/include/MathDocument.h
 	MathEditor/include/TextBuffer.h
 	MathEditor/include/DocumentNavigation.h
