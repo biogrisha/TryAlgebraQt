@@ -29,8 +29,15 @@ namespace TryAlgebraCore {
 			return;
 		}
 
-		std::vector<float> column_widths(m_columns, 0.f);
-		std::vector<float> row_heights(m_rows, 0.f);
+		struct RowSizeData
+		{
+			float spaceAbove = 0.f;
+			float spaceBelow = 0.f;
+		};
+
+		std::vector<float> columnWidths(m_columns, 0.f);
+		std::vector<RowSizeData> rowSizes(m_rows, {});
+		std::vector<float> contSpacesAbove(m_children.size(), 0.f);
 		const float padding = 5.f * m_scaling_factor;
 
 		// Calculate cell contents using the matrix scaling factor.
@@ -50,8 +57,24 @@ namespace TryAlgebraCore {
 			for (int column = 0; column < m_columns; ++column)
 			{
 				const auto& child = m_children[row * m_columns + column];
-				column_widths[column] = std::max(column_widths[column], child->getSize().x);
-				row_heights[row] = std::max(row_heights[row], child->getSize().y);
+				columnWidths[column] = std::max(columnWidths[column], child->getSize().x);
+				if (child->getChildren().empty())
+				{
+					rowSizes[row].spaceAbove = std::max(rowSizes[row].spaceAbove,
+						child->getSize().y / 2);
+					contSpacesAbove[row * m_columns + column] = child->getSize().y / 2;
+					rowSizes[row].spaceBelow = std::max(rowSizes[row].spaceBelow, child->getSize().y / 2);
+				}
+				else
+				{
+					auto& firstChild = child->getChildren().front();
+					float spaceAbove = firstChild->getPos().y + firstChild->getBearingY();
+					contSpacesAbove[row * m_columns + column] = spaceAbove;
+					rowSizes[row].spaceAbove = std::max(rowSizes[row].spaceAbove,
+						spaceAbove);
+					rowSizes[row].spaceBelow = std::max(rowSizes[row].spaceBelow, child->getSize().y - spaceAbove);
+				}
+
 			}
 		}
 
@@ -63,16 +86,23 @@ namespace TryAlgebraCore {
 			for (int column = 0; column < m_columns; ++column)
 			{
 				auto& child = m_children[row * m_columns + column];
+				auto oldPos = child->getPos();
+				auto oldSize = child->getSize();
 				child->setPos({ x, y });
-				child->setSize({ column_widths[column], row_heights[row] });
-				x += column_widths[column];
+				child->setSize({ columnWidths[column], rowSizes[row].spaceAbove + rowSizes[row].spaceBelow });
+				for (auto& contCh : child->getChildren())
+				{
+					contCh->setPosX(contCh->getPos().x + (child->getSize().x - oldSize.x) / 2.f);
+					contCh->setPosY(contCh->getPos().y + rowSizes[row].spaceAbove - contSpacesAbove[row * m_columns + column]);
+				}
+				x += columnWidths[column];
 			}
-			y += row_heights[row];
+			y += rowSizes[row].spaceAbove + rowSizes[row].spaceBelow;
 		}
 
 		// Include the outer padding in the final matrix dimensions.
 		float width = 0.f;
-		for (float column_width : column_widths)
+		for (float column_width : columnWidths)
 		{
 			width += column_width;
 		}
