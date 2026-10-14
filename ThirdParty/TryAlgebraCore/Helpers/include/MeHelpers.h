@@ -49,6 +49,8 @@ namespace TryAlgebraCore
 		static void defaultStepHorizontal(MeBase* me, StepDir dir, StepFrom step_from, MePath& path);
 		//MePos
 		static size_t contPos(MeBase* from, const MePath& pathToCont);
+		static void setContPos(MeBase* cont, MePath& pathToCont);
+		static void setExtremeLeafPos(MeBase* cont, MePath& pathToCont, bool last);
 		static void mePosToLeaf(MePath& path, bool left);
 		//me arrangement
 		static void alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x);

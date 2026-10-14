@@ -527,14 +527,27 @@ namespace TryAlgebraCore
 
 	size_t MeHelpers::contPos(MeBase* from, const MePath& pathToCont)
 	{
-		assert(!std::holds_alternative<ContPos>(pathToCont.back()));
+		assert(std::holds_alternative<ContPos>(pathToCont.back()));
 		const ContPos& cont_pos = std::get<ContPos>(pathToCont.back());
 		return MeHelpers::absToChildPos(from, cont_pos.pos).value();
 	}
 
+	void MeHelpers::setContPos(MeBase* cont, MePath& pathToCont)
+	{
+		assert(std::holds_alternative<ContPos>(pathToCont.back()));
+		std::get<ContPos>(pathToCont.back()).pos = cont->getChFrom();
+	}
+
+	void MeHelpers::setExtremeLeafPos(MeBase* cont, MePath& pathToCont, bool last)
+	{
+		assert(std::holds_alternative<LeafPos>(pathToCont.back()));
+		std::get<LeafPos>(pathToCont.back()).pos = cont->getChildren().empty() ? cont->getChFrom() :
+			last ? cont->getChildren().back()->getChTo() : cont->getChildren().front()->getChFrom();
+	}
+
 	void MeHelpers::mePosToLeaf(MePath& path, bool left)
 	{
-		assert(std::holds_alternative<ContPos>(path.back()));
+		assert(std::holds_alternative<MePos>(path.back()));
 		MePos mePos = std::get<MePos>(path.back());
 		path.back() = LeafPos{ .pos = left ? mePos.from : mePos.to };
 	}

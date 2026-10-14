@@ -177,7 +177,10 @@ namespace TryAlgebraCore::Trs
 			removeContainers(subj[i]->children);
 			if (subj[i]->label == MeNames::cont)
 			{
-				subj[i] = std::move(subj[i]->children.back());
+				if (!subj[i]->children.empty())
+				{
+					subj[i] = std::move(subj[i]->children.back());
+				}
 			}
 		}
 	}

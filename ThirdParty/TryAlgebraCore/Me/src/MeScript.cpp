@@ -11,7 +11,7 @@ namespace TryAlgebraCore {
 
 	void MeScript::calculate(VisualToolkit* vt)
 	{
-		float chScalingFactor = m_scaling_factor / 1.5f;
+		float chScalingFactor = m_scaling_factor / 1.2f;
 		m_children[0]->setScalingFactor(chScalingFactor);
 		m_children[0]->calculate(vt);
 		setSize(m_children[0]->getSize());

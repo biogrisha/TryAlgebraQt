@@ -109,16 +109,64 @@ namespace TryAlgebraCore {
 		if (stepFrom == StepFrom::inside)
 		{
 			path.pop_back();
-			auto contPos = MeHelpers::contPos(this, path).value();
+			auto contPos = MeHelpers::contPos(this, path);
 
 			if (dir == StepDir::left)
 			{
-				if (contPos == 0)
+				if (contPos % m_columns == 0)
 				{
 					path.pop_back();
+					MeHelpers::mePosToLeaf(path, true);
 					return;
 				}
+				MeHelpers::setContPos(m_children[contPos - 1].get(), path);
+				path.push_back(LeafPos());
+				MeHelpers::setExtremeLeafPos(m_children[contPos - 1].get(), path, true);
+				return;
 			}
+
+			if (dir == StepDir::right)
+			{
+				if (contPos % m_columns == m_columns - 1)
+				{
+					path.pop_back();
+					MeHelpers::mePosToLeaf(path, false);
+					return;
+				}
+				MeHelpers::setContPos(m_children[contPos + 1].get(), path);
+				path.push_back(LeafPos());
+				MeHelpers::setExtremeLeafPos(m_children[contPos + 1].get(), path, false);
+				return;
+			}
+
+			if (dir == StepDir::up)
+			{
+				if (contPos < m_columns)
+				{
+					path.pop_back();
+					MeHelpers::mePosToLeaf(path, true);
+					return;
+				}
+				MeHelpers::setContPos(m_children[contPos - m_columns].get(), path);
+				path.push_back(LeafPos());
+				MeHelpers::setExtremeLeafPos(m_children[contPos - m_columns].get(), path, false);
+				return;
+			}
+
+			if (dir == StepDir::down)
+			{
+				if (contPos >= m_columns * (m_rows - 1))
+				{
+					path.pop_back();
+					MeHelpers::mePosToLeaf(path, false);
+					return;
+				}
+				MeHelpers::setContPos(m_children[contPos + m_columns].get(), path);
+				path.push_back(LeafPos());
+				MeHelpers::setExtremeLeafPos(m_children[contPos + m_columns].get(), path, false);
+				return;
+			}
+
 		}
 	}
 }
