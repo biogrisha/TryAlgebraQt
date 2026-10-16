@@ -14,7 +14,9 @@
 //#include "VariatorTest.h"
 //#include "PatternMatchingTest.h"
 //#include "DiophantineSolver.h"
-#include "MeParserGenericTest.h"
+//#include "MeParserGenericTest.h"
+#include "MeSimpleToStrTest.h"
+
 int main(int argc, char* argv[])
 {
 	TestFramework::runAllTests();

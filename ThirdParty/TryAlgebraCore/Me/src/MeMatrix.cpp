@@ -1,4 +1,5 @@
 #include <Me/include/MeMatrix.h>
+#include <Me/include/MeGlobals.h>
 #include <Me/include/MeContainer.h>
 #include <Helpers/include/MeHelpers.h>
 #include <algorithm>
@@ -8,10 +9,9 @@
 namespace TryAlgebraCore {
 	void MeMatrix::setMeta(const std::wstring& meta)
 	{
-		const size_t separator = meta.find(L',');
-		assert(separator != std::wstring::npos);
-		m_rows = std::stoi(meta.substr(0, separator));
-		m_columns = std::stoi(meta.substr(separator + 1));
+		auto matSize = MeNames::matrixSize(meta);
+		m_rows = matSize.rows;
+		m_columns = matSize.columns;
 	}
 	void MeMatrix::calculate(VisualToolkit* visual_toolkit)
 	{

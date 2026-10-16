@@ -1,6 +1,7 @@
 #pragma once
 #include <QAbstractItemModel>
 #include <TRS/FormulasSystem.h>
+#include <Actions/MatrixScaling.h>
 #include <qqml.h>
 
 class MeActionData : public QObject
@@ -34,10 +35,9 @@ public:
 	explicit MatrixScalingData(QObject* parent = nullptr);
 public slots:
 	int rows() const;
-	int columns() const
+	int columns() const;
 public:
-	int m_rows = 0;
-	int m_columns = 0;
+	TryAlgebraCore::MatrixScaling m_matrixScaling;
 };
 
 class MeActionSection : public QObject

@@ -43,21 +43,25 @@ void MeActionsModel::update()
 		delete section;
 	}
 	m_sections.clear();
+
+
+	std::wstring str = AppGlobal::appMod->docModel()->currDoc()->meDoc()->getSelectedText();
+	if (str.empty())
+	{
+		return;
+	}
+
 	//matrix action
+
+	if (auto matrixScaling = TryAlgebraCore::MatrixScaling::tryCreate(str))
 	{
 		auto* section = new MeActionSection(this);
 		section->m_name = QStringLiteral("Matrix");
-		for (const auto& file : foundFormulas)
-		{
-			for (const auto& formula : file.formulas)
-			{
-				auto* action = new MeFormulaRes(section);
-				action->m_name = QString::fromStdWString(formula.formulaName);
-				action->m_type = "formula";
-				action->m_data = &formula;
-				section->m_actions.append(action);
-			}
-		}
+		MatrixScalingData* action = new MatrixScalingData(section);
+		action->m_type = "matrix";
+		action->m_name = "Scaling";
+		action->m_matrixScaling = std::move(matrixScaling.value());
+		section->m_actions.append(action);
 		m_sections.append(section);
 	}
 
@@ -80,6 +84,7 @@ void MeActionsModel::update()
 		}
 		m_sections.append(section);
 	}
+
 	foundFormulas = AppGlobal::appMod->formulasSystem()->lastRes();
 	if (!foundFormulas.empty())
 	{
@@ -113,4 +118,19 @@ MeFormulaRes::MeFormulaRes(QObject* parent)
 int MeFormulaRes::partsNum() const
 {
 	return m_data->exprs.size();
+}
+
+MatrixScalingData::MatrixScalingData(QObject* parent)
+	: MeActionData(parent)
+{
+}
+
+int MatrixScalingData::rows() const
+{
+	return m_matrixScaling.rows();
+}
+
+int MatrixScalingData::columns() const
+{
+	return m_matrixScaling.columns();
 }

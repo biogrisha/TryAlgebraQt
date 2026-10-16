@@ -9,6 +9,7 @@ public:
 	DocumentInfo(const QString& filePath, std::unique_ptr<TryAlgebraCore::MathDocument>&& meDoc);
 	QString filePath() const;
 	TryAlgebraCore::MathDocument* meDoc();
+
 private:
 	QString m_filePath;
 	std::unique_ptr<TryAlgebraCore::MathDocument> m_meDoc;

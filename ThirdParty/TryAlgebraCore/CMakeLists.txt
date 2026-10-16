@@ -4,6 +4,8 @@ find_package(Boost REQUIRED COMPONENTS signals2)
 add_library(TryAlgebraCore STATIC 
 	Actions/MatrixScaling.cpp
 	Actions/MatrixScaling.h
+	Actions/SimpleTree.cpp
+	Actions/SimpleTree.h
 
 	MathEditor/include/MathDocument.h
 	MathEditor/include/TextBuffer.h

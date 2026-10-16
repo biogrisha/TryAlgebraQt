@@ -114,15 +114,13 @@ void DocumentsModel::removeDocInfo(qint32 ind)
 {
 	onBeforeDocRemoved(&m_documents[ind]);
 	beginRemoveRows(QModelIndex(), ind, ind);
-	if (m_curDocPath == m_documents[ind].filePath())
-	{
-		if (m_documents.size() > 1)
-		{
-			setCurrentDocument(0);
-		}
-	}
+	bool isCurDoc = m_curDocPath == m_documents[ind].filePath();
 	m_documents.erase(m_documents.begin() + ind);
 	endRemoveRows();
+	if (isCurDoc && m_documents.size() > 1)
+	{
+		setCurrentDocument(0);
+	}
 }
 
 void DocumentsModel::setCurrentDocument(const QString& fileName)

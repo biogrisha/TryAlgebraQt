@@ -342,8 +342,8 @@ namespace TryAlgebraCore
 		{
 			calcLine(visual_toolkit);
 		}
-		setSizeX(std::max(getSize().x, m_scaling_factor * 10));
-		setSizeY(std::max(getSize().y, m_scaling_factor * g_caret_def_size.y));
+		setSizeX(std::max(getSize().x, m_scaling_factor * 15));
+		setSizeY(std::max(getSize().y, m_scaling_factor * 15));
 		if (m_drawBorder)
 		{
 			float padding = 2;

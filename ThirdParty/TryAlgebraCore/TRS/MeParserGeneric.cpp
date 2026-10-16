@@ -45,25 +45,27 @@ namespace TryAlgebraCore::Trs {
 					endChildren();
 					continue;
 				}
-				else if (m_str[i] == L'\\')
+			}
+			if (m_str[i] == L'\\')
+			{
+				readStart = i + 1;
+				if (state == State::ReadGlyph)
 				{
-					readStart = i + 1;
-					if (state == State::ReadGlyph)
-					{
-						state = State::ReadName;
-					}
-					else if (state == State::ReadName)
-					{
-						state = State::ReadMeta;
-						createMe(str);
-					}
-					else if (state == State::ReadMeta)
-					{
-						state = State::ReadGlyph;
-						addMeta(str);
-					}
-					continue;
+					state = State::ReadName;
 				}
+				else if (state == State::ReadName)
+				{
+					state = State::ReadMeta;
+					createMe(str);
+					str = {};
+				}
+				else if (state == State::ReadMeta)
+				{
+					state = State::ReadGlyph;
+					addMeta(str);
+					str = {};
+				}
+				continue;
 			}
 			if (state == State::ReadName || state == State::ReadMeta)
 			{

@@ -14,4 +14,5 @@ public slots:
 	void parse(const QString& parserName);
 	void parseInverse(const QString& parserName);
 	void applyFormula(MeActionData* actionData, int part);
+	void scaleMatrix(MatrixScalingData* actionData, int row, int column);
 };

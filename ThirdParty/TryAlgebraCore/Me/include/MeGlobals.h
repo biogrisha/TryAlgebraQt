@@ -40,6 +40,20 @@ namespace TryAlgebraCore
 
 		inline std::wstring matrix = L"mat";
 
+		inline auto matrixSize(const std::wstring& meta)
+		{
+			struct {
+				int rows = 0;
+				int columns = 0;
+			} res;
+
+			const size_t separator = meta.find(L',');
+			assert(separator != std::wstring::npos);
+			res.rows = std::stoi(meta.substr(0, separator));
+			res.columns = std::stoi(meta.substr(separator + 1));
+			return res;
+		}
+
 		inline std::wstring makeMe(const std::wstring& name, const std::wstring& meta, const size_t cont_num)
 		{
 			std::wstring res;
@@ -78,7 +92,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Subscript", makeMe(subscript, L"", 1));
 				res.emplace_back(L"Superscript", makeMe(superscript, L"", 1));
 				res.emplace_back(L"Fraction", makeMe(fraction, L"", 2));
-				res.emplace_back(L"Mat 3x4", makeMe(matrix, L"3,4", 12));
+				res.emplace_back(L"Mat 3x4", makeMe(matrix, L"2,2", 4));
 				res.emplace_back(L"Cursor placement", L'\\' + spriteCursorPlacement + L"\\\\");
 				res.emplace_back(L"Paste selection", L'\\' + spritePaste + L"\\\\");
 				res.emplace_back(L"textalpha", L"α");

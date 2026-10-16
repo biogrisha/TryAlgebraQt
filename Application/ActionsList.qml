@@ -96,7 +96,121 @@ Rectangle {
                     height: item ? item.implicitHeight : 0
                     sourceComponent: actionData.type() === "parser"
                         ? parserAction
-                        : actionData.type() === "formula" ? formulaAction : null
+                        : actionData.type() === "formula"
+                            ? formulaAction
+                            : actionData.type() === "matrix" ? matrixAction : null
+
+                    Component {
+                        id: matrixAction
+
+                        Rectangle {
+                            id: matrixItem
+
+                            width: actionLoader.width
+                            implicitHeight: 76
+                            radius: 4
+                            color: matrixHover.hovered ? "#eeeeee" : "transparent"
+
+                            HoverHandler {
+                                id: matrixHover
+                            }
+
+                            Column {
+                                anchors.fill: parent
+                                anchors.leftMargin: 7
+                                anchors.rightMargin: 4
+                                spacing: 2
+
+                                Row {
+                                    width: parent.width
+                                    height: 36
+                                    spacing: 6
+
+                                    Text {
+                                        width: 50
+                                        height: parent.height
+                                        text: qsTr("Rows")
+                                        font.pixelSize: 12
+                                        color: "#282828"
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    Slider {
+                                        id: rowsSlider
+
+                                        width: parent.width - 86
+                                        height: parent.height
+                                        from: 1
+                                        to: 10
+                                        stepSize: 1
+                                        snapMode: Slider.SnapAlways
+                                        value: actionLoader.actionData.rows()
+
+                                        onMoved: {
+                                            meActionsControl.scaleMatrix(
+                                                actionLoader.actionData,
+                                                Math.round(value),
+                                                Math.round(columnsSlider.value))
+                                        }
+                                    }
+
+                                    Text {
+                                        width: 24
+                                        height: parent.height
+                                        text: Math.round(rowsSlider.value)
+                                        font.pixelSize: 12
+                                        color: "#444444"
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+
+                                Row {
+                                    width: parent.width
+                                    height: 36
+                                    spacing: 6
+
+                                    Text {
+                                        width: 50
+                                        height: parent.height
+                                        text: qsTr("Columns")
+                                        font.pixelSize: 12
+                                        color: "#282828"
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    Slider {
+                                        id: columnsSlider
+
+                                        width: parent.width - 86
+                                        height: parent.height
+                                        from: 1
+                                        to: 10
+                                        stepSize: 1
+                                        snapMode: Slider.SnapAlways
+                                        value: actionLoader.actionData.columns()
+
+                                        onMoved: {
+                                            meActionsControl.scaleMatrix(
+                                                actionLoader.actionData,
+                                                Math.round(rowsSlider.value),
+                                                Math.round(value))
+                                        }
+                                    }
+
+                                    Text {
+                                        width: 24
+                                        height: parent.height
+                                        text: Math.round(columnsSlider.value)
+                                        font.pixelSize: 12
+                                        color: "#444444"
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     Component {
                         id: parserAction

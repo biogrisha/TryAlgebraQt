@@ -212,6 +212,12 @@ namespace MeParserGenericTest
 
 			cases += MeParserGenericCase({ "MeParserGenericTest", "11" }, L"\\vr\\uni\\{y\\}t", res);
 		}
+		{
+			std::vector<State> res;
+			addMe(L"name", L"", res, false);
+
+			cases += MeParserGenericCase({ "MeParserGenericTest", "12" }, L"\\name\\\\", res);
+		}
 	}
 
 }

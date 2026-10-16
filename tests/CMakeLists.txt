@@ -19,6 +19,7 @@ add_executable(TryAlgebraTest
     PatternMatchingTest.h
     DiophantineSolver.h
     MeParserGenericTest.h
+    MeSimpleToStrTest.h
 )
 
 target_link_libraries(TryAlgebraTest 
