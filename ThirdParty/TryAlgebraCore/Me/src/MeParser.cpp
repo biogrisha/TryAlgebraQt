@@ -70,16 +70,23 @@ namespace TryAlgebraCore
 			});
 
 		//=========ch factory 
-		m_chFactory.emplace(L'[',
-			[]()
+		auto addBracket = [&, this](wchar_t brOpen, wchar_t brClose)
 			{
-				return MyRTTI::MakeTypedUnique<MeBracket>(L'[');
-			});
-		m_chFactory.emplace(L']',
-			[]()
-			{
-				return MyRTTI::MakeTypedUnique<MeBracket>(L']');
-			});
+
+				m_chFactory.emplace(brOpen,
+					[brOpen]()
+					{
+						return MyRTTI::MakeTypedUnique<MeBracket>(brOpen);
+					});
+				m_chFactory.emplace(brClose,
+					[brClose]()
+					{
+						return MyRTTI::MakeTypedUnique<MeBracket>(brClose);
+					});
+			};
+		addBracket(L'[', L']');
+		addBracket(L'{', L'}');
+		addBracket(L'(', L')');
 
 	}
 

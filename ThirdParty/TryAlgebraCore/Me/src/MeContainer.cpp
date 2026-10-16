@@ -61,7 +61,10 @@ namespace TryAlgebraCore
 	{
 		static const std::unordered_map<wchar_t, wchar_t> bracketsMap =
 		{
-			{L'[', L']'}
+			{L'[', L']'},
+			{L'{', L'}'},
+			{L'(', L')'},
+
 		};
 		const float bracketEnlargment = 3 * m_scaling_factor;
 		struct OpenBracketInfo
