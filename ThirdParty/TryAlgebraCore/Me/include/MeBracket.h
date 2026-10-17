@@ -14,6 +14,9 @@ namespace TryAlgebraCore
 		void setHeight(float height);
 		wchar_t ch() const { return m_ch; }
 	private:
+		glm::vec2 padding() const;
+		glm::vec2 glyphSize() const;
+		glm::vec2 glyphPos() const;
 		wchar_t m_ch;
 		std::vector<FOutlineCurvePoints> m_points;
 	};

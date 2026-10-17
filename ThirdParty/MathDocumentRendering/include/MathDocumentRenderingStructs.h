@@ -12,31 +12,103 @@ struct FOutlineCurvePoints
 	float b = 0;
 };
 
+
 struct OutlineBuilder
 {
-	void addPoint(float x, float y, bool newCurve = false)
+
+	struct Point
 	{
-		outline.emplace_back();
-		outline.back().points[0] = { x,y };
-		if (outline.size() > 1 && !newCurve)
+		glm::vec2 pos;
+		bool isControl = false;
+	};
+
+	void addPoint(float x, float y, bool control = false)
+	{
+		if (rings.empty())
 		{
-			auto& points = outline[outline.size() - 2].points;
-			points[2] = { x,y };
-			points[1] = points[0] + points[2];
-			points[1] /= 2;
+			rings.emplace_back();
 		}
-	};
-
-	void closeCurve(float x, float y)
+		rings.back().push_back(Point{ .pos = {x,y}, .isControl = control });
+		if (rings.back().size() > 1 && rings.back().back().pos == rings.back().front().pos)
+		{
+			rings.emplace_back();
+		}
+	}
+	std::vector<FOutlineCurvePoints> outline()
 	{
-		auto& points = outline[outline.size() - 1].points;
-		points[2] = { x,y };
-		points[1] = points[0] + points[2];
-		points[1] /= 2;
+		std::vector<FOutlineCurvePoints> res;
 
-	};
+		auto midpoint = [](glm::vec2 a, glm::vec2 b) {
+			return (a + b) * 0.5f;
+			};
 
-	std::vector<FOutlineCurvePoints> outline;
+		auto addCurve = [&](glm::vec2 a, glm::vec2 b, glm::vec2 c) {
+			res.push_back(FOutlineCurvePoints{ .points = {a, b, c} });
+			};
+
+		for (const auto& ring : rings)
+		{
+			if (ring.size() < 2)
+				continue;
+
+			size_t n = ring.size();
+
+			// Ignore duplicated closing point.
+			if (ring.front().pos == ring.back().pos)
+				--n;
+
+			if (n < 2)
+				continue;
+
+			// Determine starting on-curve point.
+			glm::vec2 start;
+
+			if (!ring[0].isControl)
+			{
+				start = ring[0].pos;
+			}
+			else if (!ring[n - 1].isControl)
+			{
+				start = ring[n - 1].pos;
+			}
+			else
+			{
+				start = midpoint(ring[n - 1].pos, ring[0].pos);
+			}
+
+			glm::vec2 current = start;
+
+			for (size_t i = 0; i < n; ++i)
+			{
+				const auto& p = ring[i];
+				const auto& next = ring[(i + 1) % n];
+
+				if (!p.isControl)
+				{
+					if (!next.isControl)
+					{
+						// Straight line.
+						addCurve(p.pos, midpoint(p.pos, next.pos), next.pos);
+						current = next.pos;
+					}
+				}
+				else
+				{
+					// Quadratic curve.
+					glm::vec2 end = next.isControl
+						? midpoint(p.pos, next.pos)
+						: next.pos;
+
+					addCurve(current, p.pos, end);
+					current = end;
+				}
+			}
+		}
+
+		return res;
+	}
+
+	std::vector<std::vector<Point>> rings;
 };
 
 

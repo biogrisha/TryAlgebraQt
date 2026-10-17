@@ -29,160 +29,152 @@ namespace TryAlgebraCore
 			addCurve(outline, start, (start + end) / 2.f, end);
 		}
 
-		void reverseContour(std::vector<FOutlineCurvePoints>& outline)
-		{
-			std::reverse(outline.begin(), outline.end());
-			for (auto& curve : outline)
-			{
-				std::swap(curve.points[0], curve.points[2]);
-			}
-		}
-
-		void mirrorContour(std::vector<FOutlineCurvePoints>& outline, float width)
-		{
-			for (auto& curve : outline)
-			{
-				for (auto& point : curve.points)
-				{
-					point.x = width - point.x;
-				}
-			}
-			// Reflection changes the winding direction. Reverse the path so that
-			// closing brackets use the same signed fill as opening brackets.
-			reverseContour(outline);
-		}
-
-		std::vector<FOutlineCurvePoints> createSquareBracket(
-			int height,
-			int dashLength = 30,
-			int dashHeight = 10,
-			int barWidth = 10,
-			bool rightBracket = false)
+		std::vector<FOutlineCurvePoints> createSquareBracket(glm::vec2 size, float lineWidth, bool rightBracket = false)
 		{
 			OutlineBuilder outline;
-			float barOffset = rightBracket ? dashLength - barWidth : 0;
+			lineWidth = std::max<int>(std::ceil(lineWidth), 2);
+
+			float barOffset = rightBracket ? size.x - lineWidth : 0;
 			outline.addPoint(0, 0);
-			outline.addPoint(dashLength, 0);
-			outline.addPoint(dashLength, dashHeight);
-			outline.addPoint(0, dashHeight);
-			outline.closeCurve(0, 0);
+			outline.addPoint(size.x, 0);
+			outline.addPoint(size.x, lineWidth);
+			outline.addPoint(0, lineWidth);
+			outline.addPoint(0, 0);
 
-			outline.addPoint(barOffset, 0, true);
-			outline.addPoint(barWidth + barOffset, 0);
-			outline.addPoint(barWidth + barOffset, height);
-			outline.addPoint(barOffset, height);
-			outline.closeCurve(barOffset, 0);
+			float y = size.y - lineWidth;
+			outline.addPoint(0, y);
+			outline.addPoint(size.x, y);
+			outline.addPoint(size.x, size.y);
+			outline.addPoint(0, size.y);
+			outline.addPoint(0, y);
 
-			outline.addPoint(0, height - dashHeight, true);
-			outline.addPoint(dashLength, height - dashHeight);
-			outline.addPoint(dashLength, height);
-			outline.addPoint(0, height);
-			outline.closeCurve(0, height - dashHeight);
+			outline.addPoint(barOffset, 0);
+			outline.addPoint(barOffset + lineWidth, 0);
+			outline.addPoint(barOffset + lineWidth, size.y);
+			outline.addPoint(barOffset, size.y);
+			outline.addPoint(barOffset, 0);
 
-			return outline.outline;
+			return outline.outline();
 		}
 
-		std::vector<FOutlineCurvePoints> createRoundBracket(
-			float height,
-			float width,
-			float strokeWidth,
-			bool rightBracket = false)
+		std::vector<FOutlineCurvePoints> createRoundBracket(glm::vec2 size, float lineWidth, bool rightBracket = false)
 		{
-			std::vector<FOutlineCurvePoints> outline;
-			auto point = [](float x, float y) { return glm::vec2{ x, y }; };
-
-			const float middle = height / 2.f;
-			addCurve(outline, point(width, 0), point(0, 0), point(0, middle));
-			addCurve(outline, point(0, middle), point(0, height), point(width, height));
-			addLine(outline, point(width, height), point(width - strokeWidth, height));
-			addCurve(outline,
-				point(width - strokeWidth, height),
-				point(strokeWidth, height),
-				point(strokeWidth, middle));
-			addCurve(outline,
-				point(strokeWidth, middle),
-				point(strokeWidth, 0),
-				point(width - strokeWidth, 0));
-			addLine(outline, point(width - strokeWidth, 0), point(width, 0));
-
-			// The custom-glyph shader uses signed winding. Match the direction of
-			// the existing square-bracket contours.
-			reverseContour(outline);
+			OutlineBuilder outline;
+			lineWidth = std::max<int>(std::ceil(lineWidth), 1);
 			if (rightBracket)
 			{
-				mirrorContour(outline, width);
+				outline.addPoint(0, 0);
+				outline.addPoint(lineWidth, 0);
+				outline.addPoint(size.x, std::ceil(size.y / 2), true);
+				outline.addPoint(lineWidth, size.y);
+				outline.addPoint(0, size.y);
+				outline.addPoint(size.x - lineWidth, std::ceil(size.y / 2), true);
+				outline.addPoint(0, 0);
 			}
-			return outline;
+			else
+			{
+				outline.addPoint(size.x, 0);
+				outline.addPoint(lineWidth, std::ceil(size.y / 2), true);
+				outline.addPoint(size.x, size.y);
+				outline.addPoint(size.x - lineWidth, size.y);
+				outline.addPoint(0, std::ceil(size.y / 2), true);
+				outline.addPoint(size.x - lineWidth, 0);
+				outline.addPoint(size.x, 0);
+			}
+
+			return outline.outline();
 		}
 
-		std::vector<FOutlineCurvePoints> createCurlyBracket(
-			float height,
-			float width,
-			float strokeWidth,
-			bool rightBracket = false)
+		std::vector<FOutlineCurvePoints> createCurlyBracket(glm::vec2 size, float lineWidth, bool rightBracket = false)
 		{
-			std::vector<FOutlineCurvePoints> outline;
-			auto point = [](float x, float y) { return glm::vec2{ x, y }; };
-
-			const float middle = height / 2.f;
-			const float upperShoulder = height * 0.3f;
-			const float lowerShoulder = height * 0.7f;
-			const float centerTip = width * 0.5f;
-
-			addCurve(outline, point(width, 0), point(0, 0), point(0, upperShoulder));
-			addCurve(outline,
-				point(0, upperShoulder),
-				point(0, height * 0.45f),
-				point(centerTip, middle));
-			addCurve(outline,
-				point(centerTip, middle),
-				point(0, height * 0.55f),
-				point(0, lowerShoulder));
-			addCurve(outline, point(0, lowerShoulder), point(0, height), point(width, height));
-			addLine(outline, point(width, height), point(width - strokeWidth, height));
-			addCurve(outline,
-				point(width - strokeWidth, height),
-				point(strokeWidth, height),
-				point(strokeWidth, lowerShoulder));
-			addCurve(outline,
-				point(strokeWidth, lowerShoulder),
-				point(strokeWidth, height * 0.58f),
-				point(centerTip + strokeWidth, middle));
-			addCurve(outline,
-				point(centerTip + strokeWidth, middle),
-				point(strokeWidth, height * 0.42f),
-				point(strokeWidth, upperShoulder));
-			addCurve(outline,
-				point(strokeWidth, upperShoulder),
-				point(strokeWidth, 0),
-				point(width - strokeWidth, 0));
-			addLine(outline, point(width - strokeWidth, 0), point(width, 0));
-
-			reverseContour(outline);
+			OutlineBuilder outline;
+			lineWidth = std::max<int>(std::ceil(lineWidth), 1);
+			float halfHeight = std::max<int>(std::ceil(size.y / 2), 1);
+			float widthOneFourth = std::max<int>(std::ceil(size.x / 4), 1);
+			float metric1Y = lineWidth * 3;
+			float metric2Y = halfHeight - lineWidth * 5;
+			float metric3Y = halfHeight;
+			float metric1X = widthOneFourth * 2;
+			float metric2X = size.x;
 			if (rightBracket)
 			{
-				mirrorContour(outline, width);
+				//right border
+				outline.addPoint(0, 0);
+				outline.addPoint(metric1X, 0, true);
+				outline.addPoint(metric1X, metric1Y);
+				outline.addPoint(metric1X, metric2Y);
+				outline.addPoint(metric1X, metric3Y, true);
+				outline.addPoint(metric2X, metric3Y);
+				outline.addPoint(metric1X, metric3Y, true);
+				outline.addPoint(metric1X, size.y - metric2Y);
+				outline.addPoint(metric1X, size.y - metric1Y);
+				outline.addPoint(metric1X, size.y, true);
+				outline.addPoint(0, size.y);
+
+				//left border
+				outline.addPoint(0, size.y - lineWidth);
+				outline.addPoint(metric1X - lineWidth, size.y - lineWidth, true);
+				outline.addPoint(metric1X - lineWidth, size.y - metric1Y);
+				outline.addPoint(metric1X - lineWidth, size.y - metric2Y);
+				outline.addPoint(metric1X - lineWidth, metric3Y, true);
+				outline.addPoint(metric2X - lineWidth, metric3Y);
+				outline.addPoint(metric1X - lineWidth, metric3Y, true);
+				outline.addPoint(metric1X - lineWidth, metric2Y);
+				outline.addPoint(metric1X - lineWidth, metric1Y);
+				outline.addPoint(metric1X - lineWidth, lineWidth, true);
+				outline.addPoint(0, lineWidth);
+
 			}
-			return outline;
+			else
+			{
+				//left border
+				outline.addPoint(size.x - 0, lineWidth);
+				outline.addPoint(size.x - (metric1X - lineWidth), lineWidth, true);
+				outline.addPoint(size.x - (metric1X - lineWidth), metric1Y);
+				outline.addPoint(size.x - (metric1X - lineWidth), metric2Y);
+				outline.addPoint(size.x - (metric1X - lineWidth), metric3Y, true);
+				outline.addPoint(size.x - (metric2X - lineWidth), metric3Y);
+				outline.addPoint(size.x - (metric1X - lineWidth), metric3Y, true);
+				outline.addPoint(size.x - (metric1X - lineWidth), size.y - metric2Y);
+				outline.addPoint(size.x - (metric1X - lineWidth), size.y - metric1Y);
+				outline.addPoint(size.x - (metric1X - lineWidth), size.y - lineWidth, true);
+				outline.addPoint(size.x - 0, size.y - lineWidth);
+
+				//right border
+				outline.addPoint(size.x - 0, size.y);
+				outline.addPoint(size.x - metric1X, size.y, true);
+				outline.addPoint(size.x - metric1X, size.y - metric1Y);
+				outline.addPoint(size.x - metric1X, size.y - metric2Y);
+				outline.addPoint(size.x - metric1X, metric3Y, true);
+				outline.addPoint(size.x - metric2X, metric3Y);
+				outline.addPoint(size.x - metric1X, metric3Y, true);
+				outline.addPoint(size.x - metric1X, metric2Y);
+				outline.addPoint(size.x - metric1X, metric1Y);
+				outline.addPoint(size.x - metric1X, 0, true);
+				outline.addPoint(size.x - 0, 0);
+
+			}
+
+
+
+
+			return outline.outline();
 		}
 
-		std::vector<FOutlineCurvePoints> createBracket(wchar_t ch, float height)
+		std::vector<FOutlineCurvePoints> createBracket(wchar_t ch, const glm::vec2 size, float scalingFactor)
 		{
 			switch (ch)
 			{
 			case L'(':
 			case L')':
-				return createRoundBracket(
-					height, bracketDashLen, bracketWidth, ch == L')');
+				return createRoundBracket(size, scalingFactor * 2, ch == L')');
 			case L'{':
 			case L'}':
-				return createCurlyBracket(
-					height, bracketDashLen, bracketWidth, ch == L'}');
+				return createCurlyBracket(size, scalingFactor * 2, ch == L'}');
 			case L'[':
 			case L']':
 			default:
-				return createSquareBracket(
-					height, bracketDashLen, bracketWidth, bracketWidth, ch == L']');
+				return createSquareBracket(size, scalingFactor * 2, ch == L']');
 			}
 		}
 	}
@@ -195,39 +187,65 @@ namespace TryAlgebraCore
 	void MeBracket::calculate(VisualToolkit* visual_toolkit)
 	{
 		//geometry calculated in setHeight
-		m_size = { bracketDashLen, 20 };
+		switch (m_ch)
+		{
+		case L'(':
+		case L')':
+			m_size = { 14, 30 };
+			break;
+		case L'{':
+		case L'}':
+			m_size = { 15, 30 };
+			break;
+		case L'[':
+		case L']':
+		default:
+			m_size = { 10, 30 };
+			break;
+		}
 		m_size *= m_scaling_factor;
 		m_bearing_y = m_size.y / 2;
 	}
 
 	void MeBracket::draw(VisualToolkit* visual_toolkit)
 	{
-		if (!m_points.empty())
-		{
-			visual_toolkit->mdocState->at(1).addCustomGlyph(m_points, m_pos, m_size);
-		}
-		else
+		const auto gSize = glyphSize();
+		const auto gPos = glyphPos();
+		if (m_points.empty())
 		{
 			visual_toolkit->mdocState->at(1)
 				.addCustomGlyph(
-					createBracket(m_ch, m_size.y),
-					m_pos, m_size);
-
+					createBracket(m_ch, gSize, m_scaling_factor),
+					gPos, gSize);
+		}
+		else
+		{
+			visual_toolkit->mdocState->at(1).addCustomGlyph(m_points, gPos, gSize);
 		}
 	}
 
 	void MeBracket::setHeight(float height)
 	{
-		m_points = createBracket(m_ch, height);
-		float maxX = 0;
-		float maxY = 0;
-		for (auto& curve : m_points)
-		{
-			maxX = std::max({ maxX, curve.points[0].x, curve.points[1].x, curve.points[2].x });
-			maxY = std::max({ maxY, curve.points[0].y, curve.points[1].y, curve.points[2].y });
-		}
-		m_size = { maxX, maxY };
+		m_size.y = height;
 		m_bearing_y = m_size.y / 2;
+		m_points = createBracket(m_ch, glyphSize(), m_scaling_factor);
+	}
+
+	glm::vec2 MeBracket::padding() const
+	{
+		return glm::ceil(glm::vec2{ 3,3 } * m_scaling_factor);
+	}
+
+	glm::vec2 MeBracket::glyphSize() const
+	{
+		auto size = glm::ceil((m_size - (padding() * 2.f)));
+		size.x = std::max<int>(3, size.x);
+		return size;
+	}
+
+	glm::vec2 MeBracket::glyphPos() const
+	{
+		return glm::ceil(m_pos + padding());
 	}
 
 }
