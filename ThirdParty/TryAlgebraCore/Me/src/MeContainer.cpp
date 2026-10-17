@@ -64,6 +64,7 @@ namespace TryAlgebraCore
 			{L'[', L']'},
 			{L'{', L'}'},
 			{L'(', L')'},
+			{L'<', L'>'},
 
 		};
 		const float bracketEnlargment = 3 * m_scaling_factor;

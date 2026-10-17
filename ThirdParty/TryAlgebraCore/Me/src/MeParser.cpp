@@ -87,6 +87,7 @@ namespace TryAlgebraCore
 		addBracket(L'[', L']');
 		addBracket(L'{', L'}');
 		addBracket(L'(', L')');
+		addBracket(L'<', L'>');
 
 	}
 

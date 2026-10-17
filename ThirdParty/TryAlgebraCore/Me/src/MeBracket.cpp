@@ -85,6 +85,36 @@ namespace TryAlgebraCore
 			return outline.outline();
 		}
 
+		std::vector<FOutlineCurvePoints> createAngleBracket(glm::vec2 size, float lineWidth, bool rightBracket = false)
+		{
+			OutlineBuilder outline;
+			lineWidth = std::max<int>(std::ceil(lineWidth), 1);
+			if (rightBracket)
+			{
+				outline.addPoint(0, 0);
+				outline.addPoint(lineWidth, 0);
+				outline.addPoint(size.x, size.y / 2);
+				outline.addPoint(lineWidth, size.y);
+				outline.addPoint(0, size.y);
+				outline.addPoint(size.x - lineWidth, size.y / 2);
+				outline.addPoint(0, 0);
+
+			}
+			else
+			{
+				outline.addPoint(size.x - 0, 0);
+				outline.addPoint(size.x - (size.x - lineWidth), size.y / 2);
+				outline.addPoint(size.x - 0, size.y);
+				outline.addPoint(size.x - lineWidth, size.y);
+				outline.addPoint(size.x - size.x, size.y / 2);
+				outline.addPoint(size.x - lineWidth, 0);
+				outline.addPoint(size.x - 0, 0);
+
+			}
+
+			return outline.outline();
+		}
+
 		std::vector<FOutlineCurvePoints> createCurlyBracket(glm::vec2 size, float lineWidth, bool rightBracket = false)
 		{
 			OutlineBuilder outline;
@@ -154,10 +184,6 @@ namespace TryAlgebraCore
 				outline.addPoint(size.x - 0, 0);
 
 			}
-
-
-
-
 			return outline.outline();
 		}
 
@@ -171,6 +197,9 @@ namespace TryAlgebraCore
 			case L'{':
 			case L'}':
 				return createCurlyBracket(size, scalingFactor * 2, ch == L'}');
+			case L'<':
+			case L'>':
+				return createAngleBracket(size, scalingFactor * 2, ch == L'>');
 			case L'[':
 			case L']':
 			default:
@@ -195,6 +224,10 @@ namespace TryAlgebraCore
 			break;
 		case L'{':
 		case L'}':
+			m_size = { 15, 30 };
+			break;
+		case L'<':
+		case L'>':
 			m_size = { 15, 30 };
 			break;
 		case L'[':

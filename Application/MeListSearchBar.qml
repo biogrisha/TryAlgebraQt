@@ -168,7 +168,7 @@ Rectangle {
 							source: "image://MeAtlas/atlas"
 
 							width: 500
-							height: 282
+							height: 277
 
 							x: -button.viewPos.x
 							y: -button.viewPos.y
