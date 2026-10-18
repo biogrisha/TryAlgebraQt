@@ -18,12 +18,15 @@ namespace TryAlgebraCore
 		void addEmptyLine();
 		void setDrawBackground(bool val);
 		void setDrawBorder(bool val);
+		void setCenterContent(bool val);
 	private:
 		void adjustBrackets(float& maxY);
 		void adjustScripts(float& outMaxY);
+		void centerContent();
 		float next_line_y = 0;
 		int end_line_i = 0;
 		bool m_drawBackground = false;
 		bool m_drawBorder = false;
+		bool m_centerContent = false;
 	};
 }

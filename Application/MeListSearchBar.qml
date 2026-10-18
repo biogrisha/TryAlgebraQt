@@ -166,9 +166,8 @@ Rectangle {
 
 						Image {
 							source: "image://MeAtlas/atlas"
+							sourceSize: UserApplication.applicationModel().meListModel().atlasSize()
 
-							width: 500
-							height: 277
 
 							x: -button.viewPos.x
 							y: -button.viewPos.y

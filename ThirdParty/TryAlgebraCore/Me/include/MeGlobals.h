@@ -15,6 +15,8 @@ namespace TryAlgebraCore
 		inline std::wstring integral = L"∫";
 		inline std::wstring integral2 = L"∬";
 		inline std::wstring integral3 = L"∭";
+		inline std::wstring summation = L"∑";
+		inline std::wstring product = L"∏";
 
 		inline std::wstring new_line = L"nl";
 
@@ -81,6 +83,8 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Integral", makeMe(from_to, integral, 2));
 				res.emplace_back(L"Double integral", makeMe(from_to, integral2, 2));
 				res.emplace_back(L"Triple integral", makeMe(from_to, integral3, 2));
+				res.emplace_back(L"Sum", makeMe(from_to, summation, 2));
+				res.emplace_back(L"Product", makeMe(from_to, product, 2));
 				res.emplace_back(L"Zero-Multi variable", makeMe(variable, varZeroMulti, 1));
 				res.emplace_back(L"One-Multi variable", makeMe(variable, varOneMulti, 1));
 				res.emplace_back(L"Uni variable", makeMe(variable, varUni, 1));

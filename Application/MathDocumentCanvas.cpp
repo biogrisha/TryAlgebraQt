@@ -69,7 +69,7 @@ private:
 	void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 	//Transits image layout
-	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 	//Copying VkBuffer into VkImage
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
@@ -389,9 +389,9 @@ void CustomTextureNodePrivate::render()
 	m_devFuncs->vkUnmapMemory(m_dev, stagingBufferMemory);
 
 	//copy buffer into node texture
-	TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	TransitionImageLayout(m_texture, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 	copyBufferToImage(stagingBuffer, m_texture, static_cast<uint32_t>(m_size.width()), static_cast<uint32_t>(m_size.height()));
-	TransitionImageLayout(m_texture, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	TransitionImageLayout(m_texture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	//destroy staging buffer
 	m_devFuncs->vkDestroyBuffer(m_dev, stagingBuffer, nullptr);
@@ -483,7 +483,7 @@ void CustomTextureNodePrivate::EndSingleTimeCommands(VkCommandBuffer commandBuff
 	m_devFuncs->vkFreeCommandBuffers(m_dev, m_commandPool, 1, &commandBuffer);
 }
 
-void CustomTextureNodePrivate::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+void CustomTextureNodePrivate::TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
 	auto CommandBuffer = BeginSingleTimeCommands();
 	VkImageMemoryBarrier barrier{};

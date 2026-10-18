@@ -64,6 +64,11 @@ void MeListModel::setImage(QImage&& image)
 	m_image = std::move(image);
 }
 
+QSize MeListModel::atlasSize() const
+{
+	return m_image.size();
+}
+
 QHash<int, QByteArray> MeListModel::roleNames() const
 {
 	QHash<int, QByteArray> roles;

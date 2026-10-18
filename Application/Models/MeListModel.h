@@ -7,14 +7,14 @@
 class MathElementInfo
 {
 public:
-    MathElementInfo(const QString& fullName, const QPoint& viewPos, const QSize& viewSize);
+	MathElementInfo(const QString& fullName, const QPoint& viewPos, const QSize& viewSize);
 	QString meFullName() const;
-    QPoint viewPos() const;
-    QSize viewSize() const;
+	QPoint viewPos() const;
+	QSize viewSize() const;
 private:
 	QString m_meFullName;
-    QPoint m_viewPos;
-    QSize m_viewSize;
+	QPoint m_viewPos;
+	QSize m_viewSize;
 
 };
 
@@ -23,28 +23,31 @@ private:
 */
 class MeListModel : public QAbstractListModel
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    enum MathElementInfoRoles {
-        MeName = Qt::UserRole + 1,
-        Image,
-        ViewPos,
-        ViewSize,
-    };
+	enum MathElementInfoRoles {
+		MeName = Qt::UserRole + 1,
+		Image,
+		ViewPos,
+		ViewSize,
+	};
 
-    MeListModel(QObject* parent = nullptr);
+	MeListModel(QObject* parent = nullptr);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-    void addMathElementInfo(const MathElementInfo& Info);
-    void setImage(QImage&& image);
-    QImage* image() { return &m_image; }
+	void addMathElementInfo(const MathElementInfo& Info);
+	void setImage(QImage&& image);
+	QImage* image() { return &m_image; }
+public slots:
+	QSize atlasSize() const;
+
 protected:
-    QHash<int, QByteArray> roleNames() const;
+	QHash<int, QByteArray> roleNames() const;
 private:
-    QList<MathElementInfo> m_meInfos;
-    QImage m_image;
+	QList<MathElementInfo> m_meInfos;
+	QImage m_image;
 };
 

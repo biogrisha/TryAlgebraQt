@@ -45,6 +45,7 @@ namespace TryAlgebraCore {
 		{
 			if (auto* cont = MyRTTI::Cast<MeContainer>(ch.get()))
 			{
+				cont->setCenterContent(true);
 				cont->setDrawBorder(true);
 			}
 			ch->setScalingFactor(m_scaling_factor);

@@ -97,11 +97,7 @@ void TextRendering::render()
 	{
 		return;
 	}
-	auto cmdBuffer = VkHelpers::BeginSingleTimeCommands();
-	VkHelpers::ImageTransition_ToTransferDst(m_atlas.get(), cmdBuffer);
-	VkHelpers::ClearImage(m_atlas.get(), cmdBuffer);
-	VkHelpers::EndSingleTimeCommands(cmdBuffer);
-	m_atlasRendering.Render();
+	m_atlasRendering.Render(true);
 	m_textFromAtlasRendering.Render();
 }
 

@@ -57,6 +57,11 @@ namespace TryAlgebraCore
 		m_drawBorder = val;
 	}
 
+	void MeContainer::setCenterContent(bool val)
+	{
+		m_centerContent = val;
+	}
+
 	void MeContainer::adjustBrackets(float& outMaxY)
 	{
 		static const std::unordered_map<wchar_t, wchar_t> bracketsMap =
@@ -67,7 +72,7 @@ namespace TryAlgebraCore
 			{L'<', L'>'},
 
 		};
-		const float bracketEnlargment = 3 * m_scaling_factor;
+		const float bracketEnlargment = m_scaling_factor;
 		struct OpenBracketInfo
 		{
 			int iFrom = 0;
@@ -168,6 +173,38 @@ namespace TryAlgebraCore
 			}
 		}
 		maxY = maxY + lineOffset;
+	}
+
+	void MeContainer::centerContent()
+	{
+		int lineFrom = 0;
+		for (int i = 0; i < m_children.size(); ++i)
+		{
+			if (MyRTTI::Is<MeNewLine>(m_children[i].get()))
+			{
+				if (i != lineFrom)
+				{
+					auto& lastCh = m_children[i - 1];
+					float lineLen = lastCh->getPos().x + lastCh->getSize().x;
+					float offset = (m_size.x - lineLen) / 2;
+					for (int j = lineFrom; j <= i; ++j)
+					{
+						m_children[j]->setPosX(m_children[j]->getPos().x + offset);
+					}
+				}
+				lineFrom = i + 1;
+			}
+		}
+		if (lineFrom < m_children.size())
+		{
+			auto& lastCh = m_children.back();
+			float lineLen = lastCh->getPos().x + lastCh->getSize().x;
+			float offset = (m_size.x - lineLen) / 2;
+			for (int j = lineFrom; j < m_children.size(); ++j)
+			{
+				m_children[j]->setPosX(m_children[j]->getPos().x + offset);
+			}
+		}
 	}
 
 	void MeContainer::draw(VisualToolkit* vt)
@@ -348,6 +385,10 @@ namespace TryAlgebraCore
 		}
 		setSizeX(std::max(getSize().x, m_scaling_factor * 15));
 		setSizeY(std::max(getSize().y, m_scaling_factor * 15));
+		if (m_centerContent)
+		{
+			centerContent();
+		}
 		if (m_drawBorder)
 		{
 			float padding = 2;

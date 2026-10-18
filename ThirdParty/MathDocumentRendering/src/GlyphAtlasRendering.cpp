@@ -67,7 +67,7 @@ void FGlyphAtlasRendering::SetOutlineCurves(const std::vector<FOutlineCurvePoint
 	}
 }
 
-void FGlyphAtlasRendering::Render()
+void FGlyphAtlasRendering::Render(bool clearColorAttachment)
 {
 	if (Instances.empty())
 	{
@@ -83,7 +83,7 @@ void FGlyphAtlasRendering::Render()
 	Run.ColorAttachment = m_output;
 	Run.IndicesCount = RectIndices.size();
 	Run.InstancesCount = Instances.size();
-	Run.bClearAttachment = false;
+	Run.bClearAttachment = clearColorAttachment;
 	Rendering->AddRunPipelineInfo(Run);
 	Rendering->Render();
 }

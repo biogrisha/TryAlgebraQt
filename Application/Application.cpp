@@ -64,9 +64,9 @@ void Application::projectSelected(QString folderPath)
 	applicationModel()->setCurrentFolder(std::move(folderPath));
 	m_vulkanInst = std::make_unique<QVulkanInstance>();
 	m_vulkanInst->setApiVersion(QVersionNumber(1, 4));
-	//inst.setLayers({
-	//"VK_LAYER_KHRONOS_validation"
-	//	});
+	m_vulkanInst->setLayers({
+	"VK_LAYER_KHRONOS_validation"
+		});
 	bool ok = m_vulkanInst->create();
 	if (!ok) {
 		return;

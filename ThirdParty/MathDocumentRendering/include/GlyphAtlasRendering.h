@@ -40,7 +40,7 @@ public:
 	void SetExtent(const VkExtent3D& InExetent);
 	void SetInstances(const std::vector<FGlyphInstance>& InInstances);
 	void SetOutlineCurves(const std::vector<FOutlineCurvePoints>& InOutlineCurves);
-	void Render();
+	void Render(bool clearColorAttachment = false);
 private:
 	std::unique_ptr<FBuffer> VertexBuffer;
 	std::unique_ptr<FBuffer> InstanceBuffer;

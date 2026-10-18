@@ -25,7 +25,10 @@ VSOutput vertMain() {
 float4 fragMain(VSOutput vertIn) : SV_TARGET {
     
     float4 Color = Atlas.Sample(vertIn.TexCoord);
-    if(Color.a < 0.01f)
-        discard;
+    //if(Color.a < 0.01f)
+    //    discard;
+    Color.a = 1;
+    Color.g = 0;
+    Color.b = 0;
     return Color;
 }
