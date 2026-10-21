@@ -19,7 +19,7 @@ namespace TryAlgebraCore
 	void MeTerm::calculate(VisualToolkit* visual_toolkit)
 
 	{
-		float padding = 2;
+		float padding = 5 * m_scaling_factor;
 		glm::vec2 size = { padding,0 };
 		float margin = 0;
 		for (auto& ch : m_children)
@@ -35,19 +35,28 @@ namespace TryAlgebraCore
 			size.y = std::max(size.y, ch->getSize().y);
 			margin = m_scaling_factor * 10;
 		}
-		setSize(size + glm::vec2{ padding * 2, padding * 8 });
+		setSize(size + glm::vec2{ padding, padding * 4 });
 		setBearing(getSize().y / 2.);
 	}
 
-	void MeTerm::draw(VisualToolkit* visual_toolkit)
+	void MeTerm::draw(VisualToolkit* vt)
 	{
-		FRectInst rect;
-		rect.Color = m_type == Type::Function ? glm::vec4{ 1, 0, 1, 0.5 } : glm::vec4{ 0, 1, 1, 0.5 };
-
-		rect.Pos = getPos();
-		rect.Size = getSize();
-		visual_toolkit->mdocState->at(1).addRectangle(rect);
-		MeBase::draw(visual_toolkit);
+		if (getParent() && MyRTTI::Is<MeTerm>(getParent()->getParent()))
+		{
+			MeBase::draw(vt);
+			return;
+		}
+		float padding = 2 * m_scaling_factor;
+		LineChain border;
+		border.width = 1;
+		border.color = { 1,1,1,1 };
+		border.points.push_back(getPos() + glm::vec2{ padding, 0 });
+		border.points.push_back(getPos() + glm::vec2(getSize().x - padding, 0));
+		border.points.push_back(getPos() + getSize() - glm::vec2{ padding, 0 });
+		border.points.push_back(getPos() + glm::vec2(padding, getSize().y));
+		border.points.push_back(getPos() + +glm::vec2{ padding, 0 });
+		vt->mdocState->at(1).addLine(border);
+		MeBase::draw(vt);
 	}
 
 	void MeTerm::step(StepDir dir, StepFrom step_from, MePath& path)

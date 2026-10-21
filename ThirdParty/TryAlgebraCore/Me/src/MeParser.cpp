@@ -11,6 +11,7 @@
 #include <Me/include/MeSprite.h>
 #include <Me/include/MeBracket.h>
 #include <Me/include/MeMatrix.h>
+#include <Me/include/MeOverset.h>
 
 namespace TryAlgebraCore
 {
@@ -67,6 +68,11 @@ namespace TryAlgebraCore
 			[]()
 			{
 				return MyRTTI::MakeTypedUnique<MeMatrix>();
+			});
+		m_meFactory.emplace(MeNames::overset,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeOverset>();
 			});
 
 		//=========ch factory 

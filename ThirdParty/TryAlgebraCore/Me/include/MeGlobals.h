@@ -42,6 +42,8 @@ namespace TryAlgebraCore
 
 		inline std::wstring matrix = L"mat";
 
+		inline std::wstring overset = L"ovs";
+
 		inline auto matrixSize(const std::wstring& meta)
 		{
 			struct {
@@ -97,6 +99,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Superscript", makeMe(superscript, L"", 1));
 				res.emplace_back(L"Fraction", makeMe(fraction, L"", 2));
 				res.emplace_back(L"Mat 3x4", makeMe(matrix, L"2,2", 4));
+				res.emplace_back(L"overset", makeMe(overset, L"", 2));
 				res.emplace_back(L"Cursor placement", L'\\' + spriteCursorPlacement + L"\\\\");
 				res.emplace_back(L"Paste selection", L'\\' + spritePaste + L"\\\\");
 				res.emplace_back(L"textalpha", L"α");

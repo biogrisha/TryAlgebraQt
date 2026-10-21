@@ -38,6 +38,7 @@ add_library(TryAlgebraCore STATIC
 	Me/include/MeSprite.h	
 	Me/include/MeBracket.h
 	Me/include/MeMatrix.h
+	Me/include/MeOverset.h
 
 	Me/src/MeBase.cpp
 	Me/src/MeCharacter.cpp
@@ -53,6 +54,7 @@ add_library(TryAlgebraCore STATIC
 	Me/src/MeSprite.cpp
 	Me/src/MeBracket.cpp
 	Me/src/MeMatrix.cpp
+	Me/src/MeOverset.cpp
 
 	Helpers/include/MeHelpers.h
 	Helpers/include/EnumFlags.h
