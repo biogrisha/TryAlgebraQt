@@ -74,6 +74,11 @@ namespace TryAlgebraCore
 			{
 				return MyRTTI::MakeTypedUnique<MeOverset>();
 			});
+		m_meFactory.emplace(MeNames::typeAnnotation,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeOverset>();
+			});
 
 		//=========ch factory 
 		auto addBracket = [&, this](wchar_t brOpen, wchar_t brClose)

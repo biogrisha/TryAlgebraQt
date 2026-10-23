@@ -9,13 +9,11 @@ namespace TryAlgebraCore::Trs
 		constexpr const wchar_t* FormulaStart = L"$$";
 		constexpr const wchar_t* ImportParser = L"$ImportParser";
 		constexpr const wchar_t* ImportTrs = L"$ImportTrs";
-		constexpr const wchar_t* Parser = L"$Parser";
+		constexpr const wchar_t* Parser = L"$Operators";
 		constexpr const wchar_t* Formulas = L"$Formulas";
 		constexpr const wchar_t* Trs = L"$Trs";
 
-		constexpr const wchar_t* TDOnce = L"$TDOnce";
-		constexpr const wchar_t* TDEx = L"$TDEx";
-		constexpr const wchar_t* Inverse = L"$Inverse";
+		constexpr const wchar_t* Operation = L"$Op";
 	}
 	namespace {
 		void trim(std::wstring& s)

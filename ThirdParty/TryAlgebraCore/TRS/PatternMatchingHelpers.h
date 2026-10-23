@@ -92,6 +92,19 @@ namespace TryAlgebraCore::Trs
 		std::vector<Bundle> bundles;
 	};
 
+	struct Pat
+	{
+		static void create(std::vector<std::unique_ptr<TermIntermediate>>&& inPat)
+		{
+			Pat p;
+			p.pat = std::move(inPat);
+		}
+		std::vector<std::unique_ptr<TermIntermediate>> pat;
+		std::vector<TermIntermediate*> variables;
+		std::vector<Level> levels;
+		std::vector<Bundle*> bundles;
+	};
+
 	bool compare(TermIntermediate* lhs, TermIntermediate* rhs);
 
 	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, std::vector<TermIntermediate*>& variables);
