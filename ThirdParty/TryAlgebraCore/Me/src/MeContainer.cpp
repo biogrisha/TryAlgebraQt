@@ -72,7 +72,7 @@ namespace TryAlgebraCore
 			{L'<', L'>'},
 
 		};
-		const float bracketEnlargment = m_scaling_factor;
+		const float bracketEnlargment = m_scaling_factor * 0;
 		struct OpenBracketInfo
 		{
 			int iFrom = 0;
@@ -109,8 +109,14 @@ namespace TryAlgebraCore
 						}
 						openBrackets.back().bracket->setPosY(minY - bracketEnlargment);
 						openBrackets.back().bracket->setHeight(maxY - minY + bracketEnlargment * 2);
+						auto oldBracketY = bracket->getPos().y;
 						bracket->setPosY(minY - bracketEnlargment);
 						bracket->setHeight(maxY - minY + bracketEnlargment * 2);
+						float yOffset = bracket->getPos().y - oldBracketY;
+
+						openBrackets.back().bracket->setBearing(openBrackets.back().bracket->getBearingY() - yOffset);
+						bracket->setBearing(bracket->getBearingY() - yOffset);
+
 						openBrackets.pop_back();
 						minBracketY = std::min(minBracketY, bracket->getPos().y);
 						maxBracketY = std::max(maxBracketY, bracket->getPos().y + bracket->getSize().y);

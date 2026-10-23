@@ -260,7 +260,6 @@ namespace TryAlgebraCore
 	void MeBracket::setHeight(float height)
 	{
 		m_size.y = height;
-		m_bearing_y = m_size.y / 2;
 		m_points = createBracket(m_ch, glyphSize(), m_scaling_factor);
 	}
 

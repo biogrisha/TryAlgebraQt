@@ -50,11 +50,11 @@ namespace TryAlgebraCore
 		LineChain border;
 		border.width = 1;
 		border.color = { 1,1,1,1 };
-		border.points.push_back(getPos() + glm::vec2{ padding, 0 });
-		border.points.push_back(getPos() + glm::vec2(getSize().x - padding, 0));
+		border.points.push_back(getPos() + glm::vec2{ padding, padding });
+		border.points.push_back(getPos() + glm::vec2(getSize().x - padding, padding));
 		border.points.push_back(getPos() + getSize() - glm::vec2{ padding, 0 });
 		border.points.push_back(getPos() + glm::vec2(padding, getSize().y));
-		border.points.push_back(getPos() + +glm::vec2{ padding, 0 });
+		border.points.push_back(getPos() + +glm::vec2{ padding, padding });
 		vt->mdocState->at(1).addLine(border);
 		MeBase::draw(vt);
 	}

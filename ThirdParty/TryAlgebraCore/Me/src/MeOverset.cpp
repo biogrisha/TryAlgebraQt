@@ -17,6 +17,16 @@ namespace TryAlgebraCore {
 		setSizeY(m_children[1]->getPos().y + m_children[1]->getSize().y);
 		setSizeX(center * 2.f);
 		setBearing(m_children[1]->getPos().y + m_children[1]->getSize().y / 2.f);
+		auto& secondContCh = m_children[1]->getChildren();
+		if (!secondContCh.empty())
+		{
+			float maxBearing = std::numeric_limits<float>::lowest();
+			for (auto& ch : secondContCh)
+			{
+				maxBearing = std::max(maxBearing, ch->getBearingY());
+			}
+			setBearing(m_children[1]->getPos().y + maxBearing);
+		}
 	}
 	void MeOverset::step(StepDir dir, StepFrom step_from, MePath& path)
 	{
