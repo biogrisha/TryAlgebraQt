@@ -7,7 +7,6 @@
 #include <FilesControl.h>
 #include <Models/DocumentsModel.h>
 #include <iostream>
-#include <TRS/ToProperTerm.h>
 #include <MathEditor/include/TreeDisplay.h>
 
 DocumentControl::DocumentControl()

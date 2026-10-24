@@ -9,7 +9,7 @@ namespace TryAlgebraCore::Trs
 		constexpr const wchar_t* FormulaStart = L"$$";
 		constexpr const wchar_t* ImportParser = L"$ImportParser";
 		constexpr const wchar_t* ImportTrs = L"$ImportTrs";
-		constexpr const wchar_t* Parser = L"$Operators";
+		constexpr const wchar_t* Parser = L"$Parser";
 		constexpr const wchar_t* Formulas = L"$Formulas";
 		constexpr const wchar_t* Trs = L"$Trs";
 
@@ -44,11 +44,11 @@ namespace TryAlgebraCore::Trs
 			auto token = tokenMatcher.tokens()[match.value().tokenIndex];
 			if (token == Tokens::Parser)
 			{
-				if (auto parserFile = handleParserFile())
+				/*if (auto parserFile = handleParserFile())
 				{
 					parserFile.value().filePath = filePath;
 					return std::move(parserFile.value());
-				}
+				}*/
 			}
 			else if (token == Tokens::Formulas)
 			{
@@ -72,89 +72,8 @@ namespace TryAlgebraCore::Trs
 
 	std::optional<ParserFile> FileParser::handleParserFile()
 	{
-		//pos points right after $Parser
-		ParserFile res;
-		TokenMatcher tokenMatcher({
-			Tokens::TDOnce,
-			Tokens::TDEx,
-			Tokens::Inverse
-			});
 
-		{
-			//direct rules
-			auto lastMatch = tokenMatcher.findNext(m_str, m_pos);
-			while (m_pos < m_str.size())
-			{
-				if (tokenMatcher.tokens()[lastMatch.value().tokenIndex] == Tokens::Inverse)
-				{
-					break;
-				}
-				auto newMatch = tokenMatcher.findNext(m_str, m_pos);
-				auto& token = tokenMatcher.tokens()[lastMatch.value().tokenIndex];
-				RuleType type =
-					token == Tokens::TDOnce ? RuleType::TDSimpleRecursive :
-					token == Tokens::TDEx ? RuleType::TDRecursiveExhausting : RuleType::None;
-				if (type == RuleType::None)
-				{
-					return std::nullopt;
-				}
-				int from = lastMatch.value().endCharIndex;
-				int size = 0;
-				if (newMatch)
-				{
-					size = newMatch.value().endCharIndex - tokenMatcher.tokens()[newMatch.value().tokenIndex].size() - from;
-				}
-				else
-				{
-					size = m_pos - from;
-				}
-				auto rules = parseRewritingRules(std::wstring_view(m_str).substr(from, size));
-				for (auto& rule : rules)
-				{
-					auto& newRule = res.rules.emplace_back();
-					newRule.from = std::move(rule.from);
-					newRule.to = std::move(rule.to);
-					newRule.type = type;
-				}
-				lastMatch = newMatch;
-			}
-		}
-		{
-			//inverse rules
-			auto lastMatch = tokenMatcher.findNext(m_str, m_pos);
-			while (m_pos < m_str.size())
-			{
-				auto newMatch = tokenMatcher.findNext(m_str, m_pos);
-				auto& token = tokenMatcher.tokens()[lastMatch.value().tokenIndex];
-				RuleType type =
-					token == Tokens::TDOnce ? RuleType::TDSimpleRecursive :
-					token == Tokens::TDEx ? RuleType::TDRecursiveExhausting : RuleType::None;
-				if (type == RuleType::None)
-				{
-					return std::nullopt;
-				}
-				int from = lastMatch.value().endCharIndex;
-				int size = 0;
-				if (newMatch)
-				{
-					size = newMatch.value().endCharIndex - tokenMatcher.tokens()[newMatch.value().tokenIndex].size() - from;
-				}
-				else
-				{
-					size = m_pos - from;
-				}
-				auto rules = parseRewritingRules(std::wstring_view(m_str).substr(from, size));
-				for (auto& rule : rules)
-				{
-					auto& newRule = res.invRules.emplace_back();
-					newRule.from = std::move(rule.from);
-					newRule.to = std::move(rule.to);
-					newRule.type = type;
-				}
-				lastMatch = newMatch;
-			}
-		}
-		return res;
+		return {};
 	}
 
 	std::optional<FormulasFile> FileParser::handleFormulasFile()

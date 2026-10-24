@@ -66,16 +66,12 @@ add_library(TryAlgebraCore STATIC
 	TRS/PatternMatchingHelpers.cpp
 	TRS/MeParserGeneric.h
 	TRS/MeParserGeneric.cpp
-	TRS/ToProperTerm.h
-	TRS/ToProperTerm.cpp
 	TRS/TermTransformer.h
 	TRS/TermTransformer.cpp
 	TRS/TokenMatcher.h
 	TRS/TokenMatcher.cpp
 	TRS/BracketsParser.h
 	TRS/BracketsParser.cpp
-	TRS/TrsParser.h
-	TRS/TrsParser.cpp
 	TRS/FormulasSystem.h
 	TRS/FormulasSystem.cpp
 	TRS/FileParser.h

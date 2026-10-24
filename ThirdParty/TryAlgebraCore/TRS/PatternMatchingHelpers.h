@@ -92,14 +92,8 @@ namespace TryAlgebraCore::Trs
 		std::vector<Bundle> bundles;
 	};
 
-	struct Pat
+	struct PatContext
 	{
-		static void create(std::vector<std::unique_ptr<TermIntermediate>>&& inPat)
-		{
-			Pat p;
-			p.pat = std::move(inPat);
-		}
-		std::vector<std::unique_ptr<TermIntermediate>> pat;
 		std::vector<TermIntermediate*> variables;
 		std::vector<Level> levels;
 		std::vector<Bundle*> bundles;
@@ -107,6 +101,7 @@ namespace TryAlgebraCore::Trs
 
 	bool compare(TermIntermediate* lhs, TermIntermediate* rhs);
 
+	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, PatContext& context);
 	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, std::vector<TermIntermediate*>& variables);
 
 	bool markPatternNodes(std::vector<std::unique_ptr<TermIntermediate>>& t);
@@ -125,6 +120,7 @@ namespace TryAlgebraCore::Trs
 
 	void setupBundlesTree(std::vector<Level>& levels);
 
+	void generateLevels(std::vector<std::unique_ptr<TermIntermediate>>& pat, PatContext& ctx);
 	std::vector<Level> generateLevels(std::vector<std::unique_ptr<TermIntermediate>>& pat);
 
 	bool compare1(std::vector<Bundle*>& childBundles, std::vector<std::unique_ptr<TermIntermediate>>& pat, std::vector<std::unique_ptr<TermIntermediate>>& subj);

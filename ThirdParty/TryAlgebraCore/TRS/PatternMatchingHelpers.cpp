@@ -39,6 +39,11 @@ namespace TryAlgebraCore::Trs
 		return true;
 	}
 
+	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, PatContext& context)
+	{
+		unifyVariables(terms, context.variables);
+	}
+
 	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, std::vector<TermIntermediate*>& variables)
 	{
 		for (auto& tr : terms)
@@ -323,6 +328,11 @@ namespace TryAlgebraCore::Trs
 			}
 		}
 
+	}
+
+	void generateLevels(std::vector<std::unique_ptr<TermIntermediate>>& pat, PatContext& ctx)
+	{
+		ctx.levels = generateLevels(pat);
 	}
 
 	std::vector<Level> generateLevels(std::vector<std::unique_ptr<TermIntermediate>>& pat)

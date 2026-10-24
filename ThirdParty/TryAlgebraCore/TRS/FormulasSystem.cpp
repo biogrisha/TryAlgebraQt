@@ -33,13 +33,13 @@ namespace TryAlgebraCore::Trs
 
 	void FormulasSystem::compile()
 	{
-		for (auto& file : m_parserFiles)
+		/*for (auto& file : m_parserFiles)
 		{
 			std::unique_ptr<Transformer> tr = std::make_unique<Transformer>();
 			tr->addRules(std::move(file.rules));
 			tr->addInvRules(std::move(file.invRules));
 			m_transformers.emplace(file.filePath, std::move(tr));
-		}
+		}*/
 		for (auto& [path, trsFile] : m_trsFiles)
 		{
 			for (auto& rule : trsFile.rules)

@@ -30,9 +30,7 @@ namespace TryAlgebraCore::Trs
 
 	struct ParserFile
 	{
-		std::wstring filePath;
-		std::vector<RewritingRule> rules;
-		std::vector<RewritingRule> invRules;
+
 	};
 
 	struct TrsFile
