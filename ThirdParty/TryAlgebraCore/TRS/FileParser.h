@@ -30,6 +30,7 @@ namespace TryAlgebraCore::Trs
 
 	struct ParserFile
 	{
+		std::wstring filePath;
 
 	};
 

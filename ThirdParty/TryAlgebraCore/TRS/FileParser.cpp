@@ -44,11 +44,11 @@ namespace TryAlgebraCore::Trs
 			auto token = tokenMatcher.tokens()[match.value().tokenIndex];
 			if (token == Tokens::Parser)
 			{
-				/*if (auto parserFile = handleParserFile())
+				if (auto parserFile = handleParserFile())
 				{
 					parserFile.value().filePath = filePath;
 					return std::move(parserFile.value());
-				}*/
+				}
 			}
 			else if (token == Tokens::Formulas)
 			{
@@ -72,8 +72,20 @@ namespace TryAlgebraCore::Trs
 
 	std::optional<ParserFile> FileParser::handleParserFile()
 	{
+		while (true)
+		{
+			if (!waitToken(Tokens::Operation))
+			{
+				break;
+			}
+			int from = m_pos;
+			if (!waitToken(L":"))
+			{
+				break;
+			}
 
-		return {};
+		}
+
 	}
 
 	std::optional<FormulasFile> FileParser::handleFormulasFile()
