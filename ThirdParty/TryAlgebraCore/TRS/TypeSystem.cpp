@@ -20,4 +20,9 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
+	void TypeSystem::addOperatorParser(std::unique_ptr<OperatorParser>&& operatorParser)
+	{
+		m_operatorParsers.push_back(std::move(operatorParser));
+	}
+
 }

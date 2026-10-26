@@ -1,5 +1,6 @@
 #include "FileParser.h"
 #include "TokenMatcher.h"
+#include <unordered_set>
 #include <Me/include/MeCharacter.h>
 
 namespace TryAlgebraCore::Trs
@@ -14,6 +15,11 @@ namespace TryAlgebraCore::Trs
 		constexpr const wchar_t* Trs = L"$Trs";
 
 		constexpr const wchar_t* Operation = L"$Op";
+		constexpr const wchar_t* Leftassoc = L"leftassoc";
+		constexpr const wchar_t* Rightassoc = L"rightassoc";
+		constexpr const wchar_t* Infix = L"infix";
+		constexpr const wchar_t* Prefix = L"prefix";
+		constexpr const wchar_t* Postfix = L"postfix";
 	}
 	namespace {
 		void trim(std::wstring& s)
@@ -27,6 +33,94 @@ namespace TryAlgebraCore::Trs
 			const auto last = s.find_last_not_of(L" \t\n\r");
 			s = s.substr(first, last - first + 1);
 		}
+
+		std::vector<std::wstring_view> split(
+			std::wstring_view str,
+			wchar_t separator)
+		{
+			std::vector<std::wstring_view> result;
+
+			while (true) {
+				auto pos = str.find(separator);
+
+				if (pos == std::wstring_view::npos) {
+					result.push_back(str);
+					break;
+				}
+
+				result.push_back(str.substr(0, pos));
+				str.remove_prefix(pos + 1);
+			}
+
+			return result;
+		}
+
+		std::vector<std::vector<std::unique_ptr<TermIntermediate>>> split(
+			std::vector<std::unique_ptr<TermIntermediate>>& terms,
+			const std::wstring& sepLabel)
+		{
+			std::vector<std::vector<std::unique_ptr<TermIntermediate>>> res;
+			res.emplace_back();
+			for (auto& t : terms)
+			{
+				if (t->label == sepLabel)
+				{
+					res.emplace_back();
+					continue;
+				}
+				res.back().push_back(std::move(t));
+			}
+			return res;
+
+		}
+
+		std::optional<int> toInt(std::wstring_view str)
+		{
+			if (str.empty())
+				return std::nullopt;
+
+			bool negative = str.front() == L'-';
+
+			if (negative)
+				str.remove_prefix(1);
+
+			if (str.empty())
+				return std::nullopt;
+
+			int result = 0;
+			const int limit = negative
+				? std::numeric_limits<int>::min()
+				: -std::numeric_limits<int>::max();
+
+			for (wchar_t ch : str)
+			{
+				if (ch < L'0' || ch > L'9')
+					return std::nullopt;
+
+				int digit = ch - L'0';
+
+				if (result < (limit + digit) / 10)
+					return std::nullopt; // Overflow
+
+				result = result * 10 - digit;
+			}
+
+			return negative ? result : -result;
+		}
+
+		void removeSpaces(std::vector<std::unique_ptr<TermIntermediate>>& terms)
+		{
+			for (int i = terms.size() - 1; i >= 0; --i)
+			{
+				auto& t = terms[i];
+				removeSpaces(t->children);
+				if (t->label == L" ")
+				{
+					terms.erase(terms.begin() + i);
+				}
+			}
+		}
+
 	}
 	std::variant<FormulasFile, ParserFile, TrsFile, std::monostate> FileParser::parse(const std::wstring& string, const std::wstring& filePath)
 	{
@@ -72,20 +166,50 @@ namespace TryAlgebraCore::Trs
 
 	std::optional<ParserFile> FileParser::handleParserFile()
 	{
+		ParserFile res;
 		while (true)
 		{
 			if (!waitToken(Tokens::Operation))
 			{
 				break;
 			}
-			int from = m_pos;
+			int argsFrom = m_pos;
 			if (!waitToken(L":"))
 			{
-				break;
+				return std::nullopt;
 			}
+			auto argumentsStr = m_str.substr(argsFrom, m_pos - 1 - argsFrom);
+			auto args = split(argumentsStr, L' ');
+			std::unordered_set<std::wstring_view> argsSet(args.begin(), args.end());
+			const auto has = [&](std::wstring_view value)
+				{
+					return argsSet.contains(value);
+				};
 
+			std::optional<int> precedence;
+			for (auto arg : args)
+			{
+				if (auto numeric = toInt(arg))
+				{
+					precedence = numeric;
+					break;
+				}
+			}
+			if (!precedence)
+			{
+				return std::nullopt;
+			}
+			int opFrom = m_pos;
+			waitToken(L"\n");
+			auto operatorDefinition = parseToTermIntermediate(m_str.substr());
+			removeSpaces(operatorDefinition);
+			auto splitByEqualitySign = split(operatorDefinition, L"=");
+			if (has(Tokens::Infix) && has(Tokens::Leftassoc))
+			{
+
+			}
 		}
-
+		return std::nullopt;
 	}
 
 	std::optional<FormulasFile> FileParser::handleFormulasFile()

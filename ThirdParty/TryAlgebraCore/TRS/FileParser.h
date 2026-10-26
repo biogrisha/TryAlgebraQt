@@ -2,7 +2,7 @@
 #include "PatternMatchingHelpers.h"
 #include <MathEditor/include/TextBuffer.h>
 #include <string_view>
-#include "TermTransformer.h"
+#include "TypeSystem.h"
 #include <variant>
 
 namespace TryAlgebraCore::Trs
@@ -31,7 +31,7 @@ namespace TryAlgebraCore::Trs
 	struct ParserFile
 	{
 		std::wstring filePath;
-
+		TypeSystem typeSystem;
 	};
 
 	struct TrsFile
