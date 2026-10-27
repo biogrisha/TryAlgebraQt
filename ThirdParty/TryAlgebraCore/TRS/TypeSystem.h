@@ -1,5 +1,6 @@
 #pragma once
 #include <TRS/PatternMatchingHelpers.h>
+#include <span>
 
 namespace TryAlgebraCore::Trs
 {
@@ -15,10 +16,12 @@ namespace TryAlgebraCore::Trs
 		InfixLeftAssocParser(std::vector<std::unique_ptr<Trs::TermIntermediate>>&& pat,
 			std::vector<std::unique_ptr<Trs::TermIntermediate>>&& ret);
 		void apply(std::vector<std::unique_ptr<Trs::TermIntermediate>>& subj) {};
+		std::vector<std::unique_ptr<Trs::TermIntermediate>> getOperator() const;
 	private:
+		Trs::PatContext m_patContext;
 		std::vector<std::unique_ptr<Trs::TermIntermediate>> m_pat;
 		std::vector<std::unique_ptr<Trs::TermIntermediate>> m_ret;
-		Trs::PatContext m_patContext;
+		Trs::TermIntermediate* m_op;
 	};
 
 	class TypeSystem

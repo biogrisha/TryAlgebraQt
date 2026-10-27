@@ -2,7 +2,7 @@
 #include "TokenMatcher.h"
 #include <unordered_set>
 #include <Me/include/MeCharacter.h>
-
+#include <Me/include/MeGlobals.h>
 namespace TryAlgebraCore::Trs
 {
 	namespace Tokens
@@ -204,12 +204,30 @@ namespace TryAlgebraCore::Trs
 			auto operatorDefinition = parseToTermIntermediate(m_str.substr());
 			removeSpaces(operatorDefinition);
 			auto splitByEqualitySign = split(operatorDefinition, L"=");
+			if (splitByEqualitySign.size() != 2)
+			{
+				return std::nullopt;
+			}
 			if (has(Tokens::Infix) && has(Tokens::Leftassoc))
 			{
+				auto& lhs = splitByEqualitySign.front();
+				if (
+					lhs.size() < 3 ||
+					lhs.front()->label != MeNames::typeAnnotation ||
+					lhs.back()->label != MeNames::typeAnnotation
+					)
+				{
+					return std::nullopt;
+				}
 
+				auto parser = std::make_unique<InfixLeftAssocParser>(
+					std::move(splitByEqualitySign.front()),
+					std::move(splitByEqualitySign.back())
+				);
+				res.typeSystem.addOperatorParser(std::move(parser));
 			}
 		}
-		return std::nullopt;
+		return res;
 	}
 
 	std::optional<FormulasFile> FileParser::handleFormulasFile()
