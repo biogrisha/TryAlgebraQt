@@ -4,43 +4,14 @@
 
 namespace TryAlgebraCore::Trs
 {
-	enum class RuleType
-	{
-		TDSimpleRecursive,
-		TDRecursiveExhausting,
-		BUSimpleRecursive,
-		BURecursiveExhausting,
-		None
-	};
-
-	struct RewritingRule
-	{
-		std::vector<std::unique_ptr<TermIntermediate>> from;
-		std::vector<std::unique_ptr<TermIntermediate>> to;
-		std::vector<TermIntermediate*> variables;
-		std::vector<Level> levels;
-		std::vector<Bundle*> bundles;
-		RuleType type;
-	};
 
 	class Transformer
 	{
 	public:
-		void applyAll(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool removeCont = true);
-		void applyAllInverse(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool addCont = true);
-
-		void tdSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule, TermIntermediate* parent = nullptr);
-		void tdRecursiveExhausting(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule, TermIntermediate* parent = nullptr);
-		void buSimpleRecursive(std::vector<std::unique_ptr<TermIntermediate>>& subj, RewritingRule& rule);
-
-		void addRules(std::vector<RewritingRule>&& rules);
-		void addInvRules(std::vector<RewritingRule>&& rules);
 		void removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 		void addContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 	private:
 		bool isTrm(const std::wstring& label) const;
-		std::vector<RewritingRule> m_rules;
-		std::vector<RewritingRule> m_invRules;
 		BracketsParser bracketsParser;
 	};
 }

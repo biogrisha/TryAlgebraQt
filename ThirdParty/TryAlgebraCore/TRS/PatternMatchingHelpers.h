@@ -23,29 +23,6 @@ namespace TryAlgebraCore::Trs
 		} type = Type::OneMulti;
 	};
 
-	struct DioEqVar
-	{
-		VariableMeta* var = nullptr;
-		int coef = 0;
-	};
-
-	struct DioEquation
-	{
-		std::vector<DioEqVar> prevVars;
-		std::vector<DioEqVar> initVars;
-		int rhs = 0;
-
-		std::unique_ptr<DioEquation> next;
-	};
-
-	enum class DioStatus
-	{
-		exceeded,
-		succeeded,
-		solutionFound
-	};
-
-
 	struct TermIntermediate
 	{
 		std::wstring label;
@@ -63,87 +40,37 @@ namespace TryAlgebraCore::Trs
 		}
 	};
 
-	struct IdentityIntermediate
+	class PatContext
 	{
-		std::vector<std::unique_ptr<TermIntermediate>> lhs;
-		std::vector<std::unique_ptr<TermIntermediate>> rhs;
+	public:
+		PatContext();
+		~PatContext();
+		void addPat(const std::vector<std::unique_ptr<TermIntermediate>>& pat);
+	private:
+		struct Impl;
+		std::unique_ptr<Impl> m_impl;
 	};
 
-	struct Block
-	{
-		int minPatCapture = 0;
-		std::span<std::unique_ptr<TermIntermediate>> pat;
-		std::unordered_set<TermIntermediate*> varsRec;
-		std::vector<TermIntermediate*> vars;
-		std::span<std::unique_ptr<TermIntermediate>> subj;
-	};
+	/*
+		sub
+		pat
+		subj
 
-	struct Bundle
-	{
-		static Block* findBlock(const std::vector<Bundle*>& siblings, const TermIntermediate* parent);
-		std::vector<Block*> blocks;
-		DioEquation eq;
-		std::vector<Bundle*> children;
-	};
+		PatContext ctx;
+		ctx.addPat(pat1);
+		ctx.addPat(pat2);
+		ctx.addInst(inst);
 
-	struct Level
-	{
-		std::vector<Block> blocks;
-		std::vector<Bundle> bundles;
-	};
+		match(ctx, pat1, subj1);
+		match(ctx, pat2, subj2);
+		auto newInst = instantiate(ctx, inst);
+	*/
 
-	struct PatContext
-	{
-		std::vector<TermIntermediate*> variables;
-		std::vector<Level> levels;
-		std::vector<Bundle*> bundles;
-	};
-
-	bool compare(TermIntermediate* lhs, TermIntermediate* rhs);
-
-	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, PatContext& context);
-	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, std::vector<TermIntermediate*>& variables);
-
-	bool markPatternNodes(std::vector<std::unique_ptr<TermIntermediate>>& t);
-
-	void collectBlocks(std::vector<std::unique_ptr<TermIntermediate>>& pat, std::vector<Block>& blocks);
-
-	void collectVariables(Block& bl);
-
-	void collectVariablesRec(const std::span<std::unique_ptr<TermIntermediate>>& block, std::unordered_set<TermIntermediate*>& vars);
-
-	void collectBundles(std::vector<Level>& levels);
-
-	void initDiophantineEq(Bundle& bundle);
-
-	bool bundlesRelated(Bundle& b1, Bundle& b2);
-
-	void setupBundlesTree(std::vector<Level>& levels);
-
-	void generateLevels(std::vector<std::unique_ptr<TermIntermediate>>& pat, PatContext& ctx);
-	std::vector<Level> generateLevels(std::vector<std::unique_ptr<TermIntermediate>>& pat);
-
-	bool compare1(std::vector<Bundle*>& childBundles, std::vector<std::unique_ptr<TermIntermediate>>& pat, std::vector<std::unique_ptr<TermIntermediate>>& subj);
-
-	void setupDiophantineRhs(Bundle& bundle);
-
-	bool initVariables(Bundle& bundle);
-
-	DioStatus solve(int pos, DioEquation& eq, int remainder, std::function<bool()> callback);
-
-	bool comparissonTest(std::vector<Level>& levels, std::vector<std::unique_ptr<TermIntermediate>>& pat, std::vector<std::unique_ptr<TermIntermediate>>& subj, int levelI = 0);
-
-	bool compare2(std::vector<Bundle*>& childBundles);
-
+	//=========================move this out======================
 	void markVariables(std::vector<std::unique_ptr<TermIntermediate>>& pat);
 
 	void termIntermediateToStr(const std::vector<std::unique_ptr<TermIntermediate>>& terms, std::wstring& res);
 	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring_view& str);
-	std::vector<IdentityIntermediate> parseIdentities(const std::wstring& str);
-
-	bool tryMatch(std::vector<Bundle*>& childBundles
-		, std::vector<std::unique_ptr<TermIntermediate>>& pat
-		, std::vector<std::unique_ptr<TermIntermediate>>& subj);
 
 	void copyTermIntermediate(const std::span<std::unique_ptr<TermIntermediate>>& from
 		, std::vector<std::unique_ptr<TermIntermediate>>& to, TermIntermediate* parent = nullptr);
@@ -153,4 +80,6 @@ namespace TryAlgebraCore::Trs
 	std::unique_ptr<TermIntermediate> copyTermIntermediate(const std::unique_ptr<TermIntermediate>& from);
 
 	void expandVars(std::vector<std::unique_ptr<TermIntermediate>>& term);
+	//=============================================================
+
 }

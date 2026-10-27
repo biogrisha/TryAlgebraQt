@@ -4,6 +4,71 @@
 
 namespace TryAlgebraCore::Trs
 {
+
+	struct DioEqVar
+	{
+		VariableMeta* var = nullptr;
+		int coef = 0;
+	};
+
+	struct DioEquation
+	{
+		std::vector<DioEqVar> prevVars;
+		std::vector<DioEqVar> initVars;
+		int rhs = 0;
+
+		std::unique_ptr<DioEquation> next;
+	};
+
+	enum class DioStatus
+	{
+		exceeded,
+		succeeded,
+		solutionFound
+	};
+
+	struct Block
+	{
+		int minPatCapture = 0;
+		std::span<std::unique_ptr<TermIntermediate>> pat;
+		std::unordered_set<TermIntermediate*> varsRec;
+		std::vector<TermIntermediate*> vars;
+		std::span<std::unique_ptr<TermIntermediate>> subj;
+	};
+
+	struct Bundle
+	{
+		static Block* findBlock(const std::vector<Bundle*>& siblings, const TermIntermediate* parent);
+		std::vector<Block*> blocks;
+		DioEquation eq;
+		std::vector<Bundle*> children;
+	};
+
+	struct Level
+	{
+		std::vector<Block> blocks;
+		std::vector<Bundle> bundles;
+	};
+
+	struct PatContext::Impl
+	{
+		std::vector<TermIntermediate*> variables;
+		std::vector<Level> levels;
+		std::vector<Bundle*> bundles;
+	};
+
+	PatContext::PatContext()
+		: m_impl(std::make_unique<Impl>())
+	{
+	}
+
+	PatContext::~PatContext() = default;
+
+	void PatContext::addPat(const std::vector<std::unique_ptr<TermIntermediate>>& pat)
+	{
+		pat.back()->children.clear();
+	}
+
 	Block* Bundle::findBlock(const std::vector<Bundle*>& siblings, const TermIntermediate* parent)
 	{
 		for (auto* bundle : siblings)
@@ -37,11 +102,6 @@ namespace TryAlgebraCore::Trs
 			}
 		}
 		return true;
-	}
-
-	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, PatContext& context)
-	{
-		unifyVariables(terms, context.variables);
 	}
 
 	void unifyVariables(std::vector<std::unique_ptr<TermIntermediate>>& terms, std::vector<TermIntermediate*>& variables)
@@ -332,7 +392,7 @@ namespace TryAlgebraCore::Trs
 
 	void generateLevels(std::vector<std::unique_ptr<TermIntermediate>>& pat, PatContext& ctx)
 	{
-		ctx.levels = generateLevels(pat);
+		//ctx.levels = generateLevels(pat);
 	}
 
 	std::vector<Level> generateLevels(std::vector<std::unique_ptr<TermIntermediate>>& pat)
@@ -909,42 +969,6 @@ namespace TryAlgebraCore::Trs
 		return res;
 	}
 
-	std::vector<IdentityIntermediate> parseIdentities(const std::wstring& str)
-	{
-		std::vector<IdentityIntermediate> res;
-		auto terms = parseToTermIntermediate(str);
-		int i = 0;
-		while (i < terms.size())
-		{
-			IdentityIntermediate& id = res.emplace_back();
-			for (; i < terms.size(); ++i)
-			{
-				if (terms[i]->label == L" " || terms[i]->label == L"\n")
-				{
-					continue;
-				}
-				if (terms[i]->label == L"=")
-				{
-					++i;
-					break;
-				}
-				id.lhs.push_back(std::move(terms[i]));
-			}
-			for (; i < terms.size(); ++i)
-			{
-				if (terms[i]->label == L" ")
-				{
-					continue;
-				}
-				if (terms[i]->label == L"\n")
-				{
-					++i;
-					break;
-				}
 
-				id.rhs.push_back(std::move(terms[i]));
-			}
-		}
-		return res;
-	}
+
 }

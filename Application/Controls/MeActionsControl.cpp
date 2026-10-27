@@ -5,7 +5,7 @@
 #include <TRS/PatternMatchingHelpers.h>
 void MeActionsControl::parse(const QString& parserName)
 {
-	const auto& parsers = AppGlobal::appMod->formulasSystem()->transformers();
+	/*const auto& parsers = AppGlobal::appMod->formulasSystem()->transformers();
 	auto parser = parsers.find(parserName.toStdWString());
 	if (parser != parsers.end())
 	{
@@ -16,12 +16,12 @@ void MeActionsControl::parse(const QString& parserName)
 		std::wstring res;
 		TryAlgebraCore::Trs::termIntermediateToStr(term, res);
 		currDoc->meDoc()->type(res, true);
-	}
+	}*/
 }
 
 void MeActionsControl::parseInverse(const QString& parserName)
 {
-	const auto& parsers = AppGlobal::appMod->formulasSystem()->transformers();
+	/*const auto& parsers = AppGlobal::appMod->formulasSystem()->transformers();
 	auto parser = parsers.find(parserName.toStdWString());
 	if (parser != parsers.end())
 	{
@@ -32,7 +32,7 @@ void MeActionsControl::parseInverse(const QString& parserName)
 		std::wstring res;
 		TryAlgebraCore::Trs::termIntermediateToStr(term, res);
 		currDoc->meDoc()->type(res, true);
-	}
+	}*/
 }
 
 void MeActionsControl::applyFormula(MeActionData* actionData, int part)
