@@ -18,7 +18,7 @@ namespace TryAlgebraCore::Trs
 		void apply(std::vector<std::unique_ptr<Trs::TermIntermediate>>& subj) {};
 		std::vector<std::unique_ptr<Trs::TermIntermediate>> getOperator() const;
 	private:
-		Trs::PatContext m_patContext;
+		Trs::PatternMatcher m_patContext;
 		std::vector<std::unique_ptr<Trs::TermIntermediate>> m_pat;
 		std::vector<std::unique_ptr<Trs::TermIntermediate>> m_ret;
 		Trs::TermIntermediate* m_op;

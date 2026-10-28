@@ -3,8 +3,6 @@
 #include <memory>
 #include <vector>
 #include <string_view>
-#include <unordered_set>
-#include <functional>
 #include <string>
 
 namespace TryAlgebraCore::Trs
@@ -40,31 +38,19 @@ namespace TryAlgebraCore::Trs
 		}
 	};
 
-	class PatContext
+	class PatternMatcher
 	{
 	public:
-		PatContext();
-		~PatContext();
-		void addPat(const std::vector<std::unique_ptr<TermIntermediate>>& pat);
+		using Id = uint16_t;
+		PatternMatcher();
+		~PatternMatcher();
+		Id addPat(std::vector<std::unique_ptr<TermIntermediate>>&& pat);
+		Id addInst(std::vector<std::unique_ptr<TermIntermediate>>&& inst);
+		bool match(Id pat, std::span<std::unique_ptr<TermIntermediate>> subj);
 	private:
 		struct Impl;
 		std::unique_ptr<Impl> m_impl;
 	};
-
-	/*
-		sub
-		pat
-		subj
-
-		PatContext ctx;
-		ctx.addPat(pat1);
-		ctx.addPat(pat2);
-		ctx.addInst(inst);
-
-		match(ctx, pat1, subj1);
-		match(ctx, pat2, subj2);
-		auto newInst = instantiate(ctx, inst);
-	*/
 
 	//=========================move this out======================
 	void markVariables(std::vector<std::unique_ptr<TermIntermediate>>& pat);
