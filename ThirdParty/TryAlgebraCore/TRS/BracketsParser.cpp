@@ -1,4 +1,5 @@
 #include "BracketsParser.h"
+#include <unordered_map>
 #include <iterator>
 namespace TryAlgebraCore::Trs
 {

@@ -46,7 +46,8 @@ namespace TryAlgebraCore::Trs
 		~PatternMatcher();
 		Id addPat(std::vector<std::unique_ptr<TermIntermediate>>&& pat);
 		Id addInst(std::vector<std::unique_ptr<TermIntermediate>>&& inst);
-		bool match(Id pat, std::span<std::unique_ptr<TermIntermediate>> subj);
+		bool match(Id pat, const std::span<std::unique_ptr<TermIntermediate>>& subj);
+		std::vector<std::unique_ptr<TermIntermediate>> instantiate(Id instId) const;
 	private:
 		struct Impl;
 		std::unique_ptr<Impl> m_impl;

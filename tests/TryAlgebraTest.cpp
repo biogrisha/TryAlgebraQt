@@ -12,10 +12,10 @@
 //#include "IsLastLineTest.h"
 //#include "ConvertMeToTermsTest.h"
 //#include "VariatorTest.h"
-//#include "PatternMatchingTest.h"
 //#include "DiophantineSolver.h"
 //#include "MeParserGenericTest.h"
-#include "MeSimpleToStrTest.h"
+//#include "MeSimpleToStrTest.h"
+#include "PatternMatchingTest.h"
 
 int main(int argc, char* argv[])
 {

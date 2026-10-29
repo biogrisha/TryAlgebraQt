@@ -471,17 +471,7 @@ namespace TryAlgebraCore::Trs
 		bool compare1(
 			std::vector<Bundle*>& childBundles,
 			std::vector<std::unique_ptr<TermIntermediate>>& pat,
-			std::vector<std::unique_ptr<TermIntermediate>>& subj
-		)
-		{
-			std::span sp = subj;
-			compare1(childBundles, pat, sp);
-		}
-
-		bool compare1(
-			std::vector<Bundle*>& childBundles,
-			std::vector<std::unique_ptr<TermIntermediate>>& pat,
-			std::span<std::unique_ptr<TermIntermediate>>& subj
+			const std::span<std::unique_ptr<TermIntermediate>>& subj
 		)
 		{
 			int subjStart = -1;
@@ -584,6 +574,10 @@ namespace TryAlgebraCore::Trs
 					}
 					--subjI;
 				}
+			}
+			if (childBundles.empty())
+			{
+				return true;
 			}
 			Block* block = Bundle::findBlock(childBundles, pat.back()->parent);
 			if (block->minPatCapture > subjEnd - subjStart)
@@ -758,17 +752,22 @@ namespace TryAlgebraCore::Trs
 				setupDiophantineRhs(*bundle);
 				auto res = solve(0, bundle->eq, bundle->eq.rhs, [bundle]()
 					{
-						for (auto* block : bundle->blocks)
-						{
-							for (auto* var : block->vars)
+						auto clearVars = [&]()
 							{
-								var->variableMeta->captured = {};
-							}
-						}
+								for (auto* block : bundle->blocks)
+								{
+									for (auto* var : block->vars)
+									{
+										var->variableMeta->captured = {};
+									}
+								}
+							};
+						clearVars();
 						//found solution of equation
 						//assign subjects to variables and p-terms
 						if (!initVariables(*bundle))
 						{
+							clearVars();
 							return false;
 						}
 						//compare and initialize blocks in bundle
@@ -780,12 +779,18 @@ namespace TryAlgebraCore::Trs
 								{
 									if (!compare1(bundle->children, t->children, t->subj->children))
 									{
+										clearVars();
 										return false;
 									}
 								}
 							}
 						}
-						return compare2(bundle->children);
+						if (!compare2(bundle->children))
+						{
+							clearVars();
+							return false;
+						}
+						return true;
 					});
 				if (res != DioStatus::solutionFound)
 				{
@@ -795,7 +800,7 @@ namespace TryAlgebraCore::Trs
 			return true;
 		}
 
-		bool tryMatch(std::vector<Bundle*>& childBundles, std::vector<std::unique_ptr<TermIntermediate>>& pat, std::span<std::unique_ptr<TermIntermediate>>& subj)
+		bool tryMatch(std::vector<Bundle*>& childBundles, std::vector<std::unique_ptr<TermIntermediate>>& pat, const std::span<std::unique_ptr<TermIntermediate>>& subj)
 		{
 			//compare everithing we can and collect bundles subjects
 			if (!compare1(childBundles, pat, subj))
@@ -821,10 +826,13 @@ namespace TryAlgebraCore::Trs
 		unifyVariables(p->pat, m_impl->variables);
 		markPatternNodes(p->pat);
 		markCaptured(p->pat, oldVariables);
-		generateLevels(p->pat);
-		for (auto& b : p->levels.front().bundles)
+		p->levels = generateLevels(p->pat);
+		if (!p->levels.empty())
 		{
-			p->firstLevelBundles.push_back(&b);
+			for (auto& b : p->levels.front().bundles)
+			{
+				p->firstLevelBundles.push_back(&b);
+			}
 		}
 		m_impl->patterns.push_back(std::move(p));
 		return m_impl->patterns.size() - 1;
@@ -837,15 +845,19 @@ namespace TryAlgebraCore::Trs
 		return m_impl->instances.size() - 1;
 	}
 
-	bool PatternMatcher::match(Id pat, std::span<std::unique_ptr<TermIntermediate>> subj)
+	bool PatternMatcher::match(Id pat, const std::span<std::unique_ptr<TermIntermediate>>& subj)
 	{
 		std::vector<TermIntermediate*> emptyVars;
 
 		m_impl->patterns[pat]->firstLevelBundles;
-		if (!tryMatch(m_impl->patterns[pat]->firstLevelBundles, m_impl->patterns[pat]->pat, subj))
-		{
+		return tryMatch(m_impl->patterns[pat]->firstLevelBundles, m_impl->patterns[pat]->pat, subj);
+	}
 
-		}
+	std::vector<std::unique_ptr<TermIntermediate>> PatternMatcher::instantiate(Id instId) const
+	{
+		auto copy = copyTermIntermediate(m_impl->instances[instId]);
+		expandVars(copy);
+		return copy;
 	}
 
 	Block* Bundle::findBlock(const std::vector<Bundle*>& siblings, const TermIntermediate* parent)
