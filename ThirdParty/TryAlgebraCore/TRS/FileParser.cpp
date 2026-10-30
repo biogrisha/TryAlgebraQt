@@ -201,7 +201,7 @@ namespace TryAlgebraCore::Trs
 			}
 			int opFrom = m_pos;
 			waitToken(L"\n");
-			auto operatorDefinition = parseToTermIntermediate(m_str.substr());
+			auto operatorDefinition = parseToTermIntermediate(m_str.substr(opFrom, m_pos - opFrom));
 			removeSpaces(operatorDefinition);
 			auto splitByEqualitySign = split(operatorDefinition, L"=");
 			if (splitByEqualitySign.size() != 2)
@@ -224,7 +224,7 @@ namespace TryAlgebraCore::Trs
 					std::move(splitByEqualitySign.front()),
 					std::move(splitByEqualitySign.back())
 				);
-				res.typeSystem.addOperatorParser(std::move(parser));
+				res.typeSystem.addOperatorParser(std::move(parser), precedence.value());
 			}
 		}
 		return res;

@@ -84,6 +84,25 @@ namespace TryAlgebraCore::Trs
 			return true;
 		}
 
+		void expandVars(std::vector<std::unique_ptr<TermIntermediate>>& term)
+		{
+			for (int i = term.size() - 1; i >= 0; --i)
+			{
+				if (term[i]->isVariable)
+				{
+					auto copy = copyTermIntermediate(term[i]->variableMeta->captured);
+					term.erase(term.begin() + i);
+					term.insert(term.begin() + i
+						, std::make_move_iterator(copy.begin())
+						, std::make_move_iterator(copy.end()));
+				}
+				else
+				{
+					expandVars(term[i]->children);
+				}
+			}
+		}
+
 		void unifyVariables(
 			std::vector<std::unique_ptr<TermIntermediate>>& terms,
 			std::vector<TermIntermediate*>& variables
@@ -476,6 +495,57 @@ namespace TryAlgebraCore::Trs
 		{
 			int subjStart = -1;
 			int subjEnd = -1;
+			//check that the size of pat matches to subj
+			int zeroMultiNum = 0;
+			int oneMultiNum = 0;
+			int uniNum = 0;
+			int groundNum = 0;
+
+			for (const auto& p : pat)
+			{
+				if (p->isVariable)
+				{
+					if (p->variableMeta->captured.empty())
+					{
+						switch (p->variableMeta->type)
+						{
+						case VariableMeta::Type::OneMulti:
+							++oneMultiNum;
+							break;
+
+						case VariableMeta::Type::ZeroMulti:
+							++zeroMultiNum;
+							break;
+
+						case VariableMeta::Type::Uni:
+							++uniNum;
+							break;
+
+						default:
+							break;
+						}
+
+					}
+					else
+					{
+						groundNum += p->variableMeta->captured.size();
+					}
+				}
+				else
+				{
+					++groundNum;
+				}
+			}
+
+			int minSubjSize = groundNum + oneMultiNum + uniNum;
+			if (
+				subj.size() < minSubjSize ||
+				subj.size() > minSubjSize && oneMultiNum == 0 && zeroMultiNum == 0
+				)
+			{
+				return false;
+			}
+
 			{
 				//compare left border
 				int subjI = 0;
@@ -485,8 +555,10 @@ namespace TryAlgebraCore::Trs
 					{
 						if (pat[patI]->label != subj[subjI]->label)
 						{
+							//pat label not equal to subj
 							return false;
 						}
+						//labels equal compare children
 						if (!compare1(
 							childBundles,
 							pat[patI]->children,
@@ -499,6 +571,8 @@ namespace TryAlgebraCore::Trs
 					{
 						if (!pat[patI]->variableMeta->captured.empty())
 						{
+							//variable already captured something
+							//compare subj with captured
 							for (auto& cap : pat[patI]->variableMeta->captured)
 							{
 								if (!compare(cap.get(), subj[subjI].get()))
@@ -508,16 +582,18 @@ namespace TryAlgebraCore::Trs
 								++subjI;
 							}
 							//continue to avoid subjI incrementation
+							//continue goes to the next pat term
 							continue;
 						}
 						else
 						{
+							//variable haven't captured anything yet
 							//found block start
 							subjStart = subjI;
 							break;
 						}
 					}
-					else if (patI >= pat.size() || subjI >= subj.size() || !compare(pat[patI].get(), subj[subjI].get()))
+					else if (!compare(pat[patI].get(), subj[subjI].get()))
 					{
 						return false;
 					}
@@ -860,6 +936,19 @@ namespace TryAlgebraCore::Trs
 		return copy;
 	}
 
+	const std::vector<std::unique_ptr<TermIntermediate>>& PatternMatcher::pat(Id patId) const
+	{
+		return m_impl->patterns[patId]->pat;
+	}
+
+	void PatternMatcher::clear()
+	{
+		for (auto* var : m_impl->variables)
+		{
+			var->variableMeta->captured = {};
+		}
+	}
+
 	Block* Bundle::findBlock(const std::vector<Bundle*>& siblings, const TermIntermediate* parent)
 	{
 		for (auto* bundle : siblings)
@@ -876,17 +965,6 @@ namespace TryAlgebraCore::Trs
 	}
 
 	//===================move this out============================
-
-
-
-
-
-
-
-
-
-
-
 
 
 	void markVariables(std::vector<std::unique_ptr<TermIntermediate>>& pat)
@@ -1056,22 +1134,33 @@ namespace TryAlgebraCore::Trs
 		return res;
 	}
 
-	void expandVars(std::vector<std::unique_ptr<TermIntermediate>>& term)
+	void rewriteLeftRightOneTime(
+		std::vector<std::unique_ptr<TermIntermediate>>& subj,
+		PatternMatcher& matcher,
+		PatternMatcher::Id patId,
+		PatternMatcher::Id instId)
 	{
-		for (int i = term.size() - 1; i >= 0; --i)
+		int patSize = matcher.pat(patId).size();
+		if (subj.size() != patSize)
 		{
-			if (term[i]->isVariable)
+			return;
+		}
+		std::vector<std::unique_ptr<TermIntermediate>> res;
+		for (int i = 0; i < subj.size(); ++i)
+		{
+			if (i < subj.size() - patSize + 1 && matcher.match(patId, std::span(subj).subspan(i, patSize)))
 			{
-				auto copy = copyTermIntermediate(term[i]->variableMeta->captured);
-				term.erase(term.begin() + i);
-				term.insert(term.begin() + i
-					, std::make_move_iterator(copy.begin())
-					, std::make_move_iterator(copy.end()));
+				auto inst = matcher.instantiate(instId);
+				for (auto& t : inst)
+				{
+					res.push_back(std::move(t));
+				}
 			}
 			else
 			{
-				expandVars(term[i]->children);
+				res.push_back(std::move(subj[i]));
 			}
 		}
+		subj = std::move(res);
 	}
 }

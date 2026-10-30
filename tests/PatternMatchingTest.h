@@ -373,12 +373,12 @@ namespace PatternMatchingTest
 
 			{
 				PatternMatchingCase::Pair pr;
-				pr.pat = L"_a,int(cont(`x,=,`x)),`x";
+				pr.pat = L"_a,int(cont(`x,=,`x)),`y";
 				pr.subjects = {
 					{L"ds,c", false},
 					{L"a,b,c,int(cont(`x,=,`from)),d", false},
 					{L"a,b,c,d,int(cont(f,r,o,m,=,1,0))", false},
-					{L"a1,a2,a3,int(cont(x1,x2,x3,x4,=,x1,x2,x3,x4))", true},
+					{L"a1,a2,a3,int(cont(x1,x2,x3,x4,=,x1,x2,x3,x4)),y1,y2,y3,y4", true},
 				};
 				cs.pairs.push_back(std::move(pr));
 			}
@@ -386,11 +386,13 @@ namespace PatternMatchingTest
 			{
 				L"_a",
 				L"`x",
+				L"`y",
 			};
 			cs.instExpected =
 			{
 				L"a1,a2,a3",
-				L"x1,x2,x3,x4"
+				L"x1,x2,x3,x4",
+				L"y1,y2,y3,y4"
 			};
 			cases += std::move(cs);
 		}

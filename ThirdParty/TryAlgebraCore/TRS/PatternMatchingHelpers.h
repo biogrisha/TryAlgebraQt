@@ -48,12 +48,13 @@ namespace TryAlgebraCore::Trs
 		Id addInst(std::vector<std::unique_ptr<TermIntermediate>>&& inst);
 		bool match(Id pat, const std::span<std::unique_ptr<TermIntermediate>>& subj);
 		std::vector<std::unique_ptr<TermIntermediate>> instantiate(Id instId) const;
+		const std::vector<std::unique_ptr<TermIntermediate>>& pat(Id patId) const;
+		void clear();
 	private:
 		struct Impl;
 		std::unique_ptr<Impl> m_impl;
 	};
 
-	//=========================move this out======================
 	void markVariables(std::vector<std::unique_ptr<TermIntermediate>>& pat);
 
 	void termIntermediateToStr(const std::vector<std::unique_ptr<TermIntermediate>>& terms, std::wstring& res);
@@ -66,7 +67,10 @@ namespace TryAlgebraCore::Trs
 
 	std::unique_ptr<TermIntermediate> copyTermIntermediate(const std::unique_ptr<TermIntermediate>& from);
 
-	void expandVars(std::vector<std::unique_ptr<TermIntermediate>>& term);
-	//=============================================================
-
+	//rewriting
+	void rewriteLeftRightOneTime(
+		std::vector<std::unique_ptr<TermIntermediate>>& subj,
+		PatternMatcher& matcher,
+		PatternMatcher::Id pat,
+		PatternMatcher::Id inst);
 }
