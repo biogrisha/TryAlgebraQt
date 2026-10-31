@@ -1141,7 +1141,7 @@ namespace TryAlgebraCore::Trs
 		PatternMatcher::Id instId)
 	{
 		int patSize = matcher.pat(patId).size();
-		if (subj.size() != patSize)
+		if (subj.size() < patSize)
 		{
 			return;
 		}
@@ -1151,10 +1151,12 @@ namespace TryAlgebraCore::Trs
 			if (i < subj.size() - patSize + 1 && matcher.match(patId, std::span(subj).subspan(i, patSize)))
 			{
 				auto inst = matcher.instantiate(instId);
+				matcher.clear();
 				for (auto& t : inst)
 				{
 					res.push_back(std::move(t));
 				}
+				i += patSize - 1;
 			}
 			else
 			{

@@ -8,7 +8,7 @@ namespace TryAlgebraCore::Trs
 		m_trsFiles.clear();
 		m_parserFiles.clear();
 		m_formulasFiles.clear();
-		m_transformers.clear();
+		m_termElaborators.clear();
 		m_bundles.clear();
 		m_lastRes.clear();
 	}
@@ -23,7 +23,7 @@ namespace TryAlgebraCore::Trs
 		}
 		else if (auto* trsFile = std::get_if<TrsFile>(&file))
 		{
-			m_trsFiles.emplace(trsFile->filePath, std::move(*trsFile));
+			m_trsFiles.push_back(std::move(*trsFile));
 		}
 		else if (auto* formulasFile = std::get_if<FormulasFile>(&file))
 		{
@@ -33,60 +33,13 @@ namespace TryAlgebraCore::Trs
 
 	void FormulasSystem::compile()
 	{
-		/*for (auto& file : m_parserFiles)
+		//create term elaborators
+		for (auto& parserFile : m_parserFiles)
 		{
-			std::unique_ptr<Transformer> tr = std::make_unique<Transformer>();
-			tr->addRules(std::move(file.rules));
-			tr->addInvRules(std::move(file.invRules));
-			m_transformers.emplace(file.filePath, std::move(tr));
-		}*/
-		//for (auto& [path, trsFile] : m_trsFiles)
-		//{
-		//	for (auto& rule : trsFile.rules)
-		//	{
-		//		markVariables(rule.from);
-		//		markVariables(rule.to);
-		//	}
-		//}
-
-		//for (auto& formulasFile : m_formulasFiles)
-		//{
-		//	auto transformer = m_transformers.find(formulasFile.parserFilePath);
-		//	if (transformer == m_transformers.end())
-		//	{
-		//		continue;
-		//	}
-
-		//	//trskey = trs path + transformer path
-		//	std::wstring bundleKey = formulasFile.trsFilePath;
-		//	bundleKey.insert(bundleKey.end(), formulasFile.parserFilePath.begin(), formulasFile.parserFilePath.end());
-
-		//	FormulasBundle* bundle = nullptr;
-		//	auto bundleIt = m_bundles.find(bundleKey);
-		//	if (bundleIt != m_bundles.end())
-		//	{
-		//		//found trs for same file and parser
-		//		bundle = bundleIt->second.get();
-		//	}
-		//	else
-		//	{
-		//		auto newBundle = std::make_unique<FormulasBundle>();
-		//		bundle = newBundle.get();
-		//		m_bundles.emplace(bundleKey, std::move(newBundle));
-		//		bundle->transformer = transformer->second.get();
-		//		bundle->trsPath = formulasFile.trsFilePath;
-		//	}
-
-		//	for (auto& formula : formulasFile.formulas)
-		//	{
-		//		for (auto& expr : formula.equality)
-		//		{
-		//			markVariables(expr);
-		//			transformer->second->applyAll(expr);
-		//		}
-		//	}
-		//	bundle->formulaFiles.push_back(std::move(formulasFile));
-		//}
+			auto termElaborator = std::make_unique<TermElaborator>(std::move(parserFile.operatorElaborator));
+			m_termElaborators.emplace(parserFile.filePath, std::move(termElaborator));
+		}
+		m_parserFiles.clear();
 	}
 
 	void FormulasSystem::findFormulas(const std::wstring& subjString)
@@ -163,9 +116,9 @@ namespace TryAlgebraCore::Trs
 		return m_lastRes;
 	}
 
-	const std::unordered_map<std::wstring, std::unique_ptr<Transformer>>& FormulasSystem::transformers() const
+	const std::unordered_map<std::wstring, std::unique_ptr<TermElaborator>>& FormulasSystem::termElaborators() const
 	{
-		return m_transformers;
+		return m_termElaborators;
 	}
 
 	void FormulasSystem::toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent)
@@ -224,7 +177,7 @@ namespace TryAlgebraCore::Trs
 		//	}
 		//}
 	}
-	std::unique_ptr<NewTrs::Trs> FormulasSystem::createTrs(const std::wstring& trsPath, Transformer* transformer)
+	std::unique_ptr<NewTrs::Trs> FormulasSystem::createTrs(const std::wstring& trsPath, TermElaborator* transformer)
 	{
 		//auto trsFile = m_trsFiles.find(trsPath);
 		//if (trsFile == m_trsFiles.end())

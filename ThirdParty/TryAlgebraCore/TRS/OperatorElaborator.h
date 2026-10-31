@@ -29,7 +29,7 @@ namespace TryAlgebraCore::Trs
 
 	};
 
-	class TypeSystem
+	class OperatorElaborator
 	{
 	public:
 		void addOperatorParser(std::unique_ptr<OperatorParser>&& operatorParser, int precedence);

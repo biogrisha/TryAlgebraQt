@@ -1,18 +1,11 @@
 #pragma once
-#include "TermTransformer.h"
+#include "TermElaborator.h"
 #include "PatternMatchingHelpers.h"
 #include "Trs.h"
 #include "FileParser.h"
 #include <unordered_map>
 namespace TryAlgebraCore::Trs
 {
-	struct FormulasBundle
-	{
-		Transformer* transformer = nullptr;
-		std::vector<FormulasFile> formulaFiles;
-		std::wstring trsPath;
-	};
-
 	struct FormulaRes
 	{
 		std::wstring formulaName;
@@ -26,6 +19,25 @@ namespace TryAlgebraCore::Trs
 		std::vector<FormulaRes> formulas;
 	};
 
+	struct TrsRule
+	{
+		std::vector<std::unique_ptr<TermIntermediate>> rhs;
+		std::vector<std::unique_ptr<TermIntermediate>> lhs;
+	};
+
+	struct FormulasFileData
+	{
+		std::wstring fileName;
+		std::vector<Formula> formulas;
+	};
+
+	struct FormulasBundle
+	{
+		std::vector<FormulasFileData> formulaFiles;
+		std::vector<TrsRule> trsRules;
+		const TermElaborator* termElaborator;
+	};
+
 	class FormulasSystem
 	{
 	public:
@@ -34,17 +46,21 @@ namespace TryAlgebraCore::Trs
 		void compile();
 		void findFormulas(const std::wstring& subjString);
 		const std::vector<FileRes>& lastRes() const;
-		const std::unordered_map<std::wstring, std::unique_ptr<Transformer>>& transformers() const;
+		const std::unordered_map<std::wstring, std::unique_ptr<TermElaborator>>& termElaborators() const;
 	private:
 		void toTerm(const std::unique_ptr<TermIntermediate>& from, NewTrs::Term*& to, NewTrs::Term* parent = nullptr);
 		void toIntermediate(NewTrs::Term* term, std::unique_ptr<TermIntermediate>& intermediate);
 		void substitute(std::unique_ptr<TermIntermediate>& subj, const std::unique_ptr<TermIntermediate>& var, const std::unique_ptr<TermIntermediate>& sub);
-		std::unique_ptr<NewTrs::Trs> createTrs(const std::wstring& trsPath, Transformer* transformer);
-		std::unordered_map<std::wstring, TrsFile> m_trsFiles;
+		std::unique_ptr<NewTrs::Trs> createTrs(const std::wstring& trsPath, TermElaborator* transformer);
+
+		//parsed files
+		std::vector<TrsFile> m_trsFiles;
 		std::vector<ParserFile> m_parserFiles;
 		std::vector<FormulasFile> m_formulasFiles;
-		std::unordered_map<std::wstring, std::unique_ptr<Transformer>> m_transformers;
-		//key trs path + transformer path
+
+
+		std::unordered_map<std::wstring, std::unique_ptr<TermElaborator>> m_termElaborators;
+		//key trs path + term elaborator path
 		std::unordered_map<std::wstring, std::unique_ptr<FormulasBundle>> m_bundles;
 		std::vector<FileRes> m_lastRes;
 

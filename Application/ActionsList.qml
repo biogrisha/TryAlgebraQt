@@ -94,7 +94,7 @@ Rectangle {
 
                     width: sectionDelegate.width
                     height: item ? item.implicitHeight : 0
-                    sourceComponent: actionData.type() === "parser"
+                    sourceComponent: actionData.type() === "termElaborator"
                         ? parserAction
                         : actionData.type() === "formula"
                             ? formulaAction

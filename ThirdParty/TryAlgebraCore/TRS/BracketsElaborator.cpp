@@ -1,4 +1,4 @@
-#include "BracketsParser.h"
+#include "BracketsElaborator.h"
 #include <unordered_map>
 #include <iterator>
 namespace TryAlgebraCore::Trs
@@ -10,11 +10,11 @@ namespace TryAlgebraCore::Trs
 			{L"]", L"["},
 		};
 	}
-	void BracketsParser::apply(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	void CommonElaborator::elaborateBrackets(std::vector<std::unique_ptr<TermIntermediate>>& subj)
 	{
 		for (auto& t : subj)
 		{
-			apply(t->children);
+			elaborateBrackets(t->children);
 		}
 
 		struct Interval
@@ -58,7 +58,7 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	void BracketsParser::removeBrackets(std::vector<std::unique_ptr<TermIntermediate>>& subj)
+	void CommonElaborator::removeBrackets(std::vector<std::unique_ptr<TermIntermediate>>& subj)
 	{
 		for (int i = 0; i < subj.size(); ++i)
 		{

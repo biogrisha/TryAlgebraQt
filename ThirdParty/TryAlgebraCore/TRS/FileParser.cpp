@@ -167,6 +167,7 @@ namespace TryAlgebraCore::Trs
 	std::optional<ParserFile> FileParser::handleParserFile()
 	{
 		ParserFile res;
+		res.operatorElaborator = std::make_unique<OperatorElaborator>();
 		while (true)
 		{
 			if (!waitToken(Tokens::Operation))
@@ -224,7 +225,7 @@ namespace TryAlgebraCore::Trs
 					std::move(splitByEqualitySign.front()),
 					std::move(splitByEqualitySign.back())
 				);
-				res.typeSystem.addOperatorParser(std::move(parser), precedence.value());
+				res.operatorElaborator->addOperatorParser(std::move(parser), precedence.value());
 			}
 		}
 		return res;

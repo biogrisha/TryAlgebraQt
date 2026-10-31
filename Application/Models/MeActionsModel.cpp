@@ -34,7 +34,6 @@ QList<MeActionData*> MeActionSection::actions() const
 	return m_actions;
 }
 
-
 void MeActionsModel::update()
 {
 
@@ -73,14 +72,14 @@ void MeActionsModel::update()
 			section->m_actions.append(action);
 		};
 
-	const auto& parsers = AppGlobal::appMod->formulasSystem()->transformers();
-	if (!parsers.empty())
+	const auto& termElaborator = AppGlobal::appMod->formulasSystem()->termElaborators();
+	if (!termElaborator.empty())
 	{
 		auto* section = new MeActionSection(this);
-		section->m_name = QStringLiteral("Parsers");
-		for (const auto& parser : parsers)
+		section->m_name = QStringLiteral("TermElaborator");
+		for (const auto& parser : termElaborator)
 		{
-			addAction(section, QString::fromStdWString(parser.first), QStringLiteral("parser"));
+			addAction(section, QString::fromStdWString(parser.first), QStringLiteral("termElaborator"));
 		}
 		m_sections.append(section);
 	}

@@ -1,4 +1,4 @@
-#include "TypeSystem.h"
+#include "OperatorElaborator.h"
 #include <Me/include/MeGlobals.h>
 #include <span>
 namespace TryAlgebraCore::Trs
@@ -6,10 +6,11 @@ namespace TryAlgebraCore::Trs
 	namespace {
 		constexpr const wchar_t* opLabel = L"op";
 	}
+
 	InfixLeftAssocParser::InfixLeftAssocParser(std::vector<std::unique_ptr<Trs::TermIntermediate>>&& pat,
 		std::vector<std::unique_ptr<Trs::TermIntermediate>>&& ret)
 	{
-		assert(pat.size() > 3);
+		assert(pat.size() >= 3);
 		assert(pat.front()->label == MeNames::typeAnnotation);
 		assert(pat.back()->label == MeNames::typeAnnotation);
 		markVariables(pat);
@@ -54,12 +55,12 @@ namespace TryAlgebraCore::Trs
 		rewriteLeftRightOneTime(subj, m_rewriteOperator, m_operatorPatId, m_operatorInstId);
 	}
 
-	void TypeSystem::addOperatorParser(std::unique_ptr<OperatorParser>&& operatorParser, int precedence)
+	void OperatorElaborator::addOperatorParser(std::unique_ptr<OperatorParser>&& operatorParser, int precedence)
 	{
 		m_operatorParsers[precedence].push_back(std::move(operatorParser));
 	}
 
-	void TypeSystem::apply(std::vector<std::unique_ptr<Trs::TermIntermediate>>& subj)
+	void OperatorElaborator::apply(std::vector<std::unique_ptr<Trs::TermIntermediate>>& subj)
 	{
 		for (auto& [precedence, parsers] : m_operatorParsers)
 		{
@@ -68,12 +69,13 @@ namespace TryAlgebraCore::Trs
 				parser->markOperator(subj);
 			}
 		}
-		for (auto& [precedence, parsers] : m_operatorParsers)
-		{
-			for (auto& parser : parsers)
-			{
-				parser->apply(subj);
-			}
-		}
+
+		//for (auto& [precedence, parsers] : m_operatorParsers)
+		//{
+		//	for (auto& parser : parsers)
+		//	{
+		//		parser->apply(subj);
+		//	}
+		//}
 	}
 }

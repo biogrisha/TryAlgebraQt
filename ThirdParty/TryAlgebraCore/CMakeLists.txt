@@ -66,18 +66,18 @@ add_library(TryAlgebraCore STATIC
 	TRS/PatternMatchingHelpers.cpp
 	TRS/MeParserGeneric.h
 	TRS/MeParserGeneric.cpp
-	TRS/TermTransformer.h
-	TRS/TermTransformer.cpp
+	TRS/TermElaborator.h
+	TRS/TermElaborator.cpp
 	TRS/TokenMatcher.h
 	TRS/TokenMatcher.cpp
-	TRS/BracketsParser.h
-	TRS/BracketsParser.cpp
+	TRS/BracketsElaborator.h
+	TRS/BracketsElaborator.cpp
 	TRS/FormulasSystem.h
 	TRS/FormulasSystem.cpp
 	TRS/FileParser.h
 	TRS/FileParser.cpp
-	TRS/TypeSystem.h
-	TRS/TypeSystem.cpp
+	TRS/OperatorElaborator.h
+	TRS/OperatorElaborator.cpp
 )
 
 # Set include directories
