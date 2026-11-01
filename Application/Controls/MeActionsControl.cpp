@@ -3,37 +3,8 @@
 #include <AppGlobal.h>
 #include <Models/DocumentsModel.h>
 #include <TRS/PatternMatchingHelpers.h>
+#include <TRS/ElaborationUtils.h>
 
-namespace {
-
-	void appendTermsToString(
-		const std::vector<std::unique_ptr<TryAlgebraCore::Trs::TermIntermediate>>& terms,
-		std::wstring& result)
-	{
-		for (std::size_t i = 0; i < terms.size(); ++i)
-		{
-			const auto& term = terms[i];
-			result += term->label;
-			if (!term->children.empty())
-			{
-				result += L'(';
-				appendTermsToString(term->children, result);
-				result += L')';
-			}
-			if (i + 1 < terms.size())
-			{
-				result += L',';
-			}
-		}
-	}
-
-	std::wstring termsToString(const std::vector<std::unique_ptr<TryAlgebraCore::Trs::TermIntermediate>>& terms)
-	{
-		std::wstring result;
-		appendTermsToString(terms, result);
-		return result;
-	}
-}
 void MeActionsControl::parse(const QString& parserName)
 {
 	const auto& parsers = AppGlobal::appMod->formulasSystem()->termElaborators();
@@ -44,7 +15,7 @@ void MeActionsControl::parse(const QString& parserName)
 		auto selectedText = currDoc->meDoc()->getSelectedText();
 		auto term = TryAlgebraCore::Trs::parseToTermIntermediate(selectedText);
 		parser->second->applyDirect(term, false);
-		std::wstring res = termsToString(term);
+		std::wstring res = TryAlgebraCore::Trs::ElaborationUtils::termsToString(term);
 		currDoc->meDoc()->type(res, true);
 	}
 }

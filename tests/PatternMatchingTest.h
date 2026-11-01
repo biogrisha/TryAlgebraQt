@@ -514,5 +514,23 @@ namespace PatternMatchingTest
 			cs.instExpected = { L"final(alpha,beta)" };
 			cases += std::move(cs);
 		}
+
+		{
+			PatternMatchingCase cs;
+			cs.tst = { "PatternMatchingTest", "test_" + std::to_string(__LINE__) };
+
+			{
+				PatternMatchingCase::Pair pr;
+				pr.pat = L"P,r,sup(ct(br(arg(~x),arg(~y))))";
+				pr.subjects = {
+					{L"P,r,sup(ct(br(arg(2),arg(3))))", true},
+				};
+				cs.pairs.push_back(std::move(pr));
+			}
+
+			cs.inst = { L"final(~x,~y)" };
+			cs.instExpected = { L"final(2,3)" };
+			cases += std::move(cs);
+		}
 	}
 }

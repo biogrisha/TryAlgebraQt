@@ -1,6 +1,8 @@
 #include "OperatorElaborator.h"
 #include <Me/include/MeGlobals.h>
 #include <span>
+#include "ElaborationUtils.h"
+
 namespace TryAlgebraCore::Trs
 {
 	namespace {
@@ -30,6 +32,11 @@ namespace TryAlgebraCore::Trs
 		patWithOp.push_back(std::move(pat.front()));
 		patWithOp.push_back(std::move(op));
 		patWithOp.push_back(std::move(pat.back()));
+
+		ElaborationUtils::commonTermElaboration(opChildren);
+		ElaborationUtils::commonTermElaboration(opCopy);
+		ElaborationUtils::commonTermElaboration(patWithOp);
+		ElaborationUtils::commonTermElaboration(ret);
 
 		m_operatorPatId = m_rewriteOperator.addPat(std::move(opChildren));
 		m_operatorInstId = m_rewriteOperator.addInst(std::move(opCopy));

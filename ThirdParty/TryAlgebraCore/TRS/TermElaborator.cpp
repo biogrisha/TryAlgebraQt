@@ -3,9 +3,6 @@
 #include <iostream>
 namespace TryAlgebraCore::Trs
 {
-	namespace {
-		constexpr const wchar_t* argLabel = L"arg";
-	}
 
 	TermElaborator::TermElaborator(std::unique_ptr<OperatorElaborator>&& operatorElaborator)
 		:m_operatorElaborator(std::move(operatorElaborator))
@@ -52,8 +49,7 @@ namespace TryAlgebraCore::Trs
 
 	void TermElaborator::applyDirect(std::vector<std::unique_ptr<TermIntermediate>>& subj, bool cosmetic)
 	{
-		m_bracketsElaborator.elaborateBrackets(subj);
-		elaborateArgs(subj);
+		ElaborationUtils::commonTermElaboration(subj);
 		m_operatorElaborator->apply(subj);
 	}
 
@@ -61,41 +57,5 @@ namespace TryAlgebraCore::Trs
 	{
 		return l.size() > 2 && l[0] == L't' && l[1] == L'r' && l[2] == L'm';
 	}
-	void TermElaborator::elaborateArgs(std::vector<std::unique_ptr<TermIntermediate>>& subj, TermIntermediate* parent)
-	{
-		for (auto& t : subj)
-		{
-			elaborateArgs(t->children, t.get());
-		}
-		if (!parent || parent->label != L"br")
-		{
-			return;
-		}
-		std::vector<std::unique_ptr<TermIntermediate>> res;
-		int from = 0;
-		auto insertTerms = [&res, &subj](int from, int to)
-			{
-				if (from >= to)
-				{
-					return;
-				}
-				auto arg = std::make_unique<TermIntermediate>();
-				arg->label = argLabel;
-				for (int i = from; i < to; ++i)
-				{
-					arg->children.push_back(std::move(subj[i]));
-				}
-				res.push_back(std::move(arg));
-			};
-		for (int i = 0; i < subj.size(); ++i)
-		{
-			if (subj[i]->label == L",")
-			{
-				insertTerms(from, i);
-				from = i + 1;
-			}
-		}
-		insertTerms(from, subj.size());
-		subj = std::move(res);
-	}
+
 }

@@ -70,8 +70,8 @@ add_library(TryAlgebraCore STATIC
 	TRS/TermElaborator.cpp
 	TRS/TokenMatcher.h
 	TRS/TokenMatcher.cpp
-	TRS/BracketsElaborator.h
-	TRS/BracketsElaborator.cpp
+	TRS/ElaborationUtils.h
+	TRS/ElaborationUtils.cpp
 	TRS/FormulasSystem.h
 	TRS/FormulasSystem.cpp
 	TRS/FileParser.h

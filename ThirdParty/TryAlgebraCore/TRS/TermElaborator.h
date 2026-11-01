@@ -1,6 +1,6 @@
 #pragma once
 #include "PatternMatchingHelpers.h"
-#include "BracketsElaborator.h"
+#include "ElaborationUtils.h"
 #include "OperatorElaborator.h"
 namespace TryAlgebraCore::Trs
 {
@@ -14,8 +14,6 @@ namespace TryAlgebraCore::Trs
 		void removeContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 		void addContainers(std::vector<std::unique_ptr<TermIntermediate>>& subj);
 		bool isTrm(const std::wstring& label) const;
-		void elaborateArgs(std::vector<std::unique_ptr<TermIntermediate>>& subj, TermIntermediate* parent = nullptr);
-		CommonElaborator m_bracketsElaborator;
 		std::unique_ptr<OperatorElaborator> m_operatorElaborator;
 	};
 }

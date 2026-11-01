@@ -3,6 +3,8 @@
 #include <TRS/MeParserGeneric.h>
 #include <unordered_set>
 #include <functional>
+#include <iostream>
+#include "ElaborationUtils.h"
 namespace TryAlgebraCore::Trs
 {
 	struct DioEqVar
@@ -878,6 +880,8 @@ namespace TryAlgebraCore::Trs
 
 		bool tryMatch(std::vector<Bundle*>& childBundles, std::vector<std::unique_ptr<TermIntermediate>>& pat, const std::span<std::unique_ptr<TermIntermediate>>& subj)
 		{
+			std::wcout << ElaborationUtils::termsToString(pat) << L"\n";
+			std::wcout << ElaborationUtils::termsToString(subj) << L"\n";
 			//compare everithing we can and collect bundles subjects
 			if (!compare1(childBundles, pat, subj))
 			{
@@ -924,8 +928,6 @@ namespace TryAlgebraCore::Trs
 	bool PatternMatcher::match(Id pat, const std::span<std::unique_ptr<TermIntermediate>>& subj)
 	{
 		std::vector<TermIntermediate*> emptyVars;
-
-		m_impl->patterns[pat]->firstLevelBundles;
 		return tryMatch(m_impl->patterns[pat]->firstLevelBundles, m_impl->patterns[pat]->pat, subj);
 	}
 
