@@ -828,18 +828,19 @@ namespace TryAlgebraCore::Trs
 			{
 				//form diophantine
 				setupDiophantineRhs(*bundle);
-				auto res = solve(0, bundle->eq, bundle->eq.rhs, [bundle]()
+				auto clearVars = [&]()
 					{
-						auto clearVars = [&]()
+						for (auto* block : bundle->blocks)
+						{
+							for (auto* var : block->vars)
 							{
-								for (auto* block : bundle->blocks)
-								{
-									for (auto* var : block->vars)
-									{
-										var->variableMeta->captured = {};
-									}
-								}
-							};
+								var->variableMeta->captured = {};
+							}
+						}
+					};
+				auto res = solve(0, bundle->eq, bundle->eq.rhs, [&]()
+					{
+
 						clearVars();
 						//found solution of equation
 						//assign subjects to variables and p-terms
@@ -872,6 +873,7 @@ namespace TryAlgebraCore::Trs
 					});
 				if (res != DioStatus::solutionFound)
 				{
+					clearVars();
 					return false;
 				}
 			}
