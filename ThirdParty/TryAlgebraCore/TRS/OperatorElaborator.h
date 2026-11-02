@@ -35,6 +35,7 @@ namespace TryAlgebraCore::Trs
 		void addOperatorParser(std::unique_ptr<OperatorParser>&& operatorParser, int precedence);
 		void apply(std::vector<std::unique_ptr<Trs::TermIntermediate>>& subj);
 	private:
+		std::vector<OperatorParser*> sortOperators();
 		std::map<int, std::vector<std::unique_ptr<OperatorParser>>> m_operatorParsers;
 	};
 }

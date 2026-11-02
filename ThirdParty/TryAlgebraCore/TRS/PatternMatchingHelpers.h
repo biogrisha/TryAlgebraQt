@@ -10,7 +10,7 @@ namespace TryAlgebraCore::Trs
 	struct TermIntermediate;
 	struct VariableMeta
 	{
-		std::span<std::unique_ptr<TermIntermediate>> captured;
+		std::span<const std::unique_ptr<TermIntermediate>> captured;
 		bool isCaptured = false;
 		int captureSizeNondet = 0;
 		enum class Type
@@ -46,7 +46,7 @@ namespace TryAlgebraCore::Trs
 		~PatternMatcher();
 		Id addPat(std::vector<std::unique_ptr<TermIntermediate>>&& pat);
 		Id addInst(std::vector<std::unique_ptr<TermIntermediate>>&& inst);
-		bool match(Id pat, const std::span<std::unique_ptr<TermIntermediate>>& subj);
+		bool match(Id pat, const std::span<const std::unique_ptr<TermIntermediate>>& subj);
 		std::vector<std::unique_ptr<TermIntermediate>> instantiate(Id instId) const;
 		const std::vector<std::unique_ptr<TermIntermediate>>& pat(Id patId) const;
 		void clear();
@@ -60,10 +60,10 @@ namespace TryAlgebraCore::Trs
 	void termIntermediateToStr(const std::vector<std::unique_ptr<TermIntermediate>>& terms, std::wstring& res);
 	std::vector<std::unique_ptr<TermIntermediate>> parseToTermIntermediate(const std::wstring_view& str);
 
-	void copyTermIntermediate(const std::span<std::unique_ptr<TermIntermediate>>& from
+	void copyTermIntermediate(const std::span<const std::unique_ptr<TermIntermediate>>& from
 		, std::vector<std::unique_ptr<TermIntermediate>>& to, TermIntermediate* parent = nullptr);
 
-	std::vector<std::unique_ptr<TermIntermediate>> copyTermIntermediate(const std::span<std::unique_ptr<TermIntermediate>>& from);
+	std::vector<std::unique_ptr<TermIntermediate>> copyTermIntermediate(const std::span<const std::unique_ptr<TermIntermediate>>& from);
 
 	std::unique_ptr<TermIntermediate> copyTermIntermediate(const std::unique_ptr<TermIntermediate>& from);
 
@@ -73,4 +73,9 @@ namespace TryAlgebraCore::Trs
 		PatternMatcher& matcher,
 		PatternMatcher::Id pat,
 		PatternMatcher::Id inst);
+
+	bool matchesLeftRightDepthFirst(
+		const std::vector<std::unique_ptr<TermIntermediate>>& subj,
+		PatternMatcher& matcher,
+		PatternMatcher::Id pat);
 }

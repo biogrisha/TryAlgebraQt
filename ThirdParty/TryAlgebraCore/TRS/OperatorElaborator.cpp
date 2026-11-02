@@ -85,4 +85,21 @@ namespace TryAlgebraCore::Trs
 		//	}
 		//}
 	}
+
+	std::vector<OperatorParser*> OperatorElaborator::sortOperators()
+	{
+		std::vector<OperatorParser*> res;
+		for (auto& [precedence, parsers] : m_operatorParsers)
+		{
+			for (auto& parser : parsers)
+			{
+				res.push_back(parser.get());
+			}
+		}
+
+		//std::sort(res, [](OperatorParser* a, OperatorParser* b)
+		//	{
+		//	});
+		return res;
+	}
 }

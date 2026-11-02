@@ -35,7 +35,7 @@ namespace TryAlgebraCore::Trs
 		std::span<std::unique_ptr<TermIntermediate>> pat;
 		std::unordered_set<VariableMeta*> varsRec;
 		std::vector<TermIntermediate*> vars;
-		std::span<std::unique_ptr<TermIntermediate>> subj;
+		std::span<const std::unique_ptr<TermIntermediate>> subj;
 	};
 
 	struct Bundle
@@ -492,7 +492,7 @@ namespace TryAlgebraCore::Trs
 		bool compare1(
 			std::vector<Bundle*>& childBundles,
 			std::vector<std::unique_ptr<TermIntermediate>>& pat,
-			const std::span<std::unique_ptr<TermIntermediate>>& subj
+			const std::span<const std::unique_ptr<TermIntermediate>>& subj
 		)
 		{
 			int subjStart = -1;
@@ -880,10 +880,8 @@ namespace TryAlgebraCore::Trs
 			return true;
 		}
 
-		bool tryMatch(std::vector<Bundle*>& childBundles, std::vector<std::unique_ptr<TermIntermediate>>& pat, const std::span<std::unique_ptr<TermIntermediate>>& subj)
+		bool tryMatch(std::vector<Bundle*>& childBundles, std::vector<std::unique_ptr<TermIntermediate>>& pat, const std::span<const std::unique_ptr<TermIntermediate>>& subj)
 		{
-			std::wcout << ElaborationUtils::termsToString(pat) << L"\n";
-			std::wcout << ElaborationUtils::termsToString(subj) << L"\n";
 			//compare everithing we can and collect bundles subjects
 			if (!compare1(childBundles, pat, subj))
 			{
@@ -927,7 +925,7 @@ namespace TryAlgebraCore::Trs
 		return m_impl->instances.size() - 1;
 	}
 
-	bool PatternMatcher::match(Id pat, const std::span<std::unique_ptr<TermIntermediate>>& subj)
+	bool PatternMatcher::match(Id pat, const std::span<const std::unique_ptr<TermIntermediate>>& subj)
 	{
 		std::vector<TermIntermediate*> emptyVars;
 		return tryMatch(m_impl->patterns[pat]->firstLevelBundles, m_impl->patterns[pat]->pat, subj);
@@ -1104,7 +1102,7 @@ namespace TryAlgebraCore::Trs
 		return res;
 	}
 
-	void copyTermIntermediate(const std::span<std::unique_ptr<TermIntermediate>>& from
+	void copyTermIntermediate(const std::span<const std::unique_ptr<TermIntermediate>>& from
 		, std::vector<std::unique_ptr<TermIntermediate>>& to
 		, TermIntermediate* parent)
 	{
@@ -1120,7 +1118,7 @@ namespace TryAlgebraCore::Trs
 		}
 	}
 
-	std::vector<std::unique_ptr<TermIntermediate>> copyTermIntermediate(const std::span<std::unique_ptr<TermIntermediate>>& from)
+	std::vector<std::unique_ptr<TermIntermediate>> copyTermIntermediate(const std::span<const std::unique_ptr<TermIntermediate>>& from)
 	{
 		std::vector<std::unique_ptr<TermIntermediate>> res;
 		copyTermIntermediate(from, res);
@@ -1168,5 +1166,20 @@ namespace TryAlgebraCore::Trs
 			}
 		}
 		subj = std::move(res);
+	}
+	bool matchesLeftRightDepthFirst(
+		const std::vector<std::unique_ptr<TermIntermediate>>& subj,
+		PatternMatcher& matcher,
+		PatternMatcher::Id pat)
+	{
+		for (auto& t : subj)
+		{
+			if (matchesLeftRightDepthFirst(t->children, matcher, pat))
+			{
+				return true;
+			}
+		}
+		auto span = std::span(subj);
+		matcher.match(pat, span);
 	}
 }
