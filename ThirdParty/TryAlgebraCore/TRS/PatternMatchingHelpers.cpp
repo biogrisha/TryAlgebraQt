@@ -1156,6 +1156,7 @@ namespace TryAlgebraCore::Trs
 				matcher.clear();
 				for (auto& t : inst)
 				{
+					t->parent = subj[i]->parent;
 					res.push_back(std::move(t));
 				}
 				i += patSize - 1;
