@@ -19,6 +19,9 @@ namespace TryAlgebraCore
 		void setDrawBackground(bool val);
 		void setDrawBorder(bool val);
 		void setCenterContent(bool val);
+		void setPadding(const glm::vec2 pad) {
+			m_padding = pad;
+		}
 	private:
 		void adjustBrackets(float& maxY);
 		void adjustScripts(float& outMaxY);
@@ -28,5 +31,6 @@ namespace TryAlgebraCore
 		bool m_drawBackground = false;
 		bool m_drawBorder = false;
 		bool m_centerContent = false;
+		glm::vec2 m_padding = { 0,0 };
 	};
 }

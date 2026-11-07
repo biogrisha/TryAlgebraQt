@@ -237,7 +237,7 @@ namespace TryAlgebraCore
 			break;
 		}
 		m_size *= m_scaling_factor;
-		m_bearing_y = m_size.y / 2;
+		m_bearing_y = m_size.y * 0.7;
 	}
 
 	void MeBracket::draw(VisualToolkit* visual_toolkit)
@@ -265,7 +265,7 @@ namespace TryAlgebraCore
 
 	glm::vec2 MeBracket::padding() const
 	{
-		return glm::ceil(glm::vec2{ 3,3 } * m_scaling_factor);
+		return glm::ceil(glm::vec2{ 3,0 } * m_scaling_factor);
 	}
 
 	glm::vec2 MeBracket::glyphSize() const

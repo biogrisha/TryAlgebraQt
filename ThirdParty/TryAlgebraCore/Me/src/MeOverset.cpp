@@ -13,7 +13,7 @@ namespace TryAlgebraCore {
 		float center = m_children[1]->getSize().x / 2.f;
 		MeHelpers::alignVertically(m_children, center);
 		m_children[0]->setPosY(0);
-		m_children[1]->setPosY(m_children[0]->getSize().y - 5 * m_scaling_factor);
+		m_children[1]->setPosY(m_children[0]->getSize().y);
 		setSizeY(m_children[1]->getPos().y + m_children[1]->getSize().y);
 		setSizeX(center * 2.f);
 		setBearing(m_children[1]->getPos().y + m_children[1]->getSize().y / 2.f);

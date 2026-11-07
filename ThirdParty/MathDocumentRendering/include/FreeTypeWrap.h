@@ -5,6 +5,20 @@
 #include FT_OUTLINE_H
 #include "MathDocumentRenderingStructs.h"
 
+struct FGlyphRenderData
+{
+	std::vector<FOutlineCurvePoints> Outline;
+	FT_Glyph_Metrics metrics;
+	glm::vec2 TextureOffset = glm::vec2{ 0,0 };
+};
+
+struct FGlyphData
+{
+	FGlyphId GlyphId;
+	glm::vec2 Pos = { 0,0 };
+	FGlyphRenderData* RenderData = nullptr;
+};
+
 class FFreeTypeWrap
 {
 public:

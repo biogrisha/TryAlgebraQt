@@ -2,6 +2,7 @@
 #include <Me/include/MeGlobals.h>
 #include <FreeTypeWrap.h>
 #include <Helpers/include/MeHelpers.h>
+#include <Me/include/MeContainer.h>
 
 namespace TryAlgebraCore
 {
@@ -16,6 +17,10 @@ namespace TryAlgebraCore
 		float ch_scaling_factor = m_scaling_factor / 1.5f;
 		for (auto& ch : m_children)
 		{
+			if (auto* cont = MyRTTI::Cast<MeContainer>(ch.get()))
+			{
+				cont->setPadding({ 3,3 });
+			}
 			ch->setScalingFactor(ch_scaling_factor);
 			ch->calculate(visual_toolkit);
 		}
@@ -24,16 +29,20 @@ namespace TryAlgebraCore
 		auto render_data = visual_toolkit->ft->GetGlyphRenderData(m_glyph.GlyphId);
 		if (render_data)
 		{
-			m_symbol_width = render_data->WidthInPixels;
+			auto& metrics = render_data->metrics;
+			auto width = metrics.width / 64;
+			auto height = metrics.height / 64;
+
+			m_symbol_width = width;
 			float center = m_symbol_width / 2.f;
 			MeHelpers::alignVertically(m_children, center);
 			m_children[0]->setPosY(0);
-			m_children[1]->setPosY(m_children[0]->getSize().y + render_data->HeightInPixels);
+			m_children[1]->setPosY(m_children[0]->getSize().y + height);
 			setSizeY(m_children[1]->getPos().y + m_children[1]->getSize().y);
 			setSizeX(center * 2.f);
 			m_glyph.Pos.x = center - m_symbol_width / 2;
 			m_glyph.Pos.y = m_children[0]->getSize().y;
-			setBearing(m_children[0]->getSize().y + render_data->HeightInPixels / 2.f);
+			setBearing(m_children[0]->getSize().y + height / 1.5f);
 		}
 	}
 	void MeFromTo::draw(VisualToolkit* visual_toolkit)

@@ -391,6 +391,14 @@ namespace TryAlgebraCore
 		}
 		setSizeX(std::max(getSize().x, m_scaling_factor * 15));
 		setSizeY(std::max(getSize().y, m_scaling_factor * 15));
+		if (m_padding != glm::vec2{ 0, 0 })
+		{
+			setSize(getSize() + (m_padding * m_scaling_factor * 2.f));
+			for (auto& ch : m_children)
+			{
+				ch->setPos(ch->getPos() + m_padding * m_scaling_factor);
+			}
+		}
 		if (m_centerContent)
 		{
 			centerContent();

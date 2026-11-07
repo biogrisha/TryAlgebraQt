@@ -120,17 +120,6 @@ struct FGlyphInstance
 	uint32_t CurvesCount;
 };
 
-
-struct FGlyphRenderData
-{
-	std::vector<FOutlineCurvePoints> Outline;
-	uint32_t HeightInPixels = 0;
-	uint32_t WidthInPixels = 0;
-
-
-	glm::vec2 TextureOffset = glm::vec2{ 0,0 };
-};
-
 struct FGlyphId
 {
 	wchar_t Glyph{};
@@ -145,13 +134,6 @@ struct FGlyphId
 		}
 		return Glyph < Other.Glyph;
 	}
-};
-
-struct FGlyphData
-{
-	FGlyphId GlyphId;
-	glm::vec2 Pos = { 0,0 };
-	FGlyphRenderData* RenderData = nullptr;
 };
 
 struct FVertTex

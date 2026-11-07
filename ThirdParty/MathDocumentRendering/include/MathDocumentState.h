@@ -1,8 +1,6 @@
 #pragma once
-#include "MathDocumentRenderingStructs.h"
+#include "FreeTypeWrap.h"
 #include <mutex>
-
-class FFreeTypeWrap;
 
 class Layer
 {

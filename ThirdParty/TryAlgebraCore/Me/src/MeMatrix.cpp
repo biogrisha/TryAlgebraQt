@@ -45,6 +45,7 @@ namespace TryAlgebraCore {
 		{
 			if (auto* cont = MyRTTI::Cast<MeContainer>(ch.get()))
 			{
+				cont->setPadding({ 3,3 });
 				cont->setCenterContent(true);
 				cont->setDrawBorder(true);
 			}
@@ -109,7 +110,7 @@ namespace TryAlgebraCore {
 		}
 
 		setSize({ width + padding * 2.f, y + padding });
-		setBearing(getSize().y / 2.f);
+		setBearing(getSize().y / 1.5f);
 	}
 	void MeMatrix::step(StepDir dir, StepFrom stepFrom, MePath& path)
 	{

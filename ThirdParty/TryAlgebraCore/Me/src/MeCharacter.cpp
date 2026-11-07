@@ -14,12 +14,17 @@ namespace TryAlgebraCore
 	{
 		uint32_t font_size = std::max(uint32_t(g_font_def_height * m_scaling_factor), g_min_font_size);
 		m_glyph.GlyphId.Height = font_size;
+		m_glyph.GlyphId.bCompact = true;
 		auto render_data = visual_toolkit->ft->GetGlyphRenderData(m_glyph.GlyphId);
 		if (render_data)
 		{
-			m_size.y = render_data->HeightInPixels;
-			m_size.x = render_data->WidthInPixels;
-			m_bearing_y = m_size.y / 2;
+			auto& metrics = render_data->metrics;
+			auto width = metrics.width / 64;
+			auto height = metrics.height / 64;
+
+			m_size.y = height;
+			m_size.x = width;
+			m_bearing_y = metrics.horiBearingY / 64;
 		}
 	}
 
@@ -27,7 +32,7 @@ namespace TryAlgebraCore
 	{
 		if (m_ch != L' ')
 		{
-			m_glyph.Pos = m_pos;
+			m_glyph.Pos = glm::ceil(m_pos);
 			visual_toolkit->mdocState->at(1).addGlyph(m_glyph);
 		}
 	}

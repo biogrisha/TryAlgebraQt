@@ -51,8 +51,10 @@ void TextRendering::updateText(std::vector<FGlyphData> documentContent)
 
 	for (auto& glyphData : atlasContent)
 	{
-
-		if (currX + glyphData.second.RenderData->WidthInPixels > maxX)
+		auto& metrics = glyphData.second.RenderData->metrics;
+		auto width = metrics.width / 64;
+		auto height = metrics.height / 64;
+		if (currX + width > maxX)
 		{
 			currX = 0;
 			currY += maxGlyphY;
@@ -61,11 +63,10 @@ void TextRendering::updateText(std::vector<FGlyphData> documentContent)
 		glyphData.second.RenderData->TextureOffset.y = currY;
 
 		atlasInstanceData[glyphId].Offset = glm::vec2(currX, currY);
-		atlasInstanceData[glyphId].Size = glm::vec2(glyphData.second.RenderData->WidthInPixels,
-			glyphData.second.RenderData->HeightInPixels);
+		atlasInstanceData[glyphId].Size = glm::vec2(width, height);
 
-		currX += glyphData.second.RenderData->WidthInPixels + 5;
-		maxGlyphY = std::max(maxGlyphY, glyphData.second.RenderData->HeightInPixels);
+		currX += width + 5;
+		maxGlyphY = std::max<float>(maxGlyphY, height);
 		auto& outline = glyphData.second.RenderData->Outline;
 		atlasInstanceData[glyphId].StartIndex = curveId;
 		atlasInstanceData[glyphId].CurvesCount = outline.size();
@@ -83,9 +84,13 @@ void TextRendering::updateText(std::vector<FGlyphData> documentContent)
 	std::vector<FGlyphSpriteInst> textInstanceData;
 	for (auto& glyphData : documentContent)
 	{
+		auto& metrics = glyphData.RenderData->metrics;
+		auto width = metrics.width / 64;
+		auto height = metrics.height / 64;
+
 		auto& spriteInstance = textInstanceData.emplace_back();
 		spriteInstance.Pos = glyphData.Pos;
-		spriteInstance.Size = glm::vec2{ glyphData.RenderData->WidthInPixels, glyphData.RenderData->HeightInPixels };
+		spriteInstance.Size = glm::vec2{ width, height };
 		spriteInstance.TextureOffset = glyphData.RenderData->TextureOffset;
 	}
 	m_textFromAtlasRendering.SetInstances(textInstanceData);

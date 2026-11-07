@@ -14,10 +14,12 @@ namespace TryAlgebraCore
 		auto render_data = visual_toolkit->ft->GetGlyphRenderData(gl);
 		if (render_data)
 		{
-			m_size.y = render_data->HeightInPixels;
+			auto& metrics = render_data->metrics;
+			auto height = metrics.height / 64;
+			m_size.y = height;
 			m_size.x = 0;
 			m_size *= m_scaling_factor;
-			m_bearing_y = m_size.y / 2;
+			m_bearing_y = m_size.y;
 		}
 	}
 }

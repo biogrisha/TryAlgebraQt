@@ -160,29 +160,18 @@ FGlyphRenderData FFreeTypeWrap::LoadGlyph(const FGlyphId& GlyphId)
 
 	//Remove last curve since it is redundant due to how we decompose curves
 	Result.Outline.pop_back();
+	Result.metrics = UsedFace->glyph->metrics;
 
-	//Cache height and width of glyphs
-	Result.WidthInPixels = UsedFace->glyph->metrics.horiAdvance / 64;
-	float VerticalOffset = 0;
-	if (GlyphId.bCompact)
-	{
-		FT_BBox CBox;
-		FT_Outline_Get_CBox(&UsedFace->glyph->outline, &CBox);
-		Result.HeightInPixels = (CBox.yMax - CBox.yMin) / 64;
-		VerticalOffset = CBox.yMax;
-	}
-	else
-	{
-		Result.HeightInPixels = GetHeightFromFontSize(GlyphId.Height);
-		VerticalOffset = Result.HeightInPixels * 64 * 0.7;
 
-	}
+	float verticalSize = Result.metrics.horiBearingY;
 	//Cache a and b of discriminant 
 	for (auto& Curve : Result.Outline)
 	{
 		for (auto& Point : Curve.points)
 		{
-			Point.y = -Point.y + VerticalOffset;
+			Point.x -= Result.metrics.horiBearingX;
+			Point.y += Result.metrics.height - verticalSize;
+			Point.y = Result.metrics.height - Point.y;
 		}
 		std::swap(Curve.points[0], Curve.points[2]);
 		Curve.a = Curve.points[0].y - 2 * Curve.points[1].y + Curve.points[2].y;
@@ -213,7 +202,7 @@ FGlyphRenderData* FFreeTypeWrap::GetGlyphRenderData(const FGlyphId& GlyphId)
 glm::vec2 FFreeTypeWrap::GetGlyphSize(const FGlyphId& GlyphId)
 {
 	auto RenderData = GetGlyphRenderData(GlyphId);
-	return { RenderData->WidthInPixels, RenderData->HeightInPixels };
+	return { RenderData->metrics.height / 64, RenderData->metrics.height / 64 };
 }
 
 uint32_t FFreeTypeWrap::GetHeightFromFontSize(float Points)

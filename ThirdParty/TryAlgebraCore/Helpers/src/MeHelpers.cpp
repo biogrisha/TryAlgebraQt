@@ -211,12 +211,12 @@ namespace TryAlgebraCore
 			{
 				caret_data.Pos = res.me->getPos();
 				caret_data.Pos.x += res.me->getSize().x;
-				caret_data.Pos.y += res.me->getBearingY() - g_caret_def_size.y * res.me->getScalingFactor() / 2;
+				caret_data.Pos.y += res.me->getBearingY() - caret_data.Size.y;
 			}
 			break;
 		case MeHelpers::GetByPathStatus::me:
 			caret_data.Pos = res.me->getPos();
-			caret_data.Pos.y += res.me->getBearingY() - g_caret_def_size.y * res.me->getScalingFactor() / 2;
+			caret_data.Pos.y += res.me->getBearingY() - caret_data.Size.y;
 			break;
 		default:
 			break;
