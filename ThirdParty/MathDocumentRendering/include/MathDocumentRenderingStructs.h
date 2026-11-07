@@ -126,6 +126,8 @@ struct FGlyphRenderData
 	std::vector<FOutlineCurvePoints> Outline;
 	uint32_t HeightInPixels = 0;
 	uint32_t WidthInPixels = 0;
+
+
 	glm::vec2 TextureOffset = glm::vec2{ 0,0 };
 };
 

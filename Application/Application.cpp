@@ -1,6 +1,4 @@
 #include "Application.h"
-#include "Application.h"
-#include "Application.h"
 #include <qqmlengine.h>
 #include <QQuickWindow>
 #include <QVulkanInstance>
@@ -17,7 +15,7 @@
 #include <Modules/MeInfoGenerator.h>
 #include <Modules/ImageProvider.h>
 #include <Actions/Actions.h>
-
+#include <QTimer>
 Application::~Application()
 {
 	AppGlobal::application = nullptr;
@@ -47,6 +45,15 @@ Application::Application(QObject* parent)
 
 	//initializing freetype
 	m_ft_wrap.Init(logicalDpiX, logicalDpiY);
+
+	//autosave
+	auto* timer = new QTimer(this);
+
+	connect(timer, &QTimer::timeout, this, [this]() {
+		Actions::saveAll();
+		});
+
+	timer->start(20'000); // 20 seconds
 }
 
 ApplicationModel* Application::applicationModel()

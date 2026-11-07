@@ -292,6 +292,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"qed", L"∎");
 				res.emplace_back(L"definedas", L"≔");
 				res.emplace_back(L"corresponds", L"≙");
+				res.emplace_back(L"vdash", L"⊢");
 			}
 			return res;
 		}
