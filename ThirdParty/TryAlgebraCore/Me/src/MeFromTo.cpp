@@ -38,7 +38,7 @@ namespace TryAlgebraCore
 			setSizeX(center * 2.f);
 			m_glyph.Pos.x = center - m_symbol_width / 2;
 			m_glyph.Pos.y = m_children[0]->getSize().y;
-			setBearing(m_children[0]->getSize().y + height / 1.5f);
+			setBearing(m_children[0]->getSize().y + height * 0.7);
 		}
 	}
 	void MeFromTo::draw(VisualToolkit* visual_toolkit)

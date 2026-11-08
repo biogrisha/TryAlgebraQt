@@ -2,6 +2,7 @@
 #include <FreeTypeWrap.h>
 #include <Me/include/MeGlobals.h>
 #include <Helpers/include/MeHelpers.h>
+#include <Me/include/MeContainer.h>
 
 namespace TryAlgebraCore {
 	MeScript::MeScript(ScriptType type)
@@ -11,6 +12,10 @@ namespace TryAlgebraCore {
 
 	void MeScript::calculate(VisualToolkit* vt)
 	{
+		if (auto* cont = MyRTTI::Cast<MeContainer>(m_children[0].get()))
+		{
+			cont->setPadding({ 0,0 });
+		}
 		float chScalingFactor = m_scaling_factor / 1.2f;
 		m_children[0]->setScalingFactor(chScalingFactor);
 		m_children[0]->calculate(vt);
