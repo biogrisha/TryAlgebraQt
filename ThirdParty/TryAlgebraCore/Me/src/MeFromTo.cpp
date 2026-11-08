@@ -17,10 +17,6 @@ namespace TryAlgebraCore
 		float ch_scaling_factor = m_scaling_factor / 1.5f;
 		for (auto& ch : m_children)
 		{
-			if (auto* cont = MyRTTI::Cast<MeContainer>(ch.get()))
-			{
-				cont->setPadding({ 3,3 });
-			}
 			ch->setScalingFactor(ch_scaling_factor);
 			ch->calculate(visual_toolkit);
 		}

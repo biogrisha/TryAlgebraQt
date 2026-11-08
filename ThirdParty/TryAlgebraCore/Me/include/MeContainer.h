@@ -31,6 +31,6 @@ namespace TryAlgebraCore
 		bool m_drawBackground = false;
 		bool m_drawBorder = false;
 		bool m_centerContent = false;
-		glm::vec2 m_padding = { 0,0 };
+		glm::vec2 m_padding = { 3,3 };
 	};
 }

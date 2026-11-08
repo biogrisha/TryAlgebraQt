@@ -45,7 +45,6 @@ namespace TryAlgebraCore {
 		{
 			if (auto* cont = MyRTTI::Cast<MeContainer>(ch.get()))
 			{
-				cont->setPadding({ 3,3 });
 				cont->setCenterContent(true);
 				cont->setDrawBorder(true);
 			}
