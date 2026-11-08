@@ -21,12 +21,19 @@ namespace TryAlgebraCore
 	}
 	void MeVariable::calculate(VisualToolkit* visual_toolkit)
 	{
-		float padding = 2;
 		m_children[0]->setScalingFactor(m_scaling_factor);
 		m_children[0]->calculate(visual_toolkit);
-		m_children[0]->setPos({ padding, padding });
-		setSize(m_children[0]->getSize() + glm::vec2{ padding * 2, padding * 2 });
-		setBearing(getSize().y / 2.);
+		setSize(m_children[0]->getSize());
+		if (m_children[0]->getChildren().empty())
+		{
+			setBearing(getSize().y);
+		}
+		else
+		{
+			auto childPos = m_children[0]->getChildren()[0]->getPos();
+			auto childBearing = m_children[0]->getChildren()[0]->getBearingY();
+			setBearing(childPos.y + childBearing);
+		}
 	}
 
 	void MeVariable::draw(VisualToolkit* visual_toolkit)

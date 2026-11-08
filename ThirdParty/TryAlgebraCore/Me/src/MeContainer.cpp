@@ -372,25 +372,30 @@ namespace TryAlgebraCore
 	}
 	void MeContainer::calculate(VisualToolkit* visual_toolkit)
 	{
-		bool ends_with_new_line = false;
-		for (int i = 0; i < m_children.size(); ++i)
+		if (m_children.empty())
 		{
-			if (MyRTTI::Is<MeNewLine>(m_children[i].get()))
-			{
-				calcLine(visual_toolkit, i + 1);
-				ends_with_new_line = (i == m_children.size() - 1);
-			}
-		}
-		if (ends_with_new_line)
-		{
-			addEmptyLine();
+			setSize(glm::vec2{ 10,15 } * m_scaling_factor);
 		}
 		else
 		{
-			calcLine(visual_toolkit);
+			bool ends_with_new_line = false;
+			for (int i = 0; i < m_children.size(); ++i)
+			{
+				if (MyRTTI::Is<MeNewLine>(m_children[i].get()))
+				{
+					calcLine(visual_toolkit, i + 1);
+					ends_with_new_line = (i == m_children.size() - 1);
+				}
+			}
+			if (ends_with_new_line)
+			{
+				addEmptyLine();
+			}
+			else
+			{
+				calcLine(visual_toolkit);
+			}
 		}
-		setSizeX(std::max(getSize().x, m_scaling_factor * 15));
-		setSizeY(std::max(getSize().y, m_scaling_factor * 15));
 		if (m_padding != glm::vec2{ 0, 0 })
 		{
 			setSize(getSize() + (m_padding * m_scaling_factor * 2.f));
