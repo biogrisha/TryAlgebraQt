@@ -237,7 +237,7 @@ namespace TryAlgebraCore
 			break;
 		}
 		m_size *= m_scaling_factor;
-		m_bearing_y = m_size.y * 0.7;
+		m_bearing_y = m_size.y * 0.8;
 	}
 
 	void MeBracket::draw(VisualToolkit* visual_toolkit)
