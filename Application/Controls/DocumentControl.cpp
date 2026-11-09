@@ -37,11 +37,31 @@ void DocumentControl::keyInput(int key, QString text, int modifiers)
 	bool bCtrl = Qt::Modifiers(modifiers).testFlag(Qt::Modifier::CTRL);
 	bool altPressed = Qt::Modifiers(modifiers).testFlag(Qt::Modifier::ALT);
 
-	if (bCtrl && altPressed && !text.isEmpty())
+	if (bCtrl && altPressed)
 	{
-		AppGlobal::application->applicationModel()->keyBinding()->addKey(text.toStdWString()[0]);
+		auto* kb = AppGlobal::application->applicationModel()->keyBinding();
+		if (!text.isEmpty())
+		{
+			kb->addKey(text.toStdWString()[0]);
+			return;
+		}
+		switch (key) {
+		case Qt::Key_Left:
+			kb->addWord(L"left");
+			break;
+		case Qt::Key_Right:
+			kb->addWord(L"right");
+			break;
+		case Qt::Key_Up:
+			kb->addWord(L"up");
+			break;
+		case Qt::Key_Down:
+			kb->addWord(L"down");
+			break;
+		}
 		return;
 	}
+
 	switch (key) {
 	case Qt::Key_Left:
 		m_currDoc->step(TryAlgebraCore::StepDir::left, bShift);

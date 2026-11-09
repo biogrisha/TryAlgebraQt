@@ -15,5 +15,6 @@ namespace TryAlgebraCore
 	private:
 		wchar_t m_ch;
 		FGlyphData m_glyph;
+		float m_glyph_y_offset = 0.f;
 	};
 }

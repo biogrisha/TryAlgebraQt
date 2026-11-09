@@ -12,11 +12,23 @@
 
 namespace TryAlgebraCore
 {
+	namespace
+	{
+		constexpr float lineSpacing = 2.f;
+	}
+
 	void MeContainer::calcLine(VisualToolkit* visual_toolkit, size_t end)
 	{
+		const size_t lineEnd = std::min(m_children.size(), end);
+
+		if (end_line_i > 0)
+		{
+			next_line_y += lineSpacing * m_scaling_factor;
+		}
+
 		float max_bearing = 0;
 		float x = 0;
-		for (int i = end_line_i; i < std::min(m_children.size(), end); ++i)
+		for (int i = end_line_i; i < lineEnd; ++i)
 		{
 			auto& ch = m_children[i];
 			ch->setScalingFactor(m_scaling_factor);
@@ -27,24 +39,24 @@ namespace TryAlgebraCore
 			x += ch->getSize().x;
 		}
 		float max_y_offset = 0;
-		for (int i = end_line_i; i < std::min(m_children.size(), end); ++i)
+		for (int i = end_line_i; i < lineEnd; ++i)
 		{
 			auto& ch = m_children[i];
 			ch->setPosY(ch->getPos().y + next_line_y + max_bearing);
 			max_y_offset = std::max(max_y_offset, ch->getPos().y + ch->getSize().y);
 		}
 
-		adjustBrackets(max_y_offset);
+		adjustBrackets(max_y_offset, lineEnd);
 		adjustScripts(max_y_offset);
 		next_line_y = max_y_offset;
 		m_size.x = std::max(x, m_size.x);
 		m_size.y = next_line_y;
-		end_line_i = std::min(m_children.size(), end);
+		end_line_i = lineEnd;
 	}
 
 	void MeContainer::addEmptyLine()
 	{
-		m_size.y += g_caret_def_size.y * m_scaling_factor;
+		m_size.y += (g_caret_def_size.y + lineSpacing) * m_scaling_factor;
 	}
 
 	void MeContainer::setDrawBackground(bool val)
@@ -62,7 +74,7 @@ namespace TryAlgebraCore
 		m_centerContent = val;
 	}
 
-	void MeContainer::adjustBrackets(float& outMaxY)
+	void MeContainer::adjustBrackets(float& outMaxY, size_t lineEnd)
 	{
 		static const std::unordered_map<wchar_t, wchar_t> bracketsMap =
 		{
@@ -82,7 +94,7 @@ namespace TryAlgebraCore
 		std::vector<OpenBracketInfo> openBrackets;
 		float minBracketY = next_line_y;
 		float maxBracketY = next_line_y;
-		for (int i = end_line_i; i < m_children.size(); ++i)
+		for (int i = end_line_i; i < lineEnd; ++i)
 		{
 			if (auto bracket = MyRTTI::Cast<MeBracket>(m_children[i].get()))
 			{
@@ -125,7 +137,7 @@ namespace TryAlgebraCore
 			}
 		}
 		const float offset = next_line_y - minBracketY;
-		for (int i = end_line_i; i < m_children.size(); ++i)
+		for (int i = end_line_i; i < lineEnd; ++i)
 		{
 			m_children[i]->setPosY(m_children[i]->getPos().y + offset);
 		}

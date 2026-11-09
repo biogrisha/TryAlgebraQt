@@ -19,12 +19,15 @@ namespace TryAlgebraCore
 		if (render_data)
 		{
 			auto& metrics = render_data->metrics;
-			auto width = metrics.width / 64;
-			auto height = metrics.height / 64;
+			const float width = metrics.width / 64.f;
+			const float outline_height = metrics.height / 64.f;
+			const float min_height = visual_toolkit->ft->GetHeightFromFontSize(font_size) * 0.7;
+			const float extra_height = std::max(min_height - outline_height, 0.f);
 
-			m_size.y = height;
+			m_size.y = outline_height + extra_height;
 			m_size.x = width;
-			m_bearing_y = metrics.horiBearingY / 64;
+			m_glyph_y_offset = extra_height / 2.f;
+			m_bearing_y = metrics.horiBearingY / 64.f + m_glyph_y_offset;
 		}
 	}
 
@@ -32,7 +35,7 @@ namespace TryAlgebraCore
 	{
 		if (m_ch != L' ')
 		{
-			m_glyph.Pos = glm::ceil(m_pos);
+			m_glyph.Pos = glm::ceil(m_pos + glm::vec2{ 0.f, m_glyph_y_offset });
 			visual_toolkit->mdocState->at(1).addGlyph(m_glyph);
 		}
 	}

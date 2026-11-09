@@ -10,6 +10,8 @@ namespace TryAlgebraCore
 	public:
 		void setConfiguration(const std::wstring& config);
 		void addKey(wchar_t ch);
+		void addWord(const std::wstring& word);
+
 		std::optional<std::wstring> runCommand();
 
 	private:

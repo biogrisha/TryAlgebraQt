@@ -54,6 +54,11 @@ namespace TryAlgebraCore
 		m_currentCommand += std::towlower(ch);
 	}
 
+	void KeyBinding::addWord(const std::wstring& word)
+	{
+		m_currentCommand += word;
+	}
+
 	std::optional<std::wstring> KeyBinding::runCommand()
 	{
 		auto found = m_bindings.find(m_currentCommand);

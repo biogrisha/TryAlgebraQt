@@ -23,7 +23,7 @@ namespace TryAlgebraCore
 			m_padding = pad;
 		}
 	private:
-		void adjustBrackets(float& maxY);
+		void adjustBrackets(float& maxY, size_t lineEnd);
 		void adjustScripts(float& outMaxY);
 		void centerContent();
 		float next_line_y = 0;
