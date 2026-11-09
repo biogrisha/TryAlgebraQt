@@ -592,11 +592,14 @@ namespace TryAlgebraCore
 
 	void MathDocument::filterInput(std::wstring& str)
 	{
-		if (m_selection_start.size() > 1)
+		if (m_selection_end.size() > 1)
 		{
-			if (str == L"\n")
+			const std::wstring newLineMe = L"\\" + MeNames::new_line + L"\\\\";
+			size_t pos = 0;
+			while ((pos = str.find(L'\n', pos)) != std::wstring::npos)
 			{
-				str = L"\\" + MeNames::new_line + L"\\\\";
+				str.replace(pos, 1, newLineMe);
+				pos += newLineMe.size();
 			}
 		}
 	}
