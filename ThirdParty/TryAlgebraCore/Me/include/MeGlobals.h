@@ -84,9 +84,11 @@ namespace TryAlgebraCore
 			static std::vector<std::pair<std::wstring, std::wstring>> res;
 			if (res.empty())
 			{
+				res.emplace_back(L"bigcup", makeMe(from_to, L"⋃", 2));
 				res.emplace_back(L"Integral", makeMe(from_to, integral, 2));
 				res.emplace_back(L"Double integral", makeMe(from_to, integral2, 2));
 				res.emplace_back(L"Triple integral", makeMe(from_to, integral3, 2));
+				res.emplace_back(L"bigcap", makeMe(from_to, L"⋂", 2));
 				res.emplace_back(L"Sum", makeMe(from_to, summation, 2));
 				res.emplace_back(L"Product", makeMe(from_to, product, 2));
 				res.emplace_back(L"Zero-Multi variable", makeMe(variable, varZeroMulti, 1));
@@ -213,6 +215,8 @@ namespace TryAlgebraCore
 				res.emplace_back(L"supset", L"⊃");
 				res.emplace_back(L"subseteq", L"⊆");
 				res.emplace_back(L"supseteq", L"⊇");
+				res.emplace_back(L"cup", L"∪");
+				res.emplace_back(L"cap", L"∩");
 
 				res.emplace_back(L"nsubset", L"⊄");
 				res.emplace_back(L"nsupset", L"⊅");

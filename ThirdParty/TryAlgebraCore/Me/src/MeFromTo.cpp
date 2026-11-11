@@ -47,7 +47,7 @@ namespace TryAlgebraCore
 		{
 			ch->draw(visual_toolkit);
 		}
-		m_glyph.Pos += getPos();
+		m_glyph.Pos += glm::ceil(getPos());
 		visual_toolkit->mdocState->at(1).addGlyph(m_glyph);
 	}
 	void MeFromTo::step(StepDir dir, StepFrom step_from, MePath& path)

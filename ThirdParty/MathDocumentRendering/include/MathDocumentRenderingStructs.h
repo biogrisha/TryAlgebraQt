@@ -128,11 +128,11 @@ struct FGlyphId
 
 	bool operator < (const FGlyphId& Other) const
 	{
-		if (Glyph == Other.Glyph)
+		if (Height == Other.Height)
 		{
-			return Height < Other.Height;
+			return Glyph < Other.Glyph;
 		}
-		return Glyph < Other.Glyph;
+		return Height < Other.Height;
 	}
 };
 
