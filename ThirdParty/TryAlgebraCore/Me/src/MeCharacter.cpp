@@ -21,13 +21,21 @@ namespace TryAlgebraCore
 			auto& metrics = render_data->metrics;
 			const float width = metrics.width / 64.f;
 			const float outline_height = metrics.height / 64.f;
-			const float min_height = visual_toolkit->ft->GetHeightFromFontSize(font_size) * 0.7;
+			const float min_height = visual_toolkit->ft->GetHeightFromFontSize(font_size) * 0.7f;
 			const float extra_height = std::max(min_height - outline_height, 0.f);
+			const float bearing_y = metrics.horiBearingY / 64.f;
+
+			// Align the added space with the capital-letter top instead of centering it.
+			FGlyphId reference_glyph = m_glyph.GlyphId;
+			reference_glyph.Glyph = L'H';
+			auto reference_data = visual_toolkit->ft->GetGlyphRenderData(reference_glyph);
+			const float reference_bearing = reference_data
+				? reference_data->metrics.horiBearingY / 64.f : min_height;
 
 			m_size.y = outline_height + extra_height;
 			m_size.x = width;
-			m_glyph_y_offset = extra_height / 2.f;
-			m_bearing_y = metrics.horiBearingY / 64.f + m_glyph_y_offset;
+			m_glyph_y_offset = std::min(std::max(reference_bearing - bearing_y, 0.f), extra_height);
+			m_bearing_y = bearing_y + m_glyph_y_offset;
 		}
 	}
 
@@ -35,7 +43,7 @@ namespace TryAlgebraCore
 	{
 		if (m_ch != L' ')
 		{
-			m_glyph.Pos = glm::ceil(m_pos + glm::vec2{ 0.f, m_glyph_y_offset });
+			m_glyph.Pos = glm::floor(m_pos + glm::vec2{ 0.f, m_glyph_y_offset });
 			visual_toolkit->mdocState->at(1).addGlyph(m_glyph);
 		}
 	}
