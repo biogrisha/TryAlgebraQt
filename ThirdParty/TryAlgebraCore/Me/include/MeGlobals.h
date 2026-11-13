@@ -34,6 +34,7 @@ namespace TryAlgebraCore
 
 		inline std::wstring subscript = L"sub";
 		inline std::wstring superscript = L"sup";
+		inline std::wstring middlescript = L"mid";
 
 		inline std::wstring fraction = L"fr";
 
@@ -101,6 +102,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Token", makeMe(term, termToken, 1));
 				res.emplace_back(L"Subscript", makeMe(subscript, L"", 1));
 				res.emplace_back(L"Superscript", makeMe(superscript, L"", 1));
+				res.emplace_back(L"Middlescript", makeMe(middlescript, L"", 1));
 				res.emplace_back(L"Fraction", makeMe(fraction, L"", 2));
 				res.emplace_back(L"Mat 3x4", makeMe(matrix, L"2,2", 4));
 				res.emplace_back(L"overset", makeMe(overset, L"", 2));

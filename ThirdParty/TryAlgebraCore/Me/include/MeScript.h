@@ -7,7 +7,8 @@ namespace TryAlgebraCore
 	enum class ScriptType
 	{
 		Subscript,
-		Superscript
+		Superscript,
+		Middlescript
 	};
 
 	class MeScript : public MeBase

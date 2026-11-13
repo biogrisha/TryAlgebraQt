@@ -31,7 +31,7 @@ namespace TryAlgebraCore
 		m_sprite.Alpha = 1;
 
 		m_size = m_sprite.Size;
-		m_bearing_y = m_size.y / 2;
+		m_bearing_y = m_size.y;
 	}
 	void MeSprite::draw(VisualToolkit* visual_toolkit)
 	{

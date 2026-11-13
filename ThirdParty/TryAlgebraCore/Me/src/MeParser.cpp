@@ -49,6 +49,11 @@ namespace TryAlgebraCore
 			{
 				return MyRTTI::MakeTypedUnique<MeScript>(ScriptType::Superscript);
 			});
+		m_meFactory.emplace(MeNames::middlescript,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeScript>(ScriptType::Middlescript);
+			});
 		m_meFactory.emplace(MeNames::fraction,
 			[]()
 			{
