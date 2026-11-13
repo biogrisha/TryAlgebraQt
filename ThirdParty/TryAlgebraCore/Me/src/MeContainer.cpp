@@ -175,7 +175,7 @@ namespace TryAlgebraCore
 					if (script->type() == ScriptType::Middlescript)
 					{
 						script->setPosY(lastNotScript->getPos().y
-							+ (lastNotScript->getSize().y - script->getSize().y) / 2);
+							+ lastNotScript->getBearingY() - script->getBearingY());
 						minY = std::min(script->getPos().y, minY);
 						maxY = std::max(script->getPos().y + script->getSize().y, maxY);
 					}

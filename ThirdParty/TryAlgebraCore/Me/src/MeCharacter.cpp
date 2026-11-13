@@ -1,5 +1,6 @@
 #include <Me/include/MeCharacter.h>
 #include <Me/include/MeGlobals.h>
+#include <Helpers/include/MeHelpers.h>
 #include <FreeTypeWrap.h>
 
 namespace TryAlgebraCore
@@ -26,15 +27,11 @@ namespace TryAlgebraCore
 			const float bearing_y = metrics.horiBearingY / 64.f;
 
 			// Align the added space with the capital-letter top instead of centering it.
-			FGlyphId reference_glyph = m_glyph.GlyphId;
-			reference_glyph.Glyph = L'H';
-			auto reference_data = visual_toolkit->ft->GetGlyphRenderData(reference_glyph);
-			const float reference_bearing = reference_data
-				? reference_data->metrics.horiBearingY / 64.f : min_height;
+			const auto reference = MeHelpers::getReferenceLetterMetrics(visual_toolkit, m_scaling_factor);
 
 			m_size.y = outline_height + extra_height;
 			m_size.x = width;
-			m_glyph_y_offset = std::min(std::max(reference_bearing - bearing_y, 0.f), extra_height);
+			m_glyph_y_offset = std::min(std::max(reference.bearingY - bearing_y, 0.f), extra_height);
 			m_bearing_y = bearing_y + m_glyph_y_offset;
 		}
 	}

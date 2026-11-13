@@ -21,6 +21,11 @@ namespace TryAlgebraCore {
 		m_children[0]->calculate(vt);
 		setSize(m_children[0]->getSize());
 		setBearing(getSize().y / 2);
+		if (m_type == ScriptType::Middlescript)
+		{
+			const auto reference = MeHelpers::getReferenceLetterMetrics(vt, m_scaling_factor);
+			setBearing(getBearingY() + reference.centerAboveBaseline());
+		}
 	}
 
 	void MeScript::step(StepDir dir, StepFrom step_from, MePath& path)

@@ -52,6 +52,15 @@ namespace TryAlgebraCore
 		static void setContPos(MeBase* cont, MePath& pathToCont);
 		static void setExtremeLeafPos(MeBase* cont, MePath& pathToCont, bool last);
 		static void mePosToLeaf(MePath& path, bool left);
+		struct ReferenceLetterMetrics
+		{
+			glm::vec2 size;
+			float bearingY;
+
+			float centerAboveBaseline() const { return bearingY - size.y / 2.f; }
+		};
+		static ReferenceLetterMetrics getReferenceLetterMetrics(VisualToolkit* vt, float scalingFactor);
+
 		//me arrangement
 		static void alignVertically(const std::vector<std::unique_ptr<MeBase>>& mes, float& center_x);
 

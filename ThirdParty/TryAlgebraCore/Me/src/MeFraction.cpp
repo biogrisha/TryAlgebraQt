@@ -19,7 +19,9 @@ namespace TryAlgebraCore {
 		m_children[1]->setPosY(m_children[0]->getSize().y + lineWidthScaled);
 		setSizeY(m_children[1]->getPos().y + m_children[1]->getSize().y);
 		setSizeX(center * 2.f);
-		setBearing(m_children[0]->getSize().y + lineWidthScaled / 2.f);
+		const auto reference = MeHelpers::getReferenceLetterMetrics(vt, m_scaling_factor);
+		// Place the fraction bar at the reference letter's vertical center.
+		setBearing(m_children[0]->getSize().y + lineWidthScaled / 2.f + reference.centerAboveBaseline());
 	}
 	void MeFraction::draw(VisualToolkit* vt)
 	{

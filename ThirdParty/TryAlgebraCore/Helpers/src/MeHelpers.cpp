@@ -2,9 +2,27 @@
 #include <Me/include/MeNewLine.h>
 #include <Me/include/MeGlobals.h>
 #include <Me/include/MeContainer.h>
+#include <FreeTypeWrap.h>
+#include <algorithm>
 
 namespace TryAlgebraCore
 {
+	MeHelpers::ReferenceLetterMetrics MeHelpers::getReferenceLetterMetrics(VisualToolkit* vt, float scalingFactor)
+	{
+		FGlyphId referenceGlyph;
+		referenceGlyph.Glyph = L'H';
+		referenceGlyph.Height = std::max(uint32_t(g_font_def_height * scalingFactor), g_min_font_size);
+		referenceGlyph.bCompact = true;
+		const auto referenceData = vt->ft->GetGlyphRenderData(referenceGlyph);
+		if (referenceData)
+		{
+			const auto& metrics = referenceData->metrics;
+			return { { metrics.width / 64.f, metrics.height / 64.f }, metrics.horiBearingY / 64.f };
+		}
+		const float height = vt->ft->GetHeightFromFontSize(referenceGlyph.Height) * 0.7f;
+		return { { 0.f, height }, height };
+	}
+
 	std::optional<int> MeHelpers::contIndByPos(int pos, MeBase* me)
 	{
 		auto& containers = me->getChildren();
