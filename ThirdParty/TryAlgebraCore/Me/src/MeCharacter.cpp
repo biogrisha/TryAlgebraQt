@@ -22,17 +22,17 @@ namespace TryAlgebraCore
 			auto& metrics = render_data->metrics;
 			const float width = metrics.width / 64.f;
 			const float outline_height = metrics.height / 64.f;
-			const float min_height = visual_toolkit->ft->GetHeightFromFontSize(font_size) * 0.7f;
-			const float extra_height = std::max(min_height - outline_height, 0.f);
 			const float bearing_y = metrics.horiBearingY / 64.f;
 
-			// Align the added space with the capital-letter top instead of centering it.
+			// Union the glyph and reference vertical ranges relative to the baseline.
 			const auto reference = MeHelpers::getReferenceLetterMetrics(visual_toolkit, m_scaling_factor);
+			const float top = std::max(reference.bearingY, bearing_y);
+			const float bottom = std::min(reference.bearingY - reference.size.y, bearing_y - outline_height);
 
-			m_size.y = outline_height + extra_height;
 			m_size.x = width;
-			m_glyph_y_offset = std::min(std::max(reference.bearingY - bearing_y, 0.f), extra_height);
-			m_bearing_y = bearing_y + m_glyph_y_offset;
+			m_size.y = top - bottom;
+			m_glyph_y_offset = top - bearing_y;
+			m_bearing_y = top;
 		}
 	}
 
