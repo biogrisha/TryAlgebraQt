@@ -61,6 +61,24 @@ Item {
                 }
             }
         }
+
+        Menu {
+            title: qsTr("View")
+
+            Action {
+                id: showTabsAction
+                text: qsTr("Show Tabs")
+                checkable: true
+                checked: true
+            }
+
+            Action {
+                id: showProjectTreeAction
+                text: qsTr("Show Project Tree")
+                checkable: true
+                checked: true
+            }
+        }
     }
 
     Button {
@@ -114,7 +132,8 @@ Item {
 
     Rectangle {
         id: tabsArea
-        width: 150 
+        visible: showTabsAction.checked
+        width: visible ? 150 : 0
 		anchors.top: menuBar.bottom 
         anchors.bottom: parent.bottom
 		anchors.left: parent.left
@@ -170,13 +189,14 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: tabsArea.right
         anchors.right: fileSystemView.left
-        anchors.rightMargin: 10
+        anchors.rightMargin: fileSystemView.visible ? 10 : 0
     }
 
     FileSystemView {
         id: fileSystemView
 
-        width: 250
+        visible: showProjectTreeAction.checked
+        width: visible ? 250 : 0
 
         anchors.top: menuBar.bottom
         anchors.bottom: parent.bottom
