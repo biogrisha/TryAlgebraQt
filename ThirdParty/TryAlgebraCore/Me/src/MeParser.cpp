@@ -1,6 +1,7 @@
 #include <Me/include/MeParser.h>
 #include <Me/include/MeCharacter.h>
 #include <Me/include/MeContainer.h>
+#include <Me/include/MeBlock.h>
 #include <Me/include/MeNewLine.h>
 #include <Me/include/MeGlobals.h>
 #include <Me/include/MeFromTo.h>
@@ -19,6 +20,11 @@ namespace TryAlgebraCore
 		:m_it(text_buffer, line_num)
 	{
 		//=========me factory
+		m_meFactory.emplace(MeNames::block,
+			[]()
+			{
+				return MyRTTI::MakeTypedUnique<MeBlock>();
+			});
 		m_meFactory.emplace(MeNames::from_to,
 			[]()
 			{

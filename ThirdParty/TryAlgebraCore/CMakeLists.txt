@@ -28,6 +28,7 @@ add_library(TryAlgebraCore STATIC
 	Me/include/MeParser.h
 	Me/include/MeNewLine.h
 	Me/include/MeContainer.h
+	Me/include/MeBlock.h
 	Me/include/MeGlobals.h
 	Me/include/MeFromTo.h
 	Me/include/MeAtlas.h
@@ -45,6 +46,7 @@ add_library(TryAlgebraCore STATIC
 	Me/src/MeParser.cpp
 	Me/src/MeNewLine.cpp
 	Me/src/MeContainer.cpp
+	Me/src/MeBlock.cpp
 	Me/src/MeFromTo.cpp
 	Me/src/MeAtlas.cpp
 	Me/src/MeVariable.cpp

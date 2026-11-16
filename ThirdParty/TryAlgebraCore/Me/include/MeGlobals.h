@@ -21,6 +21,7 @@ namespace TryAlgebraCore
 		inline std::wstring new_line = L"nl";
 
 		inline std::wstring cont = L"ct";
+		inline std::wstring block = L"blk";
 
 		inline std::wstring variable = L"vr";
 		inline std::wstring varZeroMulti = L"0mlt";
@@ -104,6 +105,7 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Superscript", makeMe(superscript, L"", 1));
 				res.emplace_back(L"Middlescript", makeMe(middlescript, L"", 1));
 				res.emplace_back(L"Fraction", makeMe(fraction, L"", 2));
+				res.emplace_back(L"Block", makeMe(block, L"", 1));
 				res.emplace_back(L"Mat 3x4", makeMe(matrix, L"2,2", 4));
 				res.emplace_back(L"overset", makeMe(overset, L"", 2));
 				res.emplace_back(L"type", makeMe(typeAnnotation, L"", 2));
