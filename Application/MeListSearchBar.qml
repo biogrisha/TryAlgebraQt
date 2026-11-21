@@ -41,6 +41,38 @@ Rectangle {
 				}
 			}
 		]
+		sorters: [
+			FunctionSorter {
+				component SortRoleData: QtObject { property string meName }
+				function sort(left: SortRoleData, right: SortRoleData) : int {
+					const typedQuery = meSearchBar.text
+					const query = typedQuery.toLowerCase()
+					if (query === "")
+						return 0
+
+					const leftName = left.meName.toLowerCase()
+					const rightName = right.meName.toLowerCase()
+					const leftExactMatch = leftName === query
+					const rightExactMatch = rightName === query
+					if (leftExactMatch !== rightExactMatch)
+						return leftExactMatch ? -1 : 1
+
+					const leftStartsWithQuery = leftName.startsWith(query)
+					const rightStartsWithQuery = rightName.startsWith(query)
+					if (leftStartsWithQuery !== rightStartsWithQuery)
+						return leftStartsWithQuery ? -1 : 1
+
+					const leftCaseMatches = leftStartsWithQuery
+						? left.meName.startsWith(typedQuery) : left.meName.includes(typedQuery)
+					const rightCaseMatches = rightStartsWithQuery
+						? right.meName.startsWith(typedQuery) : right.meName.includes(typedQuery)
+					if (leftCaseMatches !== rightCaseMatches)
+						return leftCaseMatches ? -1 : 1
+
+					return leftName.length - rightName.length
+				}
+			}
+		]
 	}
 
 	Column {
@@ -64,6 +96,7 @@ Rectangle {
 
 				onTextChanged: {
 					filteredMeList.invalidate()
+					filteredMeList.invalidateSorter()
 					mathElementsList.currentIndex = mathElementsList.count > 0 ? 0 : -1
 				}
 
