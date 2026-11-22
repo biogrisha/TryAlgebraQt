@@ -96,8 +96,6 @@ namespace TryAlgebraCore
 				res.emplace_back(L"Zero-Multi variable", makeMe(variable, varZeroMulti, 1));
 				res.emplace_back(L"One-Multi variable", makeMe(variable, varOneMulti, 1));
 				res.emplace_back(L"Uni variable", makeMe(variable, varUni, 1));
-				res.emplace_back(L"For all", L"∀");
-				res.emplace_back(L"Exists", L"∃");
 				res.emplace_back(L"Term2", makeMe(term, L"2", 3));
 				res.emplace_back(L"Term1", makeMe(term, L"1", 2));
 				res.emplace_back(L"Token", makeMe(term, termToken, 1));
